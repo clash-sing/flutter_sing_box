@@ -1,7 +1,8 @@
 name: flutter_sing_box
 description: "A Flutter plugin project for sing-box."
 version: 0.0.1
-homepage:
+homepage: https://github.com/clashsiing/flutter_sing_box
+repository: https://github.com/clashsiing/flutter_sing_box
 
 environment:
   sdk: ^3.9.2
