@@ -1,5 +1,6 @@
 package com.clashsiing.flutter_sing_box
 
+import android.content.Context
 import android.content.Intent
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -19,13 +20,12 @@ class FlutterSingBoxPlugin :
     // This local reference serves to register the plugin with the Flutter Engine and unregister it
     // when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
-    private lateinit var pluginBinding: FlutterPlugin.FlutterPluginBinding
-    private val applicationContext by lazy { pluginBinding.applicationContext }
+    private lateinit var applicationContext: Context
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_sing_box")
         channel.setMethodCallHandler(this)
-        pluginBinding = flutterPluginBinding
+        applicationContext = flutterPluginBinding.applicationContext
     }
 
     override fun onMethodCall(
@@ -37,7 +37,7 @@ class FlutterSingBoxPlugin :
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     applicationContext.startForegroundService(
                         Intent(
-                            pluginBinding.applicationContext,
+                            applicationContext,
                             ClashSingVpnService::class.java
                         )
                     )
@@ -45,7 +45,7 @@ class FlutterSingBoxPlugin :
                 } else {
                     applicationContext.startService(
                         Intent(
-                            pluginBinding.applicationContext,
+                            applicationContext,
                             ClashSingVpnService::class.java
                         )
                     )
