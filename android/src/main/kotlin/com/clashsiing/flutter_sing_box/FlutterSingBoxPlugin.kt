@@ -15,10 +15,10 @@ import io.flutter.plugin.common.PluginRegistry
 class FlutterSingBoxPlugin :
     FlutterPlugin,
     MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
-    // The MethodChannel that will the communication between Flutter and native Android
-    //
-    // This local reference serves to register the plugin with the Flutter Engine and unregister it
-    // when the Flutter Engine is detached from the Activity
+    companion object {
+        private const val START_VPN = "startVpn"
+        private const val STOP_VPN = "stopVpn"
+    }
     private lateinit var channel: MethodChannel
     private lateinit var applicationContext: Context
 
@@ -33,7 +33,7 @@ class FlutterSingBoxPlugin :
         result: Result
     ) {
         when (call.method) {
-            "getPlatformVersion" -> {
+            START_VPN -> {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     applicationContext.startForegroundService(
                         Intent(
@@ -50,9 +50,14 @@ class FlutterSingBoxPlugin :
                         )
                     )
                 }
+            }
+            STOP_VPN -> {
+                val intent = Intent(applicationContext, ClashSingVpnService::class.java)
+                applicationContext.stopService(intent)
+            }
+            "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
-
             else -> {
                 result.notImplemented()
             }
