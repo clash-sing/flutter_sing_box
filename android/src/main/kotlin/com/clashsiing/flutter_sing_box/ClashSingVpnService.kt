@@ -16,6 +16,12 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("VpnServicePolicy")
 class ClashSingVpnService : VpnService() {
+
+    companion object {
+        const val NOTIFICATION_ID = 1
+        const val CHANNEL_ID = "ForegroundServiceChannel"
+    }
+
     private var serviceScope: CoroutineScope? = null
     private val notificationManager by lazy {
         getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -25,10 +31,6 @@ class ClashSingVpnService : VpnService() {
             .setSmallIcon(android.R.mipmap.sym_def_app_icon)
             .setContentTitle("前台服务正在运行")
             .setContentText("点击可返回应用")
-    }
-    companion object {
-        const val NOTIFICATION_ID = 1
-        const val CHANNEL_ID = "ForegroundServiceChannel"
     }
 
     override fun onCreate() {

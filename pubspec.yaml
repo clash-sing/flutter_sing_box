@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
+  mmkv: ^2.2.4
+  dio: ^5.9.0
 
 dev_dependencies:
   flutter_test:
