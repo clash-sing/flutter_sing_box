@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
-import 'package:flutter_sing_box_example/utils/snackbar_service.dart';
+import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
 
 void main() {
   runApp(const MyApp());
@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () async {
                     try {
                       await _flutterSingBoxPlugin.startVpn();
-                      SnackbarService.show('VPN启动中...');
+                      SnackbarUtil.show('VPN启动中...');
                     } on PlatformException catch (e) {
                       String errorMessage = '启动VPN失败';
                       if (e.code == 'NO_ACTIVITY') {
@@ -75,9 +75,9 @@ class _MyAppState extends State<MyApp> {
                       } else if (e.code == 'VPN_ERROR') {
                         errorMessage = e.message ?? '启动VPN服务失败';
                       }
-                      SnackbarService.showError(errorMessage);
+                      SnackbarUtil.showError(errorMessage);
                     } catch (e) {
-                      SnackbarService.showError('未知错误: ${e.toString()}');
+                      SnackbarUtil.showError('未知错误: ${e.toString()}');
                     }
                   },
                   child: const Text('Start VPN'),
@@ -87,9 +87,9 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () async {
                     try {
                       await _flutterSingBoxPlugin.stopVpn();
-                      SnackbarService.show('VPN已停止');
+                      SnackbarUtil.show('VPN已停止');
                     } catch (e) {
-                      SnackbarService.showError('停止VPN失败: ${e.toString()}');
+                      SnackbarUtil.showError('停止VPN失败: ${e.toString()}');
                     }
                   },
                   child: const Text('Stop VPN'),

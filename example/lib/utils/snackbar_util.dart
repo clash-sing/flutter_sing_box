@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
-class SnackbarService {
+class SnackbarUtil {
   /// 显示一个标准的 SnackBar
   static void show(String message) {
     // 检查 key.currentState 是否存在，因为在 app 的极早期阶段可能还不存在
