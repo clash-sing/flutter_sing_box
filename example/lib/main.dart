@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box_example/utils/snackbar_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,6 +52,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       home: Scaffold(
         appBar: AppBar(title: const Text('Plugin example app')),
         body: Builder(builder: (scaffoldContext) {
@@ -63,9 +65,7 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () async {
                     try {
                       await _flutterSingBoxPlugin.startVpn();
-                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-                        const SnackBar(content: Text('VPN启动中...'))
-                      );
+                      SnackbarService.show('VPN启动中...');
                     } on PlatformException catch (e) {
                       String errorMessage = '启动VPN失败';
                       if (e.code == 'NO_ACTIVITY') {
@@ -75,13 +75,9 @@ class _MyAppState extends State<MyApp> {
                       } else if (e.code == 'VPN_ERROR') {
                         errorMessage = e.message ?? '启动VPN服务失败';
                       }
-                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-                        SnackBar(content: Text(errorMessage))
-                      );
+                      SnackbarService.showError(errorMessage);
                     } catch (e) {
-                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-                        SnackBar(content: Text('未知错误: ${e.toString()}'))
-                      );
+                      SnackbarService.showError('未知错误: ${e.toString()}');
                     }
                   },
                   child: const Text('Start VPN'),
@@ -91,13 +87,9 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () async {
                     try {
                       await _flutterSingBoxPlugin.stopVpn();
-                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-                        const SnackBar(content: Text('VPN已停止'))
-                      );
+                      SnackbarService.show('VPN已停止');
                     } catch (e) {
-                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
-                        SnackBar(content: Text('停止VPN失败: ${e.toString()}'))
-                      );
+                      SnackbarService.showError('停止VPN失败: ${e.toString()}');
                     }
                   },
                   child: const Text('Stop VPN'),

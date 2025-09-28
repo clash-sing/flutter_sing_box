@@ -13,7 +13,7 @@
         android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"
         android:minSdkVersion="34" />
     <application
-        android:label="flutter_sing_box_example"
+        android:label="SBPlugin"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
         <activity
