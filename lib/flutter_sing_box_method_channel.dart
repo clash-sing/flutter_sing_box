@@ -14,4 +14,14 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
   }
+
+  @override
+  Future<void> startVpn() async {
+    await methodChannel.invokeMethod('startVpn');
+  }
+
+  @override
+  Future<void> stopVpn() async {
+    await methodChannel.invokeMethod('stopVpn');
+  }
 }

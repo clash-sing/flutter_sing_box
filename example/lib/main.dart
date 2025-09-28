@@ -53,7 +53,59 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Plugin example app')),
-        body: Center(child: Text('Running on: $_platformVersion\n')),
+        body: Builder(builder: (scaffoldContext) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Running on: $_platformVersion\n'),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await _flutterSingBoxPlugin.startVpn();
+                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                        const SnackBar(content: Text('VPN启动中...'))
+                      );
+                    } on PlatformException catch (e) {
+                      String errorMessage = '启动VPN失败';
+                      if (e.code == 'NO_ACTIVITY') {
+                        errorMessage = '无法获取Activity实例';
+                      } else if (e.code == 'VPN_PERMISSION_DENIED') {
+                        errorMessage = '用户拒绝了VPN权限';
+                      } else if (e.code == 'VPN_ERROR') {
+                        errorMessage = e.message ?? '启动VPN服务失败';
+                      }
+                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                        SnackBar(content: Text(errorMessage))
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                        SnackBar(content: Text('未知错误: ${e.toString()}'))
+                      );
+                    }
+                  },
+                  child: const Text('Start VPN'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      await _flutterSingBoxPlugin.stopVpn();
+                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                        const SnackBar(content: Text('VPN已停止'))
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+                        SnackBar(content: Text('停止VPN失败: ${e.toString()}'))
+                      );
+                    }
+                  },
+                  child: const Text('Stop VPN'),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }

@@ -2,6 +2,7 @@ package com.clashsiing.flutter_sing_box
 
 import android.content.Context
 import android.content.Intent
+import android.net.VpnService
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -10,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import java.util.concurrent.atomic.AtomicReference
 
 /** FlutterSingBoxPlugin */
 class FlutterSingBoxPlugin :
@@ -18,9 +20,12 @@ class FlutterSingBoxPlugin :
     companion object {
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
+        private const val VPN_REQUEST_CODE = 1001
     }
     private lateinit var channel: MethodChannel
     private lateinit var applicationContext: Context
+    private var activityBinding: ActivityPluginBinding? = null
+    private val pendingStartVpnResult = AtomicReference<Result?>(null)
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_sing_box")
@@ -34,26 +39,29 @@ class FlutterSingBoxPlugin :
     ) {
         when (call.method) {
             START_VPN -> {
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    applicationContext.startForegroundService(
-                        Intent(
-                            applicationContext,
-                            ClashSingVpnService::class.java
-                        )
-                    )
-
+                // 检查是否有Activity绑定
+                val activity = activityBinding?.activity
+                if (activity == null) {
+                    result.error("NO_ACTIVITY", "无法获取Activity实例", null)
+                    return
+                }
+                
+                // 保存result引用，用于权限请求回调
+                pendingStartVpnResult.set(result)
+                
+                // 请求VPN权限
+                val intent = VpnService.prepare(applicationContext)
+                if (intent != null) {
+                    activity.startActivityForResult(intent, VPN_REQUEST_CODE)
                 } else {
-                    applicationContext.startService(
-                        Intent(
-                            applicationContext,
-                            ClashSingVpnService::class.java
-                        )
-                    )
+                    // 已经有VPN权限，可以直接启动服务
+                    startVpnService(result)
                 }
             }
             STOP_VPN -> {
                 val intent = Intent(applicationContext, ClashSingVpnService::class.java)
                 applicationContext.stopService(intent)
+                result.success(null)
             }
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
@@ -63,25 +71,52 @@ class FlutterSingBoxPlugin :
             }
         }
     }
+    
+    private fun startVpnService(result: Result) {
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(
+                    Intent(
+                        applicationContext,
+                        ClashSingVpnService::class.java
+                    )
+                )
+            } else {
+                applicationContext.startService(
+                    Intent(
+                        applicationContext,
+                        ClashSingVpnService::class.java
+                    )
+                )
+            }
+            result.success(null)
+        } catch (e: Exception) {
+            result.error("VPN_ERROR", "启动VPN服务失败: \${e.message}", null)
+        }
+    }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        TODO("Not yet implemented")
+        activityBinding = binding
+        binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        TODO("Not yet implemented")
+        activityBinding?.removeActivityResultListener(this)
+        activityBinding = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        TODO("Not yet implemented")
+        activityBinding = binding
+        binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivity() {
-        TODO("Not yet implemented")
+        activityBinding?.removeActivityResultListener(this)
+        activityBinding = null
     }
 
     override fun onActivityResult(
@@ -89,6 +124,19 @@ class FlutterSingBoxPlugin :
         resultCode: Int,
         data: Intent?
     ): Boolean {
-        TODO("Not yet implemented")
+        if (requestCode == VPN_REQUEST_CODE) {
+            val result = pendingStartVpnResult.getAndSet(null)
+            if (result != null) {
+                if (resultCode == android.app.Activity.RESULT_OK) {
+                    // 用户授予了VPN权限，启动服务
+                    startVpnService(result)
+                } else {
+                    // 用户拒绝了VPN权限
+                    result.error("VPN_PERMISSION_DENIED", "用户拒绝了VPN权限", null)
+                }
+            }
+            return true
+        }
+        return false
     }
 }

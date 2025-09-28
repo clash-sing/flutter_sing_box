@@ -10,6 +10,18 @@ class MockFlutterSingBoxPlatform
 
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<void> startVpn() {
+    // TODO: implement startVpn
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> stopVpn() {
+    // TODO: implement stopVpn
+    throw UnimplementedError();
+  }
 }
 
 void main() {
