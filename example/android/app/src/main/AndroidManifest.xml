@@ -45,7 +45,7 @@
             android:value="2" />
 
         <service
-            android:name="com.clashsiing.flutter_sing_box.bg.ClashSingVpnService"
+            android:name="com.clashsiing.flutter_sing_box.core.ClashSingVpnService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse"

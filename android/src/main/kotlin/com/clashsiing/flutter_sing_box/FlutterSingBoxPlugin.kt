@@ -3,7 +3,8 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
-import com.clashsiing.flutter_sing_box.bg.ClashSingVpnService
+import com.clashsiing.flutter_sing_box.core.AppConfig
+import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -19,6 +20,7 @@ class FlutterSingBoxPlugin :
     FlutterPlugin,
     MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     companion object {
+        private const val SETUP = "setup"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
         private const val VPN_REQUEST_CODE = 1001
@@ -39,6 +41,27 @@ class FlutterSingBoxPlugin :
         result: Result
     ) {
         when (call.method) {
+            SETUP -> {
+                val catchingResult = runCatching {
+                    val args = call.arguments as? Map<*, *>
+                    if (args != null) {
+                        AppConfig.init(
+                            context = applicationContext,
+                            isDebug = (args["isDebug"] as? Boolean) ?: throw IllegalArgumentException("arguments['isDebug'] is null"),
+                            packageName = (args["packageName"] as? String) ?: throw IllegalArgumentException("arguments['packageName'] is null"),
+                            versionName = (args["versionName"] as? String) ?: throw IllegalArgumentException("arguments['versionName'] is null"),
+                            versionCode = ((args["versionCode"] as? String)?.toLongOrNull()) ?: throw IllegalArgumentException("arguments['versionCode'] is null"),
+                        )
+                    } else {
+                        throw IllegalArgumentException("Arguments are null")
+                    }
+                }
+                if (catchingResult.isSuccess) {
+                    result.success(null)
+                } else {
+                    result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
+                }
+            }
             START_VPN -> {
                 // 检查是否有Activity绑定
                 val activity = activityBinding?.activity

@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FlutterSingBox().setup();
   runApp(const MyApp());
 }
 

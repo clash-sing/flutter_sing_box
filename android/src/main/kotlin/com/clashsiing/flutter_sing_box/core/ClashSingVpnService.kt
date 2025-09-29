@@ -1,4 +1,4 @@
-package com.clashsiing.flutter_sing_box.bg
+package com.clashsiing.flutter_sing_box.core
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel

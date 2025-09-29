@@ -22,6 +22,12 @@ class MockFlutterSingBoxPlatform
     // TODO: implement stopVpn
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> setup() {
+    // TODO: implement setup
+    throw UnimplementedError();
+  }
 }
 
 void main() {

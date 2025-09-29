@@ -2,6 +2,11 @@
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
+
+  Future<void> setup() {
+    return FlutterSingBoxPlatform.instance.setup();
+  }
+
   Future<String?> getPlatformVersion() {
     return FlutterSingBoxPlatform.instance.getPlatformVersion();
   }
