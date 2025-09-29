@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.VpnService
 import com.clashsiing.flutter_sing_box.core.AppConfig
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
+import com.clashsiing.flutter_sing_box.utils.HttpClient
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -21,6 +22,7 @@ class FlutterSingBoxPlugin :
     MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     companion object {
         private const val SETUP = "setup"
+        private const val IMPORT_PROFILE = "importProfile"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
         private const val VPN_REQUEST_CODE = 1001
@@ -58,6 +60,25 @@ class FlutterSingBoxPlugin :
                 }
                 if (catchingResult.isSuccess) {
                     result.success(null)
+                } else {
+                    result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
+                }
+            }
+            IMPORT_PROFILE -> {
+                val catchingResult = runCatching {
+                    val args = call.arguments as? Map<*, *>
+                    if (args != null) {
+                        val url = (args["url"] as? String) ?: throw IllegalArgumentException("arguments['url'] is null")
+                        val content = HttpClient().use {
+                            it.getString(url)
+                        }
+                        return@runCatching content
+                    } else {
+                        throw IllegalArgumentException("Arguments are null")
+                    }
+                }
+                if (catchingResult.isSuccess) {
+                    result.success(catchingResult.getOrNull())
                 } else {
                     result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
                 }

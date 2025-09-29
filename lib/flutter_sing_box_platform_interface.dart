@@ -23,12 +23,16 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     _instance = instance;
   }
 
+  Future<String?> getPlatformVersion() {
+    throw UnimplementedError('platformVersion() has not been implemented.');
+  }
+
   Future<void> setup() {
     throw UnimplementedError('setup() has not been implemented.');
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<String> importProfile(String url) {
+    throw UnimplementedError('importProfile() has not been implemented.');
   }
 
   /// Starts the VPN service

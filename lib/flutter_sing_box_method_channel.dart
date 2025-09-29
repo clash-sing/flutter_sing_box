@@ -11,6 +11,12 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   final methodChannel = const MethodChannel('flutter_sing_box');
 
   @override
+  Future<String?> getPlatformVersion() async {
+    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    return version;
+  }
+
+  @override
   Future<void> setup() async {
     final packageInfo = await PackageInfo.fromPlatform();
     await methodChannel.invokeMethod('setup', {
@@ -22,9 +28,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<String> importProfile(String url) async {
+    return  await methodChannel.invokeMethod('importProfile', {
+      'url': url,
+    });
+
   }
 
   @override

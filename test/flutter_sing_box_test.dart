@@ -28,6 +28,12 @@ class MockFlutterSingBoxPlatform
     // TODO: implement setup
     throw UnimplementedError();
   }
+
+  @override
+  Future<String> importProfile(String url) {
+    // TODO: implement importProfile
+    throw UnimplementedError();
+  }
 }
 
 void main() {

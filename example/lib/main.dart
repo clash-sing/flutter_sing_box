@@ -66,6 +66,17 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: () async {
                     try {
+                      final content = await _flutterSingBoxPlugin.importProfile("");
+                      SnackbarUtil.show('VPN已准备就绪');
+                    } catch (e) {
+                      SnackbarUtil.showError('初始化VPN失败: ${e.toString()}');
+                    }
+                  },
+                  child: const Text('Import profile'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
                       await _flutterSingBoxPlugin.startVpn();
                       SnackbarUtil.show('VPN启动中...');
                     } on PlatformException catch (e) {
