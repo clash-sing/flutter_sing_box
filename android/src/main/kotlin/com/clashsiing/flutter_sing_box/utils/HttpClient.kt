@@ -1,4 +1,4 @@
-package com.clashsiing.flutter_sing_box
+package com.clashsiing.flutter_sing_box.utils
 
 import com.clashsiing.flutter_sing_box.ktx.unwrap
 import io.nekohasekai.libbox.Libbox
