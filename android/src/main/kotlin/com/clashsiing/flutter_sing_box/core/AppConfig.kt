@@ -8,31 +8,26 @@ object AppConfig {
 
     val appContext: Context?
         get() = _appContext ?: throw IllegalStateException("AppConfig not initialized")
-        private set
 
     private var _isDebug: Boolean? = null
 
     val isDebug: Boolean
         get() = _isDebug ?: throw IllegalStateException("AppConfig not initialized")
-        private set
 
     private var _packageName: String? =  null
 
     val packageName: String
         get() = _packageName ?: throw IllegalStateException("AppConfig not initialized")
-        private set
 
     private var _versionName: String? =  null
 
     val versionName: String
         get() = _versionName ?: throw IllegalStateException("AppConfig not initialized")
-        private set
 
     private var _versionCode: Long? = null
 
     val versionCode: Long
         get() = _versionCode ?: throw IllegalStateException("AppConfig not initialized")
-        private set
 
     /**
      * Initializes the configuration. Called from the main plugin class.

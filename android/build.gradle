@@ -2,14 +2,14 @@ group = "com.clashsiing.flutter_sing_box"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = "2.1.0"
+    ext.kotlin_version = "2.2.20"
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("com.android.tools.build:gradle:8.13.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
     }
 }
@@ -30,13 +30,12 @@ android {
     compileSdk = 36
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         coreLibraryDesugaringEnabled true
     }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11
+    kotlin {
+        jvmToolchain(17)
     }
 
     sourceSets {
@@ -58,7 +57,7 @@ android {
         coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
         testImplementation("org.jetbrains.kotlin:kotlin-test")
-        testImplementation("org.mockito:mockito-core:5.0.0")
+        testImplementation("org.mockito:mockito-core:5.20.0")
     }
 
     testOptions {
