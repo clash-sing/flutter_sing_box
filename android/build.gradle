@@ -48,6 +48,11 @@ android {
         minSdk = 24
     }
 
+    buildFeatures {
+        buildConfig true
+        aidl true
+    }
+
     dependencies {
         implementation("com.github.singbox-android:libbox:1.12.8")
         coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
