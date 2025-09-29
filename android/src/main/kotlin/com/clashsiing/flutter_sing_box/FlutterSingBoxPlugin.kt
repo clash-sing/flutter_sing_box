@@ -3,6 +3,7 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
+import com.clashsiing.flutter_sing_box.bg.ClashSingVpnService
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
