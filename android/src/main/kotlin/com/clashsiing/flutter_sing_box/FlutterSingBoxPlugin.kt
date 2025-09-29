@@ -98,24 +98,15 @@ class FlutterSingBoxPlugin :
     
     private fun startVpnService(result: Result) {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                applicationContext.startForegroundService(
-                    Intent(
-                        applicationContext,
-                        ClashSingVpnService::class.java
-                    )
+            applicationContext.startForegroundService(
+                Intent(
+                    applicationContext,
+                    ClashSingVpnService::class.java
                 )
-            } else {
-                applicationContext.startService(
-                    Intent(
-                        applicationContext,
-                        ClashSingVpnService::class.java
-                    )
-                )
-            }
+            )
             result.success(null)
         } catch (e: Exception) {
-            result.error("VPN_ERROR", "启动VPN服务失败: \${e.message}", null)
+            result.error("VPN_ERROR", "启动VPN服务失败:\n${e.message}", null)
         }
     }
 
