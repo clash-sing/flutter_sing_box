@@ -3,10 +3,12 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box_example/demo_manager.dart';
 import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await demoManager.loadData();
   await FlutterSingBox().setup();
   runApp(const MyApp());
 }
@@ -66,7 +68,7 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: () async {
                     try {
-                      final content = await _flutterSingBoxPlugin.importProfile("");
+                      final content = await _flutterSingBoxPlugin.importProfile(demoManager.getSubscriptionLink01());
                       SnackbarUtil.show('VPN已准备就绪');
                     } catch (e) {
                       SnackbarUtil.showError('初始化VPN失败: ${e.toString()}');
