@@ -6,6 +6,7 @@ import android.net.VpnService
 import com.clashsiing.flutter_sing_box.core.AppConfig
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.utils.HttpClient
+import com.tencent.mmkv.MMKV
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -36,6 +37,7 @@ class FlutterSingBoxPlugin :
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_sing_box")
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
+        MMKV.initialize(applicationContext)
     }
 
     override fun onMethodCall(

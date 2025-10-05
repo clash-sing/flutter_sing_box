@@ -1,4 +1,6 @@
 
+import 'package:flutter_sing_box/src/settings/sing_box_manager.dart';
+
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
@@ -11,8 +13,10 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.setup();
   }
 
-  Future<String> importProfile(String url) {
-    return FlutterSingBoxPlatform.instance.importProfile(url);
+  Future<String> importProfile(String url) async {
+    String result = await FlutterSingBoxPlatform.instance.importProfile(url);
+    singBoxManager.profile = result;
+    return result;
   }
 
   /// Starts the VPN service
