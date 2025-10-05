@@ -3,7 +3,7 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
-import com.clashsiing.flutter_sing_box.core.AppConfig
+import com.clashsiing.flutter_sing_box.utils.AppConfig
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.utils.HttpClient
 import com.tencent.mmkv.MMKV

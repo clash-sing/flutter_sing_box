@@ -1,4 +1,4 @@
-package com.clashsiing.flutter_sing_box.core
+package com.clashsiing.flutter_sing_box.utils
 
 import android.content.Context
 
