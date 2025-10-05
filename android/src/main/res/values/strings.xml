@@ -1,3 +1,7 @@
 <resources>
     <string name="stop">Stop</string>
+    <string name="status_starting">Service starting…</string>
+    <string name="status_started">Service started</string>
+    <string name="profile_type_local">Local</string>
+    <string name="profile_type_remote">Remote</string>
 </resources>

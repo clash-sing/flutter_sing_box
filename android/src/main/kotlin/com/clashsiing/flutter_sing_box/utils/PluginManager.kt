@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
+import android.os.PowerManager
 import androidx.core.content.getSystemService
 
 object PluginManager {
@@ -70,6 +71,9 @@ object PluginManager {
     val notification by lazy { appContext.getSystemService<NotificationManager>() ?: throw throwError() }
 
     val launchIntent by lazy { packageManager.getLaunchIntentForPackage(packageName) ?: throw throwError() }
+
+    val powerManager by lazy { appContext.getSystemService<PowerManager>() ?: throw throwError() }
+
 
     private fun throwError() : Throwable = IllegalStateException(ERROR_MSG)
 

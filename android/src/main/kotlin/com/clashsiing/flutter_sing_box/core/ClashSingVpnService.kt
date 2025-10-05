@@ -33,6 +33,10 @@ class ClashSingVpnService : VpnService() {
             .setContentText("点击可返回应用")
     }
 
+    var systemProxyAvailable = false
+    var systemProxyEnabled = false
+
+
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()

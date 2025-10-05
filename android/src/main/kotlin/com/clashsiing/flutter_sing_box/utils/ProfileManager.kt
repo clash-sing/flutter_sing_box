@@ -4,7 +4,9 @@ import com.tencent.mmkv.MMKV
 
 object ProfileManager {
     private val mmkv = MMKV.mmkvWithID("cs-sing-box", MMKV.MULTI_PROCESS_MODE)
-    fun getProfile(): String? {
-        return mmkv.decodeString("profile")
+
+
+    fun get(id: Long): Profile? {
+        return mmkv.decodeParcelable(id.toString(), Profile::class.java)
     }
 }
