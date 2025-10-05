@@ -3,7 +3,7 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
-import com.clashsiing.flutter_sing_box.utils.AppConfig
+import com.clashsiing.flutter_sing_box.utils.PluginManager
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.utils.HttpClient
 import com.tencent.mmkv.MMKV
@@ -49,7 +49,7 @@ class FlutterSingBoxPlugin :
                 val catchingResult = runCatching {
                     val args = call.arguments as? Map<*, *>
                     if (args != null) {
-                        AppConfig.init(
+                        PluginManager.init(
                             context = applicationContext,
                             isDebug = (args["isDebug"] as? Boolean) ?: throw IllegalArgumentException("arguments['isDebug'] is null"),
                             packageName = (args["packageName"] as? String) ?: throw IllegalArgumentException("arguments['packageName'] is null"),

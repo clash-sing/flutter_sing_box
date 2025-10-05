@@ -1,6 +1,5 @@
 package com.clashsiing.flutter_sing_box.utils
 
-import com.clashsiing.flutter_sing_box.utils.AppConfig
 import com.clashsiing.flutter_sing_box.ktx.unwrap
 import io.nekohasekai.libbox.Libbox
 import java.io.Closeable
@@ -10,9 +9,9 @@ class HttpClient : Closeable {
     companion object {
         val userAgent by lazy {
             var userAgent = "SFA/"
-            userAgent += AppConfig.versionName
+            userAgent += PluginManager.versionName
             userAgent += " ("
-            userAgent += AppConfig.versionCode
+            userAgent += PluginManager.versionCode
             userAgent += "; sing-box "
             userAgent += Libbox.version()
             userAgent += "; language "

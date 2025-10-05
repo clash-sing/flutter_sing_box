@@ -1,33 +1,36 @@
 package com.clashsiing.flutter_sing_box.utils
 
 import android.content.Context
+import android.net.ConnectivityManager
+import androidx.core.content.getSystemService
 
-object AppConfig {
+object PluginManager {
+    private const val ERROR_MSG = "PluginManager not initialized. Call PluginManager.init() first."
     @Volatile
     private var _appContext: Context? =  null
 
-    val appContext: Context?
-        get() = _appContext ?: throw IllegalStateException("AppConfig not initialized")
+    val appContext: Context
+        get() = _appContext ?: throw throwError()
 
     private var _isDebug: Boolean? = null
 
     val isDebug: Boolean
-        get() = _isDebug ?: throw IllegalStateException("AppConfig not initialized")
+        get() = _isDebug ?: throw throwError()
 
     private var _packageName: String? =  null
 
     val packageName: String
-        get() = _packageName ?: throw IllegalStateException("AppConfig not initialized")
+        get() = _packageName ?: throw throwError()
 
     private var _versionName: String? =  null
 
     val versionName: String
-        get() = _versionName ?: throw IllegalStateException("AppConfig not initialized")
+        get() = _versionName ?: throw throwError()
 
     private var _versionCode: Long? = null
 
     val versionCode: Long
-        get() = _versionCode ?: throw IllegalStateException("AppConfig not initialized")
+        get() = _versionCode ?: throw throwError()
 
     /**
      * Initializes the configuration. Called from the main plugin class.
@@ -55,4 +58,11 @@ object AppConfig {
             this._versionCode = versionCode
         }
     }
+
+    val connectivity by lazy { appContext.getSystemService<ConnectivityManager>()
+        ?: throw throwError()
+    }
+
+    private fun throwError() : Throwable = IllegalStateException(ERROR_MSG)
+
 }
