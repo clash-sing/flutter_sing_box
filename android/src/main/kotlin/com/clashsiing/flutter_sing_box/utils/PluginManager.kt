@@ -2,6 +2,7 @@ package com.clashsiing.flutter_sing_box.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import androidx.core.content.getSystemService
 
 object PluginManager {
@@ -59,9 +60,11 @@ object PluginManager {
         }
     }
 
-    val connectivity by lazy { appContext.getSystemService<ConnectivityManager>()
-        ?: throw throwError()
-    }
+    val connectivity by lazy { appContext.getSystemService<ConnectivityManager>() ?: throw throwError() }
+
+    val packageManager by lazy { appContext.packageManager ?: throw throwError() }
+
+    val wifiManager by lazy { appContext.getSystemService<WifiManager>() ?: throw throwError() }
 
     private fun throwError() : Throwable = IllegalStateException(ERROR_MSG)
 
