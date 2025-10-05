@@ -1,5 +1,6 @@
 package com.clashsiing.flutter_sing_box.utils
 
+import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
@@ -65,6 +66,10 @@ object PluginManager {
     val packageManager by lazy { appContext.packageManager ?: throw throwError() }
 
     val wifiManager by lazy { appContext.getSystemService<WifiManager>() ?: throw throwError() }
+
+    val notification by lazy { appContext.getSystemService<NotificationManager>() ?: throw throwError() }
+
+    val launchIntent by lazy { packageManager.getLaunchIntentForPackage(packageName) ?: throw throwError() }
 
     private fun throwError() : Throwable = IllegalStateException(ERROR_MSG)
 
