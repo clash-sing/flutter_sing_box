@@ -9,11 +9,11 @@ class HttpClient : Closeable {
     companion object {
         val userAgent by lazy {
             var userAgent = "SFA/"
-            userAgent += PluginManager.versionName
+            userAgent += "1.12.9" //PluginManager.versionName
             userAgent += " ("
-            userAgent += PluginManager.versionCode
+            userAgent += 575 //PluginManager.versionCode
             userAgent += "; sing-box "
-            userAgent += Libbox.version()
+            userAgent += "1.12.9"
             userAgent += "; language "
             userAgent += Locale.getDefault().toLanguageTag().replace("-", "_")
             userAgent += ")"
