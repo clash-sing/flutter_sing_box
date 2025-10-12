@@ -71,10 +71,9 @@ class FlutterSingBoxPlugin :
                     val args = call.arguments as? Map<*, *>
                     if (args != null) {
                         val url = (args["url"] as? String) ?: throw IllegalArgumentException("arguments['url'] is null")
-                        val content = HttpClient().use {
+                        HttpClient().use {
                             it.getString(url)
                         }
-                        return@runCatching content
                     } else {
                         throw IllegalArgumentException("Arguments are null")
                     }

@@ -25,7 +25,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _flutterSingBoxPlugin = FlutterSingBox();
-
+  final TextEditingController _controller = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -67,14 +67,29 @@ class _MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Running on: $_platformVersion\n'),
+                TextField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    labelText: 'Subscription Link',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
                 ElevatedButton(
                   onPressed: () async {
                     try {
-                      final content = await _flutterSingBoxPlugin.importProfile(demoManager.getSubscriptionLink01());
-
-                      SnackbarUtil.show('VPN已准备就绪');
+                      if (_controller.text.isNotEmpty) {
+                        final uri = Uri.tryParse(_controller.text);
+                        if (uri != null && uri.hasAbsolutePath && ['http', 'https'].contains(uri.scheme)) {
+                          final singBox = await _flutterSingBoxPlugin.importProfile(uri.toString());
+                          SnackbarUtil.show('订阅链接已导入');
+                        } else {
+                          SnackbarUtil.showError('订阅链接格式错误');
+                        }
+                      } else {
+                        SnackbarUtil.showError('请输入订阅链接');
+                      }
                     } catch (e) {
-                      SnackbarUtil.showError('初始化VPN失败: ${e.toString()}');
+                      SnackbarUtil.showError('导入失败: ${e.toString()}');
                     }
                   },
                   child: const Text('Import profile'),
@@ -118,5 +133,11 @@ class _MyAppState extends State<MyApp> {
         }),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

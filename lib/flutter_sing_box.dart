@@ -17,7 +17,7 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.setup();
   }
 
-  Future<String> importProfile(String url) async {
+  Future<SingBox> importProfile(String url) async {
     String result = await FlutterSingBoxPlatform.instance.importProfile(url);
     final jsonObject = json.decode(result);
     final singBox = SingBox.fromJson(jsonObject);
@@ -27,7 +27,7 @@ class FlutterSingBox {
     outbound?.outbounds?.insert(0, "auto");
     final content = json.encode(singBox.toJson());
     singBoxManager.profile = content;
-    return content;
+    return singBox;
   }
 
   /// Starts the VPN service
