@@ -165,7 +165,7 @@ class BoxService(
             commandServer?.setService(boxService)
 
             //TODO: just for debug
-            Libbox.newStandaloneCommandClient().selectOutbound("proxy", "\uD83C\uDDED\uD83C\uDDF03香港集群-全网优化(hy1)")
+            Libbox.newStandaloneCommandClient().selectOutbound("proxy", "auto")
 
             status.postValue(Status.Started)
             withContext(Dispatchers.Main) {

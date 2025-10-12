@@ -19,8 +19,8 @@ Dns _$DnsFromJson(Map<String, dynamic> json) => Dns(
 );
 
 Map<String, dynamic> _$DnsToJson(Dns instance) => <String, dynamic>{
-  'servers': instance.servers,
-  'rules': instance.rules,
+  'servers': instance.servers.map((e) => e.toJson()).toList(),
+  'rules': instance.rules.map((e) => e.toJson()).toList(),
   'independent_cache': instance.independentCache,
   'final': instance.dnsFinal,
   'strategy': instance.strategy,
@@ -37,9 +37,9 @@ Server _$ServerFromJson(Map<String, dynamic> json) => Server(
 Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
   'tag': instance.tag,
   'type': instance.type,
-  'server': instance.server,
-  'inet4_range': instance.inet4Range,
-  'inet6_range': instance.inet6Range,
+  'server': ?instance.server,
+  'inet4_range': ?instance.inet4Range,
+  'inet6_range': ?instance.inet6Range,
 };
 
 DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
@@ -54,8 +54,8 @@ DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
 );
 
 Map<String, dynamic> _$DnsRuleToJson(DnsRule instance) => <String, dynamic>{
-  'clash_mode': instance.clashMode,
+  'clash_mode': ?instance.clashMode,
   'server': instance.server,
-  'rule_set': instance.ruleSet,
-  'query_type': instance.queryType,
+  'rule_set': ?instance.ruleSet,
+  'query_type': ?instance.queryType,
 };

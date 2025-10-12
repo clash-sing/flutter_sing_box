@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'dns.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Dns {
   List<Server> servers;
   List<DnsRule> rules;

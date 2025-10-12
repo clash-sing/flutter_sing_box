@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'experimental.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Experimental {
   @JsonKey(name: "cache_file")
   CacheFile cacheFile;

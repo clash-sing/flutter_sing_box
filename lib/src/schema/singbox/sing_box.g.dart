@@ -22,10 +22,10 @@ SingBox _$SingBoxFromJson(Map<String, dynamic> json) => SingBox(
 );
 
 Map<String, dynamic> _$SingBoxToJson(SingBox instance) => <String, dynamic>{
-  'dns': instance.dns,
-  'inbounds': instance.inbounds,
-  'route': instance.route,
-  'experimental': instance.experimental,
-  'outbounds': instance.outbounds,
-  'log': instance.log,
+  'dns': instance.dns.toJson(),
+  'inbounds': instance.inbounds.map((e) => e.toJson()).toList(),
+  'route': instance.route.toJson(),
+  'experimental': instance.experimental.toJson(),
+  'outbounds': instance.outbounds.map((e) => e.toJson()).toList(),
+  'log': instance.log.toJson(),
 };

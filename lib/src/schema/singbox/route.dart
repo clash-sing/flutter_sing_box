@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'route.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Route {
   @JsonKey(name: "default_domain_resolver")
   String defaultDomainResolver;

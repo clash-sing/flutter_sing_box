@@ -9,7 +9,7 @@ import 'route.dart';
 
 part 'sing_box.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class SingBox {
   Dns dns;
   List<Inbound> inbounds;

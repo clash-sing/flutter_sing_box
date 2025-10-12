@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'outbound.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Outbound {
   String tag;
   String type;
@@ -51,7 +51,7 @@ class Outbound {
   Map<String, dynamic> toJson() => _$OutboundToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Tls {
   List<String>? alpn;
   bool enabled;

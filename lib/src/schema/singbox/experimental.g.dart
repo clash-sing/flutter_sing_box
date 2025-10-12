@@ -11,7 +11,7 @@ Experimental _$ExperimentalFromJson(Map<String, dynamic> json) => Experimental(
 );
 
 Map<String, dynamic> _$ExperimentalToJson(Experimental instance) =>
-    <String, dynamic>{'cache_file': instance.cacheFile};
+    <String, dynamic>{'cache_file': instance.cacheFile.toJson()};
 
 CacheFile _$CacheFileFromJson(Map<String, dynamic> json) => CacheFile(
   enabled: json['enabled'] as bool,

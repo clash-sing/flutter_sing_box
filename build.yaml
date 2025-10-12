@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Options configure how source code is generated for every
+          # `@JsonSerializable`-annotated class in the package.
+          #
+          # The default value for each is listed.
+          #
+          # For details on the meaning of each option, see the documentation
+          # for the corresponding field in the `JsonSerializable` class.
+          # 忽略所有值为 null 的字段
+          include_if_null: false

@@ -1,5 +1,9 @@
 
+import 'dart:convert';
+
+import 'package:flutter_sing_box/src/schema/singbox/sing_box.dart';
 import 'package:flutter_sing_box/src/settings/sing_box_manager.dart';
+import 'package:collection/collection.dart'; // 用于 firstWhereOrNull
 
 import 'flutter_sing_box_platform_interface.dart';
 
@@ -15,8 +19,15 @@ class FlutterSingBox {
 
   Future<String> importProfile(String url) async {
     String result = await FlutterSingBoxPlatform.instance.importProfile(url);
-    singBoxManager.profile = result;
-    return result;
+    final jsonObject = json.decode(result);
+    final singBox = SingBox.fromJson(jsonObject);
+    final outbound = singBox.outbounds.firstWhereOrNull(
+            (item) => item.type == "selector"
+    );
+    outbound?.outbounds?.insert(0, "auto");
+    final content = json.encode(singBox.toJson());
+    singBoxManager.profile = content;
+    return content;
   }
 
   /// Starts the VPN service

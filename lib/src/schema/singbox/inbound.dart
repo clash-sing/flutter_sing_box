@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'inbound.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Inbound {
   String tag;
   String type;
@@ -42,7 +42,7 @@ class Inbound {
 }
 
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Platform {
   @JsonKey(name: "http_proxy")
   HttpProxy httpProxy;

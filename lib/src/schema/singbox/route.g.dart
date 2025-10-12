@@ -20,10 +20,10 @@ Route _$RouteFromJson(Map<String, dynamic> json) => Route(
 
 Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
   'default_domain_resolver': instance.defaultDomainResolver,
-  'rules': instance.rules,
+  'rules': instance.rules.map((e) => e.toJson()).toList(),
   'final': instance.routeFinal,
   'auto_detect_interface': instance.autoDetectInterface,
-  'rule_set': instance.ruleSet,
+  'rule_set': instance.ruleSet.map((e) => e.toJson()).toList(),
 };
 
 RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
@@ -38,12 +38,12 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
 );
 
 Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
-  'action': instance.action,
-  'protocol': instance.protocol,
-  'clash_mode': instance.clashMode,
-  'outbound': instance.outbound,
-  'ip_is_private': instance.ipIsPrivate,
-  'rule_set': instance.ruleSet,
+  'action': ?instance.action,
+  'protocol': ?instance.protocol,
+  'clash_mode': ?instance.clashMode,
+  'outbound': ?instance.outbound,
+  'ip_is_private': ?instance.ipIsPrivate,
+  'rule_set': ?instance.ruleSet,
 };
 
 RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(

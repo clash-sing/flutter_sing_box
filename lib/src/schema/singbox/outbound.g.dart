@@ -36,20 +36,20 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'tag': instance.tag,
   'type': instance.type,
-  'outbounds': instance.outbounds,
-  'url': instance.url,
-  'interval': instance.interval,
-  'tolerance': instance.tolerance,
-  'server': instance.server,
-  'server_port': instance.serverPort,
-  'password': instance.password,
-  'tls': instance.tls,
-  'server_ports': instance.serverPorts,
-  'transport': instance.transport,
-  'up_mbps': instance.upMbps,
-  'down_mbps': instance.downMbps,
-  'auth_str': instance.authStr,
-  'disable_mtu_discovery': instance.disableMtuDiscovery,
+  'outbounds': ?instance.outbounds,
+  'url': ?instance.url,
+  'interval': ?instance.interval,
+  'tolerance': ?instance.tolerance,
+  'server': ?instance.server,
+  'server_port': ?instance.serverPort,
+  'password': ?instance.password,
+  'tls': ?instance.tls?.toJson(),
+  'server_ports': ?instance.serverPorts,
+  'transport': ?instance.transport?.toJson(),
+  'up_mbps': ?instance.upMbps,
+  'down_mbps': ?instance.downMbps,
+  'auth_str': ?instance.authStr,
+  'disable_mtu_discovery': ?instance.disableMtuDiscovery,
 };
 
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
@@ -64,12 +64,12 @@ Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
 );
 
 Map<String, dynamic> _$TlsToJson(Tls instance) => <String, dynamic>{
-  'alpn': instance.alpn,
+  'alpn': ?instance.alpn,
   'enabled': instance.enabled,
   'disable_sni': instance.disableSni,
   'insecure': instance.insecure,
-  'server_name': instance.serverName,
-  'utls': instance.utls,
+  'server_name': ?instance.serverName,
+  'utls': ?instance.utls?.toJson(),
 };
 
 Utls _$UtlsFromJson(Map<String, dynamic> json) => Utls(
