@@ -37,11 +37,46 @@ object SettingsManager {
             mmkv.encode(Keys.STARTED_BY_USER, value)
         }
 
+    var perAppProxyEnabled: Boolean
+        get() = mmkv.decodeBool(Keys.PER_APP_PROXY_ENABLED, false)
+        set(value) {
+            mmkv.encode(Keys.PER_APP_PROXY_ENABLED, value)
+        }
+
+    var perAppProxyList: List<String>
+        get() = mmkv.decodeStringSet(Keys.PER_APP_PROXY_LIST, emptySet())?.toList() ?: emptyList()
+        set(value) {
+            mmkv.encode(Keys.PER_APP_PROXY_LIST, value.toSet())
+        }
+
+    var perAppProxyMode: Int
+        get() = mmkv.decodeInt(Keys.PER_APP_PROXY_MODE,
+            Keys.PER_APP_PROXY_EXCLUDE
+        )
+        set(value) {
+            mmkv.encode(Keys.PER_APP_PROXY_MODE, value)
+        }
+
+    var systemProxyEnabled: Boolean
+        get() = mmkv.decodeBool(Keys.SYSTEM_PROXY_ENABLED, true)
+        set(value) {
+            mmkv.encode(Keys.SYSTEM_PROXY_ENABLED, value)
+        }
+
     object Keys {
         const val DYNAMIC_NOTIFICATION = "dynamic_notification"
         const val SERVICE_MODE = "service_mode"
         const val SELECTED_PROFILE = "selected_profile"
         const val DISABLE_MEMORY_LIMIT = "disable_memory_limit"
         const val STARTED_BY_USER = "started_by_user"
+        const val PER_APP_PROXY_ENABLED = "per_app_proxy_enabled"
+        const val PER_APP_PROXY_LIST = "per_app_proxy_list"
+        const val PER_APP_PROXY_MODE = "per_app_proxy_mode"
+        const val PER_APP_PROXY_DISABLED = 0
+        const val PER_APP_PROXY_EXCLUDE = 1
+        const val PER_APP_PROXY_INCLUDE = 2
+
+        const val SYSTEM_PROXY_ENABLED = "system_proxy_enabled"
+
     }
 }

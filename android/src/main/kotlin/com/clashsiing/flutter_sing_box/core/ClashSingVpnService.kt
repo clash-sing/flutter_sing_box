@@ -1,93 +1,197 @@
 package com.clashsiing.flutter_sing_box.core
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Intent
+import android.content.pm.PackageManager.NameNotFoundException
+import android.net.ProxyInfo
 import android.net.VpnService
-import androidx.core.app.NotificationCompat
-import kotlinx.coroutines.CoroutineScope
+import android.os.Build
+import android.os.IBinder
+import com.clashsiing.flutter_sing_box.ktx.toIpPrefix
+import com.clashsiing.flutter_sing_box.ktx.toList
+import com.clashsiing.flutter_sing_box.utils.SettingsManager
+import io.nekohasekai.libbox.Notification
+import io.nekohasekai.libbox.TunOptions
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 @SuppressLint("VpnServicePolicy")
-class ClashSingVpnService : VpnService() {
+class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
 
     companion object {
-        const val NOTIFICATION_ID = 1
-        const val CHANNEL_ID = "ForegroundServiceChannel"
+        private const val TAG = "VPNService"
     }
 
-    private var serviceScope: CoroutineScope? = null
-    private val notificationManager by lazy {
-        getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    private val service = BoxService(this, this)
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) =
+        service.onStartCommand()
+
+    override fun onBind(intent: Intent): IBinder {
+        val binder = super.onBind(intent)
+        if (binder != null) {
+            return binder
+        }
+        return service.onBind()
     }
-    private val notificationBuilder by lazy {
-        NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.mipmap.sym_def_app_icon)
-            .setContentTitle("前台服务正在运行")
-            .setContentText("点击可返回应用")
+
+    override fun onDestroy() {
+        service.onDestroy()
+    }
+
+    override fun onRevoke() {
+        runBlocking {
+            withContext(Dispatchers.Main) {
+                service.onRevoke()
+            }
+        }
+    }
+
+    override fun autoDetectInterfaceControl(fd: Int) {
+        protect(fd)
     }
 
     var systemProxyAvailable = false
     var systemProxyEnabled = false
 
+    override fun openTun(options: TunOptions): Int {
+        if (prepare(this) != null) error("android: missing vpn permission")
 
-    override fun onCreate() {
-        super.onCreate()
-        createNotificationChannel()
-    }
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIFICATION_ID, notificationBuilder.build())
-        if (intent?.action == "STOP_SERVICE") {
-            stopSelf()
-            return START_NOT_STICKY
-        } else {
-            if (serviceScope?.isActive != true) {
-                doHeavyWork()
-            }
-            return START_STICKY
+        val builder = Builder()
+            .setSession("sing-box")
+            .setMtu(options.mtu)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            builder.setMetered(false)
         }
-    }
 
-    private fun doHeavyWork() {
-        if (serviceScope?.isActive != true) {
-            serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-            serviceScope?.launch {
-                while (isActive) {
-                    delay(1000)
-                    notificationManager.notify(
-                        NOTIFICATION_ID,
-                        notificationBuilder.setContentText("Time: ${System.currentTimeMillis()}").build()
-                    )
-                    println("Foreground Service is running... ${System.currentTimeMillis()}")
+        val inet4Address = options.inet4Address
+        while (inet4Address.hasNext()) {
+            val address = inet4Address.next()
+            builder.addAddress(address.address(), address.prefix())
+        }
+
+        val inet6Address = options.inet6Address
+        while (inet6Address.hasNext()) {
+            val address = inet6Address.next()
+            builder.addAddress(address.address(), address.prefix())
+        }
+
+        if (options.autoRoute) {
+            builder.addDnsServer(options.dnsServerAddress.value)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val inet4RouteAddress = options.inet4RouteAddress
+                if (inet4RouteAddress.hasNext()) {
+                    while (inet4RouteAddress.hasNext()) {
+                        builder.addRoute(inet4RouteAddress.next().toIpPrefix())
+                    }
+                } else if (options.inet4Address.hasNext()) {
+                    builder.addRoute("0.0.0.0", 0)
                 }
-                // 在这里执行你的耗时任务
+
+                val inet6RouteAddress = options.inet6RouteAddress
+                if (inet6RouteAddress.hasNext()) {
+                    while (inet6RouteAddress.hasNext()) {
+                        builder.addRoute(inet6RouteAddress.next().toIpPrefix())
+                    }
+                } else if (options.inet6Address.hasNext()) {
+                    builder.addRoute("::", 0)
+                }
+
+                val inet4RouteExcludeAddress = options.inet4RouteExcludeAddress
+                while (inet4RouteExcludeAddress.hasNext()) {
+                    builder.excludeRoute(inet4RouteExcludeAddress.next().toIpPrefix())
+                }
+
+                val inet6RouteExcludeAddress = options.inet6RouteExcludeAddress
+                while (inet6RouteExcludeAddress.hasNext()) {
+                    builder.excludeRoute(inet6RouteExcludeAddress.next().toIpPrefix())
+                }
+            } else {
+                val inet4RouteAddress = options.inet4RouteRange
+                if (inet4RouteAddress.hasNext()) {
+                    while (inet4RouteAddress.hasNext()) {
+                        val address = inet4RouteAddress.next()
+                        builder.addRoute(address.address(), address.prefix())
+                    }
+                }
+
+                val inet6RouteAddress = options.inet6RouteRange
+                if (inet6RouteAddress.hasNext()) {
+                    while (inet6RouteAddress.hasNext()) {
+                        val address = inet6RouteAddress.next()
+                        builder.addRoute(address.address(), address.prefix())
+                    }
+                }
+            }
+
+            if (SettingsManager.perAppProxyEnabled) {
+                val appList = SettingsManager.perAppProxyList
+                if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_INCLUDE) {
+                    appList.forEach {
+                        try {
+                            builder.addAllowedApplication(it)
+                        } catch (_: NameNotFoundException) {
+                        }
+                    }
+                    builder.addAllowedApplication(packageName)
+                } else {
+                    appList.forEach {
+                        try {
+                            builder.addDisallowedApplication(it)
+                        } catch (_: NameNotFoundException) {
+                        }
+                    }
+                }
+            } else {
+                val includePackage = options.includePackage
+                if (includePackage.hasNext()) {
+                    while (includePackage.hasNext()) {
+                        try {
+                            builder.addAllowedApplication(includePackage.next())
+                        } catch (_: NameNotFoundException) {
+                        }
+                    }
+                }
+
+                val excludePackage = options.excludePackage
+                if (excludePackage.hasNext()) {
+                    while (excludePackage.hasNext()) {
+                        try {
+                            builder.addDisallowedApplication(excludePackage.next())
+                        } catch (_: NameNotFoundException) {
+                        }
+                    }
+                }
             }
         }
-    }
 
-    private fun createNotificationChannel() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "前台服务通知",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "用于前台服务持续运行的通知"
-            }
-
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+        if (options.isHTTPProxyEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            systemProxyAvailable = true
+            systemProxyEnabled = SettingsManager.systemProxyEnabled
+            if (systemProxyEnabled) builder.setHttpProxy(
+                ProxyInfo.buildDirectProxy(
+                    options.httpProxyServer,
+                    options.httpProxyServerPort,
+                    options.httpProxyBypassDomain.toList()
+                )
+            )
+        } else {
+            systemProxyAvailable = false
+            systemProxyEnabled = false
         }
+
+        val pfd =
+            builder.establish() ?: error("android: the application is not prepared or is revoked")
+        service.fileDescriptor = pfd
+        return pfd.fd
     }
-    override fun onDestroy() {
-        serviceScope?.cancel()
-        serviceScope = null
-        super.onDestroy()
-    }
+
+    override fun writeLog(message: String) = service.writeLog(message)
+
+    override fun sendNotification(notification: Notification) =
+        service.sendNotification(notification)
+
 }
