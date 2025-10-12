@@ -1,3 +1,4 @@
+export 'package:flutter_sing_box/src/settings/sing_box_manager.dart';
 
 import 'dart:convert';
 

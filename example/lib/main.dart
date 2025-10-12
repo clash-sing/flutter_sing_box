@@ -6,6 +6,7 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box_example/demo_manager.dart';
 import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
 import 'package:mmkv/mmkv.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +56,25 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<bool> requestPostNotificationPermission() async {
+    try {
+      var status = await Permission.notification.request();
+      if (status.isGranted) {
+        return true;
+      } else if (status.isDenied) {
+        SnackbarUtil.showError('用户拒绝了权限（可再次请求）');
+        return false;
+      } else if (status.isPermanentlyDenied) {
+        SnackbarUtil.showError('权限被永久拒绝，需引导用户去设置中开启');
+        openAppSettings(); // 跳转到应用设置页面
+        return false;
+      }
+    } catch (e) {
+      SnackbarUtil.showError('获取权限失败: ${e.toString()}');
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -97,6 +117,14 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: () async {
                     try {
+                      if (singBoxManager.profile == null) {
+                        SnackbarUtil.showError('请先导入订阅链接');
+                        return;
+                      }
+                      bool isGranted = await requestPostNotificationPermission();
+                      if (!isGranted) {
+                        return;
+                      }
                       await _flutterSingBoxPlugin.startVpn();
                       SnackbarUtil.show('VPN启动中...');
                     } on PlatformException catch (e) {

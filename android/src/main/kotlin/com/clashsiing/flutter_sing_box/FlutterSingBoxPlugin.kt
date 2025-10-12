@@ -3,6 +3,7 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
+import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.utils.PluginManager
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.utils.HttpClient
@@ -105,8 +106,11 @@ class FlutterSingBoxPlugin :
                 }
             }
             STOP_VPN -> {
-                val intent = Intent(applicationContext, ClashSingVpnService::class.java)
-                applicationContext.stopService(intent)
+                applicationContext.sendBroadcast(
+                    Intent(Action.SERVICE_CLOSE).setPackage(
+                        applicationContext.packageName
+                    )
+                )
                 result.success(null)
             }
             "getPlatformVersion" -> {
