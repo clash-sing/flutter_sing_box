@@ -15,11 +15,14 @@ dependencies:
   mmkv: ^2.2.4
   dio: ^5.9.0
   package_info_plus: ^9.0.0
+  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  build_runner: ^2.9.0
+  json_serializable: ^6.11.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
