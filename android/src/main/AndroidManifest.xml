@@ -14,7 +14,6 @@
             android:label="ClashSing"
             android:stopWithTask="true"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:process=":remote"
             tools:ignore="VpnServicePolicy">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
