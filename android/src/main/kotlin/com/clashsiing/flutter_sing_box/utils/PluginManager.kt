@@ -6,6 +6,12 @@ import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.PowerManager
 import androidx.core.content.getSystemService
+import com.clashsiing.flutter_sing_box.constant.Bugs
+import go.Seq
+import io.nekohasekai.libbox.Libbox
+import io.nekohasekai.libbox.SetupOptions
+import java.io.File
+import java.util.Locale
 
 object PluginManager {
     private const val ERROR_MSG = "PluginManager not initialized. Call PluginManager.init() first."
@@ -59,8 +65,28 @@ object PluginManager {
             this._packageName = packageName
             this._versionName = versionName
             this._versionCode = versionCode
+            initSingBox()
         }
     }
+
+    private fun initSingBox() {
+        Seq.setContext(appContext)
+        Libbox.setLocale(Locale.getDefault().toLanguageTag().replace("-", "_"))
+        val baseDir = appContext.filesDir
+        baseDir.mkdirs()
+        val workingDir = appContext.getExternalFilesDir(null) ?: return
+        workingDir.mkdirs()
+        val tempDir = appContext.cacheDir
+        tempDir.mkdirs()
+        Libbox.setup(SetupOptions().also {
+            it.basePath = baseDir.path
+            it.workingPath = workingDir.path
+            it.tempPath = tempDir.path
+            it.fixAndroidStack = Bugs.fixAndroidStack
+        })
+        Libbox.redirectStderr(File(workingDir, "stderr.log").path)
+    }
+
 
     val connectivity by lazy { appContext.getSystemService<ConnectivityManager>() ?: throw throwError() }
 

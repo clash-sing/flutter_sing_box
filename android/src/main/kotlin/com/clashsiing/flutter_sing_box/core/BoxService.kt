@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.os.PowerManager
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -47,6 +48,7 @@ class BoxService(
 ) : CommandServerHandler {
 
     companion object {
+        private const val TAG = "BoxService"
 
         fun start() {
             val intent = runBlocking {
@@ -97,13 +99,15 @@ class BoxService(
         this.commandServer = commandServer
     }
 
-    private var lastProfileName = ""
+    //TODO: 设置默认值："狗狗加速"，just for debug
+    private var lastProfileName = "狗狗加速"
     private suspend fun startService() {
         try {
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
             }
 
+/*
             val selectedProfileId = SettingsManager.selectedProfile
             if (selectedProfileId == -1L) {
                 stopAndAlert(Alert.EmptyConfiguration)
@@ -123,6 +127,11 @@ class BoxService(
             }
 
             lastProfileName = profile.name
+*/
+
+            //TODO: just for debug
+            val content = ProfileManager.getContent()
+
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
             }
@@ -154,12 +163,17 @@ class BoxService(
 
             boxService = newService
             commandServer?.setService(boxService)
+
+            //TODO: just for debug
+            Libbox.newStandaloneCommandClient().selectOutbound("proxy", "\uD83C\uDDED\uD83C\uDDF03香港集群-全网优化(hy1)")
+
             status.postValue(Status.Started)
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_started)
             }
             notification.start()
         } catch (e: Exception) {
+            Log.e(TAG, e.message, e)
             stopAndAlert(Alert.StartService, e.message)
             return
         }

@@ -9,4 +9,10 @@ object ProfileManager {
     fun get(id: Long): Profile? {
         return mmkv.decodeParcelable(id.toString(), Profile::class.java)
     }
+
+    @Deprecated("Just for debug")
+    fun getContent(): String? {
+        val profile = mmkv.decodeString("profile")
+        return profile
+    }
 }
