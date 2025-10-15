@@ -16,7 +16,7 @@ if (localPropsFile.exists()) {
 
 android {
     namespace = "com.clashsiing.flutter_sing_box_example"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
