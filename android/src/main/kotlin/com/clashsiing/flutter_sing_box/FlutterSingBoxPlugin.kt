@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import com.clashsiing.flutter_sing_box.constant.Action
+import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.utils.PluginManager
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.utils.HttpClient
@@ -38,7 +39,6 @@ class FlutterSingBoxPlugin :
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_sing_box")
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
-        MMKV.initialize(applicationContext)
     }
 
     override fun onMethodCall(
@@ -48,6 +48,7 @@ class FlutterSingBoxPlugin :
         when (call.method) {
             SETUP -> {
                 val catchingResult = runCatching {
+                    MMKV.initialize(applicationContext)
                     val args = call.arguments as? Map<*, *>
                     if (args != null) {
                         PluginManager.init(
@@ -124,12 +125,13 @@ class FlutterSingBoxPlugin :
     
     private fun startVpnService(result: Result) {
         try {
-            applicationContext.startForegroundService(
-                Intent(
-                    applicationContext,
-                    ClashSingVpnService::class.java
-                )
-            )
+            BoxService.start()
+//            applicationContext.startForegroundService(
+//                Intent(
+//                    applicationContext,
+//                    ClashSingVpnService::class.java
+//                )
+//            )
             result.success(null)
         } catch (e: Exception) {
             result.error("VPN_ERROR", "启动VPN服务失败:\n${e.message}", null)
