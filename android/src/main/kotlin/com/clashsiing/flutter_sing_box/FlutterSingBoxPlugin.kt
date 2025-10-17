@@ -107,11 +107,12 @@ class FlutterSingBoxPlugin :
                 }
             }
             STOP_VPN -> {
-                applicationContext.sendBroadcast(
-                    Intent(Action.SERVICE_CLOSE).setPackage(
-                        applicationContext.packageName
-                    )
-                )
+                BoxService.stop()
+//                applicationContext.sendBroadcast(
+//                    Intent(Action.SERVICE_CLOSE).setPackage(
+//                        applicationContext.packageName
+//                    )
+//                )
                 result.success(null)
             }
             "getPlatformVersion" -> {
