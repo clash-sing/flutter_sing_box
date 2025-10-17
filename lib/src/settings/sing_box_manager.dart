@@ -1,7 +1,7 @@
 import 'package:mmkv/mmkv.dart';
 
 class SingBoxManager {
-  static final SingBoxManager _instance = new SingBoxManager._internal();
+  static final SingBoxManager _instance = SingBoxManager._internal();
   factory SingBoxManager() => _instance;
 
   late MMKV _mmkv;

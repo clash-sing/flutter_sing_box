@@ -8,7 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('flutter_sing_box');
+  final methodChannel = const MethodChannel('flutter_sing_box_method');
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -43,5 +43,16 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   @override
   Future<void> stopVpn() async {
     await methodChannel.invokeMethod('stopVpn');
+  }
+
+  static const EventChannel _eventChannel =
+      EventChannel('flutter_sing_box_event');
+
+  static Stream<dynamic>? _vpnStatusStream;
+
+  @override
+  Stream<dynamic> get vpnStatusStream {
+    _vpnStatusStream ??= _eventChannel.receiveBroadcastStream();
+    return _vpnStatusStream!;
   }
 }

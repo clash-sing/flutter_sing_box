@@ -9,6 +9,8 @@ import 'package:collection/collection.dart'; // 用于 firstWhereOrNull
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
+  Stream<dynamic> get vpnStatusStream =>
+      FlutterSingBoxPlatform.instance.vpnStatusStream;
 
   Future<String?> getPlatformVersion() {
     return FlutterSingBoxPlatform.instance.getPlatformVersion();

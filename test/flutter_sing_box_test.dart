@@ -34,6 +34,10 @@ class MockFlutterSingBoxPlatform
     // TODO: implement importProfile
     throw UnimplementedError();
   }
+
+  @override
+  // TODO: implement vpnStatusStream
+  Stream get vpnStatusStream => throw UnimplementedError();
 }
 
 void main() {

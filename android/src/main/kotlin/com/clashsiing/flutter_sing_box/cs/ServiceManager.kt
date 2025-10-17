@@ -13,16 +13,19 @@ import com.clashsiing.flutter_sing_box.constant.Status
 import com.clashsiing.flutter_sing_box.utils.CommandClient
 import com.clashsiing.flutter_sing_box.utils.PluginManager
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
+import io.flutter.plugin.common.EventChannel
 import io.nekohasekai.libbox.StatusMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 object ServiceManager {
     private const val TAG = "ServiceManager"
     private lateinit var statusClient: CommandClient
     private lateinit var coroutineScope: CoroutineScope
     private var service: IService? = null
+    var eventSink: EventChannel.EventSink? = null
     private val callback = ServiceCallback()
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -89,6 +92,18 @@ object ServiceManager {
 
         override fun updateStatus(status: StatusMessage) {
             Log.d(TAG, "updateStatus: $status")
+            val statusMap = mapOf(
+                "connectionsIn" to status.connectionsIn,
+                "connectionsOut" to status.connectionsOut,
+                "uplink" to status.uplink,
+                "downlink" to status.downlink,
+                "uplinkTotal" to status.uplinkTotal,
+                "downlinkTotal" to status.downlinkTotal,
+                "memory" to status.memory
+            )
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                eventSink?.success(statusMap)
+            }
         }
     }
 

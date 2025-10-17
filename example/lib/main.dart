@@ -31,6 +31,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
+    listenStatus();
+
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -54,6 +56,10 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _platformVersion = platformVersion;
     });
+  }
+
+  Future<void> listenStatus() async {
+
   }
 
   Future<bool> requestPostNotificationPermission() async {
@@ -87,6 +93,24 @@ class _MyAppState extends State<MyApp> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Running on: $_platformVersion\n'),
+                StreamBuilder<dynamic>(
+                  stream: _flutterSingBoxPlugin.vpnStatusStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final status = snapshot.data as Map;
+                      final uplink = status['uplink'];
+                      final downlink = status['downlink'];
+                      return Column(
+                        children: [
+                          Text('Uplink: $uplink B/s'),
+                          Text('Downlink: $downlink B/s'),
+                        ],
+                      );
+                    }
+                    return const Text('VPN Status: Disconnected');
+                  },
+                ),
+                const SizedBox(height: 20),
                 TextField(
                   controller: _controller,
                   decoration: InputDecoration(

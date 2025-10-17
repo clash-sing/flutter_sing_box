@@ -16,6 +16,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.util.concurrent.atomic.AtomicReference
@@ -23,23 +24,29 @@ import java.util.concurrent.atomic.AtomicReference
 /** FlutterSingBoxPlugin */
 class FlutterSingBoxPlugin :
     FlutterPlugin,
-    MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
+    MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener, EventChannel.StreamHandler {
     companion object {
         private const val SETUP = "setup"
         private const val IMPORT_PROFILE = "importProfile"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
         private const val VPN_REQUEST_CODE = 1001
+        private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
+        private const val EVENT_CHANNEL_NAME = "flutter_sing_box_event"
     }
     private lateinit var channel: MethodChannel
+    private lateinit var eventChannel: EventChannel
+    private var eventSink: EventChannel.EventSink? = null
     private lateinit var applicationContext: Context
     private var activityBinding: ActivityPluginBinding? = null
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_sing_box")
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
+        eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_NAME)
+        eventChannel.setStreamHandler(this)
     }
 
     override fun onMethodCall(
@@ -117,6 +124,10 @@ class FlutterSingBoxPlugin :
 //                )
                 result.success(null)
             }
+            "sendEventToFlutter" -> {
+                eventSink?.success("Hello from Android!")
+                result.success(null)
+            }
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
@@ -143,6 +154,15 @@ class FlutterSingBoxPlugin :
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
+    }
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        ServiceManager.eventSink = events
+    }
+
+    override fun onCancel(arguments: Any?) {
+        ServiceManager.eventSink = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
