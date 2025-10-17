@@ -7,6 +7,7 @@ import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.utils.PluginManager
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
+import com.clashsiing.flutter_sing_box.cs.ServiceManager
 import com.clashsiing.flutter_sing_box.utils.HttpClient
 import com.tencent.mmkv.MMKV
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -58,6 +59,7 @@ class FlutterSingBoxPlugin :
                             versionName = (args["versionName"] as? String) ?: throw IllegalArgumentException("arguments['versionName'] is null"),
                             versionCode = ((args["versionCode"] as? String)?.toLongOrNull()) ?: throw IllegalArgumentException("arguments['versionCode'] is null"),
                         )
+                        ServiceManager.reconnect()
                     } else {
                         throw IllegalArgumentException("Arguments are null")
                     }
