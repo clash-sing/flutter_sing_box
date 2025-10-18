@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -12,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await MMKV.initialize();
   await demoManager.loadData();
-  await FlutterSingBox().setup();
+  await FlutterSingBox().init(kDebugMode);
   runApp(const MyApp());
 }
 

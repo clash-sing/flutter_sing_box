@@ -5,8 +5,10 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.PowerManager
+import android.util.Log
 import androidx.core.content.getSystemService
 import com.clashsiing.flutter_sing_box.constant.Bugs
+import com.tencent.mmkv.MMKV
 import go.Seq
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.SetupOptions
@@ -14,43 +16,19 @@ import java.io.File
 import java.util.Locale
 
 object PluginManager {
+    private const val TAG = "PluginManager"
+
+    private val mmkv = MMKV.mmkvWithID("clash_sing_plugin", MMKV.MULTI_PROCESS_MODE)
+
     private const val ERROR_MSG = "PluginManager not initialized. Call PluginManager.init() first."
     @Volatile
     private var _appContext: Context? =  null
-
-    val appContext: Context
-        get() = _appContext ?: throw throwError()
-
-    private var _isDebug: Boolean? = null
-
-    val isDebug: Boolean
-        get() = _isDebug ?: throw throwError()
-
-    private var _packageName: String? =  null
-
-    val packageName: String
-        get() = _packageName ?: throw throwError()
-
-    private var _versionName: String? =  null
-
-    val versionName: String
-        get() = _versionName ?: throw throwError()
-
-    private var _versionCode: Long? = null
-
-    val versionCode: Long
-        get() = _versionCode ?: throw throwError()
+    val appContext: Context get() = _appContext ?: throw throwError()
 
     /**
      * Initializes the configuration. Called from the main plugin class.
      */
-    fun init(
-        context: Context,
-        isDebug: Boolean,
-        packageName: String,
-        versionName: String,
-        versionCode: Long
-    ) {
+    fun init(context: Context, isDebug: Boolean? = null) {
         val checkedResult = _appContext
         if (checkedResult != null) {
             return
@@ -61,10 +39,9 @@ object PluginManager {
                 return
             }
             this._appContext = context.applicationContext
-            this._isDebug = isDebug
-            this._packageName = packageName
-            this._versionName = versionName
-            this._versionCode = versionCode
+            if (isDebug != null) {
+                mmkv.encode(Keys.DEBUG, isDebug)
+            }
             initSingBox()
         }
     }
@@ -96,11 +73,17 @@ object PluginManager {
 
     val notification by lazy { appContext.getSystemService<NotificationManager>() ?: throw throwError() }
 
-    val launchIntent by lazy { packageManager.getLaunchIntentForPackage(packageName) ?: throw throwError() }
+    val launchIntent by lazy { packageManager.getLaunchIntentForPackage(appContext.packageName) ?: throw throwError() }
 
     val powerManager by lazy { appContext.getSystemService<PowerManager>() ?: throw throwError() }
 
-
     private fun throwError() : Throwable = IllegalStateException(ERROR_MSG)
 
+    val isDebug: Boolean
+        get() = mmkv.decodeBool(Keys.DEBUG, false)
+
+
+    private object Keys {
+        const val DEBUG = "debug"
+    }
 }

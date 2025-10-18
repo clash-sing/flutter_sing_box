@@ -17,13 +17,9 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<void> setup() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-    await methodChannel.invokeMethod('setup', {
-      'isDebug': kDebugMode,
-      'packageName': packageInfo.packageName,
-      'versionName': packageInfo.version,
-      'versionCode': packageInfo.buildNumber,
+  Future<void> init(bool isDebug) async {
+    await methodChannel.invokeMethod('init', {
+      'isDebug': isDebug,
     });
   }
 

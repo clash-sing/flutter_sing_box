@@ -3,10 +3,9 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
-import com.clashsiing.flutter_sing_box.constant.Action
+import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.utils.PluginManager
-import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.cs.ServiceManager
 import com.clashsiing.flutter_sing_box.utils.HttpClient
 import com.tencent.mmkv.MMKV
@@ -26,7 +25,8 @@ class FlutterSingBoxPlugin :
     FlutterPlugin,
     MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener, EventChannel.StreamHandler {
     companion object {
-        private const val SETUP = "setup"
+        private const val TAG = "FlutterSingBoxPlugin"
+        private const val INIT = "init"
         private const val IMPORT_PROFILE = "importProfile"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
@@ -54,18 +54,13 @@ class FlutterSingBoxPlugin :
         result: Result
     ) {
         when (call.method) {
-            SETUP -> {
+            INIT -> {
                 val catchingResult = runCatching {
                     MMKV.initialize(applicationContext)
                     val args = call.arguments as? Map<*, *>
                     if (args != null) {
-                        PluginManager.init(
-                            context = applicationContext,
-                            isDebug = (args["isDebug"] as? Boolean) ?: throw IllegalArgumentException("arguments['isDebug'] is null"),
-                            packageName = (args["packageName"] as? String) ?: throw IllegalArgumentException("arguments['packageName'] is null"),
-                            versionName = (args["versionName"] as? String) ?: throw IllegalArgumentException("arguments['versionName'] is null"),
-                            versionCode = ((args["versionCode"] as? String)?.toLongOrNull()) ?: throw IllegalArgumentException("arguments['versionCode'] is null"),
-                        )
+                        val isDebug = (args["isDebug"] as? Boolean) ?: throw IllegalArgumentException("arguments['isDebug'] is null")
+                        PluginManager.init(context = applicationContext, isDebug)
                         ServiceManager.reconnect()
                     } else {
                         throw IllegalArgumentException("Arguments are null")
@@ -74,6 +69,7 @@ class FlutterSingBoxPlugin :
                 if (catchingResult.isSuccess) {
                     result.success(null)
                 } else {
+                    Log.e(TAG, "init error", catchingResult.exceptionOrNull())
                     result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
                 }
             }

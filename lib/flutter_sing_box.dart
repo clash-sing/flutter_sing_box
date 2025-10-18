@@ -16,8 +16,8 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.getPlatformVersion();
   }
 
-  Future<void> setup() {
-    return FlutterSingBoxPlatform.instance.setup();
+  Future<void> init(bool isDebug) {
+    return FlutterSingBoxPlatform.instance.init(isDebug);
   }
 
   Future<SingBox> importProfile(String url) async {

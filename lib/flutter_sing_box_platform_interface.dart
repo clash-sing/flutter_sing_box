@@ -27,8 +27,8 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> setup() {
-    throw UnimplementedError('setup() has not been implemented.');
+  Future<void> init(bool isDebug) {
+    throw UnimplementedError('init() has not been implemented.');
   }
 
   Future<String> importProfile(String url) {

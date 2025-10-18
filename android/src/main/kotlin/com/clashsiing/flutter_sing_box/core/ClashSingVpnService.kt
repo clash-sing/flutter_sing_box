@@ -34,6 +34,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
+        PluginManager.isDebug
         val packageInfo = this.application.packageManager.getPackageInfo(
             this.application.packageName, PackageManager.GET_META_DATA
         )
@@ -43,13 +44,8 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
             @Suppress("DEPRECATION")
             packageInfo.versionCode.toLong()
         }
-        PluginManager.init(
-            this.application,
-            isDebug = BuildConfig.DEBUG,
-            packageName = this.application.packageName,
-            versionName = packageInfo.versionName ?: "unknown",
-            versionCode = versionCode
-            )
+        val  versionName = packageInfo.versionName ?: "unknown";
+        PluginManager.init(this.application)
         service = BoxService(this, this)
     }
 
