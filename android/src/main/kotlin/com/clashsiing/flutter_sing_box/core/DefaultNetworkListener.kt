@@ -28,7 +28,7 @@ import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import com.clashsiing.flutter_sing_box.utils.PluginManager
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers

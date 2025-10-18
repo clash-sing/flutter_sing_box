@@ -1,11 +1,10 @@
-package com.clashsiing.flutter_sing_box.utils
+package com.clashsiing.flutter_sing_box.cs
 
 import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.PowerManager
-import android.util.Log
 import androidx.core.content.getSystemService
 import com.clashsiing.flutter_sing_box.constant.Bugs
 import com.tencent.mmkv.MMKV

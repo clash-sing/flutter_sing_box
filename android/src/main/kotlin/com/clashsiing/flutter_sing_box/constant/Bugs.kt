@@ -1,7 +1,7 @@
 package com.clashsiing.flutter_sing_box.constant
 
 import android.os.Build
-import com.clashsiing.flutter_sing_box.utils.PluginManager
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 
 object Bugs {
 

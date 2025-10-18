@@ -12,7 +12,7 @@ import android.util.Log
 import com.clashsiing.flutter_sing_box.BuildConfig
 import com.clashsiing.flutter_sing_box.ktx.toIpPrefix
 import com.clashsiing.flutter_sing_box.ktx.toList
-import com.clashsiing.flutter_sing_box.utils.PluginManager
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.utils.ProfileManager
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import com.tencent.mmkv.MMKV

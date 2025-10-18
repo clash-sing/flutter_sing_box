@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
-import com.clashsiing.flutter_sing_box.utils.PluginManager
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.ServiceManager
 import com.clashsiing.flutter_sing_box.utils.HttpClient
 import com.tencent.mmkv.MMKV

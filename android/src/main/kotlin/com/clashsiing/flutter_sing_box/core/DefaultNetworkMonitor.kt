@@ -2,7 +2,7 @@ package com.clashsiing.flutter_sing_box.core
 
 import android.net.Network
 import com.clashsiing.flutter_sing_box.constant.Bugs
-import com.clashsiing.flutter_sing_box.utils.PluginManager
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import io.nekohasekai.libbox.InterfaceUpdateListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

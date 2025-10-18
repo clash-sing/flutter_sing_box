@@ -24,7 +24,7 @@ import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Alert
 import com.clashsiing.flutter_sing_box.constant.Status
 import com.clashsiing.flutter_sing_box.ktx.hasPermission
-import com.clashsiing.flutter_sing_box.utils.PluginManager
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.utils.ProfileManager
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import go.Seq
