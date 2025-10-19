@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sing_box_example/pages/new_remote_profile.dart';
 
 class ConfigProfiles extends StatefulWidget {
   const ConfigProfiles({super.key});
@@ -47,7 +48,11 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
             SimpleDialogOption(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/import');
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (builder) {
+                    return const NewRemoteProfile();
+                  })
+                );
               },
               child: const Text('订阅链接'),
             ),
