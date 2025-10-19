@@ -24,11 +24,12 @@ class NetworkService {
 
   /// 解析订阅
   /// @example content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
+  /// @example profile-title: base64:5LiJ5q+b5py65Zy6
   /// @example profile-update-interval: 24
   /// @example profile-web-page-url: https://panel.dg5.biz
   /// @example subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
   /// @example content-type: text/html; charset=UTF-8
-  Future<Profile> _parseSubscription(String data, Headers headers) async {
+  Future<Profile> _parseSubscription(dynamic data, Headers headers) async {
     try {
 
       final typed = TypedProfile(type: ProfileType.remote, autoUpdate: false);
@@ -38,6 +39,14 @@ class NetworkService {
     }
   }
 
+  UserInfo _parseUserInfo(String data) {
+    try {
+      final info = UserInfo();
+      return info;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
 
 final networkService = NetworkService();

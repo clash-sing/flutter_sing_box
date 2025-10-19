@@ -19,7 +19,7 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
       // 创建配置
       final uri = Uri.parse(_link!);
       final profile = await networkService.fetchSubscription(uri);
-      print(profile);
+      // print(profile);
     }
   }
 
