@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box_example/demo_manager.dart';
+import 'package:flutter_sing_box_example/pages/config_profiles.dart';
 import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -180,6 +181,14 @@ class _MyAppState extends State<MyApp> {
                   },
                   child: const Text('Stop VPN'),
                 ),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          scaffoldContext,
+                          MaterialPageRoute(builder: (context) => ConfigProfiles())
+                      );
+                    },
+                    child: const Text('新增订阅')),
               ],
             ),
           );

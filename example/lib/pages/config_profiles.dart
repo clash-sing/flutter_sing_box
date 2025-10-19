@@ -23,7 +23,7 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Configurações'),
+        title: const Text('订阅配置'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
