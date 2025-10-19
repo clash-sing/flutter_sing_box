@@ -38,6 +38,12 @@ class MockFlutterSingBoxPlatform
   @override
   // TODO: implement vpnStatusStream
   Stream get vpnStatusStream => throw UnimplementedError();
+
+  @override
+  Future<void> init(bool isDebug) {
+    // TODO: implement init
+    throw UnimplementedError();
+  }
 }
 
 void main() {

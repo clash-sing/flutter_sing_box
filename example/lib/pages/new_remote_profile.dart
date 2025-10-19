@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 class NewRemoteProfile extends StatefulWidget {
   const NewRemoteProfile({super.key});
@@ -11,6 +12,16 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
   final _formKey = GlobalKey<FormState>();
   String? _name;
   String? _link;
+
+  void _onSubmit() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState!.save();
+      // 创建配置
+      final uri = Uri.parse(_link!);
+      final profile = await networkService.fetchSubscription(uri);
+      print(profile);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,15 +59,8 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
                   onSaved: (value) => _link = value,
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      _formKey.currentState!.save();
-                      // 请求链接
-
-                    }
-                  },
+                  onPressed: () => _onSubmit(),
                   child: Text("创建"),
-
                 )
               ]
             ),
