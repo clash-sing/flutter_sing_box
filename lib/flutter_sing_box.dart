@@ -2,7 +2,7 @@ export 'package:flutter_sing_box/src/settings/sing_box_manager.dart';
 
 import 'dart:convert';
 
-import 'src/schema/singbox/sing_box.dart';
+import 'src/models/singbox/sing_box.dart';
 import 'src/settings/sing_box_manager.dart';
 import 'package:collection/collection.dart'; // 用于 firstWhereOrNull
 
