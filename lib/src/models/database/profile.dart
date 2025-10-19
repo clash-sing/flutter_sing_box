@@ -10,8 +10,8 @@ class Profile {
   TypedProfile typed;
 
   Profile({
-    required this.id,
-    required this.userOrder,
+    this.id = 0,
+    this.userOrder = 0,
     required this.name,
     required this.typed
   });
