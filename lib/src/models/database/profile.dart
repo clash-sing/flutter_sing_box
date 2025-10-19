@@ -8,12 +8,14 @@ class Profile {
   int userOrder;
   String name;
   TypedProfile typed;
+  UserInfo? userInfo;
 
   Profile({
     this.id = 0,
     this.userOrder = 0,
     required this.name,
-    required this.typed
+    required this.typed,
+    this.userInfo
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
@@ -25,7 +27,8 @@ class Profile {
 class TypedProfile {
   String? path;
   ProfileType type;
-  String? remoteURL;
+  String? remoteUrl;
+  String? webPageUrl;
   int? lastUpdated;
   bool autoUpdate;
   int? autoUpdateInterval;
@@ -33,7 +36,8 @@ class TypedProfile {
   TypedProfile({
     this.path,
     required this.type,
-    this.remoteURL,
+    this.remoteUrl,
+    this.webPageUrl,
     this.lastUpdated,
     required this.autoUpdate,
     this.autoUpdateInterval
@@ -48,4 +52,24 @@ class TypedProfile {
 enum ProfileType {
   local,
   remote
+}
+
+@JsonSerializable()
+class UserInfo {
+  int? upload;
+  int? download;
+  int? total;
+  int? expire;
+
+  UserInfo({
+    this.upload,
+    this.download,
+    this.total,
+    this.expire
+  });
+
+  factory UserInfo.fromJson(Map<String, dynamic> json) => _$UserInfoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserInfoToJson(this);
+
 }
