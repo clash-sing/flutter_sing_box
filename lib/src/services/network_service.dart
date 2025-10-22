@@ -5,13 +5,17 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../const/profile_type.dart';
+import '../models/database/typed_profile.dart';
+import '../models/database/user_info.dart';
+
 
 class NetworkService {
   NetworkService._internal();
   static final NetworkService instance = NetworkService._internal();
   factory NetworkService() => instance;
 
-  Future<Profile> fetchSubscription(Uri uri) async {
+  Future<ApiResult<dynamic>> fetchSubscription(Uri uri) async {
     try {
       final dioClient = DioClient.instance;
       dioClient.options.headers.addAll({
@@ -19,7 +23,8 @@ class NetworkService {
       });
       final response = await dioClient.getUri(uri);
       if (response.statusCode == io.HttpStatus.ok) {
-        return _parseSubscription(response.data, response.headers);
+        final apiResult = ApiResult(response.data, response.headers.map);
+        return apiResult;
       } else {
         throw Exception('Failed to load, statusCode: ${response.statusCode}, message: ${response.statusMessage}, for $uri');
       }

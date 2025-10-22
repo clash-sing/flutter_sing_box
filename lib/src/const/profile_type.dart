@@ -1,0 +1,4 @@
+enum ProfileType {
+  local,
+  remote
+}
