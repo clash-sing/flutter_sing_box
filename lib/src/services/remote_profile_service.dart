@@ -29,20 +29,22 @@ class RemoteProfileService {
   }
 
   String _getProfileName(Uri link, String? name, Map<String, dynamic> headers) {
+    const contentDispositionKey = 'content-disposition';
+    const profileTitleKey = 'profile-title';
     if (name != null && name.trim().isNotEmpty) {
       return name;
     }
     String? profileName;
-    if (headers.containsKey('content-disposition')) {
-      final contentDisposition = headers['content-disposition'][0];
+    if (headers.containsKey(contentDispositionKey)) {
+      final contentDisposition = headers[contentDispositionKey][0];
       const splitTag = '\'\'';
       int tagIndex = contentDisposition?.lastIndexOf(splitTag) ?? -1;
       if (tagIndex != -1) {
         String encodeString = contentDisposition.substring(tagIndex + splitTag.length);
         profileName = Uri.decodeFull(encodeString);
       }
-    } else if (headers.containsKey('profile-title')) {
-      final String profileTitle = headers['profile-title'][0];
+    } else if (headers.containsKey(profileTitleKey)) {
+      final String profileTitle = headers[profileTitleKey][0];
       const base64Prefix = 'base64:';
       int tagIndex = profileTitle.indexOf(base64Prefix);
       if (tagIndex != -1) {
