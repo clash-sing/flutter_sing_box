@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter_sing_box/src/profile/profile.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../flutter_sing_box.dart';
 
@@ -15,6 +17,9 @@ import '../../flutter_sing_box.dart';
 class RemoteProfileService {
   Future<Profile> importProfile(Uri link, {String? name, required bool autoUpdate, int? autoUpdateInterval}) async {
     final apiResult = await networkService.fetchSubscription(link);
+    final Directory documentsDir = await getApplicationDocumentsDirectory();
+    // TODO: save to file
+
     final userInfo = _getUserInfo(apiResult.headers);
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval);
     final profileName = _getProfileName(link, name, apiResult.headers);
