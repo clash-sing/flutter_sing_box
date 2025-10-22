@@ -17,6 +17,7 @@ dependencies:
   package_info_plus: ^9.0.0
   json_annotation: ^4.9.0
   collection: ^1.19.1
+  device_info_plus: ^12.2.0
 
 dev_dependencies:
   flutter_test:
