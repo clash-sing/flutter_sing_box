@@ -63,7 +63,7 @@ class RemoteProfileService {
       if (autoUpdateInterval != null && autoUpdateInterval >= 60) {
         updateIntervalMins = autoUpdateInterval;
       } else {
-        final defaultUpdateIntervalHours = int.tryParse(headers['profile-update-interval'][0]);
+        final defaultUpdateIntervalHours = int.tryParse(headers['profile-update-interval']?[0]);
         updateIntervalMins = (defaultUpdateIntervalHours ?? 24) * 60;
       }
     }
