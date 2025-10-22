@@ -6,22 +6,22 @@ part 'typed_profile.g.dart';
 
 @JsonSerializable()
 class TypedProfile {
-  String? path;
   ProfileType type;
-  String? remoteUrl;
-  String? webPageUrl;
-  int? lastUpdated;
+  String path;
+  int lastUpdated;
   bool autoUpdate;
   int? autoUpdateInterval;
+  String? remoteUrl;
+  String? webPageUrl;
 
   TypedProfile({
-    this.path,
     required this.type,
-    this.remoteUrl,
-    this.webPageUrl,
-    this.lastUpdated,
+    required this.path,
+    required this.lastUpdated,
     required this.autoUpdate,
-    this.autoUpdateInterval
+    this.autoUpdateInterval,
+    this.remoteUrl,
+    this.webPageUrl
   });
 
   factory TypedProfile.fromJson(Map<String, dynamic> json) => _$TypedProfileFromJson(json);

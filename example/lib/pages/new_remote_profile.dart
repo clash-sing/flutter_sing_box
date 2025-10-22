@@ -18,8 +18,8 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
       _formKey.currentState!.save();
       // 创建配置
       final uri = Uri.parse(_link!);
-      final profile = await networkService.fetchSubscription(uri);
-      // print(profile);
+      final profile = await RemoteProfileService().importProfile(uri, name: _name, autoUpdate: true, autoUpdateInterval: 1440);
+      print(profile);
     }
   }
 

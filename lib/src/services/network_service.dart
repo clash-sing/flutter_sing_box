@@ -1,14 +1,8 @@
 import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
-import '../const/profile_type.dart';
-import '../models/database/typed_profile.dart';
-import '../models/database/user_info.dart';
-
 
 class NetworkService {
   NetworkService._internal();
@@ -28,32 +22,6 @@ class NetworkService {
       } else {
         throw Exception('Failed to load, statusCode: ${response.statusCode}, message: ${response.statusMessage}, for $uri');
       }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// 解析订阅
-  /// @example content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
-  /// @example profile-title: base64:5LiJ5q+b5py65Zy6
-  /// @example profile-update-interval: 24
-  /// @example profile-web-page-url: https://panel.dg5.biz
-  /// @example subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
-  /// @example content-type: text/html; charset=UTF-8
-  Future<Profile> _parseSubscription(dynamic data, Headers headers) async {
-    try {
-
-      final typed = TypedProfile(type: ProfileType.remote, autoUpdate: false);
-      return Profile(name: "hello", typed: typed);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  UserInfo _parseUserInfo(String data) {
-    try {
-      final info = UserInfo();
-      return info;
     } catch (e) {
       rethrow;
     }

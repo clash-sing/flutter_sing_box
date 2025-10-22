@@ -36,12 +36,13 @@ class ProfileManager {
     return null;
   }
 
-  void addProfile(Profile profile) {
+  Profile addProfile(Profile profile) {
     profile.id = _increaseMaxId;
     profile.userOrder = profile.id;
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     _mmkv.encodeString(key, jsonString);
+    return profile;
   }
 
   void updateProfile(Profile profile) {
