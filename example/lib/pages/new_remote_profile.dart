@@ -59,7 +59,9 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
                   onSaved: (value) => _link = value,
                 ),
                 ElevatedButton(
-                  onPressed: () => _onSubmit(),
+                  onPressed: () {
+                    _onSubmit();
+                  },
                   child: Text("创建"),
                 )
               ]

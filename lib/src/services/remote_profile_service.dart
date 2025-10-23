@@ -1,11 +1,9 @@
 import 'dart:convert';
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:flutter_sing_box/src/profile/profile.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../flutter_sing_box.dart';
+import '../utils/sing_box_config.dart';
 
 /// Example:
 ///   content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
@@ -17,18 +15,20 @@ import '../../flutter_sing_box.dart';
 class RemoteProfileService {
   Future<Profile> importProfile(Uri link, {String? name, required bool autoUpdate, int? autoUpdateInterval}) async {
     final apiResult = await networkService.fetchSubscription(link);
-    final Directory documentsDir = await getApplicationDocumentsDirectory();
-    // TODO: save to file
-
+    final profileId = profileManager.generateProfileId;
+    final profilePath = await profileManager.getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
-    final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval);
+    final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
+    final singBox = SingBoxConfig.buildConfig(apiResult.data);
 
-    final profile = profileManager.addProfile( Profile(
+    final profile = await profileManager.addProfile( Profile(
+      id: profileId,
+      userOrder: profileId,
       name: profileName,
       typed: typedProfile,
       userInfo: userInfo,
-    ));
+    ), singBox);
 
     return profile;
   }
@@ -40,22 +40,26 @@ class RemoteProfileService {
       return name;
     }
     String? profileName;
-    if (headers.containsKey(contentDispositionKey)) {
-      final contentDisposition = headers[contentDispositionKey][0];
-      const splitTag = '\'\'';
-      int tagIndex = contentDisposition?.lastIndexOf(splitTag) ?? -1;
-      if (tagIndex != -1) {
-        String encodeString = contentDisposition.substring(tagIndex + splitTag.length);
-        profileName = Uri.decodeFull(encodeString);
+    try {
+      if (headers.containsKey(contentDispositionKey)) {
+        final contentDisposition = headers[contentDispositionKey][0];
+        const splitTag = '\'\'';
+        int tagIndex = contentDisposition?.lastIndexOf(splitTag) ?? -1;
+        if (tagIndex != -1) {
+          String encodeString = contentDisposition.substring(tagIndex + splitTag.length);
+          profileName = Uri.decodeFull(encodeString);
+        }
+      } else if (headers.containsKey(profileTitleKey)) {
+        final String profileTitle = headers[profileTitleKey][0];
+        const base64Prefix = 'base64:';
+        int tagIndex = profileTitle.indexOf(base64Prefix);
+        if (tagIndex != -1) {
+          List<int> bytes = base64Decode(profileTitle.substring(tagIndex + base64Prefix.length));
+          profileName = utf8.decode(bytes);
+        }
       }
-    } else if (headers.containsKey(profileTitleKey)) {
-      final String profileTitle = headers[profileTitleKey][0];
-      const base64Prefix = 'base64:';
-      int tagIndex = profileTitle.indexOf(base64Prefix);
-      if (tagIndex != -1) {
-        List<int> bytes = base64Decode(profileTitle.substring(tagIndex + base64Prefix.length));
-        profileName = utf8.decode(bytes);
-      }
+    } catch (e) {
+      print(e);
     }
     if (profileName == null || profileName.trim().isEmpty) {
       return link.host;
@@ -64,7 +68,7 @@ class RemoteProfileService {
     }
   }
 
-  TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, bool autoUpdate, int? autoUpdateInterval) {
+  TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, bool autoUpdate, int? autoUpdateInterval, String filePath) {
     int? updateIntervalMins;
     if (autoUpdate) {
       if (autoUpdateInterval != null && autoUpdateInterval >= 60) {
@@ -77,7 +81,7 @@ class RemoteProfileService {
 
     final typedProfile = TypedProfile(
       type: ProfileType.remote,
-      path: '',
+      path: filePath,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       autoUpdate: autoUpdate,
       autoUpdateInterval: updateIntervalMins,

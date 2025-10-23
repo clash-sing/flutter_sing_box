@@ -13,7 +13,7 @@ class NetworkService {
     try {
       final dioClient = DioClient.instance;
       dioClient.options.headers.addAll({
-        'User-Agent': await getUserAgent(),
+        // 'User-Agent': await getUserAgent(),
       });
       final response = await dioClient.getUri(uri);
       if (response.statusCode == io.HttpStatus.ok) {

@@ -14,8 +14,8 @@ class Profile {
   UserInfo? userInfo;
 
   Profile({
-    this.id = 0,
-    this.userOrder = 0,
+    required this.id,
+    required this.userOrder,
     required this.name,
     required this.typed,
     this.userInfo

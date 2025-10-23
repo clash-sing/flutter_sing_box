@@ -1,0 +1,111 @@
+{
+  "dns" : {
+    "servers" : [ {
+      "tag" : "system",
+      "type" : "local"
+    }, {
+      "tag" : "alidoh",
+      "type" : "https",
+      "server" : "223.5.5.5"
+    }, {
+      "tag" : "remote",
+      "type" : "fakeip",
+      "inet4_range" : "198.18.0.0/15",
+      "inet6_range" : "fc00::/18"
+    } ],
+    "rules" : [ {
+      "clash_mode" : "direct",
+      "server" : "system"
+    }, {
+      "clash_mode" : "global",
+      "server" : "remote"
+    }, {
+      "rule_set" : [ "geoip-cn", "geosite-cn" ],
+      "server" : "system"
+    }, {
+      "query_type" : [ "A", "AAAA" ],
+      "server" : "remote"
+    } ],
+    "independent_cache" : true,
+    "final" : "alidoh",
+    "strategy" : "prefer_ipv6"
+  },
+  "inbounds" : [ {
+    "tag" : "tun",
+    "type" : "tun",
+    "address" : [ "172.19.0.1/30", "fdfe:dcba:9876::1/126" ],
+    "mtu" : 9000,
+    "stack" : "system",
+    "auto_route" : true,
+    "strict_route" : true,
+    "sniff" : true,
+    "sniff_override_destination" : true,
+    "platform" : {
+      "http_proxy" : {
+        "enabled" : false,
+        "server" : "127.0.0.1",
+        "server_port" : 8890
+      }
+    }
+  }, {
+    "tag" : "mixed",
+    "type" : "mixed",
+    "listen" : "127.0.0.1",
+    "listen_port" : 8890,
+    "sniff" : true
+  } ],
+  "route" : {
+    "default_domain_resolver" : "system",
+    "rules" : [ {
+      "action" : "sniff"
+    }, {
+      "protocol" : "dns",
+      "action" : "hijack-dns"
+    }, {
+      "protocol" : [ "quic" ],
+      "action" : "reject"
+    }, {
+      "clash_mode" : "direct",
+      "outbound" : "direct"
+    }, {
+      "clash_mode" : "global",
+      "outbound" : "proxy"
+    }, {
+      "ip_is_private" : true,
+      "outbound" : "direct"
+    }, {
+      "rule_set" : [ "geoip-cn", "geosite-cn" ],
+      "outbound" : "direct"
+    } ],
+    "final" : "proxy",
+    "auto_detect_interface" : true,
+    "rule_set" : [ {
+      "tag" : "geoip-cn",
+      "type" : "remote",
+      "format" : "binary",
+      "url" : "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs",
+      "download_detour" : "direct"
+    }, {
+      "tag" : "geosite-cn",
+      "type" : "remote",
+      "format" : "binary",
+      "url" : "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs",
+      "download_detour" : "direct"
+    } ]
+  },
+  "experimental" : {
+    "cache_file" : {
+      "enabled" : true,
+      "store_fakeip" : true
+    }
+  },
+  "outbounds" : [ {
+    "tag" : "direct",
+    "type" : "direct"
+  } ],
+  "log" : {
+    "disabled" : false,
+    "level" : "info",
+    "timestamp" : false
+  }
+}
