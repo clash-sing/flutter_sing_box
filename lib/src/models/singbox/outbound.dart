@@ -55,7 +55,7 @@ class Outbound {
 class Tls {
   List<String>? alpn;
   bool enabled;
-  @JsonKey(name: "disable_sni")
+  @JsonKey(name: "disable_sni", defaultValue: false)
   bool disableSni;
   bool insecure;
   @JsonKey(name: "server_name")

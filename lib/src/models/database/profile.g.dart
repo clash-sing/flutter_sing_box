@@ -7,8 +7,8 @@ part of 'profile.dart';
 // **************************************************************************
 
 Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
-  id: (json['id'] as num?)?.toInt() ?? 0,
-  userOrder: (json['userOrder'] as num?)?.toInt() ?? 0,
+  id: (json['id'] as num).toInt(),
+  userOrder: (json['userOrder'] as num).toInt(),
   name: json['name'] as String,
   typed: TypedProfile.fromJson(json['typed'] as Map<String, dynamic>),
   userInfo: json['userInfo'] == null

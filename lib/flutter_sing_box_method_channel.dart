@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'flutter_sing_box_platform_interface.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 /// An implementation of [FlutterSingBoxPlatform] that uses method channels.
 class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {

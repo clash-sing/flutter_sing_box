@@ -55,7 +55,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
   alpn: (json['alpn'] as List<dynamic>?)?.map((e) => e as String).toList(),
   enabled: json['enabled'] as bool,
-  disableSni: json['disable_sni'] as bool,
+  disableSni: json['disable_sni'] as bool? ?? false,
   insecure: json['insecure'] as bool,
   serverName: json['server_name'] as String?,
   utls: json['utls'] == null
