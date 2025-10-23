@@ -5,7 +5,6 @@ import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../flutter_sing_box.dart';
-import '../models/database/profile.dart';
 
 class ProfileManager {
   static final ProfileManager _instance = ProfileManager._internal();

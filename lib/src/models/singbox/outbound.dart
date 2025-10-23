@@ -7,6 +7,8 @@ class Outbound {
   String tag;
   String type;
   List<String>? outbounds;
+  @JsonKey(name: "default")
+  String? defaultTag;
   String? url;
   String? interval;
   int? tolerance;
@@ -14,6 +16,12 @@ class Outbound {
   @JsonKey(name: "server_port")
   int? serverPort;
   String? password;
+  String? uuid;
+  String? security;
+  @JsonKey(name: "alter_id")
+  int? alterId;
+  @JsonKey(name: "packet_encoding")
+  String? packetEncoding;
   Tls? tls;
   @JsonKey(name: "server_ports")
   List<String>? serverPorts;
@@ -26,6 +34,7 @@ class Outbound {
   String? authStr;
   @JsonKey(name: "disable_mtu_discovery")
   bool? disableMtuDiscovery;
+  Multiplex? multiplex;
 
   Outbound({
     required this.tag,
@@ -37,6 +46,10 @@ class Outbound {
     this.server,
     this.serverPort,
     this.password,
+    this.uuid,
+    this.security,
+    this.alterId,
+    this.packetEncoding,
     this.tls,
     this.serverPorts,
     this.transport,
@@ -44,6 +57,7 @@ class Outbound {
     this.downMbps,
     this.authStr,
     this.disableMtuDiscovery,
+    this.multiplex,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -55,8 +69,8 @@ class Outbound {
 class Tls {
   List<String>? alpn;
   bool enabled;
-  @JsonKey(name: "disable_sni", defaultValue: false)
-  bool disableSni;
+  @JsonKey(name: "disable_sni")
+  bool? disableSni;
   bool insecure;
   @JsonKey(name: "server_name")
   String? serverName;
@@ -65,7 +79,7 @@ class Tls {
   Tls({
     this.alpn,
     required this.enabled,
-    required this.disableSni,
+    this.disableSni,
     required this.insecure,
     this.serverName,
     this.utls,
@@ -94,14 +108,37 @@ class Utls {
 
 @JsonSerializable()
 class Transport {
-  @JsonKey(name: "type")
   String type;
+  String? path;
+  Map<String, dynamic>? headers;
+  @JsonKey(name: "max_early_data")
+  int? maxEarlyData;
+  @JsonKey(name: "early_data_header_name")
+  String? earlyDataHeaderName;
 
   Transport({
     required this.type,
+    this.path,
+    this.headers,
+    this.maxEarlyData,
+    this.earlyDataHeaderName,
   });
 
   factory Transport.fromJson(Map<String, dynamic> json) => _$TransportFromJson(json);
 
   Map<String, dynamic> toJson() => _$TransportToJson(this);
+}
+
+@JsonSerializable()
+class Multiplex {
+  bool enabled;
+
+  Multiplex({
+    required this.enabled,
+  });
+
+  factory Multiplex.fromJson(Map<String, dynamic> json) => _$MultiplexFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MultiplexToJson(this);
+
 }
