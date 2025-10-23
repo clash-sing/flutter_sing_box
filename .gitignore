@@ -31,3 +31,6 @@ migrate_working_dir/
 /build/
 /coverage/
 GEMINI.md
+/.qoder
+/NUL
+/AGENTS.md
