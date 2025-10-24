@@ -13,12 +13,17 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
   String? _name;
   String? _link;
 
-  void _onSubmit() async {
+  Future<void> _onSubmit() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
       // 创建配置
       final uri = Uri.parse(_link!);
-      final profile = await RemoteProfileService().importProfile(uri, name: _name, autoUpdate: true, autoUpdateInterval: 1440);
+      final profile = await RemoteProfileService().importProfile(
+        uri,
+        name: _name,
+        autoUpdate: true,
+        autoUpdateInterval: 1440,
+      );
       print(profile);
     }
   }
@@ -41,22 +46,22 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
                   validator: (value) {
                     return null;
                   },
-                  onSaved: (value) => _name = value,
+                  onSaved: (value) => _name = value?.trim(),
                 ),
 
                 TextFormField(
                   decoration: InputDecoration(labelText: '订阅链接'),
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
+                    if (value?.trim().isEmpty ?? true) {
                       return '请输入订阅链接';
                     }
-                    final Uri? uri = Uri.tryParse(value);
-                    if (uri == null || !uri.hasScheme) {
+                    final Uri? uri = Uri.tryParse(value!.trim());
+                    if (uri?.host.isEmpty ?? true) {
                       return '请输入正确的订阅链接';
                     }
                     return null;
                   },
-                  onSaved: (value) => _link = value,
+                  onSaved: (value) => _link = value?.trim(),
                 ),
                 ElevatedButton(
                   onPressed: () {
