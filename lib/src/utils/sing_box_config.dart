@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/src/const/outbound_type.dart';
 import 'package:yaml/yaml.dart';
@@ -10,21 +9,23 @@ import '../../flutter_sing_box.dart';
 class SingBoxConfig {
   static Future<SingBox> buildConfig(dynamic data) async {
     SingBox? singBox;
-    if (data is Map<String, dynamic>) {
-      try {
-        singBox = SingBox.fromJson(data);
-      } catch (e) {
-        singBox = await _fixSingBoxConfig(data);
+    try {
+      if (data is Map<String, dynamic>) {
+        try {
+          singBox = SingBox.fromJson(data);
+        } catch (e) {
+          singBox = await _fixSingBoxConfig(data);
+        }
+      } else if (data is String) {
+        try {
+          final config = jsonDecode(data);
+          singBox = SingBox.fromJson(config);
+        } catch (e) {
+          final yaml = loadYaml(data);
+        }
       }
-    } else if (data is String) {
-      try {
-        final config = jsonDecode(data);
-        final singBox = SingBox.fromJson(config);
-        return singBox;
-      } catch (e) {
-        final yaml = loadYaml(data);
-        throw Exception(e);
-      }
+    } catch (e) {
+      print(e);
     }
     if (singBox != null) {
       return singBox;

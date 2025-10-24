@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_sing_box/src/profile/profile.dart';
-
 import '../../flutter_sing_box.dart';
 import '../utils/sing_box_config.dart';
 
