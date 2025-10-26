@@ -6,7 +6,6 @@ import 'package:mmkv/mmkv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MMKV.initialize();
   runApp(const MyApp());
 }
 

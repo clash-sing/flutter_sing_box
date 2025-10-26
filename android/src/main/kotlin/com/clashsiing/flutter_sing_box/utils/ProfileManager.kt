@@ -6,7 +6,7 @@ import com.tencent.mmkv.MMKV
 import kotlinx.serialization.json.Json
 
 object ProfileManager {
-    private val mmkv = MMKV.mmkvWithID("cs-profile", MMKV.MULTI_PROCESS_MODE)
+    private val mmkv = MMKV.mmkvWithID("cs-profile", MMKV.SINGLE_PROCESS_MODE)
 
     fun getSelectedProxy(): SelectedProxy? {
         val content = mmkv.decodeString(Keys.SELECTED_PROXY)
