@@ -7,7 +7,6 @@ import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.ServiceManager
-import com.clashsiing.flutter_sing_box.utils.HttpClient
 import com.tencent.mmkv.MMKV
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -27,7 +26,6 @@ class FlutterSingBoxPlugin :
     companion object {
         private const val TAG = "FlutterSingBoxPlugin"
         private const val INIT = "init"
-        private const val IMPORT_PROFILE = "importProfile"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
         private const val VPN_REQUEST_CODE = 1001
@@ -70,24 +68,6 @@ class FlutterSingBoxPlugin :
                     result.success(null)
                 } else {
                     Log.e(TAG, "init error", catchingResult.exceptionOrNull())
-                    result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
-                }
-            }
-            IMPORT_PROFILE -> {
-                val catchingResult = runCatching {
-                    val args = call.arguments as? Map<*, *>
-                    if (args != null) {
-                        val url = (args["url"] as? String) ?: throw IllegalArgumentException("arguments['url'] is null")
-                        HttpClient().use {
-                            it.getString(url)
-                        }
-                    } else {
-                        throw IllegalArgumentException("Arguments are null")
-                    }
-                }
-                if (catchingResult.isSuccess) {
-                    result.success(catchingResult.getOrNull())
-                } else {
                     result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
                 }
             }
@@ -135,6 +115,7 @@ class FlutterSingBoxPlugin :
     
     private fun startVpnService(result: Result) {
         try {
+
             BoxService.start()
 //            applicationContext.startForegroundService(
 //                Intent(

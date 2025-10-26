@@ -130,7 +130,22 @@ class BoxService(
 */
 
             //TODO: just for debug
-            val content = ProfileManager.getContent()
+            val selectedProxy = ProfileManager.getSelectedProxy()
+            if (selectedProxy == null) {
+                stopAndAlert(Alert.EmptyConfiguration)
+                return
+            }
+            val profile = ProfileManager.getProfile(selectedProxy.profileId)
+            if (profile == null) {
+                stopAndAlert(Alert.EmptyConfiguration)
+                return
+            }
+            val file = File(profile.typed.path)
+            if (!file.exists()) {
+                stopAndAlert(Alert.EmptyConfiguration)
+                return
+            }
+            val content = file.readText()
 
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
@@ -165,7 +180,9 @@ class BoxService(
             commandServer?.setService(boxService)
 
             //TODO: just for debug
-            Libbox.newStandaloneCommandClient().selectOutbound("proxy", "auto")
+            ProfileManager.getSelectedProxy()?.let {
+                Libbox.newStandaloneCommandClient().selectOutbound(it.group, it.outbound)
+            }
 
             status.postValue(Status.Started)
             withContext(Dispatchers.Main) {

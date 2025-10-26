@@ -88,14 +88,24 @@ class ProfileManager {
     return null;
   }
 
-  Future<void> addProfile(Profile profile, SingBox singbox) async{
-    final content = jsonEncode(singbox.toJson());
+  Future<void> addProfile(Profile profile, SingBox singBox) async{
+    final content = jsonEncode(singBox.toJson());
     await File(profile.typed.path).writeAsString(content);
     final String key = getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     _mmkv.encodeString(key, jsonString);
+    final defaultProxy = getDefaultProxy(singBox);
+    if (defaultProxy != null) {
+      await setSelectedProxy(SelectedProxy(
+          profileId: profile.id,
+          group: defaultProxy.key,
+          outbound: defaultProxy.value));
+    } else {
+      throw "No default proxy found";
+    }
   }
 
+  /// TODO: 更新配置文件，未检查 [SelectedProxy]
   Future<void> updateProfile(Profile profile, SingBox singbox) async {
     final content = jsonEncode(singbox.toJson());
     await File(profile.typed.path).writeAsString(content);
@@ -105,6 +115,7 @@ class ProfileManager {
     _mmkv.encodeString(key, jsonString);
   }
 
+  /// TODO: 删除配置文件，未检查 [SelectedProxy]
   void deleteProfile(int id) {
     final profile = getProfile(id);
     if (profile == null) {
@@ -114,6 +125,18 @@ class ProfileManager {
     _mmkv.removeValue(key);
     final file = File(profile.typed.path);
     file.deleteSync();
+  }
+
+  MapEntry<String, String>? getDefaultProxy(SingBox singBox) {
+    final selector = singBox.outbounds.firstWhereOrNull((element) {
+      return element.type == OutboundType.selector
+          && element.outbounds?.isNotEmpty == true;
+    });
+    if (selector != null) {
+      return MapEntry(selector.tag, selector.defaultTag ?? selector.outbounds![0]);
+    } else {
+      return null;
+    }
   }
 
   List<Profile> getProfiles() {

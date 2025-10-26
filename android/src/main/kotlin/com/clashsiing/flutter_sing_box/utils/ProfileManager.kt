@@ -1,18 +1,29 @@
 package com.clashsiing.flutter_sing_box.utils
 
+import com.clashsiing.flutter_sing_box.cs.models.Profile
+import com.clashsiing.flutter_sing_box.cs.models.SelectedProxy
 import com.tencent.mmkv.MMKV
+import kotlinx.serialization.json.Json
 
 object ProfileManager {
-    private val mmkv = MMKV.mmkvWithID("cs-sing-box", MMKV.MULTI_PROCESS_MODE)
+    private val mmkv = MMKV.mmkvWithID("cs-profile", MMKV.MULTI_PROCESS_MODE)
 
-
-    fun get(id: Long): Profile? {
-        return mmkv.decodeParcelable(id.toString(), Profile::class.java)
+    fun getSelectedProxy(): SelectedProxy? {
+        val content = mmkv.decodeString(Keys.SELECTED_PROXY)
+        return if (content == null) null
+        else Json.decodeFromString<SelectedProxy>(content)
+    }
+    private fun getProfileKey(id: Int): String {
+        return "${Keys.PROFILE_PREFIX}$id"
+    }
+    fun getProfile(id: Int) : Profile? {
+        val content = mmkv.decodeString(getProfileKey(id))
+        return if (content == null) null
+        else Json.decodeFromString<Profile>(content)
     }
 
-    @Deprecated("Just for debug")
-    fun getContent(): String? {
-        val profile = mmkv.decodeString("profile")
-        return profile
+    private object Keys {
+        const val PROFILE_PREFIX: String = "profile_"
+        const val SELECTED_PROXY: String = "selected_proxy"
     }
 }
