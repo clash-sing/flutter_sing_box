@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
+import 'package:flutter_sing_box/src/models/database/selected_proxy.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../flutter_sing_box.dart';
+import '../const/outbound_type.dart';
 
 class ProfileManager {
   static final ProfileManager _instance = ProfileManager._internal();
@@ -13,6 +16,44 @@ class ProfileManager {
   late MMKV _mmkv;
   ProfileManager._internal() {
     _mmkv = MMKV("cs-profile", mode: MMKVMode.MULTI_PROCESS_MODE);
+  }
+
+  Future<SelectedProxy?> getSelectedProxy() async {
+    final String? jsonString = _mmkv.decodeString(_Keys.selectedProxy);
+    if (jsonString?.isNotEmpty == true) {
+      final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
+      return SelectedProxy.fromJson(jsonMap);
+    } else {
+      final profiles = getProfiles();
+      if (profiles.isNotEmpty) {
+        final profile = profiles[0];
+        final file = File(profile.typed.path);
+        final content = await file.readAsString();
+        final jsonMap = jsonDecode(content);
+        final singBox = SingBox.fromJson(jsonMap);
+        final selector = singBox.outbounds.firstWhereOrNull((element) {
+          return element.type == OutboundType.selector
+              && element.outbounds?.isNotEmpty == true;
+        });
+        if (selector != null) {
+          final selectedProxy = SelectedProxy(
+            profileId: profile.id,
+            group: selector.tag,
+            outbound: selector.defaultTag ?? selector.outbounds![0],
+          );
+          return selectedProxy;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+  }
+
+  bool setSelectedProxy(SelectedProxy selectedProxy) {
+    final String jsonString = jsonEncode(selectedProxy.toJson());
+    return _mmkv.encodeString(_Keys.selectedProxy, jsonString);
   }
 
   int get _maxId {
@@ -40,8 +81,8 @@ class ProfileManager {
   Profile? getProfile(int id) {
     final String key = getProfileKey(id);
     final String? jsonString = _mmkv.decodeString(key);
-    if (jsonString != null && jsonString.isNotEmpty) {
-      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    if (jsonString?.isNotEmpty == true) {
+      final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
       return Profile.fromJson(jsonMap);
     }
     return null;
@@ -77,11 +118,12 @@ class ProfileManager {
     List<Profile> profiles = [];
     for (String key in keys) {
       final String? jsonString = _mmkv.decodeString(key);
-      if (jsonString != null && jsonString.isNotEmpty) {
-        final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      if (jsonString?.isNotEmpty == true) {
+        final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
         profiles.add(Profile.fromJson(jsonMap));
       }
     }
+    profiles.sort((a, b) => a.userOrder.compareTo(b.userOrder));
     return profiles;
   }
 
@@ -97,6 +139,7 @@ class ProfileManager {
 class _Keys {
   static const String maxId = "max_id";
   static const String profilePrefix = "profile_";
+  static const String selectedProxy = "selected_proxy";
 }
 
 final profileManager = ProfileManager();
