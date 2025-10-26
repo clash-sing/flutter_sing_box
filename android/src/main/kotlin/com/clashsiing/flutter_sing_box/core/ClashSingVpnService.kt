@@ -33,7 +33,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
 
     override fun onCreate() {
         super.onCreate()
-        MMKV.initialize(this)
+//        MMKV.initialize(this)
         PluginManager.isDebug
         val packageInfo = this.application.packageManager.getPackageInfo(
             this.application.packageName, PackageManager.GET_META_DATA

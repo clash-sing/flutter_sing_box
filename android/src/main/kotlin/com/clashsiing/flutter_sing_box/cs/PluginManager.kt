@@ -1,10 +1,15 @@
 package com.clashsiing.flutter_sing_box.cs
 
+import android.app.ActivityManager
+import android.app.Application
 import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.PowerManager
+import android.os.Process
+import android.util.Log
 import androidx.core.content.getSystemService
 import com.clashsiing.flutter_sing_box.constant.Bugs
 import com.tencent.mmkv.MMKV
@@ -44,8 +49,18 @@ object PluginManager {
             initSingBox()
         }
     }
-
+    fun getProcessName(context: Context): String? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Application.getProcessName()
+        } else {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val runningApps = am.runningAppProcesses
+            runningApps?.find { it.pid == Process.myPid() }?.processName
+        }
+    }
     private fun initSingBox() {
+        Log.d(TAG, "initSingBox: processName = ${getProcessName(appContext)}")
+        Log.d(TAG, "initSingBox: ------------------------")
         Seq.setContext(appContext)
         Libbox.setLocale(Locale.getDefault().toLanguageTag().replace("-", "_"))
         val baseDir = appContext.filesDir

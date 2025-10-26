@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
@@ -22,10 +23,14 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadProfiles();
+    _init();
   }
 
+  Future<void> _init() async {
+    await _flutterSingBoxPlugin.init(kDebugMode);
+    _loadProfiles();
 
+  }
 
   Future<void> _loadProfiles() async {
     _selectedProxy = await profileManager.getSelectedProxy();

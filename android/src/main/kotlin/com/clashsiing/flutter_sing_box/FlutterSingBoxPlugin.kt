@@ -45,6 +45,7 @@ class FlutterSingBoxPlugin :
         applicationContext = flutterPluginBinding.applicationContext
         eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_NAME)
         eventChannel.setStreamHandler(this)
+//        MMKV.initialize(applicationContext)
     }
 
     override fun onMethodCall(
@@ -54,7 +55,6 @@ class FlutterSingBoxPlugin :
         when (call.method) {
             INIT -> {
                 val catchingResult = runCatching {
-                    MMKV.initialize(applicationContext)
                     val args = call.arguments as? Map<*, *>
                     if (args != null) {
                         val isDebug = (args["isDebug"] as? Boolean) ?: throw IllegalArgumentException("arguments['isDebug'] is null")

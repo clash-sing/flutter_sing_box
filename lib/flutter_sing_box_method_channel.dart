@@ -23,14 +23,6 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<String> importProfile(String url) async {
-    return  await methodChannel.invokeMethod('importProfile', {
-      'url': url,
-    });
-
-  }
-
-  @override
   Future<void> startVpn() async {
     await methodChannel.invokeMethod('startVpn');
   }
