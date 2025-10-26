@@ -88,27 +88,32 @@ class ProfileManager {
     return null;
   }
 
-  Future<Profile> addProfile(Profile profile, SingBox singbox) async{
+  Future<void> addProfile(Profile profile, SingBox singbox) async{
     final content = jsonEncode(singbox.toJson());
-    final file = await File(profile.typed.path).writeAsString(content);
+    await File(profile.typed.path).writeAsString(content);
     final String key = getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     _mmkv.encodeString(key, jsonString);
-    if (file.existsSync()) {
-      profile.typed.path = file.path;
+  }
+
+  Future<void> updateProfile(Profile profile, SingBox singbox) async {
+    final content = jsonEncode(singbox.toJson());
+    await File(profile.typed.path).writeAsString(content);
+
+    final String key = getProfileKey(profile.id);
+    final String jsonString = jsonEncode(profile.toJson());
+    _mmkv.encodeString(key, jsonString);
+  }
+
+  void deleteProfile(int id) {
+    final profile = getProfile(id);
+    if (profile == null) {
+      return;
     }
-    return profile;
-  }
-
-  void updateProfile(Profile profile) {
-    final String key = getProfileKey(profile.id);
-    final String jsonString = jsonEncode(profile.toJson());
-    _mmkv.encodeString(key, jsonString);
-  }
-
-  void deleteProfile(Profile profile) {
     final String key = getProfileKey(profile.id);
     _mmkv.removeValue(key);
+    final file = File(profile.typed.path);
+    file.deleteSync();
   }
 
   List<Profile> getProfiles() {
@@ -131,7 +136,8 @@ class ProfileManager {
     for (int i = 0; i < profiles.length; i++) {
       final Profile profile = profiles[i];
       profile.userOrder = i;
-      updateProfile(profile);
+      final String jsonString = jsonEncode(profile.toJson());
+      _mmkv.encodeString(getProfileKey(profile.id), jsonString);
     }
   }
 

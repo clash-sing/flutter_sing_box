@@ -24,15 +24,14 @@ class RemoteProfileService {
       print(tempText);
     }
     final singBox = await SingBoxConfig.buildConfig(apiResult.data);
-
-    final profile = await profileManager.addProfile( Profile(
+    final profile = Profile(
       id: profileId,
       userOrder: profileId,
       name: profileName,
       typed: typedProfile,
       userInfo: userInfo,
-    ), singBox);
-
+    );
+    await profileManager.addProfile(profile, singBox);
     return profile;
   }
 
