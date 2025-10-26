@@ -6,12 +6,12 @@ part 'selected_proxy.g.dart';
 @JsonSerializable()
 class SelectedProxy {
   final int profileId;
-  final String selector;
+  final String group;
   final String outbound;
 
   SelectedProxy({
     required this.profileId,
-    required this.selector,
+    required this.group,
     required this.outbound,
   });
 
