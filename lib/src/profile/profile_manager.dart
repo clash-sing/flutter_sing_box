@@ -17,36 +17,13 @@ class ProfileManager {
     _mmkv = MMKV("cs-profile", mode: MMKVMode.SINGLE_PROCESS_MODE);
   }
 
-  Future<SelectedProxy?> getSelectedProxy() async {
+  SelectedProxy? getSelectedProxy() {
     final String? jsonString = _mmkv.decodeString(_Keys.selectedProxy);
     if (jsonString?.isNotEmpty == true) {
       final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
       return SelectedProxy.fromJson(jsonMap);
     } else {
-      final profiles = getProfiles();
-      if (profiles.isNotEmpty) {
-        final profile = profiles[0];
-        final file = File(profile.typed.path);
-        final content = await file.readAsString();
-        final jsonMap = jsonDecode(content);
-        final singBox = SingBox.fromJson(jsonMap);
-        final selector = singBox.outbounds.firstWhereOrNull((element) {
-          return element.type == OutboundType.selector
-              && element.outbounds?.isNotEmpty == true;
-        });
-        if (selector != null) {
-          final selectedProxy = SelectedProxy(
-            profileId: profile.id,
-            group: selector.tag,
-            outbound: selector.defaultTag ?? selector.outbounds![0],
-          );
-          return selectedProxy;
-        } else {
-          return null;
-        }
-      } else {
         return null;
-      }
     }
   }
 
@@ -94,13 +71,12 @@ class ProfileManager {
     final String jsonString = jsonEncode(profile.toJson());
     _mmkv.encodeString(key, jsonString);
     final defaultProxy = getDefaultProxy(singBox);
-    if (defaultProxy != null) {
-      await setSelectedProxy(SelectedProxy(
+    if (defaultProxy != null && getSelectedProxy() == null) {
+      setSelectedProxy(SelectedProxy(
           profileId: profile.id,
           group: defaultProxy.key,
-          outbound: defaultProxy.value));
-    } else {
-      throw "No default proxy found";
+          outbound: defaultProxy.value
+      ));
     }
   }
 
