@@ -42,9 +42,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _changeProfile(int profileId) async {
+  Future<void> _switchProfile(int profileId) async {
     profileManager.setSelectedProfile(profileId);
-    _flutterSingBoxPlugin.switchProfile();
+    _loadProfiles();
+    await _flutterSingBoxPlugin.stopVpn();
+    await Future.delayed(Duration(seconds: 1));
+    await _flutterSingBoxPlugin.startVpn();
   }
 
   Future<bool> requestPostNotificationPermission() async {
@@ -112,7 +115,7 @@ class _HomePageState extends State<HomePage> {
             ? const Icon(Icons.radio_button_checked)
             : const Icon(Icons.radio_button_unchecked),
         onPressed: _selectedProfile?.id == profile.id ? null : () {
-          _changeProfile(profile.id);
+          _switchProfile(profile.id);
         },
       ),
     );
