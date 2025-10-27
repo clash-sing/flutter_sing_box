@@ -11,8 +11,6 @@ import com.clashsiing.flutter_sing_box.aidl.IServiceCallback
 import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Status
 import com.clashsiing.flutter_sing_box.utils.CommandClient
-import com.clashsiing.flutter_sing_box.cs.PluginManager
-import com.clashsiing.flutter_sing_box.utils.ProfileManager
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import io.flutter.plugin.common.EventChannel
 import io.nekohasekai.libbox.StatusMessage
@@ -26,7 +24,7 @@ object ServiceManager {
     private lateinit var statusClient: CommandClient
     private lateinit var coroutineScope: CoroutineScope
     private var service: IService? = null
-    var eventSink: EventChannel.EventSink? = null
+    var statusSink: EventChannel.EventSink? = null
     private val callback = ServiceCallback()
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -104,7 +102,7 @@ object ServiceManager {
                 "memory" to status.memory
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                eventSink?.success(statusMap)
+                statusSink?.success(statusMap)
             }
         }
     }

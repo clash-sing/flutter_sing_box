@@ -7,7 +7,6 @@ import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.ServiceManager
-import com.tencent.mmkv.MMKV
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -135,11 +134,11 @@ class FlutterSingBoxPlugin :
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        ServiceManager.eventSink = events
+        ServiceManager.statusSink = events
     }
 
     override fun onCancel(arguments: Any?) {
-        ServiceManager.eventSink = null
+        ServiceManager.statusSink = null
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

@@ -42,8 +42,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _changeProfile() async {
-
+  Future<void> _changeProfile(int profileId) async {
+    profileManager.setSelectedProfile(profileId);
+    _flutterSingBoxPlugin.switchProfile();
   }
 
   Future<bool> requestPostNotificationPermission() async {
@@ -111,7 +112,7 @@ class _HomePageState extends State<HomePage> {
             ? const Icon(Icons.radio_button_checked)
             : const Icon(Icons.radio_button_unchecked),
         onPressed: _selectedProfile?.id == profile.id ? null : () {
-          _changeProfile();
+          _changeProfile(profile.id);
         },
       ),
     );

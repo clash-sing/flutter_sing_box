@@ -28,4 +28,8 @@ class FlutterSingBox {
   Future<void> stopVpn() {
     return FlutterSingBoxPlatform.instance.stopVpn();
   }
+
+  Future<void> switchProfile() {
+    return FlutterSingBoxPlatform.instance.switchProfile();
+  }
 }
