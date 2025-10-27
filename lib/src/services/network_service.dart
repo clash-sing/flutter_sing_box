@@ -13,11 +13,10 @@ class NetworkService {
 
   Future<ApiResult<dynamic>> fetchSubscription(Uri uri) async {
     try {
-      final dioClient = DioClient.instance;
-      dioClient.options.headers.addAll({
+      DioClient.instance.options.headers.addAll({
         // 'User-Agent': await getUserAgent(),
       });
-      final response = await dioClient.getUri(uri);
+      final response = await DioClient.instance.getUri(uri);
       if (response.statusCode == io.HttpStatus.ok) {
         final apiResult = ApiResult(response.data, response.headers.map);
         return apiResult;

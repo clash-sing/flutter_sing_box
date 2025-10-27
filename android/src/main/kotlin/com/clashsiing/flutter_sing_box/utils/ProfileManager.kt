@@ -8,6 +8,9 @@ import kotlinx.serialization.json.Json
 object ProfileManager {
     private val mmkv = MMKV.mmkvWithID("cs-profile", MMKV.SINGLE_PROCESS_MODE)
 
+    fun getAllKeys() : List<String>? {
+        return  mmkv.allKeys()?.toList()
+    }
     fun getSelectedProxy(): SelectedProxy? {
         val content = mmkv.decodeString(Keys.SELECTED_PROXY)
         return if (content == null) null

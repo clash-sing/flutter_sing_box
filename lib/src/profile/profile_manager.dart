@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter_sing_box/src/models/database/selected_proxy.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -15,7 +14,7 @@ class ProfileManager {
 
   late MMKV _mmkv;
   ProfileManager._internal() {
-    _mmkv = MMKV("cs-profile", mode: MMKVMode.MULTI_PROCESS_MODE);
+    _mmkv = MMKV("cs-profile", mode: MMKVMode.SINGLE_PROCESS_MODE);
   }
 
   Future<SelectedProxy?> getSelectedProxy() async {

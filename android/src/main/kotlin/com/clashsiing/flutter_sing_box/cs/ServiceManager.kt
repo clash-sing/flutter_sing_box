@@ -12,6 +12,7 @@ import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Status
 import com.clashsiing.flutter_sing_box.utils.CommandClient
 import com.clashsiing.flutter_sing_box.cs.PluginManager
+import com.clashsiing.flutter_sing_box.utils.ProfileManager
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import io.flutter.plugin.common.EventChannel
 import io.nekohasekai.libbox.StatusMessage
@@ -92,6 +93,7 @@ object ServiceManager {
 
         override fun updateStatus(status: StatusMessage) {
             Log.d(TAG, "updateStatus: $status")
+            // Log.d(TAG, "updateStatus: ${ProfileManager.getAllKeys()}")
             val statusMap = mapOf(
                 "connectionsIn" to status.connectionsIn,
                 "connectionsOut" to status.connectionsOut,

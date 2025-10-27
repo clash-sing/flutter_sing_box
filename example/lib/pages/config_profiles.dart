@@ -19,6 +19,7 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
   }
 
   void _loadProfiles() async {
+    profiles.clear();
     profiles.addAll(
         profileManager.getProfiles()
     );
@@ -74,13 +75,14 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
           title: const Text('添加订阅'),
           children: [
             SimpleDialogOption(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
+                await Navigator.of(context).push(
                   MaterialPageRoute(builder: (builder) {
                     return const NewRemoteProfile();
                   })
                 );
+                _loadProfiles();
               },
               child: const Text('订阅链接'),
             ),

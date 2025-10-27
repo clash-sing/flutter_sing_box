@@ -24,7 +24,9 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
         autoUpdate: true,
         autoUpdateInterval: 1440,
       );
-      print(profile);
+      if(mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
