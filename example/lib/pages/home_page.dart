@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _flutterSingBoxPlugin = FlutterSingBox();
   final List<Profile> _profiles = [];
-  SelectedProxy? _selectedProxy;
+  Profile? _selectedProfile;
 
 
   @override
@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadProfiles() async {
-    _selectedProxy = await profileManager.getSelectedProxy();
+    _selectedProfile = profileManager.getSelectedProfile();
     _profiles.clear();
     _profiles.addAll(profileManager.getProfiles());
     if (!mounted) return;
@@ -107,10 +107,10 @@ class _HomePageState extends State<HomePage> {
       title: Text(profile.name),
       subtitle: Text(DateTime.fromMillisecondsSinceEpoch(profile.typed.lastUpdated).toString()),
       trailing: IconButton(
-        icon: _selectedProxy?.profileId == profile.id
+        icon: _selectedProfile?.id == profile.id
             ? const Icon(Icons.radio_button_checked)
             : const Icon(Icons.radio_button_unchecked),
-        onPressed: _selectedProxy?.profileId == profile.id ? null : () {
+        onPressed: _selectedProfile?.id == profile.id ? null : () {
           _changeProfile();
         },
       ),

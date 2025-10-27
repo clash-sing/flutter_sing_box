@@ -129,13 +129,7 @@ class BoxService(
             lastProfileName = profile.name
 */
 
-            //TODO: just for debug
-            val selectedProxy = ProfileManager.getSelectedProxy()
-            if (selectedProxy == null) {
-                stopAndAlert(Alert.EmptyConfiguration)
-                return
-            }
-            val profile = ProfileManager.getProfile(selectedProxy.profileId)
+            val profile = ProfileManager.getSelectedProfile()
             if (profile == null) {
                 stopAndAlert(Alert.EmptyConfiguration)
                 return
@@ -179,9 +173,8 @@ class BoxService(
             boxService = newService
             commandServer?.setService(boxService)
 
-            //TODO: just for debug
-            ProfileManager.getSelectedProxy()?.let {
-                Libbox.newStandaloneCommandClient().selectOutbound(it.group, it.outbound)
+            if (profile.selectedGroup != null && profile.selectedOutbound != null) {
+                Libbox.newStandaloneCommandClient().selectOutbound(profile.selectedGroup, profile.selectedOutbound)
             }
 
             status.postValue(Status.Started)

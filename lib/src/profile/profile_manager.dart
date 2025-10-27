@@ -17,19 +17,13 @@ class ProfileManager {
     _mmkv = MMKV("cs-profile", mode: MMKVMode.SINGLE_PROCESS_MODE);
   }
 
-  SelectedProxy? getSelectedProxy() {
-    final String? jsonString = _mmkv.decodeString(_Keys.selectedProxy);
-    if (jsonString?.isNotEmpty == true) {
-      final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
-      return SelectedProxy.fromJson(jsonMap);
-    } else {
-        return null;
-    }
+  Profile? getSelectedProfile() {
+    final profileId = _mmkv.decodeInt(_Keys.selectedProfileId);
+    return _getProfile(profileId);
   }
 
-  bool setSelectedProxy(SelectedProxy selectedProxy) {
-    final String jsonString = jsonEncode(selectedProxy.toJson());
-    return _mmkv.encodeString(_Keys.selectedProxy, jsonString);
+  bool setSelectedProfile(int profileId) {
+    return _mmkv.encodeInt(_Keys.selectedProfileId, profileId);
   }
 
   int get _maxId {
@@ -37,12 +31,13 @@ class ProfileManager {
   }
 
   int get generateProfileId {
-    _mmkv.encodeInt(_Keys.maxId, _maxId + 1);
-    return _maxId;
+    final id = _maxId + 1;
+    _mmkv.encodeInt(_Keys.maxId, id);
+    return id;
   }
 
-  String getProfileKey(int id) {
-    return "${_Keys.profilePrefix}$_maxId";
+  String _getProfileKey(int id) {
+    return "${_Keys.profilePrefix}$id";
   }
 
   Future<String> getProfilePath(int id) async {
@@ -51,11 +46,11 @@ class ProfileManager {
     if (!profilesDir.existsSync()) {
       profilesDir.createSync(recursive: true);
     }
-    return "${profilesDir.path}/${getProfileKey(id)}.json";
+    return "${profilesDir.path}/${_getProfileKey(id)}.json";
   }
 
-  Profile? getProfile(int id) {
-    final String key = getProfileKey(id);
+  Profile? _getProfile(int id) {
+    final String key = _getProfileKey(id);
     final String? jsonString = _mmkv.decodeString(key);
     if (jsonString?.isNotEmpty == true) {
       final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
@@ -67,42 +62,51 @@ class ProfileManager {
   Future<void> addProfile(Profile profile, SingBox singBox) async{
     final content = jsonEncode(singBox.toJson());
     await File(profile.typed.path).writeAsString(content);
-    final String key = getProfileKey(profile.id);
+    final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     _mmkv.encodeString(key, jsonString);
-    final defaultProxy = getDefaultProxy(singBox);
-    if (defaultProxy != null && getSelectedProxy() == null) {
-      setSelectedProxy(SelectedProxy(
-          profileId: profile.id,
-          group: defaultProxy.key,
-          outbound: defaultProxy.value
-      ));
+    if (getSelectedProfile() == null) {
+      setSelectedProfile(profile.id);
     }
   }
 
-  /// TODO: 更新配置文件，未检查 [SelectedProxy]
-  Future<void> updateProfile(Profile profile, SingBox singbox) async {
-    final content = jsonEncode(singbox.toJson());
+  Future<void> updateProfile(Profile profile, SingBox singBox) async {
+    final content = jsonEncode(singBox.toJson());
     await File(profile.typed.path).writeAsString(content);
-
-    final String key = getProfileKey(profile.id);
+    if (profile.selectedGroup != null && profile.selectedOutbound != null) {
+      List<String> tags = singBox.outbounds.map((e) => e.tag).toList();
+      if (!tags.contains(profile.selectedGroup) || !tags.contains(profile.selectedOutbound)) {
+        profile.selectedGroup = null;
+        profile.selectedOutbound = null;
+      }
+    }
+    final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     _mmkv.encodeString(key, jsonString);
   }
 
-  /// TODO: 删除配置文件，未检查 [SelectedProxy]
   void deleteProfile(int id) {
-    final profile = getProfile(id);
+    final profile = _getProfile(id);
     if (profile == null) {
       return;
     }
-    final String key = getProfileKey(profile.id);
+    if (getSelectedProfile()?.id == id) {
+      final profiles = getProfiles();
+      if (profiles.length > 1) {
+        setSelectedProfile(profiles[1].id);
+      } else {
+        _mmkv.removeValue(_Keys.selectedProfileId);
+      }
+    }
+    final String key = _getProfileKey(profile.id);
     _mmkv.removeValue(key);
     final file = File(profile.typed.path);
     file.deleteSync();
   }
 
-  MapEntry<String, String>? getDefaultProxy(SingBox singBox) {
+  /// 获取默认的 代理组 & 出站tag
+  @Deprecated(' 暂时保留此方法')
+  MapEntry<String, String>? _getDefaultProxy(SingBox singBox) {
     final selector = singBox.outbounds.firstWhereOrNull((element) {
       return element.type == OutboundType.selector
           && element.outbounds?.isNotEmpty == true;
@@ -135,7 +139,7 @@ class ProfileManager {
       final Profile profile = profiles[i];
       profile.userOrder = i;
       final String jsonString = jsonEncode(profile.toJson());
-      _mmkv.encodeString(getProfileKey(profile.id), jsonString);
+      _mmkv.encodeString(_getProfileKey(profile.id), jsonString);
     }
   }
 
@@ -143,7 +147,7 @@ class ProfileManager {
 class _Keys {
   static const String maxId = "max_id";
   static const String profilePrefix = "profile_";
-  static const String selectedProxy = "selected_proxy";
+  static const String selectedProfileId = "selected_profile_id";
 }
 
 final profileManager = ProfileManager();

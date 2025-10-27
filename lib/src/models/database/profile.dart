@@ -11,6 +11,8 @@ class Profile {
   int userOrder;
   String name;
   TypedProfile typed;
+  String? selectedGroup;
+  String? selectedOutbound;
   UserInfo? userInfo;
 
   Profile({
@@ -18,7 +20,9 @@ class Profile {
     required this.userOrder,
     required this.name,
     required this.typed,
-    this.userInfo
+    this.selectedGroup,
+    this.selectedOutbound,
+    this.userInfo,
   });
 
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);

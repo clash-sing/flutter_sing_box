@@ -14,7 +14,9 @@ data class Profile(
     val userOrder: Int,
     val name: String,
     val typed: TypedProfile,
-    val userInfo: UserInfo?,
+    var selectedGroup: String? = null,
+    var selectedOutbound: String? = null,
+    val userInfo: UserInfo? = null,
 ) : Parcelable {
     @Parcelize
     @Serializable
@@ -23,9 +25,9 @@ data class Profile(
         val path: String,
         val lastUpdated: Long,
         val autoUpdate: Boolean,
-        val autoUpdateInterval: Int?,
-        val remoteUrl: String?,
-        val webPageUrl: String?,
+        val autoUpdateInterval: Int? = null,
+        val remoteUrl: String? = null,
+        val webPageUrl: String? = null,
     ) : Parcelable {
         @Parcelize
         @Serializable
@@ -40,9 +42,9 @@ data class Profile(
     @Parcelize
     @Serializable
     data class UserInfo(
-        val upload: Long?,
-        val download: Long?,
-        val total: Long?,
-        val expire: Long?,
+        val upload: Long? = null,
+        val download: Long? = null,
+        val total: Long? = null,
+        val expire: Long? = null,
     ) : Parcelable
 }
