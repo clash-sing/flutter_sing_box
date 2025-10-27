@@ -32,11 +32,6 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     await methodChannel.invokeMethod('stopVpn');
   }
 
-  @override
-  Future<void> switchProfile() async {
-    await methodChannel.invokeMethod('switchProfile');
-  }
-
   static const EventChannel _eventChannel =
       EventChannel('flutter_sing_box_event');
 
