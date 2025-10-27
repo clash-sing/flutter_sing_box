@@ -35,8 +35,14 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
         title: const Text('订阅配置'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _popImportOptions();
+        onPressed: () async {
+          // _popImportOptions();
+          await Navigator.of(context).push(
+              MaterialPageRoute(builder: (builder) {
+                return const NewRemoteProfile();
+              })
+          );
+          _loadProfiles();
         },
         child: const Icon(Icons.add),
       ),

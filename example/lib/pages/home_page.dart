@@ -164,10 +164,11 @@ class _HomePageState extends State<HomePage> {
     return ElevatedButton(
       child: const Text('Config'),
       onPressed: () async {
-        Navigator.push(
+        await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ConfigProfiles())
         );
+        _loadProfiles();
       }
     );
   }
