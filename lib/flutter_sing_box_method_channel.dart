@@ -38,10 +38,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   static const EventChannel _eventChannelGroup = EventChannel('group_event');
-  static Stream<dynamic>? _groupStream;
+  static Stream<List<ClientGroup>>? _groupStream;
   @override
-  Stream<dynamic> get groupStream {
-    _groupStream ??= _eventChannelGroup.receiveBroadcastStream();
+  Stream<List<ClientGroup>> get groupStream {
+    _groupStream ??= _eventChannelGroup.receiveBroadcastStream()
+        .map((data) => (jsonDecode(data) as List).map((item) => ClientGroup.fromJson(item)).toList());
     return _groupStream!;
   }
 

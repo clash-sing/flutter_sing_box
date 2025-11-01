@@ -42,7 +42,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('connectedStatusStream has not been implemented.');
   }
 
-  Stream<dynamic> get groupStream {
+  Stream<List<ClientGroup>> get groupStream {
     throw UnimplementedError('groupStream has not been implemented.');
   }
 

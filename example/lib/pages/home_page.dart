@@ -191,11 +191,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildGroup() {
-    return StreamBuilder<dynamic>(
+    return StreamBuilder<List<ClientGroup>>(
       stream: _flutterSingBoxPlugin.groupStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Text(snapshot.data.toString());
+          return Text(snapshot.data?.map((e) => e.toJson()).join('\n') ?? '');
         } else {
           return const SizedBox.shrink();
         }
