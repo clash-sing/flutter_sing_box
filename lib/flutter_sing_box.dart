@@ -4,6 +4,7 @@ export '../src/models/models.dart';
 export '../src/const/const.dart';
 export '../src/profile/profile.dart';
 
+import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
@@ -21,7 +22,7 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.stopVpn();
   }
 
-  Stream<dynamic> get connectedStatusStream =>
+  Stream<StatusClient> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 
   Stream<dynamic> get groupStream =>

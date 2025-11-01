@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
 /// An implementation of [FlutterSingBoxPlatform] that uses method channels.
@@ -26,10 +29,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
-  static Stream<dynamic>? _connectedStatusStream;
+  static Stream<StatusClient>? _connectedStatusStream;
   @override
-  Stream<dynamic> get connectedStatusStream {
-    _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream();
+  Stream<StatusClient> get connectedStatusStream {
+    _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream()
+        .map((dynamic data) => StatusClient.fromJson(jsonDecode(data as String)));
     return _connectedStatusStream!;
   }
 

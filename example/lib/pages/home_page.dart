@@ -174,18 +174,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildStatus() {
-    return StreamBuilder<dynamic>(
+    return StreamBuilder<StatusClient>(
       stream: _flutterSingBoxPlugin.connectedStatusStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          // final status = snapshot.data as Map;
-          // final uplink = status['uplink'];
-          // final downlink = status['downlink'];
           return Column(
             children: [
-              // Text('Uplink: $uplink B/s'),
-              // Text('Downlink: $downlink B/s'),
-              Text(snapshot.data),
+              Text(snapshot.data?.toJson().toString() ?? ''),
             ],
           );
         } else {

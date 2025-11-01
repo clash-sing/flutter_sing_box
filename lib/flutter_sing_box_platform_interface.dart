@@ -1,3 +1,4 @@
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_sing_box_method_channel.dart';
@@ -37,7 +38,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
-  Stream<dynamic> get connectedStatusStream {
+  Stream<StatusClient> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');
   }
 
