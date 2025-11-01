@@ -14,10 +14,6 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.getPlatformVersion();
   }
 
-  Future<void> init(bool isDebug) {
-    return FlutterSingBoxPlatform.instance.init(isDebug);
-  }
-
 
   /// Starts the VPN service
   Future<void> startVpn() {

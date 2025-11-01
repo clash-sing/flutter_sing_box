@@ -27,10 +27,6 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Future<void> init(bool isDebug) {
-    throw UnimplementedError('init() has not been implemented.');
-  }
-
   /// Starts the VPN service
   Future<void> startVpn() {
     throw UnimplementedError('startVpn() has not been implemented.');

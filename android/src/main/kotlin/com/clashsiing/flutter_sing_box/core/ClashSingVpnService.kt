@@ -2,20 +2,14 @@ package com.clashsiing.flutter_sing_box.core
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
-import com.clashsiing.flutter_sing_box.BuildConfig
 import com.clashsiing.flutter_sing_box.ktx.toIpPrefix
 import com.clashsiing.flutter_sing_box.ktx.toList
-import com.clashsiing.flutter_sing_box.cs.PluginManager
-import com.clashsiing.flutter_sing_box.utils.ProfileManager
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
-import com.tencent.mmkv.MMKV
 import io.nekohasekai.libbox.Notification
 import io.nekohasekai.libbox.TunOptions
 import kotlinx.coroutines.Dispatchers
@@ -26,28 +20,10 @@ import kotlinx.coroutines.withContext
 class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
 
     companion object {
-        private const val TAG = "VpnService"
+        private const val TAG = "ClashSingVpnService"
     }
 
-    private lateinit var service: BoxService
-
-    override fun onCreate() {
-        super.onCreate()
-//        MMKV.initialize(this)
-        PluginManager.isDebug
-        val packageInfo = this.application.packageManager.getPackageInfo(
-            this.application.packageName, PackageManager.GET_META_DATA
-        )
-        val versionCode: Long = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            packageInfo.longVersionCode
-        } else {
-            @Suppress("DEPRECATION")
-            packageInfo.versionCode.toLong()
-        }
-        val  versionName = packageInfo.versionName ?: "unknown";
-        PluginManager.init(this.application)
-        service = BoxService(this, this)
-    }
+    private val service = BoxService(this, this)
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) =
         service.onStartCommand()

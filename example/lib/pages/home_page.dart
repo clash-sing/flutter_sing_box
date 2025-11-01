@@ -27,9 +27,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _init() async {
-    await _flutterSingBoxPlugin.init(kDebugMode);
     _loadProfiles();
-
   }
 
   Future<void> _loadProfiles() async {

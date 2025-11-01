@@ -16,13 +16,6 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<void> init(bool isDebug) async {
-    await methodChannel.invokeMethod('init', {
-      'isDebug': isDebug,
-    });
-  }
-
-  @override
   Future<void> startVpn() async {
     await methodChannel.invokeMethod('startVpn');
   }

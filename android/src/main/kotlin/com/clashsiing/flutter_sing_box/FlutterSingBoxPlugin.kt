@@ -21,10 +21,12 @@ import java.util.concurrent.atomic.AtomicReference
 /** FlutterSingBoxPlugin */
 class FlutterSingBoxPlugin :
     FlutterPlugin,
-    MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener, EventChannel.StreamHandler {
+    MethodCallHandler,
+    ActivityAware,
+    PluginRegistry.ActivityResultListener,
+    EventChannel.StreamHandler {
     companion object {
         private const val TAG = "FlutterSingBoxPlugin"
-        private const val INIT = "init"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
         private const val VPN_REQUEST_CODE = 1001
@@ -33,7 +35,6 @@ class FlutterSingBoxPlugin :
     }
     private lateinit var channel: MethodChannel
     private lateinit var eventChannel: EventChannel
-    private var eventSink: EventChannel.EventSink? = null
     private lateinit var applicationContext: Context
     private var activityBinding: ActivityPluginBinding? = null
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
@@ -42,34 +43,13 @@ class FlutterSingBoxPlugin :
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
+
         eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_NAME)
         eventChannel.setStreamHandler(this)
-//        MMKV.initialize(applicationContext)
     }
 
-    override fun onMethodCall(
-        call: MethodCall,
-        result: Result
-    ) {
+    override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
-            INIT -> {
-                val catchingResult = runCatching {
-                    val args = call.arguments as? Map<*, *>
-                    if (args != null) {
-                        val isDebug = (args["isDebug"] as? Boolean) ?: throw IllegalArgumentException("arguments['isDebug'] is null")
-                        PluginManager.init(context = applicationContext, isDebug)
-                        ServiceManager.reconnect()
-                    } else {
-                        throw IllegalArgumentException("Arguments are null")
-                    }
-                }
-                if (catchingResult.isSuccess) {
-                    result.success(null)
-                } else {
-                    Log.e(TAG, "init error", catchingResult.exceptionOrNull())
-                    result.error("INVALID_ARGS", catchingResult.exceptionOrNull()?.message, null)
-                }
-            }
             START_VPN -> {
                 // 检查是否有Activity绑定
                 val activity = activityBinding?.activity
@@ -97,10 +77,6 @@ class FlutterSingBoxPlugin :
 //                        applicationContext.packageName
 //                    )
 //                )
-                result.success(null)
-            }
-            "sendEventToFlutter" -> {
-                eventSink?.success("Hello from Android!")
                 result.success(null)
             }
             "getPlatformVersion" -> {
@@ -133,39 +109,42 @@ class FlutterSingBoxPlugin :
         eventChannel.setStreamHandler(null)
     }
 
+    // EventChannel.StreamHandler
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
         ServiceManager.statusSink = events
     }
 
+    // EventChannel.StreamHandler
     override fun onCancel(arguments: Any?) {
         ServiceManager.statusSink = null
     }
 
+    // ActivityAware
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityBinding = binding
         binding.addActivityResultListener(this)
     }
 
+    // ActivityAware
     override fun onDetachedFromActivityForConfigChanges() {
         activityBinding?.removeActivityResultListener(this)
         activityBinding = null
     }
 
+    // ActivityAware
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
         activityBinding = binding
         binding.addActivityResultListener(this)
     }
 
+    // ActivityAware
     override fun onDetachedFromActivity() {
         activityBinding?.removeActivityResultListener(this)
         activityBinding = null
     }
 
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ): Boolean {
+    // PluginRegistry.ActivityResultListener
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == VPN_REQUEST_CODE) {
             val result = pendingStartVpnResult.getAndSet(null)
             if (result != null) {
