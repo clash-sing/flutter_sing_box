@@ -29,9 +29,11 @@ class FlutterSingBoxPlugin :
         private const val VPN_REQUEST_CODE = 1001
         private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
         private const val EVENT_CHANNEL_CONNECTED_STATUS = "connected_status_event"
+        private const val EVENT_CHANNEL_GROUP = "group_event"
     }
     private lateinit var channel: MethodChannel
     private lateinit var eventChannelConnectedStatus: EventChannel
+    private lateinit var eventChannelGroup: EventChannel
     private lateinit var applicationContext: Context
     private var activityBinding: ActivityPluginBinding? = null
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
@@ -41,8 +43,17 @@ class FlutterSingBoxPlugin :
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
 
-        eventChannelConnectedStatus = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_CONNECTED_STATUS)
+        eventChannelConnectedStatus = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            EVENT_CHANNEL_CONNECTED_STATUS
+        )
         eventChannelConnectedStatus.setStreamHandler(ConnectedStatusStream())
+
+        eventChannelGroup = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            EVENT_CHANNEL_GROUP
+        )
+        eventChannelGroup.setStreamHandler(GroupStream())
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -104,6 +115,7 @@ class FlutterSingBoxPlugin :
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         eventChannelConnectedStatus.setStreamHandler(null)
+        eventChannelGroup.setStreamHandler(null)
     }
 
     // ActivityAware
@@ -151,6 +163,16 @@ class FlutterSingBoxPlugin :
     }
 
     class ConnectedStatusStream : StreamHandler {
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+            SingBoxConnector.statusSink = events
+        }
+
+        override fun onCancel(arguments: Any?) {
+            SingBoxConnector.statusSink = null
+        }
+    }
+
+    class GroupStream : StreamHandler {
         override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
             SingBoxConnector.statusSink = events
         }
