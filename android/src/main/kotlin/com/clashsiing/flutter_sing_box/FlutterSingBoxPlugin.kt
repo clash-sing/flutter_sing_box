@@ -123,6 +123,7 @@ class FlutterSingBoxPlugin :
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityBinding = binding
         binding.addActivityResultListener(this)
+        ServiceManager.reconnect()
     }
 
     // ActivityAware
@@ -139,6 +140,7 @@ class FlutterSingBoxPlugin :
 
     // ActivityAware
     override fun onDetachedFromActivity() {
+        ServiceManager.disconnect()
         activityBinding?.removeActivityResultListener(this)
         activityBinding = null
     }

@@ -17,6 +17,7 @@ import io.nekohasekai.libbox.StatusMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 object ServiceManager {
@@ -64,19 +65,39 @@ object ServiceManager {
         application.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
+    internal fun disconnect() {
+        try {
+            PluginManager.appContext.unbindService(serviceConnection)
+            disconnectClient()
+            coroutineScope.cancel()
+        } catch (e: Exception) {
+            Log.w(TAG, "unbindService: 不需要解绑。 ${e.message}")
+        }
+    }
+
+    private fun connectClient() {
+        statusClient.connect()
+//        clashModeClient.connect()
+    }
+
+    private fun disconnectClient() {
+        statusClient.disconnect()
+//        clashModeClient.disconnect()
+    }
+
     class ServiceCallback() : IServiceCallback.Stub() {
         override fun onServiceStatusChanged(status: Int) {
             Log.d(TAG, "onServiceStatusChanged: $status")
             if (status == Status.Started.ordinal) {
-                statusClient.connect()
+                connectClient()
             } else if (status == Status.Stopped.ordinal) {
-                statusClient.disconnect()
+                disconnectClient()
             }
         }
 
         override fun onServiceAlert(type: Int, message: String?) {
             Log.e(TAG, "onServiceAlert: $type $message")
-            statusClient.disconnect()
+            disconnectClient()
         }
 
     }
