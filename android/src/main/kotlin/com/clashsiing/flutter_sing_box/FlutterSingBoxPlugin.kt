@@ -12,6 +12,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.EventChannel.StreamHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.util.concurrent.atomic.AtomicReference
@@ -21,18 +22,16 @@ class FlutterSingBoxPlugin :
     FlutterPlugin,
     MethodCallHandler,
     ActivityAware,
-    PluginRegistry.ActivityResultListener,
-    EventChannel.StreamHandler {
+    PluginRegistry.ActivityResultListener {
     companion object {
-        private const val TAG = "FlutterSingBoxPlugin"
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
         private const val VPN_REQUEST_CODE = 1001
         private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
-        private const val EVENT_CHANNEL_NAME = "flutter_sing_box_event"
+        private const val EVENT_CHANNEL_CONNECTED_STATUS = "connected_status_event"
     }
     private lateinit var channel: MethodChannel
-    private lateinit var eventChannel: EventChannel
+    private lateinit var eventChannelConnectedStatus: EventChannel
     private lateinit var applicationContext: Context
     private var activityBinding: ActivityPluginBinding? = null
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
@@ -42,8 +41,8 @@ class FlutterSingBoxPlugin :
         channel.setMethodCallHandler(this)
         applicationContext = flutterPluginBinding.applicationContext
 
-        eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_NAME)
-        eventChannel.setStreamHandler(this)
+        eventChannelConnectedStatus = EventChannel(flutterPluginBinding.binaryMessenger, EVENT_CHANNEL_CONNECTED_STATUS)
+        eventChannelConnectedStatus.setStreamHandler(ConnectedStatusStream())
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -104,17 +103,7 @@ class FlutterSingBoxPlugin :
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        eventChannel.setStreamHandler(null)
-    }
-
-    // EventChannel.StreamHandler
-    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        SingBoxConnector.statusSink = events
-    }
-
-    // EventChannel.StreamHandler
-    override fun onCancel(arguments: Any?) {
-        SingBoxConnector.statusSink = null
+        eventChannelConnectedStatus.setStreamHandler(null)
     }
 
     // ActivityAware
@@ -159,5 +148,15 @@ class FlutterSingBoxPlugin :
             return true
         }
         return false
+    }
+
+    class ConnectedStatusStream : StreamHandler {
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+            SingBoxConnector.statusSink = events
+        }
+
+        override fun onCancel(arguments: Any?) {
+            SingBoxConnector.statusSink = null
+        }
     }
 }

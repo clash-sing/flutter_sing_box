@@ -26,7 +26,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   static const EventChannel _eventChannel =
-      EventChannel('flutter_sing_box_event');
+      EventChannel('connected_status_event');
 
   static Stream<dynamic>? _vpnStatusStream;
 
