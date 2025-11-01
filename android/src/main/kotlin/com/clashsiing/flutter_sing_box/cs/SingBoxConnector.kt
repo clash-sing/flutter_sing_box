@@ -20,7 +20,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-object ServiceManager {
+object SingBoxConnector {
     private const val TAG = "ServiceManager"
     private lateinit var statusClient: CommandClient
     private lateinit var coroutineScope: CoroutineScope

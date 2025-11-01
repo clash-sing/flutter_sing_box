@@ -3,10 +3,8 @@ package com.clashsiing.flutter_sing_box
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
-import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
-import com.clashsiing.flutter_sing_box.cs.PluginManager
-import com.clashsiing.flutter_sing_box.cs.ServiceManager
+import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -111,19 +109,19 @@ class FlutterSingBoxPlugin :
 
     // EventChannel.StreamHandler
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-        ServiceManager.statusSink = events
+        SingBoxConnector.statusSink = events
     }
 
     // EventChannel.StreamHandler
     override fun onCancel(arguments: Any?) {
-        ServiceManager.statusSink = null
+        SingBoxConnector.statusSink = null
     }
 
     // ActivityAware
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activityBinding = binding
         binding.addActivityResultListener(this)
-        ServiceManager.reconnect()
+        SingBoxConnector.reconnect()
     }
 
     // ActivityAware
@@ -140,7 +138,7 @@ class FlutterSingBoxPlugin :
 
     // ActivityAware
     override fun onDetachedFromActivity() {
-        ServiceManager.disconnect()
+        SingBoxConnector.disconnect()
         activityBinding?.removeActivityResultListener(this)
         activityBinding = null
     }
