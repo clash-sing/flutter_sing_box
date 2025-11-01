@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @SuppressLint("UnsafeOptInUsageError")
 @Serializable
-data class StatusClient(
+data class ClientStatus(
     val memory: Long,
     val goroutines: Int,
     val connectionsIn: Int,
