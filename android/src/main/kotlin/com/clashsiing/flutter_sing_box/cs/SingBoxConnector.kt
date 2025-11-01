@@ -10,7 +10,7 @@ import com.clashsiing.flutter_sing_box.aidl.IService
 import com.clashsiing.flutter_sing_box.aidl.IServiceCallback
 import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Status
-import com.clashsiing.flutter_sing_box.cs.models.StatusModel
+import com.clashsiing.flutter_sing_box.cs.models.StatusClient
 import com.clashsiing.flutter_sing_box.utils.CommandClient
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import io.flutter.plugin.common.EventChannel
@@ -144,7 +144,7 @@ object SingBoxConnector {
 //                "downlinkTotal" to status.downlinkTotal,
 //                "memory" to status.memory
 //            )
-            val statusModel = StatusModel(
+            val statusClient = StatusClient(
                 memory = status.memory,
                 goroutines = status.goroutines,
                 connectionsIn = status.connectionsIn,
@@ -156,7 +156,7 @@ object SingBoxConnector {
                 downlinkTotal = status.downlinkTotal
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                statusSink?.success(Json.encodeToString(statusModel))
+                statusSink?.success(Json.encodeToString(statusClient))
             }
         }
     }
