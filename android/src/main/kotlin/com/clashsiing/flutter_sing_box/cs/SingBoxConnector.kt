@@ -147,18 +147,28 @@ object SingBoxConnector {
             }
         }
     }
+
     class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
             Log.d(TAG, "updateGroups: $newGroups")
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                groupSink?.success(newGroups.toString())
+            }
         }
-
     }
+
     class ClashModeClient : CommandClient.Handler {
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
             Log.d(TAG, "initializeClashMode: $modeList $currentMode")
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                clashModeSink?.success(mapOf("modeList" to modeList, "currentMode" to currentMode))
+            }
         }
         override fun updateClashMode(newMode: String) {
             Log.d(TAG, "updateClashMode: $newMode")
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                clashModeSink?.success(mapOf("currentMode" to newMode))
+            }
         }
     }
 }

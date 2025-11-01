@@ -40,4 +40,12 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   Stream<dynamic> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');
   }
+
+  Stream<dynamic> get groupStream {
+    throw UnimplementedError('groupStream has not been implemented.');
+  }
+
+  Stream<dynamic> get clashModeStream {
+    throw UnimplementedError('clashModeStream has not been implemented.');
+  }
 }

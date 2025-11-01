@@ -7,13 +7,9 @@ export '../src/profile/profile.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
-  Stream<dynamic> get connectedStatusStream =>
-      FlutterSingBoxPlatform.instance.connectedStatusStream;
-
   Future<String?> getPlatformVersion() {
     return FlutterSingBoxPlatform.instance.getPlatformVersion();
   }
-
 
   /// Starts the VPN service
   Future<void> startVpn() {
@@ -24,5 +20,14 @@ class FlutterSingBox {
   Future<void> stopVpn() {
     return FlutterSingBoxPlatform.instance.stopVpn();
   }
+
+  Stream<dynamic> get connectedStatusStream =>
+      FlutterSingBoxPlatform.instance.connectedStatusStream;
+
+  Stream<dynamic> get groupStream =>
+      FlutterSingBoxPlatform.instance.groupStream;
+
+  Stream<dynamic> get clashModeStream =>
+      FlutterSingBoxPlatform.instance.clashModeStream;
 
 }

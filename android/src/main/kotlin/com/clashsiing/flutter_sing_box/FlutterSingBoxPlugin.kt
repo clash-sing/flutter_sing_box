@@ -30,10 +30,12 @@ class FlutterSingBoxPlugin :
         private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
         private const val EVENT_CHANNEL_CONNECTED_STATUS = "connected_status_event"
         private const val EVENT_CHANNEL_GROUP = "group_event"
+        private const val EVENT_CHANNEL_CLASH_MODE = "clash_mode_event"
     }
     private lateinit var channel: MethodChannel
     private lateinit var eventChannelConnectedStatus: EventChannel
     private lateinit var eventChannelGroup: EventChannel
+    private lateinit var eventChannelClashMode: EventChannel
     private lateinit var applicationContext: Context
     private var activityBinding: ActivityPluginBinding? = null
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
@@ -54,6 +56,12 @@ class FlutterSingBoxPlugin :
             EVENT_CHANNEL_GROUP
         )
         eventChannelGroup.setStreamHandler(GroupStream())
+
+        eventChannelClashMode = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            EVENT_CHANNEL_CLASH_MODE
+        )
+        eventChannelClashMode.setStreamHandler(ClashModeStream())
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -174,11 +182,21 @@ class FlutterSingBoxPlugin :
 
     class GroupStream : StreamHandler {
         override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-            SingBoxConnector.statusSink = events
+            SingBoxConnector.groupSink = events
         }
 
         override fun onCancel(arguments: Any?) {
-            SingBoxConnector.statusSink = null
+            SingBoxConnector.groupSink = null
+        }
+    }
+
+    class ClashModeStream : StreamHandler {
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+            SingBoxConnector.clashModeSink = events
+        }
+
+        override fun onCancel(arguments: Any?) {
+            SingBoxConnector.clashModeSink = null
         }
     }
 }

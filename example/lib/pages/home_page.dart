@@ -92,6 +92,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         _buildStatus(),
+        _buildGroup(),
+        _buildClashMode(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -185,14 +187,39 @@ class _HomePageState extends State<HomePage> {
               Text('Downlink: $downlink B/s'),
             ],
           );
+        } else {
+          return const Text('VPN Status: Disconnected');
         }
-        return const Text('VPN Status: Disconnected');
       },
     );
 
   }
 
+  Widget _buildGroup() {
+    return StreamBuilder<dynamic>(
+      stream: _flutterSingBoxPlugin.groupStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text(snapshot.data.toString());
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+    );
+  }
 
+  Widget _buildClashMode() {
+    return StreamBuilder<dynamic>(
+      stream: _flutterSingBoxPlugin.clashModeStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text(snapshot.data.toString());
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+    );
+  }
 
   @override
   void dispose() {
