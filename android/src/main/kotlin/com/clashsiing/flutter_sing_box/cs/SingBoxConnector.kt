@@ -10,6 +10,7 @@ import com.clashsiing.flutter_sing_box.aidl.IService
 import com.clashsiing.flutter_sing_box.aidl.IServiceCallback
 import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Status
+import com.clashsiing.flutter_sing_box.cs.models.ClientGroup
 import com.clashsiing.flutter_sing_box.cs.models.StatusClient
 import com.clashsiing.flutter_sing_box.utils.CommandClient
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
@@ -133,17 +134,6 @@ object SingBoxConnector {
         }
 
         override fun updateStatus(status: StatusMessage) {
-            Log.d(TAG, "updateStatus: $status")
-            // Log.d(TAG, "updateStatus: ${ProfileManager.getAllKeys()}")
-//            val statusMap = mapOf(
-//                "connectionsIn" to status.connectionsIn,
-//                "connectionsOut" to status.connectionsOut,
-//                "uplink" to status.uplink,
-//                "downlink" to status.downlink,
-//                "uplinkTotal" to status.uplinkTotal,
-//                "downlinkTotal" to status.downlinkTotal,
-//                "memory" to status.memory
-//            )
             val statusClient = StatusClient(
                 memory = status.memory,
                 goroutines = status.goroutines,
@@ -164,8 +154,23 @@ object SingBoxConnector {
     class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
             Log.d(TAG, "updateGroups: $newGroups")
+            val clientGroups: List<ClientGroup> = newGroups.map {
+                ClientGroup(
+                    tag = it.tag,
+                    type = it.type,
+                    selectable = it.selectable,
+                    selected = it.selected,
+                    isExpand = it.isExpand,
+                    item = if (it.items.hasNext()) ClientGroup.GroupItem(
+                        tag = it.items.next().tag,
+                        type = it.items.next().type,
+                        urlTestDelay = it.items.next().urlTestDelay,
+                        getURLTestTime = it.items.next().urlTestTime,
+                    ) else null
+                )
+            }
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                groupSink?.success(newGroups.toString())
+                groupSink?.success(Json.encodeToString(clientGroups))
             }
         }
     }
