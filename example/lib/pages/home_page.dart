@@ -178,13 +178,14 @@ class _HomePageState extends State<HomePage> {
       stream: _flutterSingBoxPlugin.connectedStatusStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final status = snapshot.data as Map;
-          final uplink = status['uplink'];
-          final downlink = status['downlink'];
+          // final status = snapshot.data as Map;
+          // final uplink = status['uplink'];
+          // final downlink = status['downlink'];
           return Column(
             children: [
-              Text('Uplink: $uplink B/s'),
-              Text('Downlink: $downlink B/s'),
+              // Text('Uplink: $uplink B/s'),
+              // Text('Downlink: $downlink B/s'),
+              Text(snapshot.data),
             ],
           );
         } else {

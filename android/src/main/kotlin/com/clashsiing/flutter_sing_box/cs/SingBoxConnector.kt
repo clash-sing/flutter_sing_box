@@ -10,6 +10,7 @@ import com.clashsiing.flutter_sing_box.aidl.IService
 import com.clashsiing.flutter_sing_box.aidl.IServiceCallback
 import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Status
+import com.clashsiing.flutter_sing_box.cs.models.StatusModel
 import com.clashsiing.flutter_sing_box.utils.CommandClient
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import io.flutter.plugin.common.EventChannel
@@ -20,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
 object SingBoxConnector {
     private const val TAG = "SingBoxConnector"
@@ -133,17 +135,28 @@ object SingBoxConnector {
         override fun updateStatus(status: StatusMessage) {
             Log.d(TAG, "updateStatus: $status")
             // Log.d(TAG, "updateStatus: ${ProfileManager.getAllKeys()}")
-            val statusMap = mapOf(
-                "connectionsIn" to status.connectionsIn,
-                "connectionsOut" to status.connectionsOut,
-                "uplink" to status.uplink,
-                "downlink" to status.downlink,
-                "uplinkTotal" to status.uplinkTotal,
-                "downlinkTotal" to status.downlinkTotal,
-                "memory" to status.memory
+//            val statusMap = mapOf(
+//                "connectionsIn" to status.connectionsIn,
+//                "connectionsOut" to status.connectionsOut,
+//                "uplink" to status.uplink,
+//                "downlink" to status.downlink,
+//                "uplinkTotal" to status.uplinkTotal,
+//                "downlinkTotal" to status.downlinkTotal,
+//                "memory" to status.memory
+//            )
+            val statusModel = StatusModel(
+                memory = status.memory,
+                goroutines = status.goroutines,
+                connectionsIn = status.connectionsIn,
+                connectionsOut = status.connectionsOut,
+                trafficAvailable = status.trafficAvailable,
+                uplink = status.uplink,
+                downlink = status.downlink,
+                uplinkTotal = status.uplinkTotal,
+                downlinkTotal = status.downlinkTotal
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                statusSink?.success(statusMap)
+                statusSink?.success(Json.encodeToString(statusModel))
             }
         }
     }
