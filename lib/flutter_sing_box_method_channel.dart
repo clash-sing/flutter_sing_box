@@ -29,11 +29,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
-  static Stream<StatusClient>? _connectedStatusStream;
+  static Stream<ClientStatus>? _connectedStatusStream;
   @override
-  Stream<StatusClient> get connectedStatusStream {
+  Stream<ClientStatus> get connectedStatusStream {
     _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream()
-        .map((data) => StatusClient.fromJson(jsonDecode(data)));
+        .map((data) => ClientStatus.fromJson(jsonDecode(data)));
     return _connectedStatusStream!;
   }
 

@@ -22,7 +22,7 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.stopVpn();
   }
 
-  Stream<StatusClient> get connectedStatusStream =>
+  Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 
   Stream<dynamic> get groupStream =>

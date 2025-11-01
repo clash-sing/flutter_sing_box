@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'status_client.dart';
+part of 'client_status.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-StatusClient _$StatusClientFromJson(Map<String, dynamic> json) => StatusClient(
+ClientStatus _$ClientStatusFromJson(Map<String, dynamic> json) => ClientStatus(
   memory: (json['memory'] as num).toInt(),
   goroutines: (json['goroutines'] as num).toInt(),
   connectionsIn: (json['connectionsIn'] as num).toInt(),
@@ -18,7 +18,7 @@ StatusClient _$StatusClientFromJson(Map<String, dynamic> json) => StatusClient(
   downlinkTotal: (json['downlinkTotal'] as num).toInt(),
 );
 
-Map<String, dynamic> _$StatusClientToJson(StatusClient instance) =>
+Map<String, dynamic> _$ClientStatusToJson(ClientStatus instance) =>
     <String, dynamic>{
       'memory': instance.memory,
       'goroutines': instance.goroutines,

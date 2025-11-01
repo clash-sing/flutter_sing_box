@@ -1,9 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'status_client.g.dart';
+part 'client_status.g.dart';
 
 @JsonSerializable()
-class StatusClient {
+class ClientStatus {
   int memory;
   int goroutines;
   int connectionsIn;
@@ -14,7 +14,7 @@ class StatusClient {
   int uplinkTotal;
   int downlinkTotal;
 
-  StatusClient({
+  ClientStatus({
     required this.memory,
     required this.goroutines,
     required this.connectionsIn,
@@ -26,7 +26,7 @@ class StatusClient {
     required this.downlinkTotal,
   });
 
-  factory StatusClient.fromJson(Map<String, dynamic> json) => _$StatusClientFromJson(json);
+  factory ClientStatus.fromJson(Map<String, dynamic> json) => _$ClientStatusFromJson(json);
 
-  Map<String, dynamic> toJson() => _$StatusClientToJson(this);
+  Map<String, dynamic> toJson() => _$ClientStatusToJson(this);
 }

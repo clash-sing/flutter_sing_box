@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
@@ -174,7 +173,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildStatus() {
-    return StreamBuilder<StatusClient>(
+    return StreamBuilder<ClientStatus>(
       stream: _flutterSingBoxPlugin.connectedStatusStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
