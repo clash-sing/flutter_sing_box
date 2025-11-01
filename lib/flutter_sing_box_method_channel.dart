@@ -33,7 +33,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   @override
   Stream<StatusClient> get connectedStatusStream {
     _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream()
-        .map((dynamic data) => StatusClient.fromJson(jsonDecode(data as String)));
+        .map((data) => StatusClient.fromJson(jsonDecode(data)));
     return _connectedStatusStream!;
   }
 
