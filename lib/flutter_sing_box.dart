@@ -7,8 +7,8 @@ export '../src/profile/profile.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
-  Stream<dynamic> get vpnStatusStream =>
-      FlutterSingBoxPlatform.instance.vpnStatusStream;
+  Stream<dynamic> get connectedStatusStream =>
+      FlutterSingBoxPlatform.instance.connectedStatusStream;
 
   Future<String?> getPlatformVersion() {
     return FlutterSingBoxPlatform.instance.getPlatformVersion();

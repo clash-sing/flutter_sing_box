@@ -25,14 +25,14 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     await methodChannel.invokeMethod('stopVpn');
   }
 
-  static const EventChannel _eventChannel =
+  static const EventChannel _eventChannelConnectedStatus =
       EventChannel('connected_status_event');
 
-  static Stream<dynamic>? _vpnStatusStream;
+  static Stream<dynamic>? _connectedStatusStream;
 
   @override
-  Stream<dynamic> get vpnStatusStream {
-    _vpnStatusStream ??= _eventChannel.receiveBroadcastStream();
-    return _vpnStatusStream!;
+  Stream<dynamic> get connectedStatusStream {
+    _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream();
+    return _connectedStatusStream!;
   }
 }

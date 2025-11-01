@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildStatus() {
     return StreamBuilder<dynamic>(
-      stream: _flutterSingBoxPlugin.vpnStatusStream,
+      stream: _flutterSingBoxPlugin.connectedStatusStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final status = snapshot.data as Map;

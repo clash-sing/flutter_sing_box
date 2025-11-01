@@ -37,7 +37,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
-  Stream<dynamic> get vpnStatusStream {
-    throw UnimplementedError('vpnStatusStream has not been implemented.');
+  Stream<dynamic> get connectedStatusStream {
+    throw UnimplementedError('connectedStatusStream has not been implemented.');
   }
 }
