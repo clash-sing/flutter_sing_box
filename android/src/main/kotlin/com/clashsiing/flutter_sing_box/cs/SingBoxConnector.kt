@@ -10,6 +10,7 @@ import com.clashsiing.flutter_sing_box.aidl.IService
 import com.clashsiing.flutter_sing_box.aidl.IServiceCallback
 import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.constant.Status
+import com.clashsiing.flutter_sing_box.cs.models.ClientClashMode
 import com.clashsiing.flutter_sing_box.cs.models.ClientGroup
 import com.clashsiing.flutter_sing_box.cs.models.StatusClient
 import com.clashsiing.flutter_sing_box.utils.CommandClient
@@ -176,16 +177,26 @@ object SingBoxConnector {
     }
 
     class ClashModeClient : CommandClient.Handler {
+        private var clashModeList = listOf<String>()
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
             Log.d(TAG, "initializeClashMode: $modeList $currentMode")
+            clashModeList = modeList
+            val clientClashMode = ClientClashMode(
+                modes = clashModeList,
+                currentMode = currentMode
+            )
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                clashModeSink?.success(mapOf("modeList" to modeList, "currentMode" to currentMode))
+                clashModeSink?.success(Json.encodeToString(clientClashMode))
             }
         }
         override fun updateClashMode(newMode: String) {
             Log.d(TAG, "updateClashMode: $newMode")
+            val clientClashMode = ClientClashMode(
+                modes = clashModeList,
+                currentMode = newMode
+            )
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                clashModeSink?.success(mapOf("currentMode" to newMode))
+                clashModeSink?.success(Json.encodeToString(clientClashMode))
             }
         }
     }
