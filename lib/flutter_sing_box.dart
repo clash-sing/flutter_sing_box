@@ -34,6 +34,6 @@ class FlutterSingBox {
   Stream<List<String>> get logStream =>
       FlutterSingBoxPlatform.instance.logStream;
 
-  Stream<dynamic> get proxyStateStream =>
+  Stream<ProxyState> get proxyStateStream =>
       FlutterSingBoxPlatform.instance.proxyStateStream;
 }

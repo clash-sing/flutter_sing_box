@@ -233,11 +233,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildProxyState() {
-    return StreamBuilder<dynamic>(
+    return StreamBuilder<ProxyState>(
       stream: _flutterSingBoxPlugin.proxyStateStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Text('Proxy State: ${snapshot.data ?? 'NONE'}');
+          return Text('Proxy State: ${snapshot.data}');
         } else {
           return const SizedBox.shrink();
         }
