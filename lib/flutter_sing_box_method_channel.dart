@@ -64,4 +64,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return _logStream!;
   }
 
+  static const EventChannel _eventChannelProxyState = EventChannel('proxy_state_event');
+  static Stream<dynamic>? _proxyStateStream;
+  @override
+  Stream<dynamic> get proxyStateStream {
+    _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream();
+    return _proxyStateStream!;
+  }
 }

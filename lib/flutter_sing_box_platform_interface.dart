@@ -57,4 +57,8 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   Stream<List<String>> get logStream {
     throw UnimplementedError('logStream has not been implemented.');
   }
+
+  Stream<dynamic> get proxyStateStream {
+    throw UnimplementedError('proxyStateStream has not been implemented.');
+  }
 }

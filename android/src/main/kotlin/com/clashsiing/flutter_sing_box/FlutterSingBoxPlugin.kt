@@ -32,12 +32,14 @@ class FlutterSingBoxPlugin :
         private const val EVENT_CHANNEL_GROUP = "group_event"
         private const val EVENT_CHANNEL_CLASH_MODE = "clash_mode_event"
         private const val EVENT_CHANNEL_LOG = "log_event"
+        private const val EVENT_CHANNEL_PROXY_STATE = "proxy_state_event"
     }
     private lateinit var channel: MethodChannel
     private lateinit var eventChannelConnectedStatus: EventChannel
     private lateinit var eventChannelGroup: EventChannel
     private lateinit var eventChannelClashMode: EventChannel
     private lateinit var eventChannelLog: EventChannel
+    private lateinit var eventChannelProxyState: EventChannel
     private lateinit var applicationContext: Context
     private var activityBinding: ActivityPluginBinding? = null
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
@@ -70,6 +72,12 @@ class FlutterSingBoxPlugin :
             EVENT_CHANNEL_LOG
         )
         eventChannelLog.setStreamHandler(LogStream())
+
+        eventChannelProxyState = EventChannel(
+            flutterPluginBinding.binaryMessenger,
+            EVENT_CHANNEL_PROXY_STATE
+        )
+        eventChannelProxyState.setStreamHandler(ProxyStateStream())
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -217,4 +225,15 @@ class FlutterSingBoxPlugin :
             SingBoxConnector.logSink = null
         }
     }
+
+    class ProxyStateStream : StreamHandler {
+        override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+            SingBoxConnector.proxyStateSink = events
+        }
+
+        override fun onCancel(arguments: Any?) {
+            SingBoxConnector.proxyStateSink = null
+        }
+    }
+
 }

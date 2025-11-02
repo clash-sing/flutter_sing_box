@@ -37,6 +37,7 @@ object SingBoxConnector {
     var groupSink: EventChannel.EventSink? = null
     var clashModeSink: EventChannel.EventSink? = null
     var logSink: EventChannel.EventSink? = null
+    var proxyStateSink: EventChannel.EventSink? = null
     private val callback = ServiceCallback()
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -121,15 +122,28 @@ object SingBoxConnector {
     class ServiceCallback() : IServiceCallback.Stub() {
         override fun onServiceStatusChanged(status: Int) {
             Log.d(TAG, "onServiceStatusChanged: $status")
-            if (status == Status.Started.ordinal) {
+            val proxyStatus: Status = when (status) {
+                Status.Stopped.ordinal -> Status.Stopped
+                Status.Starting.ordinal -> Status.Starting
+                Status.Started.ordinal -> Status.Started
+                Status.Stopping.ordinal -> Status.Stopping
+                else -> throw IllegalArgumentException("Unknown status: $status")
+            }
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                proxyStateSink?.success(proxyStatus.name)
+            }
+            if (proxyStatus == Status.Started) {
                 connectClient()
-            } else if (status == Status.Stopped.ordinal) {
+            } else if (proxyStatus == Status.Stopped) {
                 disconnectClient()
             }
         }
 
         override fun onServiceAlert(type: Int, message: String?) {
             Log.e(TAG, "onServiceAlert: $type $message")
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                proxyStateSink?.success(Status.Stopped.name)
+            }
             disconnectClient()
         }
 

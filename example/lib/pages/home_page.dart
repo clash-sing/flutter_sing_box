@@ -94,6 +94,7 @@ class _HomePageState extends State<HomePage> {
         Card(child: _buildGroup(),),
         Card(child: _buildClashMode(),),
         Card(child: _buildLogs(),),
+        Card(child: _buildProxyState(),),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -224,6 +225,19 @@ class _HomePageState extends State<HomePage> {
         if (snapshot.hasData) {
           final str = snapshot.data?.first ?? 'EMPTY!';
           return Text(str);
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+    );
+  }
+
+  Widget _buildProxyState() {
+    return StreamBuilder<dynamic>(
+      stream: _flutterSingBoxPlugin.proxyStateStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text('Proxy State: ${snapshot.data ?? 'NONE'}');
         } else {
           return const SizedBox.shrink();
         }
