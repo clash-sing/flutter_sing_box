@@ -29,6 +29,13 @@ class _HomePageState extends State<HomePage> {
     _loadProfiles();
   }
 
+  // Future<void> _getProxyState() async {
+  //   _proxyState = await _flutterSingBoxPlugin.proxyStateStream.last;
+  //   if (!mounted) return;
+  //   setState(() {
+  //   });
+  // }
+
   Future<void> _loadProfiles() async {
     _selectedProfile = profileManager.getSelectedProfile();
     _profiles.clear();

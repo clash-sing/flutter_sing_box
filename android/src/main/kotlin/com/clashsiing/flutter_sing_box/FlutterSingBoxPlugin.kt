@@ -26,6 +26,7 @@ class FlutterSingBoxPlugin :
     companion object {
         private const val START_VPN = "startVpn"
         private const val STOP_VPN = "stopVpn"
+        private const val PROXY_STATE = "proxyState"
         private const val VPN_REQUEST_CODE = 1001
         private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
         private const val EVENT_CHANNEL_CONNECTED_STATUS = "connected_status_event"
@@ -111,6 +112,9 @@ class FlutterSingBoxPlugin :
 //                )
                 result.success(null)
             }
+//            PROXY_STATE -> {
+//                result.success(SingBoxConnector.proxyState)
+//            }
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }

@@ -129,6 +129,7 @@ object SingBoxConnector {
                 Status.Stopping.ordinal -> Status.Stopping
                 else -> throw IllegalArgumentException("Unknown status: $status")
             }
+            Log.d(TAG, "proxyStatus: $proxyStatus")
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 proxyStateSink?.success(proxyStatus.name)
             }
