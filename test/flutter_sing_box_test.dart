@@ -24,28 +24,6 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
-  Future<void> setup() {
-    // TODO: implement setup
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<String> importProfile(String url) {
-    // TODO: implement importProfile
-    throw UnimplementedError();
-  }
-
-  @override
-  // TODO: implement vpnStatusStream
-  Stream get vpnStatusStream => throw UnimplementedError();
-
-  @override
-  Future<void> init(bool isDebug) {
-    // TODO: implement init
-    throw UnimplementedError();
-  }
-
-  @override
   // TODO: implement clashModeStream
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 
@@ -60,6 +38,10 @@ class MockFlutterSingBoxPlatform
   @override
   // TODO: implement logStream
   Stream<List<String>> get logStream => throw UnimplementedError();
+
+  @override
+  // TODO: implement proxyStateStream
+  Stream<ProxyState> get proxyStateStream => throw UnimplementedError();
 }
 
 void main() {
