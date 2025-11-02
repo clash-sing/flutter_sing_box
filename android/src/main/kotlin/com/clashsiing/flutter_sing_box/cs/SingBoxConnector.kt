@@ -33,10 +33,15 @@ object SingBoxConnector {
     private lateinit var logClient: CommandClient
     private lateinit var coroutineScope: CoroutineScope
     private var service: IService? = null
+    @Volatile
     var statusSink: EventChannel.EventSink? = null
+    @Volatile
     var groupSink: EventChannel.EventSink? = null
+    @Volatile
     var clashModeSink: EventChannel.EventSink? = null
+    @Volatile
     var logSink: EventChannel.EventSink? = null
+    @Volatile
     var proxyStateSink: EventChannel.EventSink? = null
     private val callback = ServiceCallback()
     private val serviceConnection = object : ServiceConnection {
@@ -62,6 +67,13 @@ object SingBoxConnector {
 
     }
     internal fun reconnect() {
+        // Null out sinks to discard any stale references from a previous engine.
+        statusSink = null
+        groupSink = null
+        clashModeSink = null
+        logSink = null
+        proxyStateSink = null
+
         val application = PluginManager.appContext
         try {
             application.unbindService(serviceConnection)
@@ -131,6 +143,9 @@ object SingBoxConnector {
             }
             Log.d(TAG, "proxyStatus: $proxyStatus")
             coroutineScope.launch(Dispatchers.Main.immediate) {
+                if (proxyStateSink == null) {
+                    Log.d(TAG, "proxyStateSink is null")
+                }
                 proxyStateSink?.success(proxyStatus.name)
             }
             if (proxyStatus == Status.Started) {
