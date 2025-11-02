@@ -31,4 +31,6 @@ class FlutterSingBox {
   Stream<ClientClashMode> get clashModeStream =>
       FlutterSingBoxPlatform.instance.clashModeStream;
 
+  Stream<List<String>> get logStream =>
+      FlutterSingBoxPlatform.instance.logStream;
 }

@@ -93,6 +93,7 @@ class _HomePageState extends State<HomePage> {
         _buildStatus(),
         _buildGroup(),
         _buildClashMode(),
+        _buildLogs(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -209,6 +210,20 @@ class _HomePageState extends State<HomePage> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(snapshot.data?.toJson().toString() ?? '');
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+    );
+  }
+
+  Widget _buildLogs() {
+    return StreamBuilder<List<String>>(
+      stream: _flutterSingBoxPlugin.logStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final str = snapshot.data?.first ?? 'EMPTY!';
+          return Text(str);
         } else {
           return const SizedBox.shrink();
         }

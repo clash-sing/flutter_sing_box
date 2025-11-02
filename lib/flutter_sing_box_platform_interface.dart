@@ -49,4 +49,8 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   Stream<ClientClashMode> get clashModeStream {
     throw UnimplementedError('clashModeStream has not been implemented.');
   }
+
+  Stream<List<String>> get logStream {
+    throw UnimplementedError('logStream has not been implemented.');
+  }
 }

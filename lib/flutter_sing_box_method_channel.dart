@@ -54,4 +54,14 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
         .map((data) => ClientClashMode.fromJson(jsonDecode(data)));
     return _clashModeStream!;
   }
+
+  static const EventChannel _eventChannelLog = EventChannel('log_event');
+  static Stream<List<String>>? _logStream;
+  @override
+  Stream<List<String>> get logStream {
+    _logStream ??= _eventChannelLog.receiveBroadcastStream()
+        .map((data) => (jsonDecode(data) as List).map((item) => item.toString()).toList());
+    return _logStream!;
+  }
+
 }
