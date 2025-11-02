@@ -98,8 +98,8 @@ object SingBoxConnector {
     internal fun disconnect() {
         try {
             PluginManager.appContext.unbindService(serviceConnection)
-            disconnectClient()
             coroutineScope.cancel()
+            disconnectClient()
         } catch (e: Exception) {
             Log.w(TAG, "unbindService: 不需要解绑。 ${e.message}")
         }
@@ -151,10 +151,10 @@ object SingBoxConnector {
 
     class StatusClient : CommandClient.Handler {
         override fun onConnected() {
-            Log.d(TAG, "onConnected: ")
+            Log.d(TAG, "onConnected:  -------------------------")
         }
         override fun onDisconnected() {
-            Log.d(TAG, "onDisconnected: ")
+            Log.d(TAG, "onDisconnected:  -------------------------")
         }
 
         override fun updateStatus(status: StatusMessage) {
@@ -229,7 +229,7 @@ object SingBoxConnector {
             Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<String>) {
-            Log.d(TAG, "appendLogs: $message")
+//            Log.d(TAG, "appendLogs: $message")
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 logSink?.success(Json.encodeToString(message))
             }
