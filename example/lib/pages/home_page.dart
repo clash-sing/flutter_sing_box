@@ -204,11 +204,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildClashMode() {
-    return StreamBuilder<dynamic>(
+    return StreamBuilder<ClientClashMode>(
       stream: _flutterSingBoxPlugin.clashModeStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Text(snapshot.data.toString());
+          return Text(snapshot.data?.toJson().toString() ?? '');
         } else {
           return const SizedBox.shrink();
         }

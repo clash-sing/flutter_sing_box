@@ -47,10 +47,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   static const EventChannel _eventChannelClashMode = EventChannel('clash_mode_event');
-  static Stream<dynamic>? _clashModeStream;
+  static Stream<ClientClashMode>? _clashModeStream;
   @override
-  Stream<dynamic> get clashModeStream {
-    _clashModeStream ??= _eventChannelClashMode.receiveBroadcastStream();
+  Stream<ClientClashMode> get clashModeStream {
+    _clashModeStream ??= _eventChannelClashMode.receiveBroadcastStream()
+        .map((data) => ClientClashMode.fromJson(jsonDecode(data)));
     return _clashModeStream!;
   }
 }

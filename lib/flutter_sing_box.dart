@@ -28,7 +28,7 @@ class FlutterSingBox {
   Stream<List<ClientGroup>> get groupStream =>
       FlutterSingBoxPlatform.instance.groupStream;
 
-  Stream<dynamic> get clashModeStream =>
+  Stream<ClientClashMode> get clashModeStream =>
       FlutterSingBoxPlatform.instance.clashModeStream;
 
 }

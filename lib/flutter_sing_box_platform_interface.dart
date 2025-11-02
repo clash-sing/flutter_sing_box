@@ -46,7 +46,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('groupStream has not been implemented.');
   }
 
-  Stream<dynamic> get clashModeStream {
+  Stream<ClientClashMode> get clashModeStream {
     throw UnimplementedError('clashModeStream has not been implemented.');
   }
 }
