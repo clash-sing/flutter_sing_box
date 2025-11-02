@@ -38,18 +38,22 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
+  /// sing-box connected status
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');
   }
 
+  /// clash group
   Stream<List<ClientGroup>> get groupStream {
     throw UnimplementedError('groupStream has not been implemented.');
   }
 
+  /// clash mode
   Stream<ClientClashMode> get clashModeStream {
     throw UnimplementedError('clashModeStream has not been implemented.');
   }
 
+  /// sing-box log
   Stream<List<String>> get logStream {
     throw UnimplementedError('logStream has not been implemented.');
   }
