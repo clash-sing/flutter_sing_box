@@ -30,11 +30,13 @@ object SingBoxConnector {
     private lateinit var statusClient: CommandClient
     private lateinit var groupClient: CommandClient
     private lateinit var clashModeClient: CommandClient
+    private lateinit var logClient: CommandClient
     private lateinit var coroutineScope: CoroutineScope
     private var service: IService? = null
     var statusSink: EventChannel.EventSink? = null
     var groupSink: EventChannel.EventSink? = null
     var clashModeSink: EventChannel.EventSink? = null
+    var logSink: EventChannel.EventSink? = null
     private val callback = ServiceCallback()
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -81,6 +83,11 @@ object SingBoxConnector {
             CommandClient.ConnectionType.ClashMode,
             ClashModeClient()
         )
+        logClient = CommandClient(
+            coroutineScope,
+            CommandClient.ConnectionType.Log,
+            LogClient()
+        )
 
         val intent = Intent(application, SettingsManager.serviceClass())
         intent.action = Action.SERVICE
@@ -101,12 +108,14 @@ object SingBoxConnector {
         statusClient.connect()
         groupClient.connect()
         clashModeClient.connect()
+        logClient.connect()
     }
 
     private fun disconnectClient() {
         statusClient.disconnect()
         groupClient.disconnect()
         clashModeClient.disconnect()
+        logClient.disconnect()
     }
 
     class ServiceCallback() : IServiceCallback.Stub() {
@@ -197,6 +206,18 @@ object SingBoxConnector {
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 clashModeSink?.success(Json.encodeToString(clientClashMode))
+            }
+        }
+    }
+
+    class LogClient : CommandClient.Handler {
+        override fun clearLogs() {
+            Log.d(TAG, "clearLogs: -------------------------")
+        }
+        override fun appendLogs(message: List<String>) {
+            Log.d(TAG, "appendLogs: $message")
+            coroutineScope.launch(Dispatchers.Main.immediate) {
+                logSink?.success(Json.encodeToString(message))
             }
         }
     }
