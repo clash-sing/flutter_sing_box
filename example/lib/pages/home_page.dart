@@ -90,10 +90,10 @@ class _HomePageState extends State<HomePage> {
               }
           ),
         ),
-        _buildStatus(),
-        _buildGroup(),
-        _buildClashMode(),
-        _buildLogs(),
+        Card(child: _buildStatus(),),
+        Card(child: _buildGroup(),),
+        Card(child: _buildClashMode(),),
+        Card(child: _buildLogs(),),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

@@ -56,6 +56,10 @@ class MockFlutterSingBoxPlatform
   @override
   // TODO: implement groupStream
   Stream<List<ClientGroup>> get groupStream => throw UnimplementedError();
+
+  @override
+  // TODO: implement logStream
+  Stream<List<String>> get logStream => throw UnimplementedError();
 }
 
 void main() {
