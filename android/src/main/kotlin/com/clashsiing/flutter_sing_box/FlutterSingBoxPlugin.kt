@@ -140,6 +140,9 @@ class FlutterSingBoxPlugin :
         channel.setMethodCallHandler(null)
         eventChannelConnectedStatus.setStreamHandler(null)
         eventChannelGroup.setStreamHandler(null)
+        eventChannelClashMode.setStreamHandler(null)
+        eventChannelLog.setStreamHandler(null)
+        eventChannelProxyState.setStreamHandler(null)
     }
 
     // ActivityAware
