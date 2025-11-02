@@ -44,6 +44,18 @@ class MockFlutterSingBoxPlatform
     // TODO: implement init
     throw UnimplementedError();
   }
+
+  @override
+  // TODO: implement clashModeStream
+  Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
+
+  @override
+  // TODO: implement connectedStatusStream
+  Stream<ClientStatus> get connectedStatusStream => throw UnimplementedError();
+
+  @override
+  // TODO: implement groupStream
+  Stream<List<ClientGroup>> get groupStream => throw UnimplementedError();
 }
 
 void main() {
