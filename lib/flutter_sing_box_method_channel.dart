@@ -28,6 +28,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     await methodChannel.invokeMethod('stopVpn');
   }
 
+  @override
+  Future<void> setClashMode(String mode) async {
+    await methodChannel.invokeMethod('setClashMode', mode);
+  }
+
   static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
   static Stream<ClientStatus>? _connectedStatusStream;
   @override

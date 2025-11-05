@@ -12,7 +12,9 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
+import io.nekohasekai.libbox.Libbox
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.text.contains
 
 class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     companion object {
@@ -55,6 +57,15 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
             "stopVpn" -> {
                 BoxService.stop()
                 result.success(null)
+            }
+            "setClashMode" -> {
+                val clashMode = call.arguments as String
+                if (singBoxConnector?.clashModes?.contains(clashMode) == true) {
+                    Libbox.newStandaloneCommandClient().setClashMode(clashMode)
+                    result.success(null)
+                } else {
+                    result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
+                }
             }
             "getPlatformVersion" -> {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")

@@ -22,6 +22,10 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.stopVpn();
   }
 
+  Future<void> setClashMode(String clashMode) {
+    return FlutterSingBoxPlatform.instance.setClashMode(clashMode);
+  }
+
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 

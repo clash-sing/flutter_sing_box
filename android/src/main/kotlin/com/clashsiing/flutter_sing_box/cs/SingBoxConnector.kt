@@ -58,6 +58,9 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     private var proxyStateSink: EventChannel.EventSink? = null
 
     private val callback = ServiceCallback()
+
+    val clashModes: MutableList<String> = mutableListOf()
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             service = IService.Stub.asInterface(binder)
@@ -234,12 +237,12 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     }
 
     inner class ClashModeClient : CommandClient.Handler {
-        private var clashModeList = listOf<String>()
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
             Log.d(TAG, "initializeClashMode: $modeList $currentMode")
-            clashModeList = modeList
+            clashModes.clear()
+            clashModes.addAll(modeList)
             val clientClashMode = ClientClashMode(
-                modes = clashModeList,
+                modes = clashModes.toList(),
                 currentMode = currentMode
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
@@ -249,7 +252,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         override fun updateClashMode(newMode: String) {
             Log.d(TAG, "updateClashMode: $newMode")
             val clientClashMode = ClientClashMode(
-                modes = clashModeList,
+                modes = clashModes.toList(),
                 currentMode = newMode
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
