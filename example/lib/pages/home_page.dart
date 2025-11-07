@@ -98,11 +98,11 @@ class _HomePageState extends State<HomePage> {
               }
           ),
         ),
-        Card(child: _buildStatus(),),
-        Card(child: _buildGroup(),),
-        Card(child: _buildClashMode(),),
-        Card(child: _buildLogs(),),
-        Card(child: _buildProxyState(),),
+        // Card(child: _buildStatus(),),
+        // Card(child: _buildGroup(),),
+        // Card(child: _buildClashMode(),),
+        // Card(child: _buildLogs(),),
+        // Card(child: _buildProxyState(),),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

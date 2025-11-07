@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box_example/utils/client_providers.dart';
 
-class ConnectedOverview extends StatefulWidget {
+class ConnectedOverview extends ConsumerStatefulWidget {
   const ConnectedOverview({super.key});
 
   @override
-  State<ConnectedOverview> createState() => _ConnectedOverviewState();
+  ConsumerState<ConnectedOverview> createState() => _ConnectedOverviewState();
 }
 
-class _ConnectedOverviewState extends State<ConnectedOverview> {
+class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   final _flutterSingBoxPlugin = FlutterSingBox();
   Profile? _profile;
   @override
@@ -16,6 +18,7 @@ class _ConnectedOverviewState extends State<ConnectedOverview> {
     super.initState();
     _profile = profileManager.getSelectedProfile();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,8 @@ class _ConnectedOverviewState extends State<ConnectedOverview> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildStatus(),
+              _buildConnectedStatus(),
+              _buildClashMode(),
             ],
           ),
         ),
@@ -37,52 +41,28 @@ class _ConnectedOverviewState extends State<ConnectedOverview> {
     );
   }
 
-  Widget _buildStatus() {
-    Row buildStatusRow(String text1, String text2) {
-      return Row(
-            children: [
-              Expanded(child: Text(text1),),
-              Expanded(child: Text(text2),),
-            ],
-          );
-    }
-    return StreamBuilder<ClientStatus>(
-      stream: _flutterSingBoxPlugin.connectedStatusStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                buildStatusRow(
-                    'TrafficAvailable: ${snapshot.data?.trafficAvailable ?? '--'}',
-                    ''
-                ),
-                buildStatusRow(
-                    'Memory: ${snapshot.data?.memory ?? '--'}',
-                    'Goroutines: ${snapshot.data?.goroutines ?? '--'}'
-                ),
-                buildStatusRow(
-                    'ConnectionsIn: ${snapshot.data?.connectionsIn ?? '--'}',
-                    'ConnectionsOut: ${snapshot.data?.connectionsOut ?? '--'}'
-                ),
-                buildStatusRow(
-                    'Uplink: ${snapshot.data?.uplink ?? '--'}',
-                    'Downlink: ${snapshot.data?.downlink ?? '--'}'
-                ),
-                buildStatusRow(
-                    'UplinkTotal: ${snapshot.data?.uplinkTotal ?? '--'}',
-                    'DownlinkTotal: ${snapshot.data?.downlinkTotal ?? '--'}'
-                ),
-              ],
-            ),
-          );
-        } else {
-          return const Text('VPN Status: Disconnected');
-        }
+  Widget _buildConnectedStatus() {
+    final asyncStatus = ref.watch(connectedStreamProvider);
+    return asyncStatus.when(
+      data: (status) {
+        return Text(
+          'memory: ${status.memory}',
+        );
       },
+      loading: () => Text('Connected: loading...'),
+      error: (error, stack) => Text('Connected: Error: $error'),
     );
+  }
 
+  Widget _buildClashMode() {
+    final lastMode = ref.watch(clashModeStreamProvider);
+    return lastMode.when(
+      data: (data) {
+        return Text('Clash Mode: ${data.currentMode}');
+      },
+      loading: () => Text('Clash Mode loading...'),
+      error: (error, stack) => Text('Clash Mode Error: $error'),
+    );
   }
 
 
