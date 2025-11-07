@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -52,12 +53,43 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   static const EventChannel _eventChannelClashMode = EventChannel('clash_mode_event');
-  static Stream<ClientClashMode>? _clashModeStream;
+  // 1. 我们自己的、对外暴露的广播 Controller
+  static StreamController<ClientClashMode>? _clashModeController;
+  // 2. 用于缓存最后一次收到的值
+  static ClientClashMode? _lastClashMode;
+  // 3. 对原生 EventChannel 的订阅，需要持有它以便管理
+  static StreamSubscription? _clashModeSubscription;
+
   @override
   Stream<ClientClashMode> get clashModeStream {
-    _clashModeStream ??= _eventChannelClashMode.receiveBroadcastStream()
-        .map((data) => ClientClashMode.fromJson(jsonDecode(data)));
-    return _clashModeStream!;
+    // 4. 首次调用时，进行一次性初始化
+    if (_clashModeController == null) {
+      // 创建一个广播 StreamController
+      _clashModeController = StreamController<ClientClashMode>.broadcast(
+        // 5. 当有新的监听者订阅我们的 Stream 时，onListen 会被调用
+        onListen: () {
+          // 如果我们已经缓存了一个值，立即把它发给这个新的监听者
+          if (_lastClashMode != null) {
+            _clashModeController!.add(_lastClashMode!);
+          }
+        },
+      );
+
+      // 6. 监听原生的 EventChannel Stream
+      _clashModeSubscription = _eventChannelClashMode
+          .receiveBroadcastStream()
+          .map((data) => ClientClashMode.fromJson(jsonDecode(data)))
+          .listen((newMode) {
+        // 7. 当收到原生端的新数据时...
+        // a. 更新我们的缓存
+        _lastClashMode = newMode;
+        // b. 把新数据添加到我们自己的 Controller 中，以通知所有当前的监听者
+        _clashModeController!.add(newMode);
+      });
+    }
+
+    // 8. 始终返回我们自己 Controller 的 Stream
+    return _clashModeController!.stream;
   }
 
   static const EventChannel _eventChannelLog = EventChannel('log_event');

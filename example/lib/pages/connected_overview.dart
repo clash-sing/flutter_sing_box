@@ -11,7 +11,7 @@ class ConnectedOverview extends ConsumerStatefulWidget {
 }
 
 class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
-  final _flutterSingBoxPlugin = FlutterSingBox();
+  // final _flutterSingBoxPlugin = FlutterSingBox();
   Profile? _profile;
   @override
   initState() {
@@ -58,7 +58,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     final lastMode = ref.watch(clashModeStreamProvider);
     return lastMode.when(
       data: (data) {
-        return Text('Clash Mode: ${data.currentMode}');
+        return Text('Clash Mode: ${data.modes}, ${data.currentMode}');
       },
       loading: () => Text('Clash Mode loading...'),
       error: (error, stack) => Text('Clash Mode Error: $error'),
