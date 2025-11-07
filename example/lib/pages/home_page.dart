@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box_example/pages/connected_overview.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/snackbar_util.dart';
@@ -109,6 +110,15 @@ class _HomePageState extends State<HomePage> {
             _buildStartButton(),
             _buildConfigButton(),
           ],
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ConnectedOverview())
+            );
+          },
+          child: const Text('Connected Overview'),
         ),
       ],
     );

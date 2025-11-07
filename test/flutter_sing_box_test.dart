@@ -24,6 +24,12 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
+  Future<void> setClashMode(String mode) {
+    // TODO: implement setClashMode
+    throw UnimplementedError();
+  }
+
+  @override
   // TODO: implement clashModeStream
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 
@@ -42,6 +48,7 @@ class MockFlutterSingBoxPlatform
   @override
   // TODO: implement proxyStateStream
   Stream<ProxyState> get proxyStateStream => throw UnimplementedError();
+
 }
 
 void main() {
