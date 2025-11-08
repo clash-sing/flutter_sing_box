@@ -60,7 +60,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
             }
             "setClashMode" -> {
                 val clashMode = call.arguments as String
-                if (singBoxConnector?.clashModes?.contains(clashMode) == true) {
+                if (singBoxConnector?.clientClashMode?.modes?.contains(clashMode) == true) {
                     Libbox.newStandaloneCommandClient().setClashMode(clashMode)
                     result.success(null)
                 } else {

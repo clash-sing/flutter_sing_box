@@ -57,9 +57,10 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     @Volatile
     private var proxyStateSink: EventChannel.EventSink? = null
 
-    private val callback = ServiceCallback()
+    @Volatile
+    internal var clientClashMode: ClientClashMode? = null
 
-    val clashModes: MutableList<String> = mutableListOf()
+    private val callback = ServiceCallback()
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -207,6 +208,9 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
                 downlinkTotal = status.downlinkTotal
             )
             coroutineScope.launch(Dispatchers.Main.immediate) {
+                clientClashMode?.let {
+                    clashModeSink?.success(Json.encodeToString(clientClashMode))
+                }
                 statusSink?.success(Json.encodeToString(clientStatus))
             }
         }
@@ -239,25 +243,20 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     inner class ClashModeClient : CommandClient.Handler {
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
             Log.d(TAG, "initializeClashMode: $modeList $currentMode")
-            clashModes.clear()
-            clashModes.addAll(modeList)
-            val clientClashMode = ClientClashMode(
-                modes = clashModes.toList(),
+            clientClashMode = ClientClashMode(
+                modes = modeList,
                 currentMode = currentMode
             )
-            coroutineScope.launch(Dispatchers.Main.immediate) {
-                clashModeSink?.success(Json.encodeToString(clientClashMode))
-            }
+//            coroutineScope.launch(Dispatchers.Main.immediate) {
+//                clashModeSink?.success(Json.encodeToString(clientClashMode))
+//            }
         }
         override fun updateClashMode(newMode: String) {
             Log.d(TAG, "updateClashMode: $newMode")
-            val clientClashMode = ClientClashMode(
-                modes = clashModes.toList(),
-                currentMode = newMode
-            )
-            coroutineScope.launch(Dispatchers.Main.immediate) {
-                clashModeSink?.success(Json.encodeToString(clientClashMode))
-            }
+            clientClashMode?.copy(currentMode = newMode)
+//            coroutineScope.launch(Dispatchers.Main.immediate) {
+//                clashModeSink?.success(Json.encodeToString(clientClashMode))
+//            }
         }
     }
 

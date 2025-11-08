@@ -42,15 +42,43 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   }
 
   Widget _buildConnectedStatus() {
+    Row buildStatusRow(String text1, String text2) {
+      return Row(
+        children: [
+          Expanded(child: Text(text1),),
+          Expanded(child: Text(text2),),
+        ],
+      );
+    }
     final asyncStatus = ref.watch(connectedStreamProvider);
     return asyncStatus.when(
       data: (status) {
-        return Text(
-          'memory: ${status.memory}',
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              buildStatusRow(
+                  'Memory: ${status.memory}',
+                  'Goroutines: ${status.goroutines}'
+              ),
+              buildStatusRow(
+                  'ConnectionsIn: ${status.connectionsIn}',
+                  'ConnectionsOut: ${status.connectionsOut}'
+              ),
+              buildStatusRow(
+                  'Uplink: ${status.uplink}',
+                  'Downlink: ${status.downlink}'
+              ),
+              buildStatusRow(
+                  'UplinkTotal: ${status.uplinkTotal}',
+                  'DownlinkTotal: ${status.downlinkTotal}'
+              ),
+            ],
+          ),
         );
       },
-      loading: () => Text('Connected: loading...'),
-      error: (error, stack) => Text('Connected: Error: $error'),
+      loading: () => Text('Connected status: loading...'),
+      error: (error, stack) => Text('Connected status error: $error'),
     );
   }
 
