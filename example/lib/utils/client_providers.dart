@@ -23,3 +23,13 @@ final proxyStateStreamProvider = StreamProvider<ProxyState>((ref) {
   final singBox = ref.watch(flutterSingBoxProvider);
   return singBox.proxyStateStream;
 });
+
+final groupStreamProvider = StreamProvider<List<ClientGroup>>((ref) {
+  final singBox = ref.watch(flutterSingBoxProvider);
+  return singBox.groupStream;
+});
+
+final logStreamProvider = StreamProvider<List<String>>((ref) {
+  final singBox = ref.watch(flutterSingBoxProvider);
+  return singBox.logStream;
+});
