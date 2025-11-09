@@ -30,6 +30,10 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.setOutbound(groupTag: groupTag, outboundTag: outboundTag);
   }
 
+  Future<void> urlTest({required String groupTag}) async {
+    return FlutterSingBoxPlatform.instance.urlTest(groupTag: groupTag);
+  }
+
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
     return FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
   }

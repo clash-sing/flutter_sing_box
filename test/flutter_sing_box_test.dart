@@ -36,6 +36,12 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
+  Future<void> urlTest({required String groupTag}) {
+    // TODO: implement urlTest
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
     // TODO: implement setGroupExpand
     throw UnimplementedError();

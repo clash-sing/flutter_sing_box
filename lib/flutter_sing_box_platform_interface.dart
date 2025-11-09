@@ -50,6 +50,10 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('setGroupExpand() has not been implemented.');
   }
 
+  Future<void> urlTest({required String groupTag}) {
+    throw UnimplementedError('urlTest() has not been implemented.');
+  }
+
   /// sing-box connected status
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');

@@ -90,7 +90,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     singBoxConnector?.groupClient?.connect()
                     result.success(null)
                 } catch (e: Exception) {
-                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    result.error("INVALID_ARGUMENTS", "无效的参数", e)
                     return
                 }
             }
@@ -113,7 +113,21 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     singBoxConnector?.groupClient?.connect()
                     result.success(null)
                 } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", e)
+                    return
+                }
+            }
+            "urlTest" -> {
+                val groupTag = call.arguments as String?
+                if (groupTag.isNullOrBlank()) {
                     result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                try {
+                    Libbox.newStandaloneCommandClient().urlTest(groupTag)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", e)
                     return
                 }
             }
