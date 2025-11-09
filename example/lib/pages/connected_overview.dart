@@ -153,37 +153,49 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
         }
       }
     }
-    return ExpansionPanelList(
-        expansionCallback: (int index, bool isExpanded) {
-          setState(() {
-            _groupItems[index].isExpanded = isExpanded;
-          });
-        },
-        children: _groupItems.map((item) {
-          return ExpansionPanel(
-            headerBuilder: (BuildContext context, bool isExpanded) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ExpansionPanelList(
+          expansionCallback: (int index, bool isExpanded) {
+            setState(() {
+              _groupItems[index].isExpanded = isExpanded;
+            });
+          },
+          children: _groupItems.map((item) {
+            return ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    spacing: 8.0,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(child: Text(item.outbound.tag),),
-                      Text((item.outbound.outbounds?.length ?? 0).toString()),
+                      Row(
+                        children: [
+                          Expanded(child: Text(item.outbound.tag),),
+                          Text((item.outbound.outbounds?.length ?? 0).toString()),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(item.outbound.type),
+                          SizedBox(width: 12.0,),
+                          Expanded(
+                            child: Text(item.selected ?? '',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Expanded(child: Text(item.outbound.type),),
-                      Text((item.selected ?? '').toString()),
-                    ],
-                  ),
-                ],
-              );
-            },
-            body: ListTile(title: Text(item.outbound.outbounds.toString()),),
-            isExpanded: item.isExpanded,
-          );
-        }).toList(),
+                );
+              },
+              body: ListTile(title: Text(item.outbound.outbounds.toString()),),
+              isExpanded: item.isExpanded,
+            );
+          }).toList(),
+      ),
     );
   }
 
