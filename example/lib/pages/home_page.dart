@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box_example/pages/connected_overview.dart';
+import 'package:flutter_sing_box_example/utils/client_providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/snackbar_util.dart';
 import 'config_profiles.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final _flutterSingBoxPlugin = FlutterSingBox();
   final List<Profile> _profiles = [];
   Profile? _selectedProfile;
@@ -29,13 +31,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> _init() async {
     _loadProfiles();
   }
-
-  // Future<void> _getProxyState() async {
-  //   _proxyState = await _flutterSingBoxPlugin.proxyStateStream.last;
-  //   if (!mounted) return;
-  //   setState(() {
-  //   });
-  // }
 
   Future<void> _loadProfiles() async {
     _selectedProfile = profileManager.getSelectedProfile();
@@ -53,6 +48,25 @@ class _HomePageState extends State<HomePage> {
     await _flutterSingBoxPlugin.stopVpn();
     await Future.delayed(Duration(seconds: 1));
     await _flutterSingBoxPlugin.startVpn();
+  }
+
+  Future<void> _startVpn() async {
+    try {
+      await requestPostNotificationPermission();
+      await ref.read(flutterSingBoxProvider).startVpn();
+    } on PlatformException catch (e) {
+      String errorMessage = '启动VPN失败';
+      if (e.code == 'NO_ACTIVITY') {
+        errorMessage = '无法获取Activity实例';
+      } else if (e.code == 'VPN_PERMISSION_DENIED') {
+        errorMessage = '用户拒绝了VPN权限';
+      } else if (e.code == 'VPN_ERROR') {
+        errorMessage = e.message ?? '启动VPN服务失败';
+      }
+      SnackbarUtil.showError(errorMessage);
+    } catch (e) {
+      SnackbarUtil.showError('未知错误: ${e.toString()}');
+    }
   }
 
   Future<bool> requestPostNotificationPermission() async {
@@ -79,8 +93,48 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plugin example app'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () async {
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConfigProfiles())
+              );
+              _loadProfiles();
+            },
+          ),
+        ],
       ),
+      floatingActionButton: _buildFloatingActionButton(),
       body: _buildBody(),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    Widget buildButton(ProxyState proxyState) {
+      return  FloatingActionButton(
+        onPressed: () async {
+          if (proxyState == ProxyState.started || proxyState == ProxyState.starting) {
+            await ref.read(flutterSingBoxProvider).stopVpn();
+          } else {
+            await _startVpn();
+          }
+        },
+        child: (proxyState == ProxyState.started || proxyState == ProxyState.starting)
+            ? const Icon(Icons.stop)
+            : const Icon(Icons.play_arrow),
+      );
+    }
+    final asyncProxyState = ref.watch(proxyStateStreamProvider);
+    return asyncProxyState.when(
+      data: (data) {
+        return buildButton(data);
+      },
+      error: (error, stack) {
+        return FloatingActionButton( onPressed: null, child: Icon(Icons.error),);
+      },
+      loading: () => buildButton(ProxyState.stopped),
     );
   }
 
@@ -97,19 +151,6 @@ class _HomePageState extends State<HomePage> {
                 return _buildProfileItem(_profiles[index]);
               }
           ),
-        ),
-        // Card(child: _buildStatus(),),
-        // Card(child: _buildGroup(),),
-        Card(child: _buildClashMode(),),
-        // Card(child: _buildLogs(),),
-        Card(child: _buildProxyState(),),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildStopButton(),
-            _buildStartButton(),
-            _buildConfigButton(),
-          ],
         ),
         ElevatedButton(
           onPressed: () async {
@@ -139,95 +180,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStartButton() {
-    return ElevatedButton(
-      onPressed: _profiles.isEmpty ? null : () async {
-        try {
-          await requestPostNotificationPermission();
-          await _flutterSingBoxPlugin.startVpn();
-          SnackbarUtil.show('VPN启动中...');
-        } on PlatformException catch (e) {
-          String errorMessage = '启动VPN失败';
-          if (e.code == 'NO_ACTIVITY') {
-            errorMessage = '无法获取Activity实例';
-          } else if (e.code == 'VPN_PERMISSION_DENIED') {
-            errorMessage = '用户拒绝了VPN权限';
-          } else if (e.code == 'VPN_ERROR') {
-            errorMessage = e.message ?? '启动VPN服务失败';
-          }
-          SnackbarUtil.showError(errorMessage);
-        } catch (e) {
-          SnackbarUtil.showError('未知错误: ${e.toString()}');
-        }
-      },
-      child: const Text('Start VPN'),
-    );
-  }
-
-  Widget _buildStopButton() {
-    return ElevatedButton(
-      child: const Text('Stop VPN'),
-      onPressed: () async {
-        try {
-          await _flutterSingBoxPlugin.stopVpn();
-          SnackbarUtil.show('VPN已停止');
-        } catch (e) {
-          SnackbarUtil.showError('停止VPN失败: ${e.toString()}');
-        }
-      }
-    );
-  }
-
-  Widget _buildConfigButton() {
-    return ElevatedButton(
-      child: const Text('Config'),
-      onPressed: () async {
-        await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ConfigProfiles())
-        );
-        _loadProfiles();
-      }
-    );
-  }
-
-  Widget _buildStatus() {
-    return StreamBuilder<ClientStatus>(
-      stream: _flutterSingBoxPlugin.connectedStatusStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Column(
-            children: [
-              Text(snapshot.data?.toJson().toString() ?? ''),
-            ],
-          );
-        } else {
-          return const Text('VPN Status: Disconnected');
-        }
-      },
-    );
-
-  }
-
   Widget _buildGroup() {
     return StreamBuilder<List<ClientGroup>>(
       stream: _flutterSingBoxPlugin.groupStream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(snapshot.data?.map((e) => e.toJson()).join('\n') ?? '');
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
-    );
-  }
-
-  Widget _buildClashMode() {
-    return StreamBuilder<ClientClashMode>(
-      stream: _flutterSingBoxPlugin.clashModeStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Text(snapshot.data?.toJson().toString() ?? '');
         } else {
           return const SizedBox.shrink();
         }
@@ -242,19 +200,6 @@ class _HomePageState extends State<HomePage> {
         if (snapshot.hasData) {
           final str = snapshot.data?.first ?? 'EMPTY!';
           return Text(str);
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
-    );
-  }
-
-  Widget _buildProxyState() {
-    return StreamBuilder<ProxyState>(
-      stream: _flutterSingBoxPlugin.proxyStateStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Text('Proxy State: ${snapshot.data}');
         } else {
           return const SizedBox.shrink();
         }

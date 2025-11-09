@@ -18,3 +18,8 @@ final connectedStreamProvider = StreamProvider<ClientStatus>((ref) {
   // 监听共享实例的 Stream
   return singBox.connectedStatusStream;
 });
+
+final proxyStateStreamProvider = StreamProvider<ProxyState>((ref) {
+  final singBox = ref.watch(flutterSingBoxProvider);
+  return singBox.proxyStateStream;
+});
