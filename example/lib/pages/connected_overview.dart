@@ -16,7 +16,7 @@ class ConnectedOverview extends ConsumerStatefulWidget {
 class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   Profile? _profile;
   SingBox? _singBox;
-  final List<ExpansionItem> _items = [];
+  final List<GroupItem> _groupItems = [];
 
   @override
   initState() {
@@ -33,9 +33,11 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     try {
       final map = jsonDecode(await file.readAsString());
       _singBox = SingBox.fromJson(map);
-      _items.addAll(
-          _singBox!.outbounds.where((group) => group.outbounds?.isNotEmpty == true)
-              .map((group) => ExpansionItem(outbound: group, isExpanded: false))
+      _groupItems.addAll(
+          _singBox!.outbounds.where(
+                  (outbound) => outbound.outbounds?.isNotEmpty == true)
+              .map((outbound) => GroupItem(outbound: outbound, isExpanded: false)
+          )
       );
 
       if (!mounted) return;
@@ -144,10 +146,10 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     return ExpansionPanelList(
         expansionCallback: (int index, bool isExpanded) {
           setState(() {
-            _items[index].isExpanded = isExpanded;
+            _groupItems[index].isExpanded = isExpanded;
           });
         },
-        children: _items.map((item) {
+        children: _groupItems.map((item) {
           return ExpansionPanel(
             headerBuilder: (BuildContext context, bool isExpanded) {
               return ListTile(title: Text(item.outbound.tag));
@@ -165,11 +167,11 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   }
 }
 
-class ExpansionItem {
+class GroupItem {
   Outbound outbound;
   bool isExpanded;
-  ExpansionItem({
+  GroupItem({
     required this.outbound,
     required this.isExpanded
-});
+  });
 }
