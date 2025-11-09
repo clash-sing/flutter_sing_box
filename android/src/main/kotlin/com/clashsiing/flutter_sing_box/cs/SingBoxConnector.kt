@@ -39,8 +39,8 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     }
 
     private lateinit var statusClient: CommandClient
-    private lateinit var groupClient: CommandClient
-    private lateinit var clashModeClient: CommandClient
+    internal lateinit var groupClient: CommandClient
+    internal lateinit var clashModeClient: CommandClient
     private lateinit var logClient: CommandClient
     private lateinit var coroutineScope: CoroutineScope
 
@@ -77,12 +77,12 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
             try {
                 service?.unregisterCallback(callback)
             } catch (e: Exception) {
-                Log.w(TAG, "unregisterCallback: 不需要取消注册。 ${e.message}")
+                Log.e(TAG, "unregisterCallback: 不需要取消注册。 ${e.message}")
             }
         }
 
         override fun onBindingDied(name: ComponentName?) {
-            Log.d(TAG, "ServiceConnection.onBindingDied: ${name?.toString()}")
+            Log.e(TAG, "ServiceConnection.onBindingDied: ${name?.toString()}")
             connect()
         }
     }
@@ -124,7 +124,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         statusClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Status, StatusClient())
         groupClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Groups, GroupClient())
         clashModeClient = CommandClient(coroutineScope, CommandClient.ConnectionType.ClashMode, ClashModeClient())
-        logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
+//        logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
     }
 
     fun disconnect() {
@@ -136,7 +136,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
             disconnectClient()
             applicationContext.unbindService(serviceConnection)
         } catch (e: Exception) {
-            Log.w(TAG, "disconnect: 解绑失败: ${e.message}")
+            Log.e(TAG, "disconnect: 解绑失败: ${e.message}")
         }
     }
 
@@ -144,19 +144,18 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         statusClient.connect()
         groupClient.connect()
         clashModeClient.connect()
-        logClient.connect()
+//        logClient.connect()
     }
 
     private fun disconnectClient() {
         statusClient.disconnect()
         groupClient.disconnect()
         clashModeClient.disconnect()
-        logClient.disconnect()
+//        logClient.disconnect()
     }
 
     inner class ServiceCallback : IServiceCallback.Stub() {
         override fun onServiceStatusChanged(status: Int) {
-            Log.d(TAG, "onServiceStatusChanged: $status")
             val proxyStatus: Status = when (status) {
                 Status.Stopped.ordinal -> Status.Stopped
                 Status.Starting.ordinal -> Status.Starting
@@ -164,9 +163,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
                 Status.Stopping.ordinal -> Status.Stopping
                 else -> throw IllegalArgumentException("Unknown status: $status")
             }
-            Log.d(TAG, "proxyStatus: $proxyStatus")
             coroutineScope.launch(Dispatchers.Main.immediate) {
-                Log.d(TAG, "proxyStateSink is null: ${proxyStateSink == null}")
                 proxyStateSink?.success(proxyStatus.name)
             }
             coroutineScope.launch {
@@ -189,10 +186,8 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     inner class StatusClient : CommandClient.Handler {
         override fun onConnected() {
-            Log.d(TAG, "onConnected:  -------------------------")
         }
         override fun onDisconnected() {
-            Log.d(TAG, "onDisconnected:  -------------------------")
         }
 
         override fun updateStatus(status: StatusMessage) {
@@ -218,7 +213,6 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     inner class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
-            Log.d(TAG, "updateGroups: $newGroups")
             val clientGroups: List<ClientGroup> = newGroups.map {
                 ClientGroup(
                     tag = it.tag,
@@ -242,7 +236,6 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     inner class ClashModeClient : CommandClient.Handler {
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
-            Log.d(TAG, "initializeClashMode: $modeList $currentMode")
             clientClashMode = ClientClashMode(
                 modes = modeList,
                 currentMode = currentMode
@@ -252,7 +245,6 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 //            }
         }
         override fun updateClashMode(newMode: String) {
-            Log.d(TAG, "updateClashMode: $newMode")
             clientClashMode?.currentMode = newMode
 //            coroutineScope.launch(Dispatchers.Main.immediate) {
 //                clashModeSink?.success(Json.encodeToString(clientClashMode))
@@ -262,10 +254,8 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     inner class LogClient : CommandClient.Handler {
         override fun clearLogs() {
-            Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<String>) {
-//            Log.d(TAG, "appendLogs: $message")
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 logSink?.success(Json.encodeToString(message))
             }

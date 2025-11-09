@@ -1,9 +1,7 @@
 package com.clashsiing.flutter_sing_box
 
-import android.R
 import android.content.Intent
 import android.net.VpnService
-import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -16,7 +14,6 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import io.nekohasekai.libbox.Libbox
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.text.contains
 
 class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     companion object {
@@ -68,6 +65,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 }
                 if (singBoxConnector?.clientClashMode?.modes?.contains(clashMode) == true) {
                     Libbox.newStandaloneCommandClient().setClashMode(clashMode)
+                    singBoxConnector?.clashModeClient?.connect()
                     result.success(null)
                 } else {
                     result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
@@ -88,8 +86,8 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     return
                 }
                 try {
-                    Log.d("setOutbound", "groupTag: $groupTag, outboundTag: $outboundTag")
                     Libbox.newStandaloneCommandClient().selectOutbound(groupTag, outboundTag)
+                    singBoxConnector?.groupClient?.connect()
                     result.success(null)
                 } catch (e: Exception) {
                     result.error("INVALID_ARGUMENTS", "无效的参数", null)
@@ -112,6 +110,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 }
                 try {
                     Libbox.newStandaloneCommandClient().setGroupExpand(groupTag, isExpand)
+                    singBoxConnector?.groupClient?.connect()
                     result.success(null)
                 } catch (e: Exception) {
                     result.error("INVALID_ARGUMENTS", "无效的参数", null)

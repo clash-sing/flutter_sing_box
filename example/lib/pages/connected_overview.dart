@@ -51,7 +51,9 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
 
   void _selectOutbound(GroupItem groupItem, String outboundTag) {
     try {
-      groupItem.selected = outboundTag;
+      setState(() {
+        groupItem.selected = outboundTag;
+      });
       ref.read(flutterSingBoxProvider).setOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
     } catch(e) {
       debugPrint('Error: $e');
@@ -149,67 +151,71 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   }
 
   Widget _buildGroups() {
-    final asyncGroup = ref.watch(groupStreamProvider);
     if (_singBox == null) {
       return const SizedBox.shrink();
     }
-    final List<ClientGroup> clientGroups = asyncGroup.value ?? [];
-    if (clientGroups.isNotEmpty) {
-      for (var clientGroup in clientGroups) {
-        final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
-        if (index > -1) {
-          _groupItems[index].selected = clientGroup.selected;
+    ref.watch(groupStreamProvider).when(
+      data: (clientGroups) {
+        // debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
+        for (var clientGroup in clientGroups) {
+          final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
+          if (index > -1) {
+            _groupItems[index].selected = clientGroup.selected;
+            _groupItems[index].isExpanded = clientGroup.isExpand;
+          }
         }
-      }
-    }
+      },
+      loading: () {},
+      error: (error, stack) {},
+    );
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ExpansionPanelList(
-          expansionCallback: (int index, bool isExpanded) {
-            setState(() {
-              _groupItems[index].isExpanded = isExpanded;
-            });
-            debugPrint('${_groupItems[index].outbound.tag} isExpanded: $isExpanded');
-            ref.read(flutterSingBoxProvider).setGroupExpand(
-              groupTag: _groupItems[index].outbound.tag,
-              isExpand: isExpanded,
-            );
-          },
-          children: _groupItems.map((item) {
-            return ExpansionPanel(
-              canTapOnHeader: true,
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    spacing: 8.0,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(child: Text(item.outbound.tag),),
-                          Text((item.outbound.outbounds?.length ?? 0).toString()),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(item.outbound.type),
-                          SizedBox(width: 12.0,),
-                          Expanded(
-                            child: Text(item.selected ?? '',
-                              overflow: TextOverflow.ellipsis,
-                            ),
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() {
+            _groupItems[index].isExpanded = isExpanded;
+          });
+          // debugPrint('${_groupItems[index].outbound.tag} isExpanded: $isExpanded');
+          ref.read(flutterSingBoxProvider).setGroupExpand(
+            groupTag: _groupItems[index].outbound.tag,
+            isExpand: isExpanded,
+          );
+        },
+        children: _groupItems.map((item) {
+          return ExpansionPanel(
+            canTapOnHeader: true,
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  spacing: 8.0,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: Text(item.outbound.tag),),
+                        Text((item.outbound.outbounds?.length ?? 0).toString()),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(item.outbound.type),
+                        SizedBox(width: 12.0,),
+                        Expanded(
+                          child: Text(item.selected ?? '',
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
-              body: _buildOutboundItem(item),
-              isExpanded: item.isExpanded,
-            );
-          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            body: _buildOutboundItem(item),
+            isExpanded: item.isExpanded,
+          );
+        }).toList(),
       ),
     );
   }
