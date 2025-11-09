@@ -139,27 +139,27 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildBody() {
-    return Column(
+    return Stack(
       children: [
-        Expanded(
-          flex: 1,
-          child: _profiles.isEmpty
-              ? const Center( child: Text('No subscription'),)
-              : ListView.builder(
-              itemCount: _profiles.length,
-              itemBuilder: (context, index) {
-                return _buildProfileItem(_profiles[index]);
-              }
-          ),
+        Column(
+          children: [
+            Expanded(
+              flex: 1,
+              child: _profiles.isEmpty
+                  ? const Center( child: Text('No subscription'),)
+                  : ListView.builder(
+                  itemCount: _profiles.length,
+                  itemBuilder: (context, index) {
+                    return _buildProfileItem(_profiles[index]);
+                  }
+              ),
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () async {
-            Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ConnectedOverview())
-            );
-          },
-          child: const Text('Connected Overview'),
+        Positioned(
+          bottom: 16,
+          left: 16,
+          child: _buildOverviewButton(),
         ),
       ],
     );
@@ -177,6 +177,32 @@ class _HomePageState extends ConsumerState<HomePage> {
           _switchProfile(profile.id);
         },
       ),
+    );
+  }
+
+  Widget _buildOverviewButton() {
+    final asyncProxyState = ref.watch(proxyStateStreamProvider);
+    return asyncProxyState.when(
+      data: (data) {
+        if ( data == ProxyState.started || data == ProxyState.starting) {
+          return FloatingActionButton(
+            heroTag: 'overview',
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ConnectedOverview())
+              );
+            },
+            child: const Icon(Icons.data_exploration),
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+      error: (error, stack) {
+        return const SizedBox.shrink();
+      },
+      loading: () => const SizedBox.shrink(),
     );
   }
 
