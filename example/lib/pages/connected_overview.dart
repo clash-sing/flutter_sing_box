@@ -49,6 +49,20 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     }
   }
 
+  void _selectOutbound(GroupItem groupItem, String outboundTag) {
+    try {
+      groupItem.selected = outboundTag;
+      setState(() {
+      });
+      Future(() {
+        ref.read(flutterSingBoxProvider).setOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
+      });
+    } catch(e) {
+      debugPrint('Error: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,24 +239,29 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
         physics: const NeverScrollableScrollPhysics(),
         children: outbounds.map((outbound) {
           return Card(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              color: groupItem.selected == outbound.tag ? Colors.blueAccent : Colors.white,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: SizedBox()),
-                  Text(outbound.tag,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
-                  ),
-                  Expanded(child: SizedBox()),
-                  Text(outbound.type,
-                    style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
-                  ),
-                  Expanded(child: SizedBox()),
-                ],
+            child: InkWell(
+              onTap: groupItem.outbound.type != OutboundType.selector ? null :() {
+                _selectOutbound(groupItem, outbound.tag);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                color: groupItem.selected == outbound.tag ? Colors.blueAccent : Colors.white,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: SizedBox()),
+                    Text(outbound.tag,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                    ),
+                    Expanded(child: SizedBox()),
+                    Text(outbound.type,
+                      style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                    ),
+                    Expanded(child: SizedBox()),
+                  ],
+                ),
               ),
             ),
           );

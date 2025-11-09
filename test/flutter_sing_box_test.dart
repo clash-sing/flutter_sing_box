@@ -30,6 +30,12 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
+  Future<void> setOutbound({required String groupTag, required String outboundTag}) {
+    // TODO: implement setOutbound
+    throw UnimplementedError();
+  }
+
+  @override
   // TODO: implement clashModeStream
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 

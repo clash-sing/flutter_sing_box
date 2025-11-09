@@ -34,6 +34,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     await methodChannel.invokeMethod('setClashMode', mode);
   }
 
+  @override
+  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
+    await methodChannel.invokeMethod('setOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
+  }
+
   static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
   static Stream<ClientStatus>? _connectedStatusStream;
   @override

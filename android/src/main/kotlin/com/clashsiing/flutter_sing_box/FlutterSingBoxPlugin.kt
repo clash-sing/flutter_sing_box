@@ -2,6 +2,7 @@ package com.clashsiing.flutter_sing_box
 
 import android.content.Intent
 import android.net.VpnService
+import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -59,12 +60,39 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 result.success(null)
             }
             "setClashMode" -> {
-                val clashMode = call.arguments as String
+                val clashMode = call.arguments as String?
+                if (clashMode.isNullOrBlank()) {
+                    result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
+                    return
+                }
                 if (singBoxConnector?.clientClashMode?.modes?.contains(clashMode) == true) {
                     Libbox.newStandaloneCommandClient().setClashMode(clashMode)
                     result.success(null)
                 } else {
                     result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
+                }
+            }
+            "setOutbound" -> {
+                val groupArgName = "groupTag"
+                val outboundArgName = "outboundTag"
+                if (call.arguments !is Map<*, *>) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                val argsMap = call.arguments as Map<*, *>
+                val groupTag = argsMap[groupArgName] as String?
+                val outboundTag = argsMap[outboundArgName] as String?
+                if (groupTag.isNullOrBlank() || outboundTag.isNullOrBlank()) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                try {
+                    Log.d("setOutbound", "groupTag: $groupTag, outboundTag: $outboundTag")
+                    Libbox.newStandaloneCommandClient().selectOutbound(groupTag, outboundTag)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
                 }
             }
             "getPlatformVersion" -> {

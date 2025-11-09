@@ -26,6 +26,10 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }
 
+  Future<void> setOutbound({required String groupTag, required String outboundTag}) {
+    return FlutterSingBoxPlatform.instance.setOutbound(groupTag: groupTag, outboundTag: outboundTag);
+  }
+
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 
