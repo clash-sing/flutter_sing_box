@@ -253,7 +253,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         }
         override fun updateClashMode(newMode: String) {
             Log.d(TAG, "updateClashMode: $newMode")
-            clientClashMode?.copy(currentMode = newMode)
+            clientClashMode?.currentMode = newMode
 //            coroutineScope.launch(Dispatchers.Main.immediate) {
 //                clashModeSink?.success(Json.encodeToString(clientClashMode))
 //            }

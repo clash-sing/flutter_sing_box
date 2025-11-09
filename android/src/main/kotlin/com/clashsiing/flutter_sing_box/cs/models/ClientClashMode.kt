@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ClientClashMode(
     val modes: List<String>,
-    val currentMode: String,
+    var currentMode: String,
 )

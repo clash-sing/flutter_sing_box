@@ -83,10 +83,30 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   }
 
   Widget _buildClashMode() {
-    final lastMode = ref.watch(clashModeStreamProvider);
-    return lastMode.when(
+    List<Widget> buildChildren(ClientClashMode clashMode) {
+      return clashMode.modes.map((mode) {
+        return OutlinedButton(
+          onPressed: () {
+            ref.read(flutterSingBoxProvider).setClashMode(mode);
+          },
+          style: OutlinedButton.styleFrom(
+            backgroundColor: mode == clashMode.currentMode
+              ? Colors.blue : Colors.white
+          ),
+          child: Text(mode,
+            style: TextStyle(color: mode == clashMode.currentMode ? Colors.white : Colors.blue),
+          ),
+        );
+      }).toList(growable: false);
+    }
+
+    final asyncClashMode = ref.watch(clashModeStreamProvider);
+    return asyncClashMode.when(
       data: (data) {
-        return Text('Clash Mode: ${data.modes}, ${data.currentMode}');
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: buildChildren(data),
+        );
       },
       loading: () => Text('Clash Mode loading...'),
       error: (error, stack) => Text('Clash Mode Error: $error'),
