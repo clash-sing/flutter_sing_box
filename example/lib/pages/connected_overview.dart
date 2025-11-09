@@ -163,6 +163,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
           },
           children: _groupItems.map((item) {
             return ExpansionPanel(
+              canTapOnHeader: true,
               headerBuilder: (BuildContext context, bool isExpanded) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -191,10 +192,61 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                   ),
                 );
               },
-              body: ListTile(title: Text(item.outbound.outbounds.toString()),),
+              body: _buildOutboundItem(item),
               isExpanded: item.isExpanded,
             );
           }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildOutboundItem(GroupItem groupItem) {
+    final List<Outbound> outbounds = [];
+    groupItem.outbound.outbounds?.forEach((outboundTag) {
+      final index = _singBox?.outbounds.indexWhere((outbound) {
+        return outbound.tag == outboundTag;
+      });
+      if (index != null && index > -1) {
+        final outbound = _singBox?.outbounds[index];
+        if (outbound != null) {
+          outbounds.add(outbound);
+        }
+      }
+    });
+    if (outbounds.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return SizedBox(
+      width: double.infinity,
+      child: GridView.count(
+        childAspectRatio: 3.0,
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        children: outbounds.map((outbound) {
+          return Card(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              color: groupItem.selected == outbound.tag ? Colors.blueAccent : Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: SizedBox()),
+                  Text(outbound.tag,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                  ),
+                  Expanded(child: SizedBox()),
+                  Text(outbound.type,
+                    style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                  ),
+                  Expanded(child: SizedBox()),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
