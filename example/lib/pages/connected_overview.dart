@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
@@ -11,14 +14,38 @@ class ConnectedOverview extends ConsumerStatefulWidget {
 }
 
 class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
-  // final _flutterSingBoxPlugin = FlutterSingBox();
   Profile? _profile;
+  SingBox? _singBox;
+  final List<ExpansionItem> _items = [];
+
   @override
   initState() {
     super.initState();
     _profile = profileManager.getSelectedProfile();
+    _initData();
   }
 
+  Future<void> _initData() async {
+    final path = _profile?.typed.path;
+    if (path?.isNotEmpty != true) return;
+    final file = File(path!);
+    if (! await file.exists()) return;
+    try {
+      final map = jsonDecode(await file.readAsString());
+      _singBox = SingBox.fromJson(map);
+      _items.addAll(
+          _singBox!.outbounds.where((group) => group.outbounds?.isNotEmpty == true)
+              .map((group) => ExpansionItem(outbound: group, isExpanded: false))
+      );
+
+      if (!mounted) return;
+      setState(() {
+
+      });
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,18 +53,15 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
       appBar: AppBar(
         title: Text(_profile?.name ?? '服务未启动'),
       ),
-      body: SizedBox(
-        height: double.infinity,
-        width: double.infinity,
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
           child: Column(
             children: [
               _buildConnectedStatus(),
               _buildClashMode(),
+              _buildGroups(),
             ],
           ),
         ),
-      )
     );
   }
 
@@ -113,9 +137,39 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     );
   }
 
+  Widget _buildGroups() {
+    if (_singBox == null) {
+      return const SizedBox.shrink();
+    }
+    return ExpansionPanelList(
+        expansionCallback: (int index, bool isExpanded) {
+          setState(() {
+            _items[index].isExpanded = isExpanded;
+          });
+        },
+        children: _items.map((item) {
+          return ExpansionPanel(
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return ListTile(title: Text(item.outbound.tag));
+            },
+            body: ListTile(title: Text(item.outbound.outbounds.toString()),),
+            isExpanded: item.isExpanded,
+          );
+        }).toList(),
+    );
+  }
 
   @override
   void dispose() {
     super.dispose();
   }
+}
+
+class ExpansionItem {
+  Outbound outbound;
+  bool isExpanded;
+  ExpansionItem({
+    required this.outbound,
+    required this.isExpanded
+});
 }
