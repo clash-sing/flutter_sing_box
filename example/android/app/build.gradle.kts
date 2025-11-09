@@ -1,3 +1,4 @@
+import com.android.tools.r8.internal.fa
 import java.util.Properties
 import java.io.FileInputStream
 
@@ -56,8 +57,8 @@ android {
                 abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
             }
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
