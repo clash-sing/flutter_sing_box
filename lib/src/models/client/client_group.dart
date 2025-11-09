@@ -9,7 +9,7 @@ class ClientGroup {
   final bool selectable;
   final String selected;
   final bool isExpand;
-  final GroupItem? item;
+  final List<GroupItem>? items;
 
   ClientGroup({
     required this.tag,
@@ -17,7 +17,7 @@ class ClientGroup {
     required this.selectable,
     required this.selected,
     required this.isExpand,
-    this.item,
+    this.items,
   });
 
   factory ClientGroup.fromJson(Map<String, dynamic> json) => _$ClientGroupFromJson(json);
@@ -29,14 +29,14 @@ class ClientGroup {
 class GroupItem {
   final String tag;
   final String type;
+  final int urlTestTime;
   final int urlTestDelay;
-  final int getURLTestTime;
 
   GroupItem({
     required this.tag,
     required this.type,
+    required this.urlTestTime,
     required this.urlTestDelay,
-    required this.getURLTestTime,
   });
 
   factory GroupItem.fromJson(Map<String, dynamic> json) => _$GroupItemFromJson(json);

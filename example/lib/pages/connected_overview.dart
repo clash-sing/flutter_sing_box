@@ -194,6 +194,14 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                     Row(
                       children: [
                         Expanded(child: Text(item.outbound.tag),),
+                        IconButton(
+                          icon: Icon(Icons.speed),
+                          onPressed: () {
+                            ref.read(flutterSingBoxProvider).urlTest(
+                              groupTag: item.outbound.tag,
+                            );
+                          },
+                        ),
                         Text((item.outbound.outbounds?.length ?? 0).toString()),
                       ],
                     ),

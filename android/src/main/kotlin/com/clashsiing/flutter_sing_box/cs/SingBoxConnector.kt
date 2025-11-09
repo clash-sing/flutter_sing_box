@@ -213,21 +213,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     inner class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
-            val clientGroups: List<ClientGroup> = newGroups.map {
-                ClientGroup(
-                    tag = it.tag,
-                    type = it.type,
-                    selectable = it.selectable,
-                    selected = it.selected,
-                    isExpand = it.isExpand,
-                    item = if (it.items.hasNext()) ClientGroup.GroupItem(
-                        tag = it.items.next().tag,
-                        type = it.items.next().type,
-                        urlTestDelay = it.items.next().urlTestDelay,
-                        getURLTestTime = it.items.next().urlTestTime,
-                    ) else null
-                )
-            }
+            val clientGroups = newGroups.map(::ClientGroup)
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 groupSink?.success(Json.encodeToString(clientGroups))
             }
