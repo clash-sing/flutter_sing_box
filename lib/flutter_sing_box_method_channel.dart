@@ -39,6 +39,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     await methodChannel.invokeMethod('setOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
   }
 
+  @override
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
+    await methodChannel.invokeMethod('setGroupExpand', {"groupTag": groupTag, "isExpand": isExpand});
+  }
+
   static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
   static Stream<ClientStatus>? _connectedStatusStream;
   @override

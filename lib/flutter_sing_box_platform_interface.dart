@@ -25,7 +25,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   }
 
   Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+    throw UnimplementedError('getPlatformVersion() has not been implemented.');
   }
 
   /// Starts the VPN service
@@ -44,6 +44,10 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
 
   Future<void> setOutbound({required String groupTag, required String outboundTag}) {
     throw UnimplementedError('setOutbound() has not been implemented.');
+  }
+
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
+    throw UnimplementedError('setGroupExpand() has not been implemented.');
   }
 
   /// sing-box connected status

@@ -52,16 +52,11 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   void _selectOutbound(GroupItem groupItem, String outboundTag) {
     try {
       groupItem.selected = outboundTag;
-      setState(() {
-      });
-      Future(() {
-        ref.read(flutterSingBoxProvider).setOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
-      });
+      ref.read(flutterSingBoxProvider).setOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
     } catch(e) {
       debugPrint('Error: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -174,6 +169,11 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
             setState(() {
               _groupItems[index].isExpanded = isExpanded;
             });
+            debugPrint('${_groupItems[index].outbound.tag} isExpanded: $isExpanded');
+            ref.read(flutterSingBoxProvider).setGroupExpand(
+              groupTag: _groupItems[index].outbound.tag,
+              isExpand: isExpanded,
+            );
           },
           children: _groupItems.map((item) {
             return ExpansionPanel(

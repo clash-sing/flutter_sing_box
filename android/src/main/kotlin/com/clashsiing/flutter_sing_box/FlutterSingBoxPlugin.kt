@@ -1,5 +1,6 @@
 package com.clashsiing.flutter_sing_box
 
+import android.R
 import android.content.Intent
 import android.net.VpnService
 import android.util.Log
@@ -89,6 +90,28 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 try {
                     Log.d("setOutbound", "groupTag: $groupTag, outboundTag: $outboundTag")
                     Libbox.newStandaloneCommandClient().selectOutbound(groupTag, outboundTag)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+            }
+            "setGroupExpand" -> {
+                val groupArgName = "groupTag"
+                val expandArgName = "isExpand"
+                if (call.arguments !is Map<*, *>) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                val argsMap = call.arguments as Map<*, *>
+                val groupTag = argsMap[groupArgName] as String?
+                val isExpand = argsMap[expandArgName] as Boolean?
+                if (groupTag.isNullOrBlank() || isExpand == null) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                try {
+                    Libbox.newStandaloneCommandClient().setGroupExpand(groupTag, isExpand)
                     result.success(null)
                 } catch (e: Exception) {
                     result.error("INVALID_ARGUMENTS", "无效的参数", null)

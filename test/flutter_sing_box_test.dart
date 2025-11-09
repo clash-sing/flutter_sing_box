@@ -36,6 +36,12 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
+    // TODO: implement setGroupExpand
+    throw UnimplementedError();
+  }
+
+  @override
   // TODO: implement clashModeStream
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 

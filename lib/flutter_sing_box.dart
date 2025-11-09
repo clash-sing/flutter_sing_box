@@ -30,6 +30,10 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.setOutbound(groupTag: groupTag, outboundTag: outboundTag);
   }
 
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
+    return FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
+  }
+
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 
