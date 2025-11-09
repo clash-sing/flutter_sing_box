@@ -140,8 +140,18 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   }
 
   Widget _buildGroups() {
+    final asyncGroup = ref.watch(groupStreamProvider);
     if (_singBox == null) {
       return const SizedBox.shrink();
+    }
+    final List<ClientGroup> clientGroups = asyncGroup.value ?? [];
+    if (clientGroups.isNotEmpty) {
+      for (var clientGroup in clientGroups) {
+        final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
+        if (index > -1) {
+          _groupItems[index].selected = clientGroup.selected;
+        }
+      }
     }
     return ExpansionPanelList(
         expansionCallback: (int index, bool isExpanded) {
@@ -152,7 +162,23 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
         children: _groupItems.map((item) {
           return ExpansionPanel(
             headerBuilder: (BuildContext context, bool isExpanded) {
-              return ListTile(title: Text(item.outbound.tag));
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: Text(item.outbound.tag),),
+                      Text((item.outbound.outbounds?.length ?? 0).toString()),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Expanded(child: Text(item.outbound.type),),
+                      Text((item.selected ?? '').toString()),
+                    ],
+                  ),
+                ],
+              );
             },
             body: ListTile(title: Text(item.outbound.outbounds.toString()),),
             isExpanded: item.isExpanded,
@@ -170,8 +196,10 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
 class GroupItem {
   Outbound outbound;
   bool isExpanded;
+  String? selected;
   GroupItem({
     required this.outbound,
-    required this.isExpanded
+    required this.isExpanded,
+    this.selected,
   });
 }
