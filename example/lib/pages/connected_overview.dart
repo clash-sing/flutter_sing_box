@@ -156,12 +156,13 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     }
     ref.watch(groupStreamProvider).when(
       data: (clientGroups) {
-        debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
+        // debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
         for (var clientGroup in clientGroups) {
           final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
           if (index > -1) {
             _groupItems[index].selected = clientGroup.selected;
             _groupItems[index].isExpanded = clientGroup.isExpand;
+            _groupItems[index].items = clientGroup.items ??  [];
           }
         }
       },
@@ -275,7 +276,13 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                         Text(outbound.type,
                           style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
                         ),
-
+                        SizedBox(width: 8.0,),
+                        Text(
+                          groupItem.items.firstWhere(
+                                  (clientGroupItem) => clientGroupItem.tag == outbound.tag,
+                              orElse: () => ClientGroupItem(tag: '', type: '', urlTestTime: 0, urlTestDelay: 0,)
+                          ).urlTestDelay.toString()
+                        ),
                       ],
                     ),
                     Spacer(),
@@ -299,9 +306,11 @@ class GroupItem {
   Outbound outbound;
   bool isExpanded;
   String? selected;
+  List<ClientGroupItem> items;
   GroupItem({
     required this.outbound,
     required this.isExpanded,
     this.selected,
+    this.items = const [],
   });
 }
