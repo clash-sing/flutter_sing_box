@@ -13,7 +13,7 @@ ClientGroup _$ClientGroupFromJson(Map<String, dynamic> json) => ClientGroup(
   selected: json['selected'] as String,
   isExpand: json['isExpand'] as bool,
   items: (json['items'] as List<dynamic>?)
-      ?.map((e) => GroupItem.fromJson(e as Map<String, dynamic>))
+      ?.map((e) => ClientGroupItem.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 
@@ -27,16 +27,18 @@ Map<String, dynamic> _$ClientGroupToJson(ClientGroup instance) =>
       'items': ?instance.items?.map((e) => e.toJson()).toList(),
     };
 
-GroupItem _$GroupItemFromJson(Map<String, dynamic> json) => GroupItem(
-  tag: json['tag'] as String,
-  type: json['type'] as String,
-  urlTestTime: (json['urlTestTime'] as num).toInt(),
-  urlTestDelay: (json['urlTestDelay'] as num).toInt(),
-);
+ClientGroupItem _$ClientGroupItemFromJson(Map<String, dynamic> json) =>
+    ClientGroupItem(
+      tag: json['tag'] as String,
+      type: json['type'] as String,
+      urlTestTime: (json['urlTestTime'] as num).toInt(),
+      urlTestDelay: (json['urlTestDelay'] as num).toInt(),
+    );
 
-Map<String, dynamic> _$GroupItemToJson(GroupItem instance) => <String, dynamic>{
-  'tag': instance.tag,
-  'type': instance.type,
-  'urlTestTime': instance.urlTestTime,
-  'urlTestDelay': instance.urlTestDelay,
-};
+Map<String, dynamic> _$ClientGroupItemToJson(ClientGroupItem instance) =>
+    <String, dynamic>{
+      'tag': instance.tag,
+      'type': instance.type,
+      'urlTestTime': instance.urlTestTime,
+      'urlTestDelay': instance.urlTestDelay,
+    };

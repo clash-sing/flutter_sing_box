@@ -156,7 +156,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     }
     ref.watch(groupStreamProvider).when(
       data: (clientGroups) {
-        // debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
+        debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
         for (var clientGroup in clientGroups) {
           final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
           if (index > -1) {
@@ -264,16 +264,21 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: SizedBox()),
+                    Spacer(),
                     Text(outbound.tag,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
                     ),
-                    Expanded(child: SizedBox()),
-                    Text(outbound.type,
-                      style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                    Spacer(),
+                    Row(
+                      children: [
+                        Text(outbound.type,
+                          style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                        ),
+
+                      ],
                     ),
-                    Expanded(child: SizedBox()),
+                    Spacer(),
                   ],
                 ),
               ),

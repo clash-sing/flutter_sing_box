@@ -9,7 +9,7 @@ class ClientGroup {
   final bool selectable;
   final String selected;
   final bool isExpand;
-  final List<GroupItem>? items;
+  final List<ClientGroupItem>? items;
 
   ClientGroup({
     required this.tag,
@@ -26,20 +26,20 @@ class ClientGroup {
 }
 
 @JsonSerializable()
-class GroupItem {
+class ClientGroupItem {
   final String tag;
   final String type;
   final int urlTestTime;
   final int urlTestDelay;
 
-  GroupItem({
+  ClientGroupItem({
     required this.tag,
     required this.type,
     required this.urlTestTime,
     required this.urlTestDelay,
   });
 
-  factory GroupItem.fromJson(Map<String, dynamic> json) => _$GroupItemFromJson(json);
+  factory ClientGroupItem.fromJson(Map<String, dynamic> json) => _$ClientGroupItemFromJson(json);
 
-  Map<String, dynamic> toJson() => _$GroupItemToJson(this);
+  Map<String, dynamic> toJson() => _$ClientGroupItemToJson(this);
  }
