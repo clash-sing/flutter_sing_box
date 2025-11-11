@@ -45,9 +45,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _switchProfile(int profileId) async {
     profileManager.setSelectedProfile(profileId);
     _loadProfiles();
-    await _flutterSingBoxPlugin.stopVpn();
-    await Future.delayed(Duration(seconds: 1));
-    await _flutterSingBoxPlugin.startVpn();
+    if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
+      try {
+        ref.read(flutterSingBoxProvider).switchProfile();
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+    }
   }
 
   Future<void> _startVpn() async {
@@ -173,8 +177,10 @@ class _HomePageState extends ConsumerState<HomePage> {
         icon: _selectedProfile?.id == profile.id
             ? const Icon(Icons.radio_button_checked)
             : const Icon(Icons.radio_button_unchecked),
-        onPressed: _selectedProfile?.id == profile.id ? null : () {
-          _switchProfile(profile.id);
+        onPressed: () {
+          if (_selectedProfile?.id != profile.id) {
+            _switchProfile(profile.id);
+          }
         },
       ),
     );

@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_sing_box_example/pages/home_page.dart';
 import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
+import 'package:mmkv/mmkv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final rootDir = await MMKV.initialize();
+  debugPrint('mmkv rootDir: $rootDir');
   runApp(const ProviderScope(
     child: MyApp(),
   ));

@@ -38,6 +38,10 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
+  Future<void> switchProfile() {
+    throw UnimplementedError('switchProfile() has not been implemented.');
+  }
+
   Future<void> setClashMode(String mode) {
     throw UnimplementedError('setClashMode() has not been implemented.');
   }

@@ -8,8 +8,8 @@ import com.tencent.mmkv.MMKV
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        MMKV.initialize(this)
+        val rootDir = MMKV.initialize(this)
+        Log.d("MyApplication", "MMKV rootDir: $rootDir")
         PluginManager.init(this, false)
-        Log.d("MyApplication", "MMKV init success")
     }
 }

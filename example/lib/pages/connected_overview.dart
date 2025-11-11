@@ -156,7 +156,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     }
     ref.watch(groupStreamProvider).when(
       data: (clientGroups) {
-        // debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
+        debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
         for (var clientGroup in clientGroups) {
           final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
           if (index > -1) {
@@ -176,7 +176,6 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
           setState(() {
             _groupItems[index].isExpanded = isExpanded;
           });
-          // debugPrint('${_groupItems[index].outbound.tag} isExpanded: $isExpanded');
           ref.read(flutterSingBoxProvider).setGroupExpand(
             groupTag: _groupItems[index].outbound.tag,
             isExpand: isExpanded,

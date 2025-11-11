@@ -134,11 +134,13 @@ class BoxService(
                 stopAndAlert(Alert.EmptyConfiguration)
                 return
             }
+            lastProfileName = profile.name
             val file = File(profile.typed.path)
             if (!file.exists()) {
                 stopAndAlert(Alert.EmptyConfiguration)
                 return
             }
+            Log.d(TAG, "profile path: ${file.absolutePath}")
             val content = file.readText()
 
             withContext(Dispatchers.Main) {
