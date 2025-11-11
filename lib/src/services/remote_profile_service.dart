@@ -20,10 +20,6 @@ class RemoteProfileService {
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
 
-    if (apiResult.data is Map<String, dynamic>) {
-      String tempText = jsonEncode(apiResult.data);
-      debugPrint(tempText);
-    }
     final singBox = await SingBoxConfig.buildConfig(apiResult.data);
     final profile = Profile(
       id: profileId,
