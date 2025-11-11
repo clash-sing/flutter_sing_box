@@ -110,7 +110,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         })
     }
 
-    fun connect() {
+    internal fun connect() {
         if (this::coroutineScope.isInitialized && coroutineScope.coroutineContext.isActive) {
             return
         }
@@ -127,7 +127,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 //        logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
     }
 
-    fun disconnect() {
+    internal fun disconnect() {
         if (!this::coroutineScope.isInitialized) {
             return
         }
