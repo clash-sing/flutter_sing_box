@@ -21,7 +21,9 @@ class SingBoxConfig {
           final config = jsonDecode(data);
           singBox = SingBox.fromJson(config);
         } catch (e) {
-          final yaml = loadYaml(data);
+          final YamlMap yaml = loadYaml(data);
+          final Map<String, dynamic> map = yaml.toMap();
+          debugPrint(map.toString());
         }
       }
     } catch (e) {
