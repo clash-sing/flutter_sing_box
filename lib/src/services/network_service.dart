@@ -29,7 +29,7 @@ class NetworkService {
   static Future<String> getUserAgent() async {
     final packageInfo = await _getPackageInfo();
     final deviceInfo = await _getDeviceInfo();
-    return '($deviceInfo) mihomo/1.19.15 ClashMeta/1.19.15';
+    return '($deviceInfo) mihomo/1.19.15 ClashMeta/1.19.15 sing-box/1.12.12 v2ray';
     // return '($deviceInfo) ClashMeta/1.19.15';
     // return '$packageInfo ($deviceInfo) sing-box/1.12.12 ClashMeta/1.19.15';
     // return 'ClashMeta/1.19.15 mihomo/1.19.15 clash-verge v2ray';
