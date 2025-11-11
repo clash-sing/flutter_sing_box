@@ -30,11 +30,6 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<void> switchProfile() async {
-    await methodChannel.invokeMethod('switchProfile');
-  }
-
-  @override
   Future<void> setClashMode(String mode) async {
     await methodChannel.invokeMethod('setClashMode', mode);
   }

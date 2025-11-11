@@ -46,11 +46,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     profileManager.setSelectedProfile(profileId);
     _loadProfiles();
     if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
-      try {
-        ref.read(flutterSingBoxProvider).switchProfile();
-      } catch (e) {
-        debugPrint(e.toString());
-      }
+      // try {
+      //   ref.read(flutterSingBoxProvider).switchProfile();
+      // } catch (e) {
+      //   debugPrint(e.toString());
+      // }
     }
   }
 
@@ -209,19 +209,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         return const SizedBox.shrink();
       },
       loading: () => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildGroup() {
-    return StreamBuilder<List<ClientGroup>>(
-      stream: _flutterSingBoxPlugin.groupStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Text(snapshot.data?.map((e) => e.toJson()).join('\n') ?? '');
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
     );
   }
 

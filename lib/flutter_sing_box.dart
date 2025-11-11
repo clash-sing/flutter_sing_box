@@ -22,10 +22,6 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.stopVpn();
   }
 
-  Future<void> switchProfile() {
-    return FlutterSingBoxPlatform.instance.switchProfile();
-  }
-
   Future<void> setClashMode(String clashMode) {
     return FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }

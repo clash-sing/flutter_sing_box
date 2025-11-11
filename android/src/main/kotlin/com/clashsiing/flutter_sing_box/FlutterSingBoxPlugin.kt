@@ -57,15 +57,6 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 BoxService.stop()
                 result.success(null)
             }
-            "switchProfile" -> {
-                try {
-                    BoxService.stop()
-                    Thread.sleep(1000)
-                    BoxService.start()
-                } catch (e: Exception) {
-                    result.error("FAILED_TO_RESTART_VPN", "无法启动VPN服务", e)
-                }
-             }
             "setClashMode" -> {
                 val clashMode = call.arguments as String?
                 if (clashMode.isNullOrBlank()) {
