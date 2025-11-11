@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+
 import '../../flutter_sing_box.dart';
-import '../utils/sing_box_config.dart';
 
 /// Example:
 ///   content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
@@ -21,7 +22,7 @@ class RemoteProfileService {
 
     if (apiResult.data is Map<String, dynamic>) {
       String tempText = jsonEncode(apiResult.data);
-      print(tempText);
+      debugPrint(tempText);
     }
     final singBox = await SingBoxConfig.buildConfig(apiResult.data);
     final profile = Profile(
@@ -61,7 +62,7 @@ class RemoteProfileService {
         }
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     if (profileName == null || profileName.trim().isEmpty) {
       return link.host;

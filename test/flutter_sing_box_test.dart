@@ -48,6 +48,12 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
+  Future<void> switchProfile() {
+    // TODO: implement switchProfile
+    throw UnimplementedError();
+  }
+
+  @override
   // TODO: implement clashModeStream
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 

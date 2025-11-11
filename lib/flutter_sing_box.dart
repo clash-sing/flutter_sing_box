@@ -2,7 +2,7 @@ export '../src/settings/sing_box_manager.dart';
 export '../src/services/index.dart';
 export '../src/models/index.dart';
 export '../src/const/index.dart';
-export '../src/profile/index.dart';
+export '../src/utils/index.dart';
 
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';

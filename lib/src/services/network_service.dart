@@ -4,8 +4,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../utils/dio_client.dart';
-
 class NetworkService {
   NetworkService._internal();
   static final NetworkService instance = NetworkService._internal();

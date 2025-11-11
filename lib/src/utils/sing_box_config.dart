@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sing_box/src/const/outbound_type.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../flutter_sing_box.dart';
@@ -25,7 +25,7 @@ class SingBoxConfig {
         }
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     if (singBox != null) {
       return singBox;

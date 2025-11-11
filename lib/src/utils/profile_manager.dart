@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -105,20 +104,6 @@ class ProfileManager {
     mmkv.removeValue(key);
     final file = File(profile.typed.path);
     file.deleteSync();
-  }
-
-  /// 获取默认的 代理组 & 出站tag
-  @Deprecated(' 暂时保留此方法')
-  MapEntry<String, String>? _getDefaultProxy(SingBox singBox) {
-    final selector = singBox.outbounds.firstWhereOrNull((element) {
-      return element.type == OutboundType.selector
-          && element.outbounds?.isNotEmpty == true;
-    });
-    if (selector != null) {
-      return MapEntry(selector.tag, selector.defaultTag ?? selector.outbounds![0]);
-    } else {
-      return null;
-    }
   }
 
   List<Profile> getProfiles() {
