@@ -1,0 +1,77 @@
+import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box/src/models/clash/clash_proxy.dart';
+
+import '../models/clash/clash_type.dart';
+
+extension ClashProxyExt on ClashProxy {
+  Outbound? toOutbound() {
+    final outbound = switch(type) {
+      ClashProxyType.hysteria2 =>
+          Outbound(
+            type: type,
+            tag: name,
+            server: server,
+            serverPort: port,
+            serverPorts: [ports!.replaceAll('-', ':')],
+            password: password,
+            tls: Tls(
+              alpn: alpn ?? ['h3'],
+              enabled: true,
+              insecure: true,
+              disableSni: !(sni?.isNotEmpty == true),
+              serverName: sni ?? "",
+            ),
+          ),
+      ClashProxyType.hysteria =>
+          Outbound(
+            type: type,
+            tag: name,
+            server: server,
+            serverPort: port,
+            serverPorts: [ports!.replaceAll('-', ':')],
+            authStr: authStr,
+            tls: Tls(
+              alpn: alpn ?? ['h3'],
+              enabled: true,
+              insecure: true,
+              disableSni: !(sni?.isNotEmpty == true),
+              serverName: sni ?? "",
+            ),
+            upMbps: up,
+            downMbps: down,
+            disableMtuDiscovery: disableMtuDiscovery ?? true,
+          ),
+      ClashProxyType.anytls =>
+          Outbound(
+            type: type,
+            tag: name,
+            server: server,
+            serverPort: port,
+            password: password,
+            tls: Tls(
+              enabled: true,
+              insecure: true,
+              disableSni: !(sni?.isNotEmpty == true),
+              serverName: sni ?? "",
+            ),
+          ),
+      ClashProxyType.trojan =>
+          Outbound(
+            type: type,
+            tag: name,
+            server: server,
+            serverPort: port,
+            password: password,
+            tls: Tls(
+              enabled: true,
+              insecure: true,
+              disableSni: !(sni?.isNotEmpty == true),
+              serverName: sni ?? "",
+            ),
+            transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
+          ),
+      _ => null,
+    };
+    return outbound;
+  }
+}

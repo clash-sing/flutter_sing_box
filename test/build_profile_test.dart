@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/flutter_sing_box_method_channel.dart';
 import 'package:flutter_sing_box/src/models/clash/clash.dart';
+import 'package:flutter_sing_box/src/utils/clash_ext.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:yaml/yaml.dart';
@@ -43,6 +44,15 @@ void main() async {
     final YamlMap yaml = loadYaml(yamlStr);
     final Map<String, dynamic> map = yaml.toMap();
     final clash = Clash.fromJson(map);
-    debugPrint(clash.toString());
+    final List<Outbound> outbounds = [];
+    for (var element in clash.proxies) {
+      final outbound = element.toOutbound();
+      if (outbound != null) {
+        outbounds.add(outbound);
+      } else {
+        debugPrint('${element.name} is not support');
+      }
+    }
+    debugPrint(outbounds.toString());
   });
 }
