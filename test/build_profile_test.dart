@@ -36,14 +36,6 @@ void main() async {
     return null;
   });
 
-  test('importRemote', () async {
-    var yamlStr = await rootBundle.loadString('assets/.local/test_link.yaml');
-    final YamlMap yaml = loadYaml(yamlStr);
-    final map = yaml.toMap();
-    final uri = Uri.parse(map['link1']);
-    final apiResult = await networkService.fetchSubscription(uri);
-    debugPrint(apiResult.data.toString());
-  });
 
   test('loadYaml', () async {
     var yamlStr = await rootBundle.loadString('assets/.local/test_sub.yaml');
