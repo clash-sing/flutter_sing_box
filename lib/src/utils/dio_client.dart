@@ -47,7 +47,7 @@ class DioClient {
       myDio.interceptors.add(
         LogInterceptor(
           requestBody: true,
-          responseBody: true,
+          // responseBody: true,
         ),
       );
       return true;
