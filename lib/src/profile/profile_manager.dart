@@ -6,33 +6,36 @@ import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../flutter_sing_box.dart';
-import '../const/outbound_type.dart';
 
 class ProfileManager {
   static final ProfileManager _instance = ProfileManager._internal();
   factory ProfileManager() => _instance;
 
-  late MMKV _mmkv;
-  ProfileManager._internal() {
-    _mmkv = MMKV("cs-profile", mode: MMKVMode.SINGLE_PROCESS_MODE);
+  ProfileManager._internal();
+
+  MMKV? _mmkv;
+
+  MMKV get mmkv {
+    _mmkv ??= MMKV("profile_data", mode: MMKVMode.MULTI_PROCESS_MODE);
+    return _mmkv!;
   }
 
   Profile? getSelectedProfile() {
-    final profileId = _mmkv.decodeInt(_Keys.selectedProfileId);
+    final profileId = mmkv.decodeInt(_Keys.selectedProfileId);
     return _getProfile(profileId);
   }
 
   bool setSelectedProfile(int profileId) {
-    return _mmkv.encodeInt(_Keys.selectedProfileId, profileId);
+    return mmkv.encodeInt(_Keys.selectedProfileId, profileId);
   }
 
   int get _maxId {
-    return _mmkv.decodeInt(_Keys.maxId);
+    return mmkv.decodeInt(_Keys.maxId);
   }
 
   int get generateProfileId {
     final id = _maxId + 1;
-    _mmkv.encodeInt(_Keys.maxId, id);
+    mmkv.encodeInt(_Keys.maxId, id);
     return id;
   }
 
@@ -51,7 +54,7 @@ class ProfileManager {
 
   Profile? _getProfile(int id) {
     final String key = _getProfileKey(id);
-    final String? jsonString = _mmkv.decodeString(key);
+    final String? jsonString = mmkv.decodeString(key);
     if (jsonString?.isNotEmpty == true) {
       final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
       return Profile.fromJson(jsonMap);
@@ -64,7 +67,7 @@ class ProfileManager {
     await File(profile.typed.path).writeAsString(content);
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
-    _mmkv.encodeString(key, jsonString);
+    mmkv.encodeString(key, jsonString);
     if (getSelectedProfile() == null) {
       setSelectedProfile(profile.id);
     }
@@ -82,7 +85,7 @@ class ProfileManager {
     }
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
-    _mmkv.encodeString(key, jsonString);
+    mmkv.encodeString(key, jsonString);
   }
 
   void deleteProfile(int id) {
@@ -95,11 +98,11 @@ class ProfileManager {
       if (profiles.length > 1) {
         setSelectedProfile(profiles[1].id);
       } else {
-        _mmkv.removeValue(_Keys.selectedProfileId);
+        mmkv.removeValue(_Keys.selectedProfileId);
       }
     }
     final String key = _getProfileKey(profile.id);
-    _mmkv.removeValue(key);
+    mmkv.removeValue(key);
     final file = File(profile.typed.path);
     file.deleteSync();
   }
@@ -119,12 +122,12 @@ class ProfileManager {
   }
 
   List<Profile> getProfiles() {
-    List<String> keys = _mmkv.allKeys.where(
+    List<String> keys = mmkv.allKeys.where(
       (key) => key.startsWith(_Keys.profilePrefix),
     ).toList();
     List<Profile> profiles = [];
     for (String key in keys) {
-      final String? jsonString = _mmkv.decodeString(key);
+      final String? jsonString = mmkv.decodeString(key);
       if (jsonString?.isNotEmpty == true) {
         final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
         profiles.add(Profile.fromJson(jsonMap));
@@ -139,7 +142,7 @@ class ProfileManager {
       final Profile profile = profiles[i];
       profile.userOrder = i;
       final String jsonString = jsonEncode(profile.toJson());
-      _mmkv.encodeString(_getProfileKey(profile.id), jsonString);
+      mmkv.encodeString(_getProfileKey(profile.id), jsonString);
     }
   }
 
