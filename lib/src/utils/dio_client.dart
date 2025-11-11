@@ -6,10 +6,17 @@ import 'package:dio/io.dart';
 
 class DioClient {
   DioClient._internal();
-  static final Dio _dio = _initDio();
-  static Dio get dio => _dio;
-  static Dio _initDio() {
-    final dio = Dio(
+  static final DioClient _instance = DioClient._internal();
+  factory DioClient() => _instance;
+
+  Dio? _dio;
+  Dio get dio {
+    _dio ??= _initDio();
+    return _dio!;
+  }
+
+  Dio _initDio() {
+    final myDio = Dio(
       BaseOptions(
         // connectTimeout: Duration(seconds: 5),
         // receiveTimeout: Duration(seconds: 3),
@@ -26,7 +33,7 @@ class DioClient {
     );
 
     // 添加 HttpClientAdapter 并配置安全上下文
-    dio.httpClientAdapter = IOHttpClientAdapter(
+    myDio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
         // 允许自签名证书（仅用于测试环境）
@@ -37,7 +44,7 @@ class DioClient {
 
     // 在 Debug 模式下添加日志拦截器
     assert(() {
-      dio.interceptors.add(
+      myDio.interceptors.add(
         LogInterceptor(
           requestBody: true,
           responseBody: true,
@@ -46,6 +53,8 @@ class DioClient {
       return true;
     }());
 
-    return dio;
+    return myDio;
   }
 }
+
+final dioClient = DioClient();

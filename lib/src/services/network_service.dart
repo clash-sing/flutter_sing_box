@@ -11,10 +11,10 @@ class NetworkService {
 
   Future<ApiResult<dynamic>> fetchSubscription(Uri uri) async {
     try {
-      DioClient.dio.options.headers.addAll({
+      dioClient.dio.options.headers.addAll({
         // 'User-Agent': await getUserAgent(),
       });
-      final response = await DioClient.dio.getUri(uri);
+      final response = await dioClient.dio.getUri(uri);
       if (response.statusCode == io.HttpStatus.ok) {
         final apiResult = ApiResult(response.data, response.headers.map);
         return apiResult;
@@ -29,7 +29,7 @@ class NetworkService {
   static Future<String> getUserAgent() async {
     final packageInfo = await _getPackageInfo();
     final deviceInfo = await _getDeviceInfo();
-    return '$packageInfo ($deviceInfo) sing-box/1.12.10 ClashMeta/1.19.15';
+    return '$packageInfo ($deviceInfo) sing-box/1.12.12 ClashMeta/1.19.15';
   }
 
   static Future<String> _getPackageInfo() async {
