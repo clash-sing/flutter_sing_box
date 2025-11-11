@@ -59,12 +59,9 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
             }
             "switchProfile" -> {
                 try {
-                    singBoxConnector?.disconnect()
                     BoxService.stop()
                     Thread.sleep(1000)
                     BoxService.start()
-                    singBoxConnector?.connect()
-//                    Libbox.newStandaloneCommandClient().serviceReload()
                 } catch (e: Exception) {
                     result.error("FAILED_TO_RESTART_VPN", "无法启动VPN服务", e)
                 }

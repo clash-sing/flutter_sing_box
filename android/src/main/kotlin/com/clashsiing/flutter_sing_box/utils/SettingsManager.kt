@@ -6,7 +6,9 @@ import com.clashsiing.flutter_sing_box.core.ProxyService
 import com.tencent.mmkv.MMKV
 
 object SettingsManager {
-    private val mmkv = MMKV.mmkvWithID("cs-settings", MMKV.MULTI_PROCESS_MODE)
+    private val mmkv by lazy {
+        MMKV.mmkvWithID("settings_data", MMKV.MULTI_PROCESS_MODE)
+    }
 
     val dynamicNotification = mmkv.decodeBool(Keys.DYNAMIC_NOTIFICATION, true)
 

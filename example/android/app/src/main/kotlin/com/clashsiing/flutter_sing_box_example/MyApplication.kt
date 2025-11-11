@@ -10,6 +10,8 @@ class MyApplication : Application() {
         super.onCreate()
         val rootDir = MMKV.initialize(this)
         Log.d("MyApplication", "MMKV rootDir: $rootDir")
+        MMKV.mmkvWithID("profile_data", MMKV.MULTI_PROCESS_MODE)
+        MMKV.mmkvWithID("settings_data", MMKV.MULTI_PROCESS_MODE)
         PluginManager.init(this, false)
     }
 }
