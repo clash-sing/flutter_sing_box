@@ -7,7 +7,7 @@ import 'package:yaml/yaml.dart';
 import '../../flutter_sing_box.dart';
 
 class SingBoxConfig {
-  static Future<SingBox> buildConfig(dynamic data) async {
+  static Future<SingBox> buildConfig(final dynamic data) async {
     SingBox? singBox;
     try {
       if (data is Map<String, dynamic>) {
