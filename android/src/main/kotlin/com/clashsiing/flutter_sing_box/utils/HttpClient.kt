@@ -5,6 +5,7 @@ import io.nekohasekai.libbox.Libbox
 import java.io.Closeable
 import java.util.Locale
 
+@Deprecated("改为由 Flutter 发起网络请求")
 class HttpClient : Closeable {
     companion object {
         val userAgent by lazy {
