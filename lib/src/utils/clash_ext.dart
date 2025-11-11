@@ -1,6 +1,7 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/src/models/clash/clash_proxy.dart';
 
+import '../models/clash/clash_group.dart';
 import '../models/clash/clash_type.dart';
 
 extension ClashProxyExt on ClashProxy {
@@ -69,6 +70,38 @@ extension ClashProxyExt on ClashProxy {
               serverName: sni ?? "",
             ),
             transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
+          ),
+      _ => null,
+    };
+    return outbound;
+  }
+}
+
+extension ClashGroupExt on ClashGroup {
+  String _singBoxInterval() {
+    if (interval != null) {
+      final int min = interval! ~/ 60;
+      return '${min}m';
+    } else {
+      return '10m';
+    }
+  }
+  Outbound? toOutbound() {
+    final outbound = switch(type) {
+      ClashGroupType.select =>
+          Outbound(
+            type: type,
+            tag: name,
+            outbounds: proxies,
+          ),
+      ClashGroupType.urlTest =>
+          Outbound(
+            type: type,
+            tag: name,
+            outbounds: proxies,
+            url: url,
+            interval: _singBoxInterval(),
+            tolerance: 50,
           ),
       _ => null,
     };

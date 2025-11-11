@@ -54,5 +54,16 @@ void main() async {
       }
     }
     debugPrint(outbounds.toString());
+
+    final List<Outbound> groupOutbounds = [];
+    for (var element in clash.proxyGroups) {
+      final outbound = element.toOutbound();
+      if (outbound != null) {
+        groupOutbounds.add(outbound);
+      } else {
+        debugPrint('${element.name} is not support');
+      }
+    }
+    debugPrint(groupOutbounds.toString());
   });
 }
