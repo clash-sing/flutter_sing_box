@@ -23,30 +23,15 @@ class SingBoxConfig {
           final config = jsonDecode(data);
           singBox = SingBox.fromJson(config);
         } catch (e) {
-          final YamlMap yaml = loadYaml(data);
-          final Map<String, dynamic> clashMap = yaml.toMap();
-          final clash = Clash.fromJson(clashMap);
-          final List<Outbound> outbounds = [];
-          for (var element in clash.proxies) {
-            final outbound = element.toOutbound();
-            if (outbound != null) {
-              outbounds.add(outbound);
-            } else {
-              debugPrint('${element.name} is not support');
-            }
+          try {
+            final YamlMap yamlMap = loadYaml(data);
+            final outbounds = _clash2SingBoxOutbounds(yamlMap);
+            final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
+            singBox = await _fixSingBoxConfig({"outbounds": listMap});
+          } catch (e) {
+            String decodedString = utf8.decode(base64.decode(data));
+            debugPrint(decodedString);
           }
-          for (var element in clash.proxyGroups.reversed) {
-            final outbound = element.toOutbound();
-            if (outbound != null) {
-              outbounds.insert(0, outbound);
-            } else {
-              debugPrint('${element.name} is not support');
-            }
-          }
-          final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
-          singBox = await _fixSingBoxConfig({"outbounds": listMap});
-          debugPrint('${singBox?.outbounds.length} outbounds');
-
         }
       }
     } catch (e) {
@@ -57,6 +42,29 @@ class SingBoxConfig {
     } else {
       singBox = throw Exception("Invalid content");
     }
+  }
+
+  static List<Outbound> _clash2SingBoxOutbounds(final YamlMap yamlMap) {
+    final Map<String, dynamic> clashMap = yamlMap.toMap();
+    final clash = Clash.fromJson(clashMap);
+    final List<Outbound> outbounds = [];
+    for (var element in clash.proxies) {
+      final outbound = element.toOutbound();
+      if (outbound != null) {
+        outbounds.add(outbound);
+      } else {
+        debugPrint('${element.name} is not support');
+      }
+    }
+    for (var element in clash.proxyGroups.reversed) {
+      final outbound = element.toOutbound();
+      if (outbound != null) {
+        outbounds.insert(0, outbound);
+      } else {
+        debugPrint('${element.name} is not support');
+      }
+    }
+    return outbounds;
   }
 
   static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {
