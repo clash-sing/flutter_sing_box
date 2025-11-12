@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/flutter_sing_box_method_channel.dart';
 import 'package:flutter_sing_box/src/models/clash/clash.dart';
+import 'package:flutter_sing_box/src/utils/base64_parser.dart';
 import 'package:flutter_sing_box/src/utils/clash_ext.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mmkv/mmkv.dart';
@@ -65,5 +68,16 @@ void main() async {
       }
     }
     debugPrint(groupOutbounds.toString());
+  });
+
+  test('testBase64Parser', () async {
+    var base64String = await rootBundle.loadString('assets/.local/test_base64.txt');
+    // 移除可能的空白字符
+    base64String = base64String.replaceAll(RegExp(r'\s+'), '');
+    String decodedString = utf8.decode(base64.decode(base64String));
+    final parser = Base64Parser.parse(decodedString);
+
+
+
   });
 }

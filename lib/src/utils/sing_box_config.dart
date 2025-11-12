@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sing_box/src/utils/base64_parser.dart';
 import 'package:flutter_sing_box/src/utils/clash_ext.dart';
 import 'package:yaml/yaml.dart';
 
@@ -29,7 +30,9 @@ class SingBoxConfig {
             final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
             singBox = await _fixSingBoxConfig({"outbounds": listMap});
           } catch (e) {
-            String decodedString = utf8.decode(base64.decode(data));
+            final base64String = data.replaceAll(RegExp(r'\s+'), '');
+            String decodedString = utf8.decode(base64.decode(base64String));
+            Base64Parser.parse(decodedString);
             debugPrint(decodedString);
           }
         }
