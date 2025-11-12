@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sing_box/src/utils/clash_ext.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../flutter_sing_box.dart';
+import '../models/clash/clash.dart';
 
 class SingBoxConfig {
   static Future<SingBox> buildConfig(final dynamic data) async {
@@ -22,8 +24,29 @@ class SingBoxConfig {
           singBox = SingBox.fromJson(config);
         } catch (e) {
           final YamlMap yaml = loadYaml(data);
-          final Map<String, dynamic> map = yaml.toMap();
-          debugPrint(map.toString());
+          final Map<String, dynamic> clashMap = yaml.toMap();
+          final clash = Clash.fromJson(clashMap);
+          final List<Outbound> outbounds = [];
+          for (var element in clash.proxies) {
+            final outbound = element.toOutbound();
+            if (outbound != null) {
+              outbounds.add(outbound);
+            } else {
+              debugPrint('${element.name} is not support');
+            }
+          }
+          for (var element in clash.proxyGroups.reversed) {
+            final outbound = element.toOutbound();
+            if (outbound != null) {
+              outbounds.insert(0, outbound);
+            } else {
+              debugPrint('${element.name} is not support');
+            }
+          }
+          final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
+          singBox = await _fixSingBoxConfig({"outbounds": listMap});
+          debugPrint('${singBox?.outbounds.length} outbounds');
+
         }
       }
     } catch (e) {
@@ -84,21 +107,23 @@ class SingBoxConfig {
         defaultSingBox.outbounds.add(sbOutbound);
       }
     }
-    if (errorTags.isNotEmpty) {
-      // 从 【代理组】 中移除错误的 tag
-      for (var outbound in defaultSingBox.outbounds) {
-        if (outbound.outbounds?.isNotEmpty ?? false) {
-          if (outbound.defaultTag?.isNotEmpty ?? false) {
-            if (errorTags.contains(outbound.defaultTag)) {
-              // 移除错误的 默认 tag
-              outbound.defaultTag = null;
-            }
-          }
-          outbound.outbounds?.removeWhere((element) {
-            return errorTags.contains(element);
-          });
-        }
+    final allTags = defaultSingBox.outbounds.map((outbound) => outbound.tag).toList();
+    final groups = defaultSingBox.outbounds.where((outbound) => outbound.outbounds?.isNotEmpty == true);
+    for (var group in groups) {
+      if (group.defaultTag?.isNotEmpty == true && errorTags.contains(group.defaultTag)) {
+        // 移除错误的 默认 tag
+        group.defaultTag = null;
       }
+      group.outbounds?.removeWhere((tag) => !allTags.contains(tag));
+    }
+    if (defaultSingBox.outbounds.indexWhere((outbound) => outbound.type == OutboundType.direct) == -1) {
+      // 查找最后一个 group 的索引
+      final index = defaultSingBox.outbounds.lastIndexWhere((outbound) => outbound.outbounds?.isNotEmpty == true);
+      final directOutbound = Outbound(
+        tag: OutboundType.direct,
+        type: OutboundType.direct,
+      );
+      defaultSingBox.outbounds.insert(index+1, directOutbound);
     }
     _fixOutboundInRoute(defaultSingBox);
     return defaultSingBox;

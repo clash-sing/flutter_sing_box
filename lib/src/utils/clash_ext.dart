@@ -9,7 +9,7 @@ extension ClashProxyExt on ClashProxy {
     final outbound = switch(type) {
       ClashProxyType.hysteria2 =>
           Outbound(
-            type: type,
+            type: OutboundType.hysteria2,
             tag: name,
             server: server,
             serverPort: port,
@@ -25,7 +25,7 @@ extension ClashProxyExt on ClashProxy {
           ),
       ClashProxyType.hysteria =>
           Outbound(
-            type: type,
+            type: OutboundType.hysteria,
             tag: name,
             server: server,
             serverPort: port,
@@ -44,7 +44,7 @@ extension ClashProxyExt on ClashProxy {
           ),
       ClashProxyType.anytls =>
           Outbound(
-            type: type,
+            type: OutboundType.anytls,
             tag: name,
             server: server,
             serverPort: port,
@@ -58,7 +58,7 @@ extension ClashProxyExt on ClashProxy {
           ),
       ClashProxyType.trojan =>
           Outbound(
-            type: type,
+            type: OutboundType.trojan,
             tag: name,
             server: server,
             serverPort: port,
@@ -90,13 +90,13 @@ extension ClashGroupExt on ClashGroup {
     final outbound = switch(type) {
       ClashGroupType.select =>
           Outbound(
-            type: type,
+            type: OutboundType.selector,
             tag: name,
             outbounds: proxies,
           ),
       ClashGroupType.urlTest =>
           Outbound(
-            type: type,
+            type: OutboundType.urltest,
             tag: name,
             outbounds: proxies,
             url: url,
