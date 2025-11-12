@@ -46,11 +46,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     profileManager.setSelectedProfile(profileId);
     _loadProfiles();
     if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
-      // try {
-      //   ref.read(flutterSingBoxProvider).switchProfile();
-      // } catch (e) {
-      //   debugPrint(e.toString());
-      // }
+      try {
+        await ref.read(flutterSingBoxProvider).stopVpn();
+        await Future.delayed(const Duration(milliseconds: 1000));
+        await ref.read(flutterSingBoxProvider).startVpn();
+      } catch (e) {
+        debugPrint(e.toString());
+      }
     }
   }
 
