@@ -1,4 +1,3 @@
-export '../src/settings/sing_box_manager.dart';
 export '../src/data/models/index.dart';
 export '../src/constants/index.dart';
 export '../src/utils/index.dart';
