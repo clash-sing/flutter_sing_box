@@ -1,6 +1,6 @@
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../constants/profile_type.dart';
 
 part 'typed_profile.g.dart';
 

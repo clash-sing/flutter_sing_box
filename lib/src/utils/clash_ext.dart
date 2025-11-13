@@ -1,8 +1,8 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
-import 'package:flutter_sing_box/src/models/clash/clash_proxy.dart';
 
-import '../models/clash/clash_group.dart';
-import '../models/clash/clash_type.dart';
+import '../data/models/clash/clash_group.dart';
+import '../data/models/clash/clash_proxy.dart';
+import '../data/models/clash/clash_type.dart';
 
 extension ClashProxyExt on ClashProxy {
   Outbound? toOutbound() {

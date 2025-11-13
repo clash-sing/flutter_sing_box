@@ -1,6 +1,6 @@
-import 'package:flutter_sing_box/src/models/clash/clash_group.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'clash_group.dart';
 import 'clash_proxy.dart';
 
 part 'clash.g.dart';
