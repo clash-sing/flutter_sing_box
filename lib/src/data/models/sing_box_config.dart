@@ -6,8 +6,8 @@ import 'package:flutter_sing_box/src/utils/base64_parser.dart';
 import 'package:flutter_sing_box/src/utils/clash_ext.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../flutter_sing_box.dart';
-import '../data/models/clash/clash.dart';
+import '../../../flutter_sing_box.dart';
+import 'clash/clash.dart';
 
 class SingBoxConfig {
   static Future<SingBox> buildConfig(final dynamic data) async {
