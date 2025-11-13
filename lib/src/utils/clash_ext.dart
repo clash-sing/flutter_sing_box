@@ -18,7 +18,7 @@ extension ClashProxyExt on ClashProxy {
             tls: Tls(
               alpn: alpn ?? ['h3'],
               enabled: true,
-              insecure: true,
+              insecure: skipCertVerify,
               disableSni: !(sni?.isNotEmpty == true),
               serverName: sni ?? "",
             ),
@@ -34,7 +34,7 @@ extension ClashProxyExt on ClashProxy {
             tls: Tls(
               alpn: alpn ?? ['h3'],
               enabled: true,
-              insecure: true,
+              insecure: skipCertVerify,
               disableSni: !(sni?.isNotEmpty == true),
               serverName: sni ?? "",
             ),
@@ -51,7 +51,7 @@ extension ClashProxyExt on ClashProxy {
             password: password,
             tls: Tls(
               enabled: true,
-              insecure: true,
+              insecure: skipCertVerify,
               disableSni: !(sni?.isNotEmpty == true),
               serverName: sni ?? "",
             ),
@@ -65,7 +65,7 @@ extension ClashProxyExt on ClashProxy {
             password: password,
             tls: Tls(
               enabled: true,
-              insecure: true,
+              insecure: skipCertVerify,
               disableSni: !(sni?.isNotEmpty == true),
               serverName: sni ?? "",
             ),

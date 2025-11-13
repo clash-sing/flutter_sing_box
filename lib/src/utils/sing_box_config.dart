@@ -32,8 +32,19 @@ class SingBoxConfig {
           } catch (e) {
             final base64String = data.replaceAll(RegExp(r'\s+'), '');
             String decodedString = utf8.decode(base64.decode(base64String));
-            Base64Parser.parse(decodedString);
-            debugPrint(decodedString);
+            final outbounds = Base64Parser.parse(decodedString);
+            outbounds.insert(0, Outbound(
+              tag: 'Auto',
+              type: OutboundType.urltest,
+              outbounds: outbounds.map((element) => element.tag).toList(),
+            ));
+            outbounds.insert(0, Outbound(
+              tag: 'Proxy',
+              type: OutboundType.selector,
+              outbounds: outbounds.map((element) => element.tag).toList(),
+            ));
+            final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
+            singBox = await _fixSingBoxConfig({"outbounds": listMap});
           }
         }
       }
