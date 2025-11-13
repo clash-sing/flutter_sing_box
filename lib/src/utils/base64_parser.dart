@@ -39,7 +39,6 @@ import '../const/outbound_transport_type.dart';
         if (outbound != null) {
           outbounds.add(outbound);
         }
-        debugPrint(outbounds.toString());
       }
     }
     return outbounds;

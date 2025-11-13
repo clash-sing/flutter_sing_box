@@ -30,19 +30,7 @@ class SingBoxConfig {
             final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
             singBox = await _fixSingBoxConfig({"outbounds": listMap});
           } catch (e) {
-            final base64String = data.replaceAll(RegExp(r'\s+'), '');
-            String decodedString = utf8.decode(base64.decode(base64String));
-            final outbounds = Base64Parser.parse(decodedString);
-            outbounds.insert(0, Outbound(
-              tag: 'Auto',
-              type: OutboundType.urltest,
-              outbounds: outbounds.map((element) => element.tag).toList(),
-            ));
-            outbounds.insert(0, Outbound(
-              tag: 'Proxy',
-              type: OutboundType.selector,
-              outbounds: outbounds.map((element) => element.tag).toList(),
-            ));
+            final outbounds = _base64ToSingBoxOutbounds(data);
             final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
             singBox = await _fixSingBoxConfig({"outbounds": listMap});
           }
@@ -56,6 +44,35 @@ class SingBoxConfig {
     } else {
       singBox = throw Exception("Invalid content");
     }
+  }
+
+  static List<Outbound> _base64ToSingBoxOutbounds(final String data) {
+    final base64String = data.replaceAll(RegExp(r'\s+'), '');
+    // 检查长度是否为4的倍数
+    if (base64String.length % 4 != 0) {
+      throw Exception("Invalid base64 string");
+    }
+    RegExp base64RegExp = RegExp(r'^[A-Za-z0-9+/]*={0,2}$');
+    final isBase64 = base64RegExp.hasMatch(base64String);
+    if (!isBase64) {
+      throw Exception("Invalid base64 string");
+    }
+    String decodedString = utf8.decode(base64.decode(base64String));
+    final outbounds = Base64Parser.parse(decodedString);
+    if (outbounds.isEmpty) {
+      throw Exception("Invalid base64 string");
+    }
+    outbounds.insert(0, Outbound(
+      tag: 'Auto',
+      type: OutboundType.urltest,
+      outbounds: outbounds.map((element) => element.tag).toList(),
+    ));
+    outbounds.insert(0, Outbound(
+      tag: 'Proxy',
+      type: OutboundType.selector,
+      outbounds: outbounds.map((element) => element.tag).toList(),
+    ));
+    return outbounds;
   }
 
   static List<Outbound> _clash2SingBoxOutbounds(final YamlMap yamlMap) {
