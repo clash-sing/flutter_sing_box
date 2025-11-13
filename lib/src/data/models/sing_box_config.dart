@@ -2,12 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/src/utils/base64_parser.dart';
-import 'package:flutter_sing_box/src/utils/clash_ext.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../../flutter_sing_box.dart';
-import 'clash/clash.dart';
 
 class SingBoxConfig {
   static Future<SingBox> buildConfig(final dynamic data) async {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 import '../constants/outbound_transport_type.dart';
-import '../data/models/clash/clash_type.dart';
 
  class Base64Parser {
   static List<Outbound> parse(String base64) {
