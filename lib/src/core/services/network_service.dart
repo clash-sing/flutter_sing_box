@@ -1,9 +1,9 @@
 import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../data/network/api_result.dart';
 import '../../data/network/dio_client.dart';
 
 class NetworkService {
