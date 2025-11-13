@@ -11,11 +11,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Profile(
     val id: Int,
-    val userOrder: Int,
+    val order: Int,
     val name: String,
     val typed: TypedProfile,
-    var selectedGroup: String? = null,
-    var selectedOutbound: String? = null,
     val userInfo: UserInfo? = null,
 ) : Parcelable {
     @Parcelize

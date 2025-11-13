@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
-
-import '../../flutter_sing_box.dart';
 
 class ProfileManager {
   static final ProfileManager _instance = ProfileManager._internal();
@@ -75,13 +74,6 @@ class ProfileManager {
   Future<void> updateProfile(Profile profile, SingBox singBox) async {
     final content = jsonEncode(singBox.toJson());
     await File(profile.typed.path).writeAsString(content);
-    if (profile.selectedGroup != null && profile.selectedOutbound != null) {
-      List<String> tags = singBox.outbounds.map((e) => e.tag).toList();
-      if (!tags.contains(profile.selectedGroup) || !tags.contains(profile.selectedOutbound)) {
-        profile.selectedGroup = null;
-        profile.selectedOutbound = null;
-      }
-    }
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     mmkv.encodeString(key, jsonString);
@@ -118,14 +110,14 @@ class ProfileManager {
         profiles.add(Profile.fromJson(jsonMap));
       }
     }
-    profiles.sort((a, b) => a.userOrder.compareTo(b.userOrder));
+    profiles.sort((a, b) => a.order.compareTo(b.order));
     return profiles;
   }
 
-  void reorder(List<Profile>  profiles) {
+  void sort(List<Profile>  profiles) {
     for (int i = 0; i < profiles.length; i++) {
       final Profile profile = profiles[i];
-      profile.userOrder = i;
+      profile.order = i;
       final String jsonString = jsonEncode(profile.toJson());
       mmkv.encodeString(_getProfileKey(profile.id), jsonString);
     }

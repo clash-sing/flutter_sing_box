@@ -22,7 +22,7 @@ class RemoteProfileService {
     final singBox = await SingBoxConfig.buildConfig(apiResult.data);
     final profile = Profile(
       id: profileId,
-      userOrder: profileId,
+      order: profileId,
       name: profileName,
       typed: typedProfile,
       userInfo: userInfo,

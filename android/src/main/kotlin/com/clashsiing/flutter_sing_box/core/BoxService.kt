@@ -175,10 +175,6 @@ class BoxService(
             boxService = newService
             commandServer?.setService(boxService)
 
-            if (profile.selectedGroup != null && profile.selectedOutbound != null) {
-                Libbox.newStandaloneCommandClient().selectOutbound(profile.selectedGroup, profile.selectedOutbound)
-            }
-
             status.postValue(Status.Started)
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_started)

@@ -8,20 +8,16 @@ part 'profile.g.dart';
 @JsonSerializable(explicitToJson: true)
 class Profile {
   int id;
-  int userOrder;
+  int order;
   String name;
   TypedProfile typed;
-  String? selectedGroup;
-  String? selectedOutbound;
   UserInfo? userInfo;
 
   Profile({
     required this.id,
-    required this.userOrder,
+    required this.order,
     required this.name,
     required this.typed,
-    this.selectedGroup,
-    this.selectedOutbound,
     this.userInfo,
   });
 

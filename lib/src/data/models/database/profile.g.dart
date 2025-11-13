@@ -8,11 +8,9 @@ part of 'profile.dart';
 
 Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
   id: (json['id'] as num).toInt(),
-  userOrder: (json['userOrder'] as num).toInt(),
+  order: (json['order'] as num).toInt(),
   name: json['name'] as String,
   typed: TypedProfile.fromJson(json['typed'] as Map<String, dynamic>),
-  selectedGroup: json['selectedGroup'] as String?,
-  selectedOutbound: json['selectedOutbound'] as String?,
   userInfo: json['userInfo'] == null
       ? null
       : UserInfo.fromJson(json['userInfo'] as Map<String, dynamic>),
@@ -20,10 +18,8 @@ Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile(
 
 Map<String, dynamic> _$ProfileToJson(Profile instance) => <String, dynamic>{
   'id': instance.id,
-  'userOrder': instance.userOrder,
+  'order': instance.order,
   'name': instance.name,
   'typed': instance.typed.toJson(),
-  'selectedGroup': ?instance.selectedGroup,
-  'selectedOutbound': ?instance.selectedOutbound,
   'userInfo': ?instance.userInfo?.toJson(),
 };
