@@ -6,8 +6,8 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:yaml/yaml.dart';
 
 
-class SingBoxConfig {
-  static Future<SingBox> buildConfig(final dynamic data) async {
+class SingBoxConfigProvider {
+  static Future<SingBox> provide(final dynamic data) async {
     SingBox? singBox;
     try {
       if (data is Map<String, dynamic>) {
@@ -55,7 +55,7 @@ class SingBoxConfig {
       throw Exception("Invalid base64 string");
     }
     String decodedString = utf8.decode(base64.decode(base64String));
-    final outbounds = Base64Parser.parse(decodedString);
+    final outbounds = Base64Provider.provide(decodedString);
     if (outbounds.isEmpty) {
       throw Exception("Invalid base64 string");
     }

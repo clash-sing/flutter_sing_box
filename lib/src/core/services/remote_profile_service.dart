@@ -19,7 +19,7 @@ class RemoteProfileService {
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
 
-    final singBox = await SingBoxConfig.buildConfig(apiResult.data);
+    final singBox = await SingBoxConfigProvider.provide(apiResult.data);
     final profile = Profile(
       id: profileId,
       order: profileId,

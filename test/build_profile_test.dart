@@ -70,6 +70,6 @@ void main() async {
     // 移除可能的空白字符
     base64String = base64String.replaceAll(RegExp(r'\s+'), '');
     String decodedString = utf8.decode(base64.decode(base64String));
-    final parser = Base64Parser.parse(decodedString);
+    final parser = Base64Provider.provide(decodedString);
   });
 }

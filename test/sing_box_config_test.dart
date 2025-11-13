@@ -145,7 +145,7 @@ void main() {
 }
 ''';
 
-      final result = await SingBoxConfig.buildConfig(jsonString);
+      final result = await SingBoxConfigProvider.provide(jsonString);
       expect(result, isA<SingBox>());
       expect(result.route.routeFinal, equals('direct'));
       expect(result.outbounds.length, equals(1));
@@ -155,7 +155,7 @@ void main() {
 
     test('buildConfig with valid Map data', () async {
       final jsonData = jsonDecode(defaultConfig) as Map<String, dynamic>;
-      final result = await SingBoxConfig.buildConfig(jsonData);
+      final result = await SingBoxConfigProvider.provide(jsonData);
 
       expect(result, isA<SingBox>());
       expect(result.route.routeFinal, equals('proxy'));
@@ -164,7 +164,7 @@ void main() {
 
     test('buildConfig throws exception for invalid content', () async {
       expect(
-        () => SingBoxConfig.buildConfig('invalid content'),
+        () => SingBoxConfigProvider.provide('invalid content'),
         throwsException,
       );
     });
@@ -174,7 +174,7 @@ void main() {
       // 修改route.final为无效值
       jsonData['route']['final'] = 'invalid-outbound';
 
-      final result = await SingBoxConfig.buildConfig(jsonData);
+      final result = await SingBoxConfigProvider.provide(jsonData);
 
       // 应该自动修复为第一个selector类型的outbound
       expect(result.route.routeFinal, equals('proxy'));

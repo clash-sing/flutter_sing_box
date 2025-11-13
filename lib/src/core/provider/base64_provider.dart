@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 
- class Base64Parser {
-  static List<Outbound> parse(String base64) {
+ class Base64Provider {
+  static List<Outbound> provide(String base64) {
     final List<Outbound> outbounds = [];
     final List<String> lines = base64.split('\n');
     for (var line in  lines) {
