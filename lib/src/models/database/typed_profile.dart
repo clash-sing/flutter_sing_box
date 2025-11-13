@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../const/profile_type.dart';
+import '../../constants/profile_type.dart';
 
 part 'typed_profile.g.dart';
 
