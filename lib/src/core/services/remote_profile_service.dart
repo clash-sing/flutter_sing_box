@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
-
-import '../../flutter_sing_box.dart';
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 /// Example:
 ///   content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
