@@ -18,7 +18,7 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
     _loadProfiles();
   }
 
-  void _loadProfiles() async {
+  void _loadProfiles() {
     profiles.clear();
     profiles.addAll(
         ProfileManager().getProfiles()
@@ -61,6 +61,8 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
                     icon: const Icon(Icons.delete),
                     onPressed: () {
                       // TODO: 实现删除配置文件功能
+                      ProfileManager().deleteProfile(profile.id);
+                      _loadProfiles();
                     },
                   ),
                   onTap: () {
