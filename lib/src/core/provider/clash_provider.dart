@@ -1,5 +1,31 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:yaml/yaml.dart';
 
+class ClashProvider {
+  static List<Outbound> provide(YamlMap yamlMap) {
+    final Map<String, dynamic> clashMap = yamlMap.toMap();
+    final clash = Clash.fromJson(clashMap);
+    final List<Outbound> outbounds = [];
+    for (var element in clash.proxies) {
+      final outbound = element.toOutbound();
+      if (outbound != null) {
+        outbounds.add(outbound);
+      } else {
+        debugPrint('${element.name} is not support');
+      }
+    }
+    for (var element in clash.proxyGroups.reversed) {
+      final outbound = element.toOutbound();
+      if (outbound != null) {
+        outbounds.insert(0, outbound);
+      } else {
+        debugPrint('${element.name} is not support');
+      }
+    }
+    return outbounds;
+  }
+}
 
 extension ClashProxyExt on ClashProxy {
   Outbound? toOutbound() {

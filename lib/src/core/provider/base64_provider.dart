@@ -1,11 +1,24 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 
  class Base64Provider {
-  static List<Outbound> provide(String base64) {
+  static List<Outbound> provide(String data) {
+    final base64String = data.replaceAll(RegExp(r'\s+'), '');
+    // 检查长度是否为4的倍数
+    if (base64String.length % 4 != 0) {
+      throw Exception("Invalid base64 string");
+    }
+    RegExp base64RegExp = RegExp(r'^[A-Za-z0-9+/]*={0,2}$');
+    final isBase64 = base64RegExp.hasMatch(base64String);
+    if (!isBase64) {
+      throw Exception("Invalid base64 string");
+    }
+    String decodedString = utf8.decode(base64.decode(base64String));
     final List<Outbound> outbounds = [];
-    final List<String> lines = base64.split('\n');
+    final List<String> lines = decodedString.split('\n');
     for (var line in  lines) {
       final uri = Uri.tryParse(line);
       if (uri == null) {

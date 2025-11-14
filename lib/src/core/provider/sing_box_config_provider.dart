@@ -23,11 +23,24 @@ class SingBoxConfigProvider {
         } catch (e) {
           try {
             final YamlMap yamlMap = loadYaml(data);
-            final outbounds = _clash2SingBoxOutbounds(yamlMap);
+            final outbounds = ClashProvider.provide(yamlMap);
             final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
             singBox = await _fixSingBoxConfig({"outbounds": listMap});
           } catch (e) {
-            final outbounds = _base64ToSingBoxOutbounds(data);
+            final outbounds = Base64Provider.provide(data);
+            if (outbounds.isEmpty) {
+              throw Exception("Invalid base64 string");
+            }
+            outbounds.insert(0, Outbound(
+              tag: 'Auto',
+              type: OutboundType.urltest,
+              outbounds: outbounds.map((element) => element.tag).toList(),
+            ));
+            outbounds.insert(0, Outbound(
+              tag: 'Proxy',
+              type: OutboundType.selector,
+              outbounds: outbounds.map((element) => element.tag).toList(),
+            ));
             final List<Map<String, dynamic>> listMap = outbounds.map((element) => element.toJson()).toList();
             singBox = await _fixSingBoxConfig({"outbounds": listMap});
           }
@@ -41,58 +54,6 @@ class SingBoxConfigProvider {
     } else {
       singBox = throw Exception("Invalid content");
     }
-  }
-
-  static List<Outbound> _base64ToSingBoxOutbounds(final String data) {
-    final base64String = data.replaceAll(RegExp(r'\s+'), '');
-    // 检查长度是否为4的倍数
-    if (base64String.length % 4 != 0) {
-      throw Exception("Invalid base64 string");
-    }
-    RegExp base64RegExp = RegExp(r'^[A-Za-z0-9+/]*={0,2}$');
-    final isBase64 = base64RegExp.hasMatch(base64String);
-    if (!isBase64) {
-      throw Exception("Invalid base64 string");
-    }
-    String decodedString = utf8.decode(base64.decode(base64String));
-    final outbounds = Base64Provider.provide(decodedString);
-    if (outbounds.isEmpty) {
-      throw Exception("Invalid base64 string");
-    }
-    outbounds.insert(0, Outbound(
-      tag: 'Auto',
-      type: OutboundType.urltest,
-      outbounds: outbounds.map((element) => element.tag).toList(),
-    ));
-    outbounds.insert(0, Outbound(
-      tag: 'Proxy',
-      type: OutboundType.selector,
-      outbounds: outbounds.map((element) => element.tag).toList(),
-    ));
-    return outbounds;
-  }
-
-  static List<Outbound> _clash2SingBoxOutbounds(final YamlMap yamlMap) {
-    final Map<String, dynamic> clashMap = yamlMap.toMap();
-    final clash = Clash.fromJson(clashMap);
-    final List<Outbound> outbounds = [];
-    for (var element in clash.proxies) {
-      final outbound = element.toOutbound();
-      if (outbound != null) {
-        outbounds.add(outbound);
-      } else {
-        debugPrint('${element.name} is not support');
-      }
-    }
-    for (var element in clash.proxyGroups.reversed) {
-      final outbound = element.toOutbound();
-      if (outbound != null) {
-        outbounds.insert(0, outbound);
-      } else {
-        debugPrint('${element.name} is not support');
-      }
-    }
-    return outbounds;
   }
 
   static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {
