@@ -14,7 +14,7 @@ class NetworkService {
   Future<ApiResult<dynamic>> fetchSubscription(Uri uri) async {
     try {
       dioClient.dio.options.headers.addAll({
-        'User-Agent': await getUserAgent(),
+        'User-Agent': await _getUserAgent(),
       });
       final response = await dioClient.dio.getUri(uri);
       if (response.statusCode == io.HttpStatus.ok) {
@@ -28,19 +28,19 @@ class NetworkService {
     }
   }
 
-  static Future<String> getUserAgent() async {
+  Future<String> _getUserAgent() async {
     final packageInfo = await _getPackageInfo();
     final deviceInfo = await _getDeviceInfo();
     return '($deviceInfo) mihomo/1.19.15 ClashMeta/1.19.15 sing-box/1.12.12 v2ray';
     // return '$packageInfo ($deviceInfo) sing-box/1.12.12 mihomo/1.19.15 ClashMeta/1.19.15 v2ray';
   }
 
-  static Future<String> _getPackageInfo() async {
+  Future<String> _getPackageInfo() async {
     final info = await PackageInfo.fromPlatform();
     return 'ClashSing/${info.version}';
   }
 
-  static Future<String> _getDeviceInfo() async {
+  Future<String> _getDeviceInfo() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     late final String device;
     if (io.Platform.isAndroid) {
@@ -57,7 +57,7 @@ class NetworkService {
       device = 'Linux ${linuxInfo.prettyName}';
     } else if (io.Platform.isMacOS) {
       final macosInfo = await deviceInfo.macOsInfo;
-      device =  'MacOS ${macosInfo.kernelVersion}';
+      device = 'MacOS ${macosInfo.kernelVersion}';
     } else {
       device = 'Unknown';
     }
