@@ -21,7 +21,7 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
   void _loadProfiles() async {
     profiles.clear();
     profiles.addAll(
-        profileManager.getProfiles()
+        ProfileManager().getProfiles()
     );
     setState(() {
 

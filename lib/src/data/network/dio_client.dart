@@ -56,5 +56,3 @@ class DioClient {
     return myDio;
   }
 }
-
-final dioClient = DioClient();

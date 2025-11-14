@@ -129,5 +129,3 @@ class _Keys {
   static const String profilePrefix = "profile_";
   static const String selectedProfileId = "selected_profile_id";
 }
-
-final profileManager = ProfileManager();

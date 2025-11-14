@@ -33,9 +33,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _loadProfiles() async {
-    _selectedProfile = profileManager.getSelectedProfile();
+    _selectedProfile = ProfileManager().getSelectedProfile();
     _profiles.clear();
-    _profiles.addAll(profileManager.getProfiles());
+    _profiles.addAll(ProfileManager().getProfiles());
     if (!mounted) return;
     setState(() {
 
@@ -43,7 +43,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _switchProfile(int profileId) async {
-    profileManager.setSelectedProfile(profileId);
+    ProfileManager().setSelectedProfile(profileId);
     _loadProfiles();
     if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
       try {

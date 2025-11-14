@@ -12,9 +12,9 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 ///   content-type: text/html; charset=UTF-8
 class RemoteProfileService {
   Future<Profile> importProfile(Uri link, {String? name, required bool autoUpdate, int? autoUpdateInterval}) async {
-    final apiResult = await networkService.fetchSubscription(link);
-    final profileId = profileManager.generateProfileId;
-    final profilePath = await profileManager.getProfilePath(profileId);
+    final apiResult = await NetworkService().fetchSubscription(link);
+    final profileId = ProfileManager().generateProfileId;
+    final profilePath = await ProfileManager().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
@@ -27,7 +27,7 @@ class RemoteProfileService {
       typed: typedProfile,
       userInfo: userInfo,
     );
-    await profileManager.addProfile(profile, singBox);
+    await ProfileManager().addProfile(profile, singBox);
     return profile;
   }
 

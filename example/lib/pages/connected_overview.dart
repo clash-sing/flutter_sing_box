@@ -21,7 +21,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   @override
   initState() {
     super.initState();
-    _profile = profileManager.getSelectedProfile();
+    _profile = ProfileManager().getSelectedProfile();
     _initData();
   }
 
