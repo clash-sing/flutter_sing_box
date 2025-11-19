@@ -1,3 +1,6 @@
+group = "com.clashsiing.flutter_sing_box"
+version = "1.0-SNAPSHOT"
+
 buildscript {
     ext.kotlin_version = "2.2.20"
     repositories {
@@ -6,20 +9,11 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.13.0")
-//        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("com.android.tools.build:gradle:8.13.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlin_version")
     }
 }
-
-plugins {
-    id 'org.jetbrains.kotlin.android' version '2.2.20'
-    id 'com.android.library'
-    id 'kotlin-parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.2.20'
-}
-
-group = "com.clashsiing.flutter_sing_box"
-version = "1.0-SNAPSHOT"
 
 allprojects {
     repositories {
@@ -27,6 +21,10 @@ allprojects {
         mavenCentral()
     }
 }
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 
 android {
     namespace = "com.clashsiing.flutter_sing_box"

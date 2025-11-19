@@ -1,13 +1,10 @@
 package com.clashsiing.flutter_sing_box.cs.models
 
 import android.annotation.SuppressLint
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @SuppressLint("UnsafeOptInUsageError")
-@Parcelize
 @Serializable
 data class Profile(
     val id: Int,
@@ -15,8 +12,7 @@ data class Profile(
     val name: String,
     val typed: TypedProfile,
     val userInfo: UserInfo? = null,
-) : Parcelable {
-    @Parcelize
+) {
     @Serializable
     data class TypedProfile(
         val type: ProfileType,
@@ -26,10 +22,9 @@ data class Profile(
         val autoUpdateInterval: Int? = null,
         val remoteUrl: String? = null,
         val webPageUrl: String? = null,
-    ) : Parcelable {
-        @Parcelize
+    ) {
         @Serializable
-        enum class ProfileType : Parcelable {
+        enum class ProfileType {
             @SerialName("local")
             LOCAL,
             @SerialName("remote")
@@ -37,12 +32,11 @@ data class Profile(
         }
     }
 
-    @Parcelize
     @Serializable
     data class UserInfo(
         val upload: Long? = null,
         val download: Long? = null,
         val total: Long? = null,
         val expire: Long? = null,
-    ) : Parcelable
+    )
 }
