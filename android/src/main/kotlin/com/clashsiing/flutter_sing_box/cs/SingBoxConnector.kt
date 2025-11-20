@@ -163,6 +163,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
                 Status.Stopping.ordinal -> Status.Stopping
                 else -> throw IllegalArgumentException("Unknown status: $status")
             }
+            Log.d(TAG, "onServiceStatusChanged: proxyStatus = ${proxyStatus.name}")
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 proxyStateSink?.success(proxyStatus.name)
             }
