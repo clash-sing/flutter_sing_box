@@ -156,7 +156,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     }
     ref.watch(groupStreamProvider).when(
       data: (clientGroups) {
-        debugPrint('clientGroups: ${jsonEncode(clientGroups)}');
+        debugPrint('clientGroups.length: ${clientGroups.length}');
         for (var clientGroup in clientGroups) {
           final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
           if (index > -1) {
