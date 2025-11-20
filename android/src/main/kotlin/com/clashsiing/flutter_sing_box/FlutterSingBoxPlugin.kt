@@ -2,6 +2,7 @@ package com.clashsiing.flutter_sing_box
 
 import android.content.Intent
 import android.net.VpnService
+import android.util.Log
 import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     companion object {
+        private const val TAG = "FlutterSingBoxPlugin"
         private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
         private const val VPN_REQUEST_CODE = 1001
     }
@@ -159,22 +161,26 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        Log.d(TAG, "onAttachedToActivity --------------------")
         activityBinding = binding
         binding.addActivityResultListener(this)
         singBoxConnector?.connect()
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        Log.d(TAG, "onDetachedFromActivityForConfigChanges --------------------")
         activityBinding?.removeActivityResultListener(this)
         activityBinding = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Log.d(TAG, "onReattachedToActivityForConfigChanges --------------------")
         activityBinding = binding
         binding.addActivityResultListener(this)
     }
 
     override fun onDetachedFromActivity() {
+        Log.d(TAG, "onDetachedFromActivity --------------------")
         singBoxConnector?.disconnect()
         activityBinding?.removeActivityResultListener(this)
         activityBinding = null

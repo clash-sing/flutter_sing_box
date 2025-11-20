@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
       darkTheme: ThemeData.dark(
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 
