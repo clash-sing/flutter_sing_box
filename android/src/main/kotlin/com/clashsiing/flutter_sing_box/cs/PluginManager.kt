@@ -7,6 +7,8 @@ import android.net.wifi.WifiManager
 import android.os.PowerManager
 import androidx.core.content.getSystemService
 import com.clashsiing.flutter_sing_box.constant.Bugs
+import com.clashsiing.flutter_sing_box.utils.ProfileManager
+import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import com.tencent.mmkv.MMKV
 import go.Seq
 import io.nekohasekai.libbox.Libbox
@@ -30,8 +32,8 @@ object PluginManager {
                 return
             }
             this._appContext = context.applicationContext
-            MMKV.mmkvWithID("profile_data", MMKV.MULTI_PROCESS_MODE)
-            MMKV.mmkvWithID("settings_data", MMKV.MULTI_PROCESS_MODE)
+            MMKV.mmkvWithID(ProfileManager.MMKV_ID, MMKV.MULTI_PROCESS_MODE)
+            MMKV.mmkvWithID(SettingsManager.MMKV_ID, MMKV.MULTI_PROCESS_MODE)
             initSingBox()
         }
     }

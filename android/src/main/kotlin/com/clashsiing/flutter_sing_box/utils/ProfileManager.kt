@@ -5,8 +5,9 @@ import com.tencent.mmkv.MMKV
 import kotlinx.serialization.json.Json
 
 object ProfileManager {
+    const val MMKV_ID = "cs_profile"
     private val mmkv by lazy {
-        MMKV.mmkvWithID("profile_data", MMKV.MULTI_PROCESS_MODE)
+        MMKV.mmkvWithID(MMKV_ID, MMKV.MULTI_PROCESS_MODE)
     }
     fun getAllKeys() : List<String>? {
         return  mmkv.allKeys()?.toList()

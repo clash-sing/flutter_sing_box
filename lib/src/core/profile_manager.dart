@@ -14,7 +14,7 @@ class ProfileManager {
   MMKV? _mmkv;
 
   MMKV get mmkv {
-    _mmkv ??= MMKV("profile_data", mode: MMKVMode.MULTI_PROCESS_MODE);
+    _mmkv ??= MMKV("cs_profile", mode: MMKVMode.MULTI_PROCESS_MODE);
     return _mmkv!;
   }
 
