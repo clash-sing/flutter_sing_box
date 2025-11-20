@@ -7,8 +7,8 @@ import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
-  Future<String?> getPlatformVersion() {
-    return FlutterSingBoxPlatform.instance.getPlatformVersion();
+  Future<void> init() {
+    return FlutterSingBoxPlatform.instance.init();
   }
 
   /// Starts the VPN service

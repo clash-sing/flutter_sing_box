@@ -7,6 +7,7 @@ import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.IBinder
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.ktx.toIpPrefix
 import com.clashsiing.flutter_sing_box.ktx.toList
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
@@ -24,6 +25,11 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
     }
 
     private val service = BoxService(this, this)
+
+    override fun onCreate() {
+        super.onCreate()
+        PluginManager.init(this)
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) =
         service.onStartCommand()

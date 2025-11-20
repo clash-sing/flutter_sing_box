@@ -9,7 +9,10 @@ class MockFlutterSingBoxPlatform
     implements FlutterSingBoxPlatform {
 
   @override
-  Future<String?> getPlatformVersion() => Future.value('42');
+  Future<void> init() {
+    // TODO: implement init
+    throw UnimplementedError();
+  }
 
   @override
   Future<void> startVpn() {
@@ -77,11 +80,11 @@ void main() {
     expect(initialPlatform, isInstanceOf<MethodChannelFlutterSingBox>());
   });
 
-  test('getPlatformVersion', () async {
-    FlutterSingBox flutterSingBoxPlugin = FlutterSingBox();
-    MockFlutterSingBoxPlatform fakePlatform = MockFlutterSingBoxPlatform();
-    FlutterSingBoxPlatform.instance = fakePlatform;
-
-    expect(await flutterSingBoxPlugin.getPlatformVersion(), '42');
-  });
+  // test('getPlatformVersion', () async {
+  //   FlutterSingBox flutterSingBoxPlugin = FlutterSingBox();
+  //   MockFlutterSingBoxPlatform fakePlatform = MockFlutterSingBoxPlatform();
+  //   FlutterSingBoxPlatform.instance = fakePlatform;
+  //
+  //   expect(await flutterSingBoxPlugin.getPlatformVersion(), '42');
+  // });
 }

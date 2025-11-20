@@ -3,6 +3,7 @@ package com.clashsiing.flutter_sing_box
 import android.content.Intent
 import android.net.VpnService
 import com.clashsiing.flutter_sing_box.core.BoxService
+import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -39,6 +40,17 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
+            "init" -> {
+                val activity = activityBinding?.activity
+                if (activity != null) {
+                    PluginManager.init(activity.applicationContext)
+                    result.success(null)
+                    return
+                } else {
+                    result.error("NO_ACTIVITY", "无法获取Activity实例", null)
+                    return
+                }
+            }
             "startVpn" -> {
                 val activity = activityBinding?.activity
                 if (activity == null) {
@@ -130,9 +142,6 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     result.error("INVALID_ARGUMENTS", "无效的参数", e)
                     return
                 }
-            }
-            "getPlatformVersion" -> {
-                result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             else -> {
                 result.notImplemented()

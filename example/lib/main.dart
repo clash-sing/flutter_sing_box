@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 import 'package:flutter_sing_box_example/pages/home_page.dart';
 import 'package:flutter_sing_box_example/utils/snackbar_util.dart';
@@ -9,6 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final rootDir = await MMKV.initialize();
   debugPrint('mmkv rootDir: $rootDir');
+  await FlutterSingBox().init();
   runApp(const ProviderScope(
     child: MyApp(),
   ));

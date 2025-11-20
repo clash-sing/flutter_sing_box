@@ -7,6 +7,7 @@ import android.net.wifi.WifiManager
 import android.os.PowerManager
 import androidx.core.content.getSystemService
 import com.clashsiing.flutter_sing_box.constant.Bugs
+import com.tencent.mmkv.MMKV
 import go.Seq
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.SetupOptions
@@ -18,12 +19,7 @@ object PluginManager {
     private var _appContext: Context? =  null
     val appContext: Context get() = _appContext ?: throw throwError()
 
-    private var _isDebug: Boolean? = null
-
-    val isDebug: Boolean
-        get() = _isDebug ?: throw throwError()
-
-    fun init(context: Context, isDebug: Boolean) {
+    fun init(context: Context) {
         val checkedResult = _appContext
         if (checkedResult != null) {
             return
@@ -34,7 +30,8 @@ object PluginManager {
                 return
             }
             this._appContext = context.applicationContext
-            this._isDebug = isDebug
+            MMKV.mmkvWithID("profile_data", MMKV.MULTI_PROCESS_MODE)
+            MMKV.mmkvWithID("settings_data", MMKV.MULTI_PROCESS_MODE)
             initSingBox()
         }
     }

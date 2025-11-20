@@ -2,7 +2,6 @@ package com.clashsiing.flutter_sing_box_example
 
 import android.app.Application
 import android.util.Log
-import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.tencent.mmkv.MMKV
 
 class MyApplication : Application() {
@@ -10,8 +9,5 @@ class MyApplication : Application() {
         super.onCreate()
         val rootDir = MMKV.initialize(this)
         Log.d("MyApplication", "MMKV rootDir: $rootDir")
-        MMKV.mmkvWithID("profile_data", MMKV.MULTI_PROCESS_MODE)
-        MMKV.mmkvWithID("settings_data", MMKV.MULTI_PROCESS_MODE)
-        PluginManager.init(this, false)
     }
 }

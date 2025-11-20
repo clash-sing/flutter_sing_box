@@ -14,9 +14,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   final methodChannel = const MethodChannel('flutter_sing_box_method');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
+  Future<void> init() async {
+    await methodChannel.invokeMethod('init');
   }
 
   @override
