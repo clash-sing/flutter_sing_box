@@ -64,6 +64,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            Log.d(TAG, "onServiceConnected: ${name?.toString()}")
             service = IService.Stub.asInterface(binder)
             coroutineScope.launch {
                 service?.apply {
@@ -75,9 +76,10 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
         override fun onServiceDisconnected(name: ComponentName?) {
             try {
+                Log.d(TAG, "onServiceDisconnected: ${name?.toString()}")
                 service?.unregisterCallback(callback)
             } catch (e: Exception) {
-                Log.e(TAG, "unregisterCallback: 不需要取消注册。 ${e.message}")
+                Log.e(TAG, "onServiceDisconnected: 不需要取消注册。 $e")
             }
         }
 
@@ -111,6 +113,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     }
 
     internal fun connect() {
+        Log.d(TAG, "connect ----------------------------")
         if (this::coroutineScope.isInitialized && coroutineScope.coroutineContext.isActive) {
             return
         }
@@ -128,6 +131,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     }
 
     internal fun disconnect() {
+        Log.d(TAG, "disconnect ----------------------------")
         if (!this::coroutineScope.isInitialized) {
             return
         }
