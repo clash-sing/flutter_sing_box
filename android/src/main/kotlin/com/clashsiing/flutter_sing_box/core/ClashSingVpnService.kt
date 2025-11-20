@@ -7,6 +7,7 @@ import android.net.ProxyInfo
 import android.net.VpnService
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.ktx.toIpPrefix
 import com.clashsiing.flutter_sing_box.ktx.toList
@@ -35,6 +36,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
         service.onStartCommand()
 
     override fun onBind(intent: Intent): IBinder {
+        Log.d(TAG, "onBind: $intent")
         val binder = super.onBind(intent)
         if (binder != null) {
             return binder
@@ -43,15 +45,13 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
     }
 
     override fun onDestroy() {
+        Log.d(TAG, "onDestroy: VPN 销毁")
         service.onDestroy()
     }
 
     override fun onRevoke() {
-        runBlocking {
-            withContext(Dispatchers.Main) {
-                service.onRevoke()
-            }
-        }
+        Log.d(TAG, "onRevoke: 在APP之外关闭了 VPN，或 VPN 权限被撤销")
+        service.onRevoke()
     }
 
     override fun autoDetectInterfaceControl(fd: Int) {
