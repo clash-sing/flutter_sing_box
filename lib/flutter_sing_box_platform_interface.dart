@@ -24,33 +24,33 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<void> init() {
+  Future<void> init() async {
     throw UnimplementedError('init() has not been implemented.');
   }
 
   /// Starts the VPN service
-  Future<void> startVpn() {
+  Future<void> startVpn() async {
     throw UnimplementedError('startVpn() has not been implemented.');
   }
 
   /// Stops the VPN service
-  Future<void> stopVpn() {
+  Future<void> stopVpn() async {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
-  Future<void> setClashMode(String mode) {
+  Future<void> setClashMode(String mode) async {
     throw UnimplementedError('setClashMode() has not been implemented.');
   }
 
-  Future<void> setOutbound({required String groupTag, required String outboundTag}) {
+  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
     throw UnimplementedError('setOutbound() has not been implemented.');
   }
 
-  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
     throw UnimplementedError('setGroupExpand() has not been implemented.');
   }
 
-  Future<void> urlTest({required String groupTag}) {
+  Future<void> urlTest({required String groupTag}) async {
     throw UnimplementedError('urlTest() has not been implemented.');
   }
 

@@ -7,34 +7,34 @@ import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
 class FlutterSingBox {
-  Future<void> init() {
-    return FlutterSingBoxPlatform.instance.init();
+  Future<void> init() async {
+    return await FlutterSingBoxPlatform.instance.init();
   }
 
   /// Starts the VPN service
-  Future<void> startVpn() {
-    return FlutterSingBoxPlatform.instance.startVpn();
+  Future<void> startVpn() async {
+    return await FlutterSingBoxPlatform.instance.startVpn();
   }
 
   /// Stops the VPN service
-  Future<void> stopVpn() {
-    return FlutterSingBoxPlatform.instance.stopVpn();
+  Future<void> stopVpn() async {
+    return await FlutterSingBoxPlatform.instance.stopVpn();
   }
 
-  Future<void> setClashMode(String clashMode) {
-    return FlutterSingBoxPlatform.instance.setClashMode(clashMode);
+  Future<void> setClashMode(String clashMode) async {
+    return await FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }
 
-  Future<void> setOutbound({required String groupTag, required String outboundTag}) {
-    return FlutterSingBoxPlatform.instance.setOutbound(groupTag: groupTag, outboundTag: outboundTag);
+  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
+    return await FlutterSingBoxPlatform.instance.setOutbound(groupTag: groupTag, outboundTag: outboundTag);
   }
 
   Future<void> urlTest({required String groupTag}) async {
-    return FlutterSingBoxPlatform.instance.urlTest(groupTag: groupTag);
+    return await FlutterSingBoxPlatform.instance.urlTest(groupTag: groupTag);
   }
 
-  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) {
-    return FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
+    return await FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
   }
 
   Stream<ClientStatus> get connectedStatusStream =>

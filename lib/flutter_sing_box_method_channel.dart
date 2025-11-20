@@ -15,37 +15,37 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
 
   @override
   Future<void> init() async {
-    await methodChannel.invokeMethod('init');
+    return await methodChannel.invokeMethod('init');
   }
 
   @override
   Future<void> startVpn() async {
-    await methodChannel.invokeMethod('startVpn');
+    return await methodChannel.invokeMethod('startVpn');
   }
 
   @override
   Future<void> stopVpn() async {
-    await methodChannel.invokeMethod('stopVpn');
+    return await methodChannel.invokeMethod('stopVpn');
   }
 
   @override
   Future<void> setClashMode(String mode) async {
-    await methodChannel.invokeMethod('setClashMode', mode);
+    return await methodChannel.invokeMethod('setClashMode', mode);
   }
 
   @override
   Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
-    await methodChannel.invokeMethod('setOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
+    return await methodChannel.invokeMethod('setOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
   }
 
   @override
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
-    await methodChannel.invokeMethod('setGroupExpand', {"groupTag": groupTag, "isExpand": isExpand});
+    return await methodChannel.invokeMethod('setGroupExpand', {"groupTag": groupTag, "isExpand": isExpand});
   }
 
   @override
   Future<void> urlTest({required String groupTag}) async {
-    await methodChannel.invokeMethod('urlTest', groupTag);
+    return await methodChannel.invokeMethod('urlTest', groupTag);
   }
 
   static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
