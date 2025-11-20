@@ -48,8 +48,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
       try {
         await ref.read(flutterSingBoxProvider).stopVpn();
+        debugPrint('stopVpn');
         await Future.delayed(const Duration(milliseconds: 1500));
         await ref.read(flutterSingBoxProvider).startVpn();
+        debugPrint('startVpn');
       } catch (e) {
         debugPrint(e.toString());
       }
@@ -122,7 +124,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       return  FloatingActionButton(
         onPressed: () async {
           if (proxyState == ProxyState.started || proxyState == ProxyState.starting) {
-            await ref.read(flutterSingBoxProvider).stopVpn();
+            await FlutterSingBox().stopVpn();
           } else {
             await _startVpn();
           }

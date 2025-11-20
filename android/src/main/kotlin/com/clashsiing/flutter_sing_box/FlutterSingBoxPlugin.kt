@@ -3,7 +3,9 @@ package com.clashsiing.flutter_sing_box
 import android.content.Intent
 import android.net.VpnService
 import android.util.Log
+import com.clashsiing.flutter_sing_box.constant.Action
 import com.clashsiing.flutter_sing_box.core.BoxService
+import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -45,7 +47,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
             "init" -> {
                 val activity = activityBinding?.activity
                 if (activity != null) {
-                    PluginManager.init(activity.applicationContext)
+//                    PluginManager.init(activity.applicationContext)
                     result.success(null)
                     return
                 } else {
@@ -68,8 +70,18 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 }
             }
             "stopVpn" -> {
-                BoxService.stop()
-                result.success(null)
+                val context = activityBinding?.activity?.applicationContext
+                if (context != null) {
+                    context.sendBroadcast(
+                        Intent(Action.SERVICE_CLOSE).setPackage(context.packageName)
+                    )
+//                    BoxService.stop()
+                    result.success(null)
+                    return
+                } else {
+                    result.error("NO_CONTEXT", "无法获取Context实例", null)
+                    return
+                }
             }
             "setClashMode" -> {
                 val clashMode = call.arguments as String?
@@ -153,8 +165,17 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
 
     private fun startVpnService(result: Result) {
         try {
-            BoxService.start()
-            result.success(null)
+            val context = activityBinding?.activity?.applicationContext
+            if (context != null) {
+                val intent = Intent(context, ClashSingVpnService::class.java)
+                context.startForegroundService(intent)
+//                BoxService.start()
+                result.success(null)
+                return
+            } else {
+                result.error("NO_CONTEXT", "无法获取Context实例", null)
+                return
+            }
         } catch (e: Exception) {
             result.error("VPN_ERROR", "启动VPN服务失败:\n${e.message}", null)
         }
