@@ -36,8 +36,10 @@ extension ClashProxyExt on ClashProxy {
             tag: name,
             server: server,
             serverPort: port,
-            serverPorts: [ports!.replaceAll('-', ':')],
+            serverPorts: ports?.isNotEmpty == true ? [ports!.replaceAll('-', ':')] : null,
             password: password,
+            upMbps: up,
+            downMbps: down,
             tls: Tls(
               alpn: alpn ?? ['h3'],
               enabled: true,
@@ -52,8 +54,11 @@ extension ClashProxyExt on ClashProxy {
             tag: name,
             server: server,
             serverPort: port,
-            serverPorts: [ports!.replaceAll('-', ':')],
+            serverPorts: ports?.isNotEmpty == true ? [ports!.replaceAll('-', ':')] : null,
             authStr: authStr,
+            upMbps: up,
+            downMbps: down,
+            disableMtuDiscovery: disableMtuDiscovery ?? true,
             tls: Tls(
               alpn: alpn ?? ['h3'],
               enabled: true,
@@ -61,9 +66,6 @@ extension ClashProxyExt on ClashProxy {
               disableSni: !(sni?.isNotEmpty == true),
               serverName: sni ?? "",
             ),
-            upMbps: up,
-            downMbps: down,
-            disableMtuDiscovery: disableMtuDiscovery ?? true,
           ),
       ClashProxyType.anytls =>
           Outbound(
