@@ -19,6 +19,11 @@ class RemoteProfileService {
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
 
+    // TODO: for debug
+    // final assetFile = 'packages/flutter_sing_box/assets/.local/sing-box-config-demo.json';
+    // final syyTreeString = await rootBundle.loadString(assetFile);
+    // final skyTreeMap = jsonDecode(syyTreeString);
+
     final singBox = await SingBoxConfigProvider.provide(apiResult.data);
     final profile = Profile(
       id: profileId,
