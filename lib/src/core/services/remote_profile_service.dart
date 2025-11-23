@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 /// Example:
@@ -20,7 +21,7 @@ class RemoteProfileService {
     final profileName = _getProfileName(link, name, apiResult.headers);
 
     // TODO: for debug
-    // final assetFile = 'packages/flutter_sing_box/assets/.local/sing-box-config-demo.json';
+    // final assetFile = 'packages/flutter_sing_box/assets/.local/no-urltest-20251122.json';
     // final syyTreeString = await rootBundle.loadString(assetFile);
     // final skyTreeMap = jsonDecode(syyTreeString);
 
