@@ -14,9 +14,10 @@ import com.clashsiing.flutter_sing_box.ktx.toList
 import com.clashsiing.flutter_sing_box.utils.SettingsManager
 import io.nekohasekai.libbox.Notification
 import io.nekohasekai.libbox.TunOptions
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 
 @SuppressLint("VpnServicePolicy")
 class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
@@ -24,8 +25,11 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
     companion object {
         private const val TAG = "ClashSingVpnService"
     }
+    var systemProxyAvailable = false
+    var systemProxyEnabled = false
 
-    private val service = BoxService(this, this)
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val service = BoxService(this, this, coroutineScope)
 
     override fun onCreate() {
         super.onCreate()
@@ -47,6 +51,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
     override fun onDestroy() {
         Log.d(TAG, "onDestroy: VPN 销毁")
         service.onDestroy()
+        coroutineScope.cancel()
     }
 
     override fun onRevoke() {
@@ -57,9 +62,6 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
     override fun autoDetectInterfaceControl(fd: Int) {
         protect(fd)
     }
-
-    var systemProxyAvailable = false
-    var systemProxyEnabled = false
 
     override fun openTun(options: TunOptions): Int {
         if (prepare(this) != null) error("android: missing vpn permission")

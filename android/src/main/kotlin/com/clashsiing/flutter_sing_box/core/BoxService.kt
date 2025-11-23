@@ -35,6 +35,7 @@ import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.Notification
 import io.nekohasekai.libbox.PlatformInterface
 import io.nekohasekai.libbox.SystemProxyStatus
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -42,9 +43,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.core.net.toUri
 
 class BoxService(
-    private val service: Service, private val platformInterface: PlatformInterface
+    private val service: Service,
+    private val platformInterface: PlatformInterface,
+    private val coroutineScope: CoroutineScope
 ) : CommandServerHandler {
 
     companion object {
@@ -82,8 +86,6 @@ class BoxService(
                 Action.SERVICE_CLOSE -> {
                     stopService()
                 }
-
-
                 PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         serviceUpdateIdleMode()
@@ -103,11 +105,10 @@ class BoxService(
     private var lastProfileName = "狗狗加速"
     private suspend fun startService() {
         try {
+/*
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
             }
-
-/*
             val selectedProfileId = SettingsManager.selectedProfile
             if (selectedProfileId == -1L) {
                 stopAndAlert(Alert.EmptyConfiguration)
@@ -135,6 +136,9 @@ class BoxService(
                 return
             }
             lastProfileName = profile.name
+            withContext(Dispatchers.Main) {
+                notification.show(lastProfileName, R.string.status_starting)
+            }
             val file = File(profile.typed.path)
             if (!file.exists()) {
                 stopAndAlert(Alert.EmptyConfiguration)
@@ -142,10 +146,6 @@ class BoxService(
             }
             Log.d(TAG, "profile path: ${file.absolutePath}")
             val content = file.readText()
-
-            withContext(Dispatchers.Main) {
-                notification.show(lastProfileName, R.string.status_starting)
-            }
 
             DefaultNetworkMonitor.start()
             Libbox.setMemoryLimit(!SettingsManager.disableMemoryLimit)
@@ -156,9 +156,7 @@ class BoxService(
                 stopAndAlert(Alert.CreateService, e.message)
                 return
             }
-
             newService.start()
-
             if (newService.needWIFIState()) {
                 val wifiPermission = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -206,7 +204,7 @@ class BoxService(
         commandServer?.setService(null)
         commandServer?.resetLog()
         boxService = null
-        runBlocking {
+        coroutineScope.launch {
             startService()
         }
     }
@@ -246,7 +244,7 @@ class BoxService(
             receiverRegistered = false
         }
         notification.close()
-        GlobalScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             val pfd = fileDescriptor
             if (pfd != null) {
                 pfd.close()
@@ -270,32 +268,28 @@ class BoxService(
             }
             commandServer = null
             SettingsManager.startedByUser = false
-            withContext(Dispatchers.Main) {
-                status.value = Status.Stopped
-                service.stopSelf()
-            }
+            status.postValue(Status.Stopped)
+            service.stopSelf()
         }
     }
 
-    private suspend fun stopAndAlert(type: Alert, message: String? = null) {
+    private fun stopAndAlert(type: Alert, message: String? = null) {
         SettingsManager.startedByUser = false
-        withContext(Dispatchers.Main) {
-            if (receiverRegistered) {
-                service.unregisterReceiver(receiver)
-                receiverRegistered = false
-            }
-            notification.close()
-            binder.broadcast { callback ->
-                callback.onServiceAlert(type.ordinal, message)
-            }
-            status.value = Status.Stopped
+        if (receiverRegistered) {
+            service.unregisterReceiver(receiver)
+            receiverRegistered = false
         }
+        notification.close()
+        binder.broadcast { callback ->
+            callback.onServiceAlert(type.ordinal, message)
+        }
+        status.postValue(Status.Stopped)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     @Suppress("SameReturnValue")
     internal fun onStartCommand(): Int {
-        if (status.value != Status.Stopped) return Service.START_NOT_STICKY
+        if (status.value != Status.Stopped) return Service.START_STICKY
         status.value = Status.Starting
 
         if (!receiverRegistered) {
@@ -308,17 +302,19 @@ class BoxService(
             receiverRegistered = true
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
-            SettingsManager.startedByUser = true
-            try {
-                startCommandServer()
-            } catch (e: Exception) {
-                stopAndAlert(Alert.StartCommandServer, e.message)
-                return@launch
-            }
+        SettingsManager.startedByUser = true
+        try {
+            startCommandServer()
+        } catch (e: Exception) {
+            stopAndAlert(Alert.StartCommandServer, e.message)
+            return Service.START_NOT_STICKY
+        }
+        coroutineScope.launch {
             startService()
         }
-        return Service.START_NOT_STICKY
+
+        notification.show("", R.string.status_starting)
+        return Service.START_STICKY
     }
 
     internal fun onBind(): IBinder {
@@ -356,14 +352,14 @@ class BoxService(
                     service,
                     0,
                     PluginManager.launchIntent.apply {
-                        setAction(Action.OPEN_URL).setData(Uri.parse(notification.openURL))
+                        setAction(Action.OPEN_URL).setData(notification.openURL.toUri())
                         setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     },
                     ServiceNotification.flags,
                 )
             )
         }
-        GlobalScope.launch(Dispatchers.Main) {
+        coroutineScope.launch(Dispatchers.Main) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 PluginManager.notification.createNotificationChannel(
                     NotificationChannel(
