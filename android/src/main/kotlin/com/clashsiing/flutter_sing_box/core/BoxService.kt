@@ -247,35 +247,32 @@ class BoxService(
         }
         notification.close()
         coroutineScope.launch {
-            withContext(NonCancellable) {
-                delay(3000)
-                commandServer?.setService(null)
-                commandServer?.apply {
-                    close()
-                    Seq.destroyRef(refnum)
-                }
-                commandServer = null
+            commandServer?.setService(null)
+            commandServer?.apply {
+                close()
+                Seq.destroyRef(refnum)
+            }
+            commandServer = null
 
-                try {
-                    Log.w(TAG, "关闭之前")
-                    boxService?.close()
-                    Log.w(TAG, "成功关闭")
+            try {
+                Log.w(TAG, "关闭之前")
+                boxService?.close()
+                Log.w(TAG, "成功关闭")
 
-                } catch (t: Throwable) {
-                    Log.e(TAG, t.message, t)
-                    writeLog("service: error when closing: $t")
-                }
-                boxService?.let {
-                    Seq.destroyRef(it.refnum)
-                }
-                boxService = null
-                DefaultNetworkMonitor.stop()
+            } catch (t: Throwable) {
+                Log.e(TAG, t.message, t)
+                writeLog("service: error when closing: $t")
+            }
+            boxService?.let {
+                Seq.destroyRef(it.refnum)
+            }
+            boxService = null
+            DefaultNetworkMonitor.stop()
 
-                val pfd = fileDescriptor
-                if (pfd != null) {
-                    pfd.close()
-                    fileDescriptor = null
-                }
+            val pfd = fileDescriptor
+            if (pfd != null) {
+                pfd.close()
+                fileDescriptor = null
             }
             SettingsManager.startedByUser = false
             status.postValue(Status.Stopped)

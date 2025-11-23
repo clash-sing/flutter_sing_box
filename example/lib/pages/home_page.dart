@@ -47,6 +47,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     _loadProfiles();
     if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
       try {
+        await Future.delayed(const Duration(milliseconds: 3000));
         await ref.read(flutterSingBoxProvider).stopVpn();
         debugPrint('stopVpn');
         await Future.delayed(const Duration(milliseconds: 1500));
