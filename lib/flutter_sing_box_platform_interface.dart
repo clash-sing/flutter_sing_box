@@ -38,6 +38,10 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
+  Future<void> serviceReload() async {
+    throw UnimplementedError('serviceReload() has not been implemented.');
+  }
+
   Future<void> setClashMode(String mode) async {
     throw UnimplementedError('setClashMode() has not been implemented.');
   }

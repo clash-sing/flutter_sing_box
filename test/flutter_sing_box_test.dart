@@ -27,6 +27,12 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
+  Future<void> serviceReload() {
+    // TODO: implement serviceReload
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> setClashMode(String mode) {
     // TODO: implement setClashMode
     throw UnimplementedError();

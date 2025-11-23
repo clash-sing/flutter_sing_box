@@ -88,6 +88,14 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     return
                 }
             }
+            "serviceReload" -> {
+                try {
+                    Libbox.newStandaloneCommandClient().serviceReload()
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("SERVICE_RELOAD_FAILED", "服务重载失败", e)
+                }
+            }
             "setClashMode" -> {
                 val clashMode = call.arguments as String?
                 if (clashMode.isNullOrBlank()) {

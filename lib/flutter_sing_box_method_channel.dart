@@ -29,6 +29,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
+  Future<void> serviceReload() async {
+    return await methodChannel.invokeMethod('serviceReload');
+  }
+
+  @override
   Future<void> setClashMode(String mode) async {
     return await methodChannel.invokeMethod('setClashMode', mode);
   }

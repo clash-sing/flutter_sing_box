@@ -21,6 +21,11 @@ class FlutterSingBox {
     return await FlutterSingBoxPlatform.instance.stopVpn();
   }
 
+  Future<void> serviceReload() async {
+    return await FlutterSingBoxPlatform.instance.serviceReload();
+  }
+
+
   Future<void> setClashMode(String clashMode) async {
     return await FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }
