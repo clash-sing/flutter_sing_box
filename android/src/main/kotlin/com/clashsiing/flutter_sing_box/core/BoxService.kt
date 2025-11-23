@@ -44,6 +44,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.File
 import androidx.core.net.toUri
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 
 class BoxService(
     private val service: Service,
@@ -245,28 +247,36 @@ class BoxService(
         }
         notification.close()
         coroutineScope.launch {
-            val pfd = fileDescriptor
-            if (pfd != null) {
-                pfd.close()
-                fileDescriptor = null
-            }
-            boxService?.apply {
-                runCatching {
+            withContext(NonCancellable) {
+                delay(3000)
+                commandServer?.setService(null)
+                commandServer?.apply {
                     close()
-                }.onFailure {
-                    writeLog("service: error when closing: $it")
+                    Seq.destroyRef(refnum)
                 }
-                Seq.destroyRef(refnum)
-            }
-            commandServer?.setService(null)
-            boxService = null
-            DefaultNetworkMonitor.stop()
+                commandServer = null
 
-            commandServer?.apply {
-                close()
-                Seq.destroyRef(refnum)
+                try {
+                    Log.w(TAG, "关闭之前")
+                    boxService?.close()
+                    Log.w(TAG, "成功关闭")
+
+                } catch (t: Throwable) {
+                    Log.e(TAG, t.message, t)
+                    writeLog("service: error when closing: $t")
+                }
+                boxService?.let {
+                    Seq.destroyRef(it.refnum)
+                }
+                boxService = null
+                DefaultNetworkMonitor.stop()
+
+                val pfd = fileDescriptor
+                if (pfd != null) {
+                    pfd.close()
+                    fileDescriptor = null
+                }
             }
-            commandServer = null
             SettingsManager.startedByUser = false
             status.postValue(Status.Stopped)
             service.stopSelf()
