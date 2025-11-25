@@ -69,7 +69,13 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   @override
   Stream<List<ClientGroup>> get groupStream {
     _groupStream ??= _eventChannelGroup.receiveBroadcastStream()
-        .map((data) => (jsonDecode(data) as List).map((item) => ClientGroup.fromJson(item)).toList());
+        .map((data) {
+      final List<dynamic> list = jsonDecode(data);
+      final groups = list.map((item) {
+        return ClientGroup.fromJson(item);
+      }).toList();
+      return groups;
+    });
     return _groupStream!;
   }
 

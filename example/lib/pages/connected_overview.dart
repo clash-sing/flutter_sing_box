@@ -69,7 +69,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
       body: SingleChildScrollView(
           child: Column(
             children: [
-              // _buildConnectedStatus(),
+              _buildConnectedStatus(),
               _buildClashMode(),
               _buildGroups(),
             ],
