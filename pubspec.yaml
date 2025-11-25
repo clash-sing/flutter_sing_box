@@ -5,7 +5,7 @@ homepage: https://github.com/clash-sing/flutter_sing_box
 repository: https://github.com/clash-sing/flutter_sing_box.git
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.1
   flutter: '>=3.3.0'
 
 dependencies:

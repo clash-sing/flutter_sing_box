@@ -48,6 +48,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 val activity = activityBinding?.activity
                 if (activity != null) {
                     PluginManager.init(activity.applicationContext)
+                    singBoxConnector?.connect()
                     result.success(null)
                     return
                 } else {
@@ -198,7 +199,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
         Log.d(TAG, "onAttachedToActivity --------------------")
         activityBinding = binding
         binding.addActivityResultListener(this)
-        singBoxConnector?.connect()
+//        singBoxConnector?.connect()
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
