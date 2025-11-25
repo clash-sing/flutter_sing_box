@@ -53,8 +53,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return await methodChannel.invokeMethod('urlTest', groupTag);
   }
 
-  static const EventChannel _eventChannelConnectedStatus = EventChannel('connected_status_event');
-  static Stream<ClientStatus>? _connectedStatusStream;
+  final _eventChannelConnectedStatus = const EventChannel('connected_status_event');
+  Stream<ClientStatus>? _connectedStatusStream;
   @override
   Stream<ClientStatus> get connectedStatusStream {
     _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream()
@@ -62,8 +62,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return _connectedStatusStream!;
   }
 
-  static const EventChannel _eventChannelGroup = EventChannel('group_event');
-  static Stream<List<ClientGroup>>? _groupStream;
+  final _eventChannelGroup = const EventChannel('group_event');
+  Stream<List<ClientGroup>>? _groupStream;
   @override
   Stream<List<ClientGroup>> get groupStream {
     _groupStream ??= _eventChannelGroup.receiveBroadcastStream()
@@ -71,8 +71,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return _groupStream!;
   }
 
-  static const EventChannel _eventChannelClashMode = EventChannel('clash_mode_event');
-  static Stream<ClientClashMode>? _clashModeStream;
+  final _eventChannelClashMode = const EventChannel('clash_mode_event');
+  Stream<ClientClashMode>? _clashModeStream;
 
   @override
   Stream<ClientClashMode> get clashModeStream {
@@ -81,8 +81,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return _clashModeStream!;
   }
 
-  static const EventChannel _eventChannelLog = EventChannel('log_event');
-  static Stream<List<String>>? _logStream;
+  final _eventChannelLog = const EventChannel('log_event');
+  Stream<List<String>>? _logStream;
   @override
   Stream<List<String>> get logStream {
     _logStream ??= _eventChannelLog.receiveBroadcastStream()
@@ -90,8 +90,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return _logStream!;
   }
 
-  static const EventChannel _eventChannelProxyState = EventChannel('proxy_state_event');
-  static Stream<ProxyState>? _proxyStateStream;
+  final _eventChannelProxyState = const EventChannel('proxy_state_event');
+  Stream<ProxyState>? _proxyStateStream;
   @override
   Stream<ProxyState> get proxyStateStream {
     _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream()
