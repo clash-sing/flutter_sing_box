@@ -84,18 +84,16 @@ class ProfileManager {
     if (profile == null) {
       return;
     }
-    if (getSelectedProfile()?.id == id) {
-      final profiles = getProfiles();
-      if (profiles.length > 1) {
-        setSelectedProfile(profiles[1].id);
-      } else {
-        mmkv.removeValue(_Keys.selectedProfileId);
-      }
-    }
     final String key = _getProfileKey(profile.id);
     mmkv.removeValue(key);
     final file = File(profile.typed.path);
     file.deleteSync();
+    final firstProfile = getProfiles().firstOrNull;
+    if (firstProfile != null) {
+      setSelectedProfile(firstProfile.id);
+    } else {
+      mmkv.removeValue(_Keys.selectedProfileId);
+    }
   }
 
   List<Profile> getProfiles() {
