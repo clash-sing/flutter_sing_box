@@ -65,14 +65,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.2"
-  code_assets:
-    dependency: transitive
-    description:
-      name: code_assets
-      sha256: ae0db647e668cbb295a3527f0938e4039e004c80099dce2f964102373f5ce0b5
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.19.10"
   collection:
     dependency: transitive
     description:
@@ -117,10 +109,10 @@ packages:
     dependency: transitive
     description:
       name: device_info_plus
-      sha256: dd0e8e02186b2196c7848c9d394a5fd6e5b57a43a546082c5820b1ec72317e33
+      sha256: "4df8babf73058181227e18b08e6ea3520cf5fc5d796888d33b7cb0f33f984b7c"
       url: "https://pub.dev"
     source: hosted
-    version: "12.2.0"
+    version: "12.3.0"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -233,14 +225,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
-  hooks:
-    dependency: transitive
-    description:
-      name: hooks
-      sha256: "5410b9f4f6c9f01e8ff0eb81c9801ea13a3c3d39f8f0b1613cda08e27eab3c18"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.20.5"
   http:
     dependency: transitive
     description:
@@ -370,66 +354,58 @@ packages:
     dependency: "direct main"
     description:
       name: mmkv
-      sha256: bf06a3faa87157ec644f7d6cca2c91986a1c8432d6f96c20cc0753e642ebd381
+      sha256: "3299a7fa095139471ffd8ab40d5f8d2fb48c2d881c42fbca769ccb7520058fbb"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
+    version: "2.3.0"
   mmkv_android:
     dependency: transitive
     description:
       name: mmkv_android
-      sha256: "1569e273308d8f12497859672a0abd89ddeb4be3c64078e7b577ed9d813f3cd5"
+      sha256: e831636319d6e343a011a07bffb61af5e8182a4924f1c01fc75c1da30b30cee4
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
+    version: "2.3.0"
   mmkv_ios:
     dependency: transitive
     description:
       name: mmkv_ios
-      sha256: b4fbc24b97c583568276a19d45787f3b497b7958bad21589069c1c3971a30915
+      sha256: b97f331193cfb95f91d9e62ea0fe3f0b4d457b9416bcd20408979b024d67c893
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
+    version: "2.3.0"
   mmkv_linux:
     dependency: transitive
     description:
       name: mmkv_linux
-      sha256: "219559d516ee7bac052c3ddeb2aed3d83fb6579ce62d78b278c206bca6cf3e3e"
+      sha256: "3fa97cc3b63f66e602c722cbca717f5259b3234b3db3bb325cc9010d76426ad2"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
+    version: "2.3.0"
   mmkv_ohos:
     dependency: transitive
     description:
       name: mmkv_ohos
-      sha256: e51bce5b350d966bdd4033cc3d6c42536974ee6caf0ee65328e7c6f2ff3a637b
+      sha256: "4dc5d7d93e64488e60dc1d92462ab75f90ebbc3827a06f525a326140936ff31f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
+    version: "2.3.0"
   mmkv_platform_interface:
     dependency: transitive
     description:
       name: mmkv_platform_interface
-      sha256: "9ac0e51172501e634e0d84ade7b4642f7c0d7ea45f3eeb52442ed42028d8e335"
+      sha256: cb6deafaeb31ed9d9dccdf6cd37f5f5be47424662d8e967fdbb1111f04cadac7
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.3"
+    version: "2.3.0"
   mmkv_win32:
     dependency: transitive
     description:
       name: mmkv_win32
-      sha256: "11d2b6430a69bb57466047dd2a9702239d470e92486550b03acf18a1cbcf26fb"
+      sha256: "09f7917e1b011d19194e94386ea47d5942963e3f4da573133981dd8f2bc17da3"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.4"
-  native_toolchain_c:
-    dependency: transitive
-    description:
-      name: native_toolchain_c
-      sha256: f8872ea6c7a50ce08db9ae280ca2b8efdd973157ce462826c82f3c3051d154ce
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.17.2"
+    version: "2.3.0"
   node_preamble:
     dependency: transitive
     description:
@@ -438,14 +414,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  objective_c:
-    dependency: transitive
-    description:
-      name: objective_c
-      sha256: "3d88b0d084eda819fa5302ec892f0d42e80945495c3fc204b57eb7ebb1440106"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.2.0"
   package_config:
     dependency: transitive
     description:
@@ -498,10 +466,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_foundation
-      sha256: "6192e477f34018ef1ea790c56fffc7302e3bc3efede9e798b934c252c8c105ba"
+      sha256: "6d13aece7b3f5c5a9731eaf553ff9dcbc2eff41087fd2df587fd0fed9a3eb0c4"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.0"
+    version: "2.5.1"
   path_provider_linux:
     dependency: transitive
     description:
