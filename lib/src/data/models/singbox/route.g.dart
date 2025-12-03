@@ -11,7 +11,7 @@ Route _$RouteFromJson(Map<String, dynamic> json) => Route(
   rules: (json['rules'] as List<dynamic>)
       .map((e) => RouteRule.fromJson(e as Map<String, dynamic>))
       .toList(),
-  routeFinal: json['final'] as String,
+  routeFinal: json['final'] as String?,
   autoDetectInterface: json['auto_detect_interface'] as bool,
   ruleSet: (json['rule_set'] as List<dynamic>)
       .map((e) => RuleSet.fromJson(e as Map<String, dynamic>))
@@ -21,7 +21,7 @@ Route _$RouteFromJson(Map<String, dynamic> json) => Route(
 Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
   'default_domain_resolver': instance.defaultDomainResolver,
   'rules': instance.rules.map((e) => e.toJson()).toList(),
-  'final': instance.routeFinal,
+  'final': ?instance.routeFinal,
   'auto_detect_interface': instance.autoDetectInterface,
   'rule_set': instance.ruleSet.map((e) => e.toJson()).toList(),
 };

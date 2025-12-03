@@ -8,7 +8,7 @@ class Route {
   String defaultDomainResolver;
   List<RouteRule> rules;
   @JsonKey(name: "final")
-  String routeFinal;
+  String? routeFinal;
   @JsonKey(name: "auto_detect_interface")
   bool autoDetectInterface;
   @JsonKey(name: "rule_set")
