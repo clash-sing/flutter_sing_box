@@ -26,4 +26,20 @@ class TypedProfile {
 
   Map<String, dynamic> toJson() => _$TypedProfileToJson(this);
 
+  TypedProfile copyWith({
+    ProfileType? type,
+    String? path,
+    int? lastUpdated,
+    int? autoUpdateInterval,
+    String? remoteUrl,
+    String? webPageUrl
+  }) =>
+      TypedProfile(
+          type: type ?? this.type,
+          path: path ?? this.path,
+          lastUpdated: lastUpdated ?? this.lastUpdated,
+          autoUpdateInterval: autoUpdateInterval ?? this.autoUpdateInterval,
+          remoteUrl: remoteUrl ?? this.remoteUrl,
+          webPageUrl: webPageUrl ?? this.webPageUrl
+      );
 }

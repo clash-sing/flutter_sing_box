@@ -71,9 +71,7 @@ class ProfileManager {
     }
   }
 
-  Future<void> updateProfile(Profile profile, SingBox singBox) async {
-    final content = jsonEncode(singBox.toJson());
-    await File(profile.typed.path).writeAsString(content);
+  void updateProfile(Profile profile) {
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     mmkv.encodeString(key, jsonString);

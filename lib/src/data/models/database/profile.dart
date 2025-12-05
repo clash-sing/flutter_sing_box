@@ -24,4 +24,17 @@ class Profile {
   factory Profile.fromJson(Map<String, dynamic> json) => _$ProfileFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProfileToJson(this);
+
+  Profile copyWith({
+    int? order,
+    String? name,
+    TypedProfile? typed,
+  }) =>
+      Profile(
+        id: id,
+        order: order ?? this.order,
+        name: name ?? this.name,
+        typed: typed ?? this.typed,
+        userInfo: userInfo,
+      );
 }

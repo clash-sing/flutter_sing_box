@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+
+import '../../data/index.dart';
 
 /// Example:
 ///   content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
@@ -13,7 +16,19 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 ///   content-type: text/html; charset=UTF-8
 class RemoteProfileService {
   Future<Profile> importProfile(Uri link, {String? name, int? autoUpdateInterval}) async {
-    final apiResult = await NetworkService().fetchSubscription(link);
+    late final ApiResult apiResult;
+    if (isLocaleFile(link)) {
+      File file = File(link.toFilePath());
+      if (await file.exists()) {
+        final String content = await file.readAsString();
+        apiResult = ApiResult<String>(content, {},);
+      } else {
+        throw Exception('File not exists');
+      }
+    } else {
+      apiResult = await NetworkService().fetchSubscription(link);
+    }
+
     final profileId = ProfileManager().generateProfileId;
     final profilePath = await ProfileManager().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
@@ -74,7 +89,7 @@ class RemoteProfileService {
 
   TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, int? autoUpdateInterval, String filePath) {
     final typedProfile = TypedProfile(
-      type: ProfileType.remote,
+      type: isLocaleFile(link) ? ProfileType.local : ProfileType.remote,
       path: filePath,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       autoUpdateInterval: autoUpdateInterval,
@@ -122,5 +137,9 @@ class RemoteProfileService {
     } else {
       return null;
     }
+  }
+
+  bool isLocaleFile(Uri link) {
+    return link.scheme.toLowerCase() == Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
   }
 }
