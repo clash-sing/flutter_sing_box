@@ -20,7 +20,7 @@ class ProfileManager {
 
   Profile? getSelectedProfile() {
     final profileId = mmkv.decodeInt(_Keys.selectedProfileId);
-    return _getProfile(profileId);
+    return getProfile(profileId);
   }
 
   bool setSelectedProfile(int profileId) {
@@ -50,7 +50,7 @@ class ProfileManager {
     return "${profilesDir.path}/${_getProfileKey(id)}.json";
   }
 
-  Profile? _getProfile(int id) {
+  Profile? getProfile(int id) {
     final String key = _getProfileKey(id);
     final String? jsonString = mmkv.decodeString(key);
     if (jsonString?.isNotEmpty == true) {
@@ -80,7 +80,7 @@ class ProfileManager {
   }
 
   void deleteProfile(int id) {
-    final profile = _getProfile(id);
+    final profile = getProfile(id);
     if (profile == null) {
       return;
     }
