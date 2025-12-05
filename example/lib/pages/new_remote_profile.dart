@@ -21,7 +21,6 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
       final profile = await RemoteProfileService().importProfile(
         uri,
         name: _name,
-        autoUpdate: true,
         autoUpdateInterval: 1440,
       );
       if(mounted) {

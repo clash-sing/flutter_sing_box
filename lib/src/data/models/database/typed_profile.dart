@@ -9,7 +9,6 @@ class TypedProfile {
   ProfileType type;
   String path;
   int lastUpdated;
-  bool autoUpdate;
   int? autoUpdateInterval;
   String? remoteUrl;
   String? webPageUrl;
@@ -18,7 +17,6 @@ class TypedProfile {
     required this.type,
     required this.path,
     required this.lastUpdated,
-    required this.autoUpdate,
     this.autoUpdateInterval,
     this.remoteUrl,
     this.webPageUrl

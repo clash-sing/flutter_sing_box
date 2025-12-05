@@ -12,12 +12,12 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 ///   subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
 ///   content-type: text/html; charset=UTF-8
 class RemoteProfileService {
-  Future<Profile> importProfile(Uri link, {String? name, required bool autoUpdate, int? autoUpdateInterval}) async {
+  Future<Profile> importProfile(Uri link, {String? name, int? autoUpdateInterval}) async {
     final apiResult = await NetworkService().fetchSubscription(link);
     final profileId = ProfileManager().generateProfileId;
     final profilePath = await ProfileManager().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
-    final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdate, autoUpdateInterval, profilePath);
+    final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
 
     // TODO: for debug
@@ -72,23 +72,12 @@ class RemoteProfileService {
     }
   }
 
-  TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, bool autoUpdate, int? autoUpdateInterval, String filePath) {
-    int? updateIntervalMins;
-    if (autoUpdate) {
-      if (autoUpdateInterval != null && autoUpdateInterval >= 60) {
-        updateIntervalMins = autoUpdateInterval;
-      } else {
-        final defaultUpdateIntervalHours = int.tryParse(headers['profile-update-interval']?[0]);
-        updateIntervalMins = (defaultUpdateIntervalHours ?? 24) * 60;
-      }
-    }
-
+  TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, int? autoUpdateInterval, String filePath) {
     final typedProfile = TypedProfile(
       type: ProfileType.remote,
       path: filePath,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
-      autoUpdate: autoUpdate,
-      autoUpdateInterval: updateIntervalMins,
+      autoUpdateInterval: autoUpdateInterval,
       remoteUrl: link.toString(),
       webPageUrl: headers['profile-web-page-url']?[0] ?? link.host,
     );
