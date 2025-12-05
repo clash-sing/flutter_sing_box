@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:path/path.dart' as p;
+
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 import '../../data/index.dart';
@@ -55,9 +56,13 @@ class RemoteProfileService {
   String _getProfileName(Uri link, String? name, Map<String, dynamic> headers) {
     const contentDispositionKey = 'content-disposition';
     const profileTitleKey = 'profile-title';
-    if (name != null && name.trim().isNotEmpty) {
-      return name;
+
+    if (name?.trim().isNotEmpty == true) {
+      return name!.trim();
+    } else if (isLocaleFile(link)) {
+      return link.toFilePath().split(p.separator).last;
     }
+
     String? profileName;
     try {
       if (headers.containsKey(contentDispositionKey)) {
