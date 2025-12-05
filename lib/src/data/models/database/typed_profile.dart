@@ -10,7 +10,7 @@ class TypedProfile {
   String path;
   int lastUpdated;
   int? autoUpdateInterval;
-  String? remoteUrl;
+  String? subscribeUrl;
   String? webPageUrl;
 
   TypedProfile({
@@ -18,7 +18,7 @@ class TypedProfile {
     required this.path,
     required this.lastUpdated,
     this.autoUpdateInterval,
-    this.remoteUrl,
+    this.subscribeUrl,
     this.webPageUrl
   });
 
@@ -27,19 +27,15 @@ class TypedProfile {
   Map<String, dynamic> toJson() => _$TypedProfileToJson(this);
 
   TypedProfile copyWith({
-    ProfileType? type,
-    String? path,
-    int? lastUpdated,
     int? autoUpdateInterval,
-    String? remoteUrl,
-    String? webPageUrl
+    String? subscribeUrl,
   }) =>
       TypedProfile(
-          type: type ?? this.type,
-          path: path ?? this.path,
-          lastUpdated: lastUpdated ?? this.lastUpdated,
-          autoUpdateInterval: autoUpdateInterval ?? this.autoUpdateInterval,
-          remoteUrl: remoteUrl ?? this.remoteUrl,
-          webPageUrl: webPageUrl ?? this.webPageUrl
+        type: type,
+        path: path,
+        lastUpdated: lastUpdated,
+        autoUpdateInterval: autoUpdateInterval ?? this.autoUpdateInterval,
+        subscribeUrl: subscribeUrl ?? this.subscribeUrl,
+        webPageUrl: webPageUrl,
       );
 }

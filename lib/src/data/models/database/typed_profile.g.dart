@@ -11,7 +11,7 @@ TypedProfile _$TypedProfileFromJson(Map<String, dynamic> json) => TypedProfile(
   path: json['path'] as String,
   lastUpdated: (json['lastUpdated'] as num).toInt(),
   autoUpdateInterval: (json['autoUpdateInterval'] as num?)?.toInt(),
-  remoteUrl: json['remoteUrl'] as String?,
+  subscribeUrl: json['subscribeUrl'] as String?,
   webPageUrl: json['webPageUrl'] as String?,
 );
 
@@ -21,7 +21,7 @@ Map<String, dynamic> _$TypedProfileToJson(TypedProfile instance) =>
       'path': instance.path,
       'lastUpdated': instance.lastUpdated,
       'autoUpdateInterval': ?instance.autoUpdateInterval,
-      'remoteUrl': ?instance.remoteUrl,
+      'subscribeUrl': ?instance.subscribeUrl,
       'webPageUrl': ?instance.webPageUrl,
     };
 

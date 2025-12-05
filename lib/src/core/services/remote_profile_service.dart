@@ -93,7 +93,7 @@ class RemoteProfileService {
       path: filePath,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       autoUpdateInterval: autoUpdateInterval,
-      remoteUrl: link.toString(),
+      subscribeUrl: link.toString(),
       webPageUrl: headers['profile-web-page-url']?[0] ?? link.host,
     );
     return typedProfile;

@@ -18,9 +18,8 @@ data class Profile(
         val type: ProfileType,
         val path: String,
         val lastUpdated: Long,
-        val autoUpdate: Boolean,
         val autoUpdateInterval: Int? = null,
-        val remoteUrl: String? = null,
+        val subscribeUrl: String? = null,
         val webPageUrl: String? = null,
     ) {
         @Serializable
