@@ -19,7 +19,7 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
       // 创建配置
       final uri = Uri.parse(_link!);
       final profile = await RemoteProfileService().importProfile(
-        uri,
+        subscribeLink: uri,
         name: _name,
         autoUpdateInterval: 1440,
       );

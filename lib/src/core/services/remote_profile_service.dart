@@ -16,7 +16,16 @@ import '../../data/index.dart';
 ///   subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
 ///   content-type: text/html; charset=UTF-8
 class RemoteProfileService {
-  Future<Profile> importProfile(Uri link, {String? name, int? autoUpdateInterval}) async {
+  Future<Profile> importProfile({Uri? subscribeLink, int? id, String? name, int? autoUpdateInterval}) async {
+    assert(subscribeLink != null || id != null);
+    assert(subscribeLink == null || id == null);
+    late final Uri link;
+    if (subscribeLink != null) {
+      link = subscribeLink;
+    } else {
+      link = Uri.parse(ProfileManager().getProfile(id!)!.typed.subscribeUrl!);
+    }
+
     late final ApiResult apiResult;
     if (isLocaleFile(link)) {
       File file = File(link.toFilePath());
@@ -30,7 +39,7 @@ class RemoteProfileService {
       apiResult = await NetworkService().fetchSubscription(link);
     }
 
-    final profileId = ProfileManager().generateProfileId;
+    final profileId = id ?? ProfileManager().generateProfileId;
     final profilePath = await ProfileManager().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdateInterval, profilePath);
