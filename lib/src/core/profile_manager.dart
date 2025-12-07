@@ -44,8 +44,8 @@ class ProfileManager {
   Future<String> getProfilePath(int id) async {
     final Directory documentsDir = await getApplicationDocumentsDirectory();
     final profilesDir = Directory('${documentsDir.path}/profiles');
-    if (!profilesDir.existsSync()) {
-      profilesDir.createSync(recursive: true);
+    if (!await profilesDir.exists()) {
+      await profilesDir.create(recursive: true);
     }
     return "${profilesDir.path}/${_getProfileKey(id)}.json";
   }
