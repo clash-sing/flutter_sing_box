@@ -107,6 +107,6 @@
   "log" : {
     "disabled" : false,
     "level" : "info",
-    "timestamp" : false
+    "timestamp" : true
   }
 }
