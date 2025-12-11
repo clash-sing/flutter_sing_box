@@ -37,7 +37,7 @@ class SingBoxConfigProvider {
               outbounds: outbounds.map((element) => element.tag).toList(),
             ));
             outbounds.insert(0, Outbound(
-              tag: 'Proxy',
+              tag: FlutterSingBoxConstants.defaultGroup,
               type: OutboundType.selector,
               outbounds: outbounds.map((element) => element.tag).toList(),
             ));
@@ -57,8 +57,7 @@ class SingBoxConfigProvider {
   }
 
   static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {
-    const defaultConfigPath = 'packages/flutter_sing_box/assets/default_config.json';
-    final defaultConfig = await rootBundle.loadString(defaultConfigPath);
+    final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
     final jsonConfig = jsonDecode(defaultConfig);
     final defaultSingBox = SingBox.fromJson(jsonConfig);
     final List<String> errorTags =  [];
