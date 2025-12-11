@@ -31,6 +31,28 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
   protocol: json['protocol'],
   clashMode: json['clash_mode'] as String?,
   outbound: json['outbound'] as String?,
+  domain: (json['domain'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  domainSuffix: (json['domain_suffix'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  domainKeyword: (json['domain_keyword'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  domainRegex: (json['domain_regex'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  processName: (json['process_name'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  processPath: (json['process_path'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  processPathRegex: (json['process_path_regex'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  packageName: (json['package_name'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   ipIsPrivate: json['ip_is_private'] as bool?,
   ruleSet: (json['rule_set'] as List<dynamic>?)
       ?.map((e) => e as String)
@@ -42,6 +64,14 @@ Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
   'protocol': ?instance.protocol,
   'clash_mode': ?instance.clashMode,
   'outbound': ?instance.outbound,
+  'domain': ?instance.domain,
+  'domain_suffix': ?instance.domainSuffix,
+  'domain_keyword': ?instance.domainKeyword,
+  'domain_regex': ?instance.domainRegex,
+  'process_name': ?instance.processName,
+  'process_path': ?instance.processPath,
+  'process_path_regex': ?instance.processPathRegex,
+  'package_name': ?instance.packageName,
   'ip_is_private': ?instance.ipIsPrivate,
   'rule_set': ?instance.ruleSet,
 };

@@ -35,16 +35,41 @@ class RouteRule {
   @JsonKey(name: "clash_mode")
   String? clashMode;
   String? outbound;
+  List<String>? domain;
+  @JsonKey(name: "domain_suffix")
+  List<String>? domainSuffix;
+  @JsonKey(name: "domain_keyword")
+  List<String>? domainKeyword;
+  @JsonKey(name: "domain_regex")
+  List<String>? domainRegex;
+  @JsonKey(name: "process_name")
+  List<String>? processName;
+  @JsonKey(name: "process_path")
+  List<String>? processPath;
+  @JsonKey(name: "process_path_regex")
+  List<String>? processPathRegex;
+  @JsonKey(name: "package_name")
+  List<String>? packageName;
   @JsonKey(name: "ip_is_private")
   bool? ipIsPrivate;
   @JsonKey(name: "rule_set")
   List<String>? ruleSet;
+
+
 
   RouteRule({
     this.action,
     this.protocol,
     this.clashMode,
     this.outbound,
+    this.domain,
+    this.domainSuffix,
+    this.domainKeyword,
+    this.domainRegex,
+    this.processName,
+    this.processPath,
+    this.processPathRegex,
+    this.packageName,
     this.ipIsPrivate,
     this.ruleSet,
   });
