@@ -15,7 +15,7 @@ import '../../data/index.dart';
 ///   profile-web-page-url: https://panel.dg5.biz
 ///   subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
 ///   content-type: text/html; charset=UTF-8
-class RemoteProfileService {
+class ProfileService {
   Future<Profile> importProfile({Uri? subscribeLink, int? id, String? name, int? autoUpdateInterval}) async {
     assert(subscribeLink != null || id != null);
     assert(subscribeLink == null || id == null);

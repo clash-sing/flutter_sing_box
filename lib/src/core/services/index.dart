@@ -1,2 +1,2 @@
 export 'network_service.dart';
-export 'remote_profile_service.dart';
+export 'profile_service.dart';

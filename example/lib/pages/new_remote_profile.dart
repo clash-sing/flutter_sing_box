@@ -18,7 +18,7 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
       _formKey.currentState!.save();
       // 创建配置
       final uri = Uri.parse(_link!);
-      final profile = await RemoteProfileService().importProfile(
+      final profile = await ProfileService().importProfile(
         subscribeLink: uri,
         name: _name,
         autoUpdateInterval: 1440,
