@@ -39,8 +39,8 @@ class MockFlutterSingBoxPlatform
   }
 
   @override
-  Future<void> setOutbound({required String groupTag, required String outboundTag}) {
-    // TODO: implement setOutbound
+  Future<void> selectOutbound({required String groupTag, required String outboundTag}) {
+    // TODO: implement selectOutbound
     throw UnimplementedError();
   }
 

@@ -54,7 +54,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
       setState(() {
         groupItem.selected = outboundTag;
       });
-      ref.read(flutterSingBoxProvider).setOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
+      ref.read(flutterSingBoxProvider).selectOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
     } catch(e) {
       debugPrint('Error: $e');
     }

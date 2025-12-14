@@ -39,8 +39,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
-    return await methodChannel.invokeMethod('setOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
+  Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
+    return await methodChannel.invokeMethod('selectOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
   }
 
   @override

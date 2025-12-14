@@ -46,8 +46,8 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('setClashMode() has not been implemented.');
   }
 
-  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
-    throw UnimplementedError('setOutbound() has not been implemented.');
+  Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
+    throw UnimplementedError('selectOutbound() has not been implemented.');
   }
 
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {

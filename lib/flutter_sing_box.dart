@@ -30,8 +30,8 @@ class FlutterSingBox {
     return await FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }
 
-  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
-    return await FlutterSingBoxPlatform.instance.setOutbound(groupTag: groupTag, outboundTag: outboundTag);
+  Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
+    return await FlutterSingBoxPlatform.instance.selectOutbound(groupTag: groupTag, outboundTag: outboundTag);
   }
 
   Future<void> urlTest({required String groupTag}) async {

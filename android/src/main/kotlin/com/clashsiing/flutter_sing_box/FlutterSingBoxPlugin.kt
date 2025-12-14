@@ -111,7 +111,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
                 }
             }
-            "setOutbound" -> {
+            "selectOutbound" -> {
                 val groupArgName = "groupTag"
                 val outboundArgName = "outboundTag"
                 if (call.arguments !is Map<*, *>) {
