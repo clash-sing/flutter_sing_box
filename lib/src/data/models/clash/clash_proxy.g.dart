@@ -26,6 +26,10 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   protocol: json['protocol'] as String?,
   fastOpen: json['fast-open'] as bool?,
   disableMtuDiscovery: json['disable_mtu_discovery'] as bool?,
+  uuid: json['uuid'] as String?,
+  reduceRtt: json['reduce-rtt'] as bool?,
+  congestionControl: json['congestion-control'] as String?,
+  udpRelayMode: json['udp-relay-mode'] as String?,
 );
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -49,4 +53,8 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'protocol': ?instance.protocol,
       'fast-open': ?instance.fastOpen,
       'disable_mtu_discovery': ?instance.disableMtuDiscovery,
+      'uuid': ?instance.uuid,
+      'reduce-rtt': ?instance.reduceRtt,
+      'congestion-control': ?instance.congestionControl,
+      'udp-relay-mode': ?instance.udpRelayMode,
     };

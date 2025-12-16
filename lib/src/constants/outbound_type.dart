@@ -8,4 +8,5 @@ class OutboundType {
   static const String trojan = "trojan";
   static const String vmess = "vmess";
   static const String vless = "vless";
+  static const String tuic = "tuic";
 }

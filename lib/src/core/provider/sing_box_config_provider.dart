@@ -102,6 +102,9 @@ class SingBoxConfigProvider {
           case OutboundType.vless:
             sbOutbound = Outbound.fromJson(outbound);
             break;
+          case OutboundType.tuic:
+            sbOutbound = Outbound.fromJson(outbound);
+            break;
           default:
             break;
         }

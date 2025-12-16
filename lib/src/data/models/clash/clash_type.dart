@@ -3,6 +3,7 @@ class ClashProxyType {
   static const String hysteria = "hysteria";
   static const String anytls = "anytls";
   static const String trojan = "trojan";
+  static const String tuic = "tuic";
 }
 
 class ClashGroupType {

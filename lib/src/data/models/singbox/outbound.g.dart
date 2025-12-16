@@ -38,6 +38,11 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   multiplex: json['multiplex'] == null
       ? null
       : Multiplex.fromJson(json['multiplex'] as Map<String, dynamic>),
+  zeroRttHandshake: json['zero_rtt_handshake'] as bool?,
+  congestionControl: json['congestion_control'] as String?,
+  udpRelayMode: json['udp_relay_mode'] as String?,
+  udpOverStream: json['udp_over_stream'] as bool?,
+  heartbeat: json['heartbeat'] as String?,
 )..defaultTag = json['default'] as String?;
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -63,6 +68,11 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'auth_str': ?instance.authStr,
   'disable_mtu_discovery': ?instance.disableMtuDiscovery,
   'multiplex': ?instance.multiplex?.toJson(),
+  'zero_rtt_handshake': ?instance.zeroRttHandshake,
+  'congestion_control': ?instance.congestionControl,
+  'udp_relay_mode': ?instance.udpRelayMode,
+  'udp_over_stream': ?instance.udpOverStream,
+  'heartbeat': ?instance.heartbeat,
 };
 
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(

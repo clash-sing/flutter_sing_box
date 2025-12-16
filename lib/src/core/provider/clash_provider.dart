@@ -96,6 +96,26 @@ extension ClashProxyExt on ClashProxy {
             ),
             transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
           ),
+      ClashProxyType.tuic =>
+          Outbound(
+            type: OutboundType.tuic,
+            tag: name,
+            server: server,
+            serverPort: port,
+            uuid: uuid,
+            password: password,
+            zeroRttHandshake: reduceRtt,
+            congestionControl: congestionControl,
+            udpRelayMode: udpRelayMode,
+            tls: Tls(
+              alpn: alpn ?? ['h3'],
+              enabled: true,
+              insecure: skipCertVerify,
+              disableSni: !(sni?.isNotEmpty == true),
+              serverName: sni ?? "",
+            ),
+            transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
+          ),
       _ => null,
     };
     return outbound;
