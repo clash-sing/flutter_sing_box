@@ -126,7 +126,8 @@ class SingBoxConfigProvider {
         group.defaultTag = null;
       }
       group.outbounds?.removeWhere((tag) => !allTags.contains(tag));
-      if (group.outbounds?.isEmpty == true) {
+      // sing-box 不支持只有一个出站的代理组 ！！
+      if (group.outbounds?.isEmpty == true || group.outbounds?.length == 1) {
         emptyGroups.add(group.tag);
       }
     }
@@ -158,7 +159,8 @@ class SingBoxConfigProvider {
     singBox.outbounds.removeWhere((group) => emptyGroups.contains(group.tag));
     for (var group in allGroups) {
       group.outbounds?.removeWhere((tag) => emptyGroups.contains(tag));
-      if (group.outbounds?.isEmpty == true) {
+      // sing-box 不支持只有一个出站的代理组 ！！
+      if (group.outbounds?.isEmpty == true || group.outbounds?.length == 1) {
         tempEmptyGroups.add(group.tag);
       }
     }
