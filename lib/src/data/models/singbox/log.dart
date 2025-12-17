@@ -6,11 +6,13 @@ part 'log.g.dart';
 class Log {
   bool disabled;
   String level;
+  String? output;
   bool timestamp;
 
   Log({
     required this.disabled,
     required this.level,
+    this.output,
     required this.timestamp,
   });
 
