@@ -127,7 +127,7 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         statusClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Status, StatusClient())
         groupClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Groups, GroupClient())
         clashModeClient = CommandClient(coroutineScope, CommandClient.ConnectionType.ClashMode, ClashModeClient())
-//        logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
+        logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
     }
 
     internal fun disconnect() {
@@ -148,14 +148,14 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         statusClient.connect()
         groupClient.connect()
         clashModeClient.connect()
-//        logClient.connect()
+        logClient.connect()
     }
 
     private fun disconnectClient() {
         statusClient.disconnect()
         groupClient.disconnect()
         clashModeClient.disconnect()
-//        logClient.disconnect()
+        logClient.disconnect()
     }
 
     inner class ServiceCallback : IServiceCallback.Stub() {
@@ -245,8 +245,12 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
 
     inner class LogClient : CommandClient.Handler {
         override fun clearLogs() {
+            Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<String>) {
+//            for (log in message) {
+//                Log.d(TAG, "appendLogs: $log")
+//            }
             coroutineScope.launch(Dispatchers.Main.immediate) {
                 logSink?.success(Json.encodeToString(message))
             }
