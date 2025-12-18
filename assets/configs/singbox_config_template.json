@@ -106,7 +106,7 @@
   "outbounds" : [],
   "log" : {
     "disabled" : false,
-    "level" : "info",
+    "level" : "trace",
     "timestamp" : true
   }
 }
