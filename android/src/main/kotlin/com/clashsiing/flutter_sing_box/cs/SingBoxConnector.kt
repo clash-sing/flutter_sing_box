@@ -196,50 +196,61 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         }
 
         override fun updateStatus(status: StatusMessage) {
-            val clientStatus = ClientStatus(
-                memory = status.memory,
-                goroutines = status.goroutines,
-                connectionsIn = status.connectionsIn,
-                connectionsOut = status.connectionsOut,
-                trafficAvailable = status.trafficAvailable,
-                uplink = status.uplink,
-                downlink = status.downlink,
-                uplinkTotal = status.uplinkTotal,
-                downlinkTotal = status.downlinkTotal
-            )
-            coroutineScope.launch(Dispatchers.Main.immediate) {
-                clientClashMode?.let {
-                    clashModeSink?.success(Json.encodeToString(clientClashMode))
+            coroutineScope.launch {
+                val clientStatus = ClientStatus(
+                    memory = status.memory,
+                    goroutines = status.goroutines,
+                    connectionsIn = status.connectionsIn,
+                    connectionsOut = status.connectionsOut,
+                    trafficAvailable = status.trafficAvailable,
+                    uplink = status.uplink,
+                    downlink = status.downlink,
+                    uplinkTotal = status.uplinkTotal,
+                    downlinkTotal = status.downlinkTotal
+                )
+                val event = Json.encodeToString(clientStatus)
+                coroutineScope.launch(Dispatchers.Main.immediate) {
+                    statusSink?.success(event)
                 }
-                statusSink?.success(Json.encodeToString(clientStatus))
             }
         }
     }
 
     inner class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
-            val clientGroups = newGroups.map(::ClientGroup)
-            coroutineScope.launch(Dispatchers.Main.immediate) {
-                groupSink?.success(Json.encodeToString(clientGroups))
+            coroutineScope.launch {
+                val clientGroups = newGroups.map(::ClientGroup)
+                val event = Json.encodeToString(clientGroups)
+                coroutineScope.launch(Dispatchers.Main.immediate) {
+                    groupSink?.success(event)
+                }
             }
         }
     }
 
     inner class ClashModeClient : CommandClient.Handler {
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
-            clientClashMode = ClientClashMode(
-                modes = modeList,
-                currentMode = currentMode
-            )
-//            coroutineScope.launch(Dispatchers.Main.immediate) {
-//                clashModeSink?.success(Json.encodeToString(clientClashMode))
-//            }
+            coroutineScope.launch {
+                clientClashMode = ClientClashMode(
+                    modes = modeList,
+                    currentMode = currentMode
+                )
+                val event = Json.encodeToString(clientClashMode)
+                coroutineScope.launch(Dispatchers.Main.immediate) {
+                    clashModeSink?.success(event)
+                }
+            }
         }
         override fun updateClashMode(newMode: String) {
-            clientClashMode?.currentMode = newMode
-//            coroutineScope.launch(Dispatchers.Main.immediate) {
-//                clashModeSink?.success(Json.encodeToString(clientClashMode))
-//            }
+            coroutineScope.launch {
+                clientClashMode?.let { clashMode ->
+                    clashMode.currentMode = newMode
+                    val event = Json.encodeToString(clashMode)
+                    coroutineScope.launch(Dispatchers.Main.immediate) {
+                        clashModeSink?.success(event)
+                    }
+                }
+            }
         }
     }
 
@@ -248,11 +259,11 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
             Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<String>) {
-//            for (log in message) {
-//                Log.d(TAG, "appendLogs: $log")
-//            }
-            coroutineScope.launch(Dispatchers.Main.immediate) {
-                logSink?.success(Json.encodeToString(message))
+            coroutineScope.launch {
+                val event = Json.encodeToString(message)
+                coroutineScope.launch(Dispatchers.Main.immediate) {
+                    logSink?.success(event)
+                }
             }
         }
     }
