@@ -107,7 +107,6 @@
   "log" : {
     "disabled" : false,
     "level" : "info",
-    "output" : "singbox.log",
     "timestamp" : true
   }
 }
