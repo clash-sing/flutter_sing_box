@@ -24,6 +24,7 @@ class UsingConfig {
       await file.create(recursive: true);
     }
     await file.writeAsString(jsonEncode(singBox.toJson()));
+    ProfileManager().setUsingConfig(file.parent.path);
   }
 
 }

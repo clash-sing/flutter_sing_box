@@ -3,6 +3,7 @@ package com.clashsiing.flutter_sing_box.utils
 import com.clashsiing.flutter_sing_box.cs.models.Profile
 import com.tencent.mmkv.MMKV
 import kotlinx.serialization.json.Json
+import java.io.File
 
 object ProfileManager {
     const val MMKV_ID = "cs_profile"
@@ -23,8 +24,17 @@ object ProfileManager {
         return "${Keys.PROFILE_PREFIX}$id"
     }
 
+    fun getUsingConfig(): File {
+        return File(
+            mmkv.decodeString(Keys.USING_CONFIG, ""),
+            Keys.USING_CONFIG_FILE_NAME
+        )
+    }
+
     private object Keys {
         const val PROFILE_PREFIX: String = "profile_"
         const val SELECTED_PROFILE_ID: String = "selected_profile_id"
+        const val USING_CONFIG: String = "using_config"
+        const val USING_CONFIG_FILE_NAME: String = "using_config.json"
     }
 }

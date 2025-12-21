@@ -123,6 +123,10 @@ class ProfileManager {
     return File('$usingConfig/${_Keys.usingConfigFilename}');
   }
 
+  void setUsingConfig(String path) {
+    mmkv.encodeString(_Keys.usingConfig, path);
+  }
+
 }
 
 class _Keys {

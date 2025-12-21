@@ -132,8 +132,9 @@ class BoxService(
             lastProfileName = profile.name
 */
 
+            val configFile = ProfileManager.getUsingConfig()
             val profile = ProfileManager.getSelectedProfile()
-            if (profile == null) {
+            if (profile == null || !configFile.exists()) {
                 stopAndAlert(Alert.EmptyConfiguration)
                 return
             }
@@ -141,13 +142,13 @@ class BoxService(
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
             }
-            val file = File(profile.typed.path)
-            if (!file.exists()) {
-                stopAndAlert(Alert.EmptyConfiguration)
-                return
-            }
-            Log.d(TAG, "profile path: ${file.absolutePath}")
-            val content = file.readText()
+//            val file = File(profile.typed.path)
+//            if (!file.exists()) {
+//                stopAndAlert(Alert.EmptyConfiguration)
+//                return
+//            }
+            Log.d(TAG, "profile path: ${configFile.absolutePath}")
+            val content = configFile.readText()
 
             DefaultNetworkMonitor.start()
             Libbox.setMemoryLimit(!SettingsManager.disableMemoryLimit)
