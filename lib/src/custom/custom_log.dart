@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
-import 'package:flutter_sing_box/src/constants/log_level.dart';
 import 'package:flutter_sing_box/src/custom/custom_keys.dart';
 import 'package:flutter_sing_box/src/custom/custom_manager.dart';
 
