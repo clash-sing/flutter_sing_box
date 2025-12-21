@@ -14,8 +14,8 @@ enum LogLevel {
   /// 系统崩溃：内存溢出、关键资源不可用
   panic('panic', 'PANIC');
 
-  final String value;
+  final String level;
   final String name;
-  const LogLevel(this.value, this.name);
+  const LogLevel(this.level, this.name);
 
 }
