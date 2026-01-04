@@ -81,7 +81,8 @@ RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(
   type: json['type'] as String,
   format: json['format'] as String,
   url: json['url'] as String,
-  downloadDetour: json['download_detour'] as String,
+  downloadDetour: json['download_detour'] as String?,
+  updateInterval: json['update_interval'] as String?,
 );
 
 Map<String, dynamic> _$RuleSetToJson(RuleSet instance) => <String, dynamic>{
@@ -89,5 +90,6 @@ Map<String, dynamic> _$RuleSetToJson(RuleSet instance) => <String, dynamic>{
   'type': instance.type,
   'format': instance.format,
   'url': instance.url,
-  'download_detour': instance.downloadDetour,
+  'download_detour': ?instance.downloadDetour,
+  'update_interval': ?instance.updateInterval,
 };
