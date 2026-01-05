@@ -83,12 +83,12 @@
       "tag" : "geoip-cn",
       "type" : "remote",
       "format" : "binary",
-      "url" : "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs"
+      "url" : "https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs"
     }, {
       "tag" : "geosite-cn",
       "type" : "remote",
       "format" : "binary",
-      "url" : "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs"
+      "url" : "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs"
     } ]
   },
   "experimental" : {
