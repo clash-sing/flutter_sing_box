@@ -23,7 +23,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.lang.ref.WeakReference
@@ -43,7 +42,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
     internal var groupClient: CommandClient? = null
     internal var clashModeClient: CommandClient? = null
     private var logClient: CommandClient? = null
-    private lateinit var coroutineScope: CoroutineScope
+    private var coroutineScope: CoroutineScope? = null
 
     @Volatile
     private var statusSink: EventChannel.EventSink? = null
@@ -88,9 +87,6 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
     internal fun connect(ctx: Context) {
         Log.d(TAG, "connect begin----------------------------")
         disconnect()
-        if (this::coroutineScope.isInitialized && coroutineScope.coroutineContext.isActive) {
-            coroutineScope.cancel()
-        }
         context = WeakReference(ctx)
         coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         serviceConnection = MyServiceConnection()
@@ -98,20 +94,18 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
         intent.action = Action.SERVICE
         ctx.bindService(intent, serviceConnection!!, Context.BIND_AUTO_CREATE)
 
-        statusClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Status, StatusClient())
-        groupClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Groups, GroupClient())
-        clashModeClient = CommandClient(coroutineScope, CommandClient.ConnectionType.ClashMode, ClashModeClient())
-        logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
+        statusClient = CommandClient(coroutineScope!!, CommandClient.ConnectionType.Status, StatusClient())
+        groupClient = CommandClient(coroutineScope!!, CommandClient.ConnectionType.Groups, GroupClient())
+        clashModeClient = CommandClient(coroutineScope!!, CommandClient.ConnectionType.ClashMode, ClashModeClient())
+        logClient = CommandClient(coroutineScope!!, CommandClient.ConnectionType.Log, LogClient())
         Log.d(TAG, "connect ended ----------------------------")
     }
 
     internal fun disconnect() {
         Log.d(TAG, "disconnect ----------------------------")
-        if (!this::coroutineScope.isInitialized) {
-            return
-        }
         try {
-            coroutineScope.cancel()
+            coroutineScope?.cancel()
+            coroutineScope = null
             disconnectClient()
             if (serviceConnection != null) {
                 context?.get()?.unbindService(serviceConnection!!)
@@ -146,10 +140,10 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
                 else -> throw IllegalArgumentException("Unknown status: $status")
             }
             Log.d(TAG, "onServiceStatusChanged: proxyStatus = ${proxyStatus.name}")
-            coroutineScope.launch(Dispatchers.Main.immediate) {
+            coroutineScope?.launch(Dispatchers.Main.immediate) {
                 proxyStateSink?.success(proxyStatus.name)
             }
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 if (proxyStatus == Status.Started) {
                     connectClient()
                 } else if (proxyStatus == Status.Stopped) {
@@ -160,7 +154,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
         override fun onServiceAlert(type: Int, message: String?) {
             Log.e(TAG, "onServiceAlert: $type $message")
-            coroutineScope.launch(Dispatchers.Main.immediate) {
+            coroutineScope?.launch(Dispatchers.Main.immediate) {
                 proxyStateSink?.success(Status.Stopped.name)
             }
             disconnectClient()
@@ -174,7 +168,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             Log.d(TAG, "onServiceConnected: ${name?.toString()}")
             service = IService.Stub.asInterface(binder)
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 service?.apply {
                     registerCallback(callback)
                     callback.onServiceStatusChanged(status)
@@ -206,7 +200,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
         }
 
         override fun updateStatus(status: StatusMessage) {
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 val clientStatus = ClientStatus(
                     memory = status.memory,
                     goroutines = status.goroutines,
@@ -219,7 +213,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
                     downlinkTotal = status.downlinkTotal
                 )
                 val event = Json.encodeToString(clientStatus)
-                coroutineScope.launch(Dispatchers.Main.immediate) {
+                coroutineScope?.launch(Dispatchers.Main.immediate) {
                     statusSink?.success(event)
                 }
             }
@@ -228,10 +222,10 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
     inner class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 val clientGroups = newGroups.map(::ClientGroup)
                 val event = Json.encodeToString(clientGroups)
-                coroutineScope.launch(Dispatchers.Main.immediate) {
+                coroutineScope?.launch(Dispatchers.Main.immediate) {
                     groupSink?.success(event)
                 }
             }
@@ -240,23 +234,23 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
     inner class ClashModeClient : CommandClient.Handler {
         override fun initializeClashMode(modeList: List<String>, currentMode: String) {
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 clientClashMode = ClientClashMode(
                     modes = modeList,
                     currentMode = currentMode
                 )
                 val event = Json.encodeToString(clientClashMode)
-                coroutineScope.launch(Dispatchers.Main.immediate) {
+                coroutineScope?.launch(Dispatchers.Main.immediate) {
                     clashModeSink?.success(event)
                 }
             }
         }
         override fun updateClashMode(newMode: String) {
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 clientClashMode?.let { clashMode ->
                     clashMode.currentMode = newMode
                     val event = Json.encodeToString(clashMode)
-                    coroutineScope.launch(Dispatchers.Main.immediate) {
+                    coroutineScope?.launch(Dispatchers.Main.immediate) {
                         clashModeSink?.success(event)
                     }
                 }
@@ -269,9 +263,9 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<String>) {
-            coroutineScope.launch {
+            coroutineScope?.launch {
                 val event = Json.encodeToString(message)
-                coroutineScope.launch(Dispatchers.Main.immediate) {
+                coroutineScope?.launch(Dispatchers.Main.immediate) {
                     logSink?.success(event)
                 }
             }
