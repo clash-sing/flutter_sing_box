@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.VpnService
 import android.util.Log
 import com.clashsiing.flutter_sing_box.constant.Action
-import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
@@ -32,12 +31,15 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
     private val pendingStartVpnResult = AtomicReference<Result?>(null)
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d(TAG, "onAttachedToEngine ---------------------------------")
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
         channel.setMethodCallHandler(this)
-        singBoxConnector = SingBoxConnector(flutterPluginBinding.applicationContext, flutterPluginBinding.binaryMessenger)
+        PluginManager.init(flutterPluginBinding.applicationContext)
+        singBoxConnector = SingBoxConnector(flutterPluginBinding.binaryMessenger)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d(TAG, "onDetachedFromEngine ---------------------------------")
         channel.setMethodCallHandler(null)
         singBoxConnector = null
     }
@@ -45,10 +47,10 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "init" -> {
+                Log.d(TAG, "onMethodCall init ---------------------------------")
                 val activity = activityBinding?.activity
                 if (activity != null) {
-                    PluginManager.init(activity.applicationContext)
-                    singBoxConnector?.connect()
+                    singBoxConnector?.connect(activity)
                     result.success(null)
                     return
                 } else {

@@ -26,8 +26,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import java.lang.ref.WeakReference
 
-class SingBoxConnector(private val applicationContext: Context, val binaryMessenger: BinaryMessenger) {
+class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
     companion object {
         private const val TAG = "SingBoxConnector"
@@ -38,13 +39,11 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         private const val EVENT_CHANNEL_PROXY_STATE = "proxy_state_event"
     }
 
-    private lateinit var statusClient: CommandClient
-    internal lateinit var groupClient: CommandClient
-    internal lateinit var clashModeClient: CommandClient
-    private lateinit var logClient: CommandClient
+    private var statusClient: CommandClient? = null
+    internal var groupClient: CommandClient? = null
+    internal var clashModeClient: CommandClient? = null
+    private var logClient: CommandClient? = null
     private lateinit var coroutineScope: CoroutineScope
-
-    private var service: IService? = null
 
     @Volatile
     private var statusSink: EventChannel.EventSink? = null
@@ -60,36 +59,9 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
     @Volatile
     internal var clientClashMode: ClientClashMode? = null
 
-    private val callback = ServiceCallback()
+    private var serviceConnection: ServiceConnection? = null
 
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            Log.d(TAG, "onServiceConnected: ${name?.toString()}")
-            service = IService.Stub.asInterface(binder)
-            coroutineScope.launch {
-                service?.apply {
-                    registerCallback(callback)
-                    callback.onServiceStatusChanged(status)
-                }
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            try {
-                Log.d(TAG, "onServiceDisconnected: ${name?.toString()}")
-                service?.unregisterCallback(callback)
-            } catch (e: Exception) {
-                Log.e(TAG, "onServiceDisconnected: 不需要取消注册。 $e")
-            }
-        }
-
-        override fun onBindingDied(name: ComponentName?) {
-            Log.e(TAG, "ServiceConnection.onBindingDied: ${name?.toString()}")
-            connect()
-        }
-    }
-
-    private fun createEventChannel() {
+    init {
         EventChannel(binaryMessenger, EVENT_CHANNEL_CONNECTED_STATUS).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { statusSink = events }
             override fun onCancel(arguments: Any?) { statusSink = null }
@@ -112,22 +84,25 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         })
     }
 
-    internal fun connect() {
-        Log.d(TAG, "connect ----------------------------")
+    private var context: WeakReference<Context>? = null
+    internal fun connect(ctx: Context) {
+        Log.d(TAG, "connect begin----------------------------")
+        disconnect()
         if (this::coroutineScope.isInitialized && coroutineScope.coroutineContext.isActive) {
-            return
+            coroutineScope.cancel()
         }
-        createEventChannel()
+        context = WeakReference(ctx)
         coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-        val intent = Intent(applicationContext, SettingsManager.serviceClass())
+        serviceConnection = MyServiceConnection()
+        val intent = Intent(ctx, SettingsManager.serviceClass())
         intent.action = Action.SERVICE
-        applicationContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        ctx.bindService(intent, serviceConnection!!, Context.BIND_AUTO_CREATE)
 
         statusClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Status, StatusClient())
         groupClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Groups, GroupClient())
         clashModeClient = CommandClient(coroutineScope, CommandClient.ConnectionType.ClashMode, ClashModeClient())
         logClient = CommandClient(coroutineScope, CommandClient.ConnectionType.Log, LogClient())
+        Log.d(TAG, "connect ended ----------------------------")
     }
 
     internal fun disconnect() {
@@ -138,24 +113,27 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
         try {
             coroutineScope.cancel()
             disconnectClient()
-            applicationContext.unbindService(serviceConnection)
+            if (serviceConnection != null) {
+                context?.get()?.unbindService(serviceConnection!!)
+                serviceConnection = null
+            }
         } catch (e: Exception) {
             Log.e(TAG, "disconnect: 解绑失败: ${e.message}")
         }
     }
 
     private fun connectClient() {
-        statusClient.connect()
-        groupClient.connect()
-        clashModeClient.connect()
-        logClient.connect()
+        statusClient?.connect()
+        groupClient?.connect()
+        clashModeClient?.connect()
+        logClient?.connect()
     }
 
     private fun disconnectClient() {
-        statusClient.disconnect()
-        groupClient.disconnect()
-        clashModeClient.disconnect()
-        logClient.disconnect()
+        statusClient?.disconnect()
+        groupClient?.disconnect()
+        clashModeClient?.disconnect()
+        logClient?.disconnect()
     }
 
     inner class ServiceCallback : IServiceCallback.Stub() {
@@ -186,6 +164,38 @@ class SingBoxConnector(private val applicationContext: Context, val binaryMessen
                 proxyStateSink?.success(Status.Stopped.name)
             }
             disconnectClient()
+        }
+    }
+
+    inner class MyServiceConnection : ServiceConnection {
+        private var service: IService? = null
+        private val callback = ServiceCallback()
+
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            Log.d(TAG, "onServiceConnected: ${name?.toString()}")
+            service = IService.Stub.asInterface(binder)
+            coroutineScope.launch {
+                service?.apply {
+                    registerCallback(callback)
+                    callback.onServiceStatusChanged(status)
+                }
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            try {
+                Log.d(TAG, "onServiceDisconnected: ${name?.toString()}")
+                service?.unregisterCallback(callback)
+            } catch (e: Exception) {
+                Log.e(TAG, "onServiceDisconnected: 不需要取消注册。 $e")
+            }
+        }
+
+        override fun onBindingDied(name: ComponentName?) {
+            Log.e(TAG, "ServiceConnection.onBindingDied: ${name?.toString()}")
+            context?.get()?.let {
+                connect(it)
+            }
         }
     }
 
