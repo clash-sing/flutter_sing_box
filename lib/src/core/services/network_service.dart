@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../data/network/api_result.dart';
@@ -13,10 +14,12 @@ class NetworkService {
 
   Future<ApiResult<dynamic>> fetchSubscription(Uri uri) async {
     try {
-      DioClient().dio.options.headers.addAll({
-        'User-Agent': await _getUserAgent(),
-      });
-      final response = await DioClient().dio.getUri(uri);
+      final response = await DioClient().dio.getUri(uri, options: Options(
+        headers: {
+          ...DioClient().dio.options.headers,
+          'User-Agent': await _getUserAgent(),
+        }
+      ));
       if (response.statusCode == io.HttpStatus.ok) {
         final apiResult = ApiResult(response.data, response.headers.map);
         return apiResult;

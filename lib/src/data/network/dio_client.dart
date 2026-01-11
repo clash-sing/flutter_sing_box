@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 /// User-Agent 格式说明：APP名称/APP版本 (编译版本好; 平台 系统版本; 内核名称/内核版本)
 
 class DioClient {
@@ -9,11 +10,8 @@ class DioClient {
   static final DioClient _instance = DioClient._internal();
   factory DioClient() => _instance;
 
-  Dio? _dio;
-  Dio get dio {
-    _dio ??= _initDio();
-    return _dio!;
-  }
+  late final Dio _dio = _initDio();
+  Dio get dio => _dio;
 
   Dio _initDio() {
     final myDio = Dio(
@@ -37,7 +35,9 @@ class DioClient {
       createHttpClient: () {
         final client = HttpClient();
         // 允许自签名证书（仅用于测试环境）
-        client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        if (kDebugMode) {
+          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+        }
         return client;
       },
     );
