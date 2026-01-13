@@ -85,19 +85,21 @@ class RuleSet {
   String tag;
   String type;
   String format;
-  String url;
+  String? url;
   @JsonKey(name: "download_detour")
   String? downloadDetour;
   @JsonKey(name: "update_interval")
   String? updateInterval;
+  String? path;
 
   RuleSet({
     required this.tag,
     required this.type,
     required this.format,
-    required this.url,
+    this.url,
     this.downloadDetour,
     this.updateInterval,
+    this.path,
   });
 
   factory RuleSet.fromJson(Map<String, dynamic> json) => _$RuleSetFromJson(json);
