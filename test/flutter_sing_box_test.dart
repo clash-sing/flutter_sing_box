@@ -77,6 +77,12 @@ class MockFlutterSingBoxPlatform
   // TODO: implement proxyStateStream
   Stream<ProxyState> get proxyStateStream => throw UnimplementedError();
 
+  @override
+  Future<String> getSingBoxVersion() {
+    // TODO: implement getSingBoxVersion
+    throw UnimplementedError();
+  }
+
 }
 
 void main() {

@@ -3,8 +3,6 @@ export '../src/constants/index.dart';
 export '../src/utils/index.dart';
 export '../src/core/index.dart';
 
-import 'package:flutter/material.dart';
-
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 

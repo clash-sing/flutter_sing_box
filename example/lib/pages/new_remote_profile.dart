@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 class NewRemoteProfile extends StatefulWidget {
   const NewRemoteProfile({super.key});
@@ -10,19 +9,11 @@ class NewRemoteProfile extends StatefulWidget {
 
 class _NewRemoteProfileState extends State<NewRemoteProfile> {
   final _formKey = GlobalKey<FormState>();
-  String? _name;
-  String? _link;
 
   Future<void> _onSubmit() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
       // 创建配置
-      final uri = Uri.parse(_link!);
-      final profile = await ProfileService().importProfile(
-        subscribeLink: uri,
-        name: _name,
-        autoUpdateInterval: 1440,
-      );
       if(mounted) {
         Navigator.pop(context);
       }
@@ -47,7 +38,9 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
                   validator: (value) {
                     return null;
                   },
-                  onSaved: (value) => _name = value?.trim(),
+                  onSaved: (value) {
+
+                  },
                 ),
 
                 TextFormField(
@@ -62,7 +55,9 @@ class _NewRemoteProfileState extends State<NewRemoteProfile> {
                     }
                     return null;
                   },
-                  onSaved: (value) => _link = value?.trim(),
+                  onSaved: (value) {
+
+                  },
                 ),
                 ElevatedButton(
                   onPressed: () {

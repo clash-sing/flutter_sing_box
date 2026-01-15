@@ -2,7 +2,6 @@ import 'dart:io' as io;
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../data/network/api_result.dart';
 import '../../data/network/dio_client.dart';
@@ -32,15 +31,9 @@ class NetworkService {
   }
 
   Future<String> _getUserAgent() async {
-    final packageInfo = await _getPackageInfo();
     final deviceInfo = await _getDeviceInfo();
     return '($deviceInfo) mihomo/1.19.15 ClashMeta/1.19.15 sing-box/1.12.12 v2ray';
     // return '$packageInfo ($deviceInfo) sing-box/1.12.12 mihomo/1.19.15 ClashMeta/1.19.15 v2ray';
-  }
-
-  Future<String> _getPackageInfo() async {
-    final info = await PackageInfo.fromPlatform();
-    return 'ClashSing/${info.version}';
   }
 
   Future<String> _getDeviceInfo() async {

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
@@ -69,7 +67,5 @@ void main() async {
     var base64String = await rootBundle.loadString('assets/.local/test_base64.txt');
     // 移除可能的空白字符
     base64String = base64String.replaceAll(RegExp(r'\s+'), '');
-    String decodedString = utf8.decode(base64.decode(base64String));
-    final parser = Base64Provider.provide(decodedString);
   });
 }

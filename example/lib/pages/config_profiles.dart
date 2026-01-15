@@ -75,43 +75,6 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
     );
   }
 
-  void _popImportOptions() async {
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog(
-          title: const Text('添加订阅'),
-          children: [
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await Navigator.of(context).push(
-                  MaterialPageRoute(builder: (builder) {
-                    return const NewRemoteProfile();
-                  })
-                );
-                _loadProfiles();
-              },
-              child: const Text('订阅链接'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('本地文件'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('扫描二维码'),
-            ),
-          ],
-        );
-      }
-    );
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();

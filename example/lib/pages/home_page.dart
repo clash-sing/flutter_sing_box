@@ -17,7 +17,6 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  final _flutterSingBoxPlugin = FlutterSingBox();
   final List<Profile> _profiles = [];
   Profile? _selectedProfile;
 
@@ -214,20 +213,6 @@ class _HomePageState extends ConsumerState<HomePage> {
         return const SizedBox.shrink();
       },
       loading: () => const SizedBox.shrink(),
-    );
-  }
-
-  Widget _buildLogs() {
-    return StreamBuilder<List<String>>(
-      stream: _flutterSingBoxPlugin.logStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final str = snapshot.data?.first ?? 'EMPTY!';
-          return Text(str);
-        } else {
-          return const SizedBox.shrink();
-        }
-      },
     );
   }
 
