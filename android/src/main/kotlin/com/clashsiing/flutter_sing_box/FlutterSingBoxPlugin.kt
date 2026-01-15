@@ -173,6 +173,10 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                     return
                 }
             }
+            "getSingBoxVersion" -> {
+                val version = Libbox.version()
+                result.success(version)
+            }
             else -> {
                 result.notImplemented()
             }

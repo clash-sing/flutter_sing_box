@@ -58,6 +58,10 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('urlTest() has not been implemented.');
   }
 
+  Future<String> getSingBoxVersion() async {
+    throw UnimplementedError('getSingBoxVersion() has not been implemented.');
+  }
+
   /// sing-box connected status
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');

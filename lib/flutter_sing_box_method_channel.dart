@@ -53,6 +53,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return await methodChannel.invokeMethod('urlTest', groupTag);
   }
 
+  @override
+  Future<String> getSingBoxVersion() async {
+    return await methodChannel.invokeMethod('getSingBoxVersion');
+  }
+
   final _eventChannelConnectedStatus = const EventChannel('connected_status_event');
   Stream<ClientStatus>? _connectedStatusStream;
   @override

@@ -3,6 +3,8 @@ export '../src/constants/index.dart';
 export '../src/utils/index.dart';
 export '../src/core/index.dart';
 
+import 'package:flutter/material.dart';
+
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
@@ -25,7 +27,6 @@ class FlutterSingBox {
     return await FlutterSingBoxPlatform.instance.serviceReload();
   }
 
-
   Future<void> setClashMode(String clashMode) async {
     return await FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }
@@ -34,12 +35,16 @@ class FlutterSingBox {
     return await FlutterSingBoxPlatform.instance.selectOutbound(groupTag: groupTag, outboundTag: outboundTag);
   }
 
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
+    return await FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
+  }
+
   Future<void> urlTest({required String groupTag}) async {
     return await FlutterSingBoxPlatform.instance.urlTest(groupTag: groupTag);
   }
 
-  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
-    return await FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
+  Future<String> getSingBoxVersion() async {
+    return await FlutterSingBoxPlatform.instance.getSingBoxVersion();
   }
 
   Stream<ClientStatus> get connectedStatusStream =>
