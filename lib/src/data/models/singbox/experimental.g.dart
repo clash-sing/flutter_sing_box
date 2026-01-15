@@ -34,15 +34,28 @@ Map<String, dynamic> _$CacheFileToJson(CacheFile instance) => <String, dynamic>{
 };
 
 ClashApi _$ClashApiFromJson(Map<String, dynamic> json) => ClashApi(
-  secret: json['secret'] as String?,
   externalController: json['external_controller'] as String?,
   externalUi: json['external_ui'] as String?,
   externalUiDownloadUrl: json['external_ui_download_url'] as String?,
+  externalUiDownloadDetour: json['external_ui_download_detour'] as String?,
+  secret: json['secret'] as String?,
+  defaultMode: json['default_mode'] as String?,
+  accessControlAllowOrigin:
+      (json['access_control_allow_origin'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+  accessControlAllowPrivateNetwork:
+      json['access_control_allow_private_network'] as bool?,
 );
 
 Map<String, dynamic> _$ClashApiToJson(ClashApi instance) => <String, dynamic>{
-  'secret': ?instance.secret,
   'external_controller': ?instance.externalController,
   'external_ui': ?instance.externalUi,
   'external_ui_download_url': ?instance.externalUiDownloadUrl,
+  'external_ui_download_detour': ?instance.externalUiDownloadDetour,
+  'secret': ?instance.secret,
+  'default_mode': ?instance.defaultMode,
+  'access_control_allow_origin': ?instance.accessControlAllowOrigin,
+  'access_control_allow_private_network':
+      ?instance.accessControlAllowPrivateNetwork,
 };

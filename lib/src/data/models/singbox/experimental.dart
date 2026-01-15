@@ -40,19 +40,31 @@ class CacheFile {
 
 @JsonSerializable()
 class ClashApi {
-  String? secret;
   @JsonKey(name: "external_controller")
   String? externalController;
   @JsonKey(name: "external_ui")
   String? externalUi;
   @JsonKey(name: "external_ui_download_url")
   String? externalUiDownloadUrl;
+  @JsonKey(name: "external_ui_download_detour")
+  String? externalUiDownloadDetour;
+  String? secret;
+  @JsonKey(name: "default_mode")
+  String? defaultMode;
+  @JsonKey(name: "access_control_allow_origin")
+  List<String>? accessControlAllowOrigin;
+  @JsonKey(name: "access_control_allow_private_network")
+  bool? accessControlAllowPrivateNetwork;
 
   ClashApi({
-    this.secret,
     this.externalController,
     this.externalUi,
     this.externalUiDownloadUrl,
+    this.externalUiDownloadDetour,
+    this.secret,
+    this.defaultMode,
+    this.accessControlAllowOrigin,
+    this.accessControlAllowPrivateNetwork,
   });
 
   factory ClashApi.fromJson(Map<String, dynamic> json) => _$ClashApiFromJson(json);
