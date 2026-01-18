@@ -1,6 +1,9 @@
-## 1.0.1
+## 1.0.2
 
-* Improve package description and documentation to increase pub points.
+* Improve package description and API documentation coverage to increase pub score.
+* Add comprehensive README with features, platform support, and basic usage.
+* Add Chinese documentation (`README_CN.md`).
+* Showcase projects using this plugin (clash_sing_app).
 
 ## 1.0.0
 
