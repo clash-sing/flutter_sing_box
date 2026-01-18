@@ -20,12 +20,12 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 ## Platform Support
 
 | Platform | Support | Status |
-| :--- | :---: | :--- |
-| Android | ✅ | Production Ready |
-| iOS | 🏗️ | Planned |
-| Windows | 🏗️ | Planned |
-| macOS | 🏗️ | Planned |
-| Linux | 🏗️ | Planned |
+| :--- |:-------:| :--- |
+| Android |    ✅    | Production Ready |
+| iOS |    ☐    | Planned |
+| Windows |   ☐️    | Planned |
+| macOS |   ☐️    | Planned |
+| Linux |    ☐    | Planned |
 
 ## Getting Started
 
