@@ -8,11 +8,14 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 ## Features
 
 - **VPN Service Management**: Easily start and stop VPN services on supported platforms.
+- **Advanced Configuration Support**:
+    - **Native sing-box**: Direct support for native JSON configurations.
+    - **YAML to sing-box**: Automatic conversion of Clash-style YAML configurations.
+    - **Base64 to sing-box**: Seamless parsing of Base64 encoded subscription links.
 - **Profile Management**: Import, manage, and switch between local and remote profiles (subscription links).
 - **Clash API Support**: Full support for Clash-compatible API for managing proxies, groups, and selecting outbounds.
 - **Real-time Monitoring**: Monitor connection status, traffic (uplink/downlink), and logs in real-time via streams.
 - **Multi-Protocol Support**: Inherits support for various protocols from sing-box, including Hysteria, TUIC, WireGuard, Shadowsocks, and more.
-- **Customizable**: Flexible configuration options to suit different use cases.
 
 ## Platform Support
 
