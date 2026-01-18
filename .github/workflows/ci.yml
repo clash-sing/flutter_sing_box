@@ -7,11 +7,11 @@ name: Dart CI & Publish
 
 on:
   push:
-    branches: [ "master" ]
+#    branches: [ "master" ]
     tags: [ "v*" ]
-  pull_request:
-    branches: [ "master" ]
-  workflow_dispatch:
+#  pull_request:
+#    branches: [ "master" ]
+#  workflow_dispatch:
 
 jobs:
   build:
@@ -43,5 +43,6 @@ jobs:
         uses: k-paxian/dart-package-publisher@v1.6
         with:
           accessToken: ${{ secrets.PUB_CREDENTIALS }}
+          refreshToken: ${{ secrets.PUB_CREDENTIALS }}
           flutter: true
           force: true
