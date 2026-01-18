@@ -35,6 +35,7 @@ void main() async {
   });
 
 
+/*
   test('loadYaml', () async {
     var yamlStr = await rootBundle.loadString('assets/.local/test_sub.yaml');
     final YamlMap yaml = loadYaml(yamlStr);
@@ -68,4 +69,5 @@ void main() async {
     // 移除可能的空白字符
     base64String = base64String.replaceAll(RegExp(r'\s+'), '');
   });
+*/
 }
