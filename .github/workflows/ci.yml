@@ -42,7 +42,6 @@ jobs:
       - name: Publish
         uses: k-paxian/dart-package-publisher@v1.6
         with:
-          accessToken: ${{ secrets.PUB_CREDENTIALS }}
-          refreshToken: ${{ secrets.PUB_CREDENTIALS }}
+          credentialJson: ${{ secrets.PUB_CREDENTIALS }}
           flutter: true
           force: true
