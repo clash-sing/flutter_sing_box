@@ -5,6 +5,10 @@
 
 A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform.
 
+## 🚀 Projects Using This Plugin
+
+- [**clash_sing_app**](https://github.com/clash-sing/clash_sing_app): A full-featured GUI client based on sing-box and Clash, providing a powerful and intuitive user experience.
+
 ## Features
 
 - **VPN Service Management**: Easily start and stop VPN services on supported platforms.
@@ -81,10 +85,6 @@ FlutterSingBox().connectedStatusStream.listen((status) {
 ## Example
 
 Check out the [example](https://github.com/clash-sing/flutter_sing_box/tree/master/example) directory for a complete demo application using Riverpod for state management.
-
-## Projects Using This Plugin
-
-- [**clash_sing_app**](https://github.com/clash-sing/clash_sing_app): A full-featured GUI client based on sing-box and Clash, providing a powerful and intuitive user experience.
 
 ## Contributing
 
