@@ -40,8 +40,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Publish
-        uses: k-paxian/dart-package-publisher@v1.6
+        uses: k-paxian/dart-package-publisher@v1.6.2
         with:
-          credential: ${{ secrets.PUB_CREDENTIALS }}
+          accessToken: ${{ secrets.PUB_CREDENTIALS }}
           flutter: true
           force: true
