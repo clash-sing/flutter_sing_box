@@ -82,6 +82,10 @@ FlutterSingBox().connectedStatusStream.listen((status) {
 
 Check out the [example](https://github.com/clash-sing/flutter_sing_box/tree/master/example) directory for a complete demo application using Riverpod for state management.
 
+## Projects Using This Plugin
+
+- [**clash_sing_app**](https://github.com/clash-sing/clash_sing_app): A full-featured GUI client based on sing-box and Clash, providing a powerful and intuitive user experience.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request or open an issue if you encounter any bugs or have feature requests.
