@@ -1,3 +1,7 @@
+## 1.0.1
+
+* Improve package description and documentation to increase pub points.
+
 ## 1.0.0
 
 * Initial release of the `flutter_sing_box` plugin.
