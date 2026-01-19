@@ -3,7 +3,7 @@
 [![pub package](https://img.shields.io/pub/v/flutter_sing_box.svg)](https://pub.dev/packages/flutter_sing_box)
 [![license](https://img.shields.io/github/license/clash-sing/flutter_sing_box.svg)](https://github.com/clash-sing/flutter_sing_box/blob/master/LICENSE)
 
-English | [中文文档](README_CN.md)
+English | [中文简体](README_CN.md)
 
 A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform.
 
