@@ -41,7 +41,7 @@
 
 ```yaml
 dependencies:
-  flutter_sing_box: ^1.0.1
+  flutter_sing_box: ^1.0.3
 ```
 
 ### 初始化

@@ -1,3 +1,11 @@
+## 1.0.3
+
+* Add `getSingBoxVersion()` API to retrieve the underlying sing-box core version.
+* Optimize memory usage and stability for long-running VPN services.
+* Improve error handling during remote profile synchronization.
+* Update dependencies to latest versions (dio, mmkv, package_info_plus, etc.).
+* Minor bug fixes and performance improvements.
+
 ## 1.0.2
 
 * Improve package description and API documentation coverage to increase pub score.
