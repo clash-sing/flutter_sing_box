@@ -1,3 +1,9 @@
+## 1.0.4
+
+* Update `libbox` dependency to `1.12.19` for Android.
+* Update documentation and project links in README.
+* Bump version to 1.0.4.
+
 ## 1.0.3
 
 * Add `getSingBoxVersion()` API to retrieve the underlying sing-box core version.
@@ -23,4 +29,3 @@
 * Support for various protocols like Hysteria, TUIC, etc.
 * Core functionalities like network service, profile management, and custom logging.
 * Many bug fixes and performance improvements.
-
