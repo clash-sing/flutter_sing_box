@@ -9,7 +9,7 @@
 
 ## 🚀 使用此插件的项目
 
-- [**clash_sing_app**](https://github.com/clash-sing/clash_sing_app): 一个功能齐全的基于 sing-box 和 Clash 的 GUI 客户端，提供强大直观的用户体验。
+- [**clash_sing**](https://github.com/clash-sing/clash_sing): 一个功能齐全的基于 sing-box 和 Clash 的 GUI 客户端，提供强大直观的用户体验。
 
 ## 功能特性
 
