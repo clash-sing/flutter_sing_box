@@ -1,3 +1,7 @@
+## 1.0.5
+
+* Update `sing-box` dependency to `1.12.20` for Android.
+
 ## 1.0.4
 
 * Update `libbox` dependency to `1.12.19` for Android.
