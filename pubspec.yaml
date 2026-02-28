@@ -1,6 +1,6 @@
 name: flutter_sing_box
 description: "A Flutter plugin for sing-box, supporting remote profile import, Clash API, and VPN service management for Android and iOS."
-version: 1.0.6
+version: 1.0.7
 homepage: https://github.com/clash-sing/flutter_sing_box
 repository: https://github.com/clash-sing/flutter_sing_box.git
 
