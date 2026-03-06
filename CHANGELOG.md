@@ -1,3 +1,7 @@
+## 1.0.8
+
+* Update `sing-box` dependency to `1.12.24` for Android.
+
 ## 1.0.7
 
 * Update `sing-box` dependency to `1.12.23` for Android.
