@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
-import 'package:flutter_sing_box/src/custom/custom_log.dart';
 
 class UsingConfig {
   static Future<void> create() async {

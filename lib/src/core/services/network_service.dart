@@ -1,6 +1,5 @@
 import 'dart:io' as io;
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 
 import '../../data/network/api_result.dart';
@@ -30,6 +29,7 @@ class NetworkService {
     }
   }
 
+/*
   Future<String> _getUserAgent() async {
     final deviceInfo = await _getDeviceInfo();
     return '($deviceInfo) mihomo/1.19.15 ClashMeta/1.19.15 sing-box/1.12.12 v2ray';
@@ -59,5 +59,6 @@ class NetworkService {
     }
     return device;
   }
+*/
 
 }
