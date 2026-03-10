@@ -16,7 +16,7 @@ class NetworkService {
       final response = await DioClient().dio.getUri(uri, options: Options(
         headers: {
           ...DioClient().dio.options.headers,
-          'User-Agent': await _getUserAgent(),
+          // 'User-Agent': await _getUserAgent(),
         }
       ));
       if (response.statusCode == io.HttpStatus.ok) {
