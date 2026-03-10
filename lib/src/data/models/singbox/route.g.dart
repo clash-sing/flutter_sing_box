@@ -7,23 +7,23 @@ part of 'route.dart';
 // **************************************************************************
 
 Route _$RouteFromJson(Map<String, dynamic> json) => Route(
-  defaultDomainResolver: json['default_domain_resolver'] as String,
   rules: (json['rules'] as List<dynamic>)
       .map((e) => RouteRule.fromJson(e as Map<String, dynamic>))
       .toList(),
-  routeFinal: json['final'] as String?,
   autoDetectInterface: json['auto_detect_interface'] as bool,
-  ruleSet: (json['rule_set'] as List<dynamic>)
-      .map((e) => RuleSet.fromJson(e as Map<String, dynamic>))
+  defaultDomainResolver: json['default_domain_resolver'] as String?,
+  routeFinal: json['final'] as String?,
+  ruleSet: (json['rule_set'] as List<dynamic>?)
+      ?.map((e) => RuleSet.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
 
 Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
-  'default_domain_resolver': instance.defaultDomainResolver,
   'rules': instance.rules.map((e) => e.toJson()).toList(),
-  'final': ?instance.routeFinal,
   'auto_detect_interface': instance.autoDetectInterface,
-  'rule_set': instance.ruleSet.map((e) => e.toJson()).toList(),
+  'default_domain_resolver': ?instance.defaultDomainResolver,
+  'final': ?instance.routeFinal,
+  'rule_set': ?instance.ruleSet?.map((e) => e.toJson()).toList(),
 };
 
 RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(

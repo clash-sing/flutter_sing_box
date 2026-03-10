@@ -52,19 +52,30 @@ class Server {
 
 @JsonSerializable()
 class DnsRule {
+  String server;
   @JsonKey(name: "clash_mode")
   String? clashMode;
-  String server;
   @JsonKey(name: "rule_set")
   List<String>? ruleSet;
   @JsonKey(name: "query_type")
   List<String>? queryType;
+  List<String>? domain;
+  @JsonKey(name: "domain_suffix")
+  List<String>? domainSuffix;
+  @JsonKey(name: "domain_keyword")
+  List<String>? domainKeyword;
+  @JsonKey(name: "domain_regex")
+  List<String>? domainRegex;
 
   DnsRule({
-    this.clashMode,
     required this.server,
+    this.clashMode,
     this.ruleSet,
     this.queryType,
+    this.domain,
+    this.domainSuffix,
+    this.domainKeyword,
+    this.domainRegex,
   });
 
   factory DnsRule.fromJson(Map<String, dynamic> json) => _$DnsRuleFromJson(json);

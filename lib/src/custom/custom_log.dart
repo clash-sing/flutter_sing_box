@@ -30,7 +30,7 @@ class CustomLog {
   Log get defaultLog {
     return Log(
       disabled: false,
-      level: LogLevel.trace.level,
+      level: LogLevel.info.level,
       output: null,
       timestamp: true,
     );

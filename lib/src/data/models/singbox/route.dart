@@ -4,22 +4,22 @@ part 'route.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Route {
-  @JsonKey(name: "default_domain_resolver")
-  String defaultDomainResolver;
   List<RouteRule> rules;
-  @JsonKey(name: "final")
-  String? routeFinal;
   @JsonKey(name: "auto_detect_interface")
   bool autoDetectInterface;
+  @JsonKey(name: "default_domain_resolver")
+  String? defaultDomainResolver;
+  @JsonKey(name: "final")
+  String? routeFinal;
   @JsonKey(name: "rule_set")
-  List<RuleSet> ruleSet;
+  List<RuleSet>? ruleSet;
 
   Route({
-    required this.defaultDomainResolver,
     required this.rules,
-    required this.routeFinal,
     required this.autoDetectInterface,
-    required this.ruleSet,
+    this.defaultDomainResolver,
+    this.routeFinal,
+    this.ruleSet,
   });
 
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
