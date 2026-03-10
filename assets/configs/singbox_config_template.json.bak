@@ -14,13 +14,17 @@
       "inet6_range" : "fc00::/18"
     } ],
     "rules" : [ {
+      "clash_mode" : "direct",
+      "server" : "system"
+    }, {
       "clash_mode" : "global",
-      "query_type" : [ "A", "AAAA" ],
       "server" : "remote"
     }, {
-      "clash_mode" : "direct",
-      "domain_suffix": [ ".cn" ],
+      "rule_set" : [ "geoip-cn", "geosite-cn" ],
       "server" : "system"
+    }, {
+      "query_type" : [ "A", "AAAA" ],
+      "server" : "remote"
     } ],
     "independent_cache" : true,
     "final" : "alidoh",
@@ -61,16 +65,31 @@
       "protocol" : [ "quic" ],
       "action" : "reject"
     }, {
+      "clash_mode" : "direct",
+      "outbound" : "direct"
+    }, {
       "clash_mode" : "global",
       "outbound" : "proxy"
     }, {
-      "clash_mode" : "direct",
       "ip_is_private" : true,
-      "domain_suffix" : [ ".cn" ],
+      "outbound" : "direct"
+    }, {
+      "rule_set" : [ "geoip-cn", "geosite-cn" ],
       "outbound" : "direct"
     } ],
     "final" : "proxy",
-    "auto_detect_interface" : true
+    "auto_detect_interface" : true,
+    "rule_set" : [ {
+      "tag" : "geoip-cn",
+      "type" : "remote",
+      "format" : "binary",
+      "url" : "https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs"
+    }, {
+      "tag" : "geosite-cn",
+      "type" : "remote",
+      "format" : "binary",
+      "url" : "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs"
+    } ]
   },
   "experimental" : {
     "cache_file" : {

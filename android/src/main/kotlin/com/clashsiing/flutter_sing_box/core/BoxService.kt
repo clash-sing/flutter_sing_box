@@ -103,8 +103,6 @@ class BoxService(
         this.commandServer = commandServer
     }
 
-    //TODO: 设置默认值："狗狗加速"，just for debug
-    private var lastProfileName = "狗狗加速"
     private suspend fun startService() {
         try {
 /*
@@ -138,7 +136,7 @@ class BoxService(
                 stopAndAlert(Alert.EmptyConfiguration)
                 return
             }
-            lastProfileName = profile.name
+            val lastProfileName = profile.name
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
             }
