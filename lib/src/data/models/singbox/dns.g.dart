@@ -43,7 +43,8 @@ Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
 };
 
 DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
-  server: json['server'] as String,
+  action: json['action'] as String? ?? RuleAction.route,
+  server: json['server'] as String?,
   clashMode: json['clash_mode'] as String?,
   ruleSet: (json['rule_set'] as List<dynamic>?)
       ?.map((e) => e as String)
@@ -64,7 +65,8 @@ DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
 );
 
 Map<String, dynamic> _$DnsRuleToJson(DnsRule instance) => <String, dynamic>{
-  'server': instance.server,
+  'action': instance.action,
+  'server': ?instance.server,
   'clash_mode': ?instance.clashMode,
   'rule_set': ?instance.ruleSet,
   'query_type': ?instance.queryType,

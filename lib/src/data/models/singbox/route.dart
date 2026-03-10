@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../constants/rule_action.dart';
 
 part 'route.g.dart';
 
@@ -30,7 +31,7 @@ class Route {
 
 @JsonSerializable()
 class RouteRule {
-  String? action;
+  String action;
   dynamic protocol;
   @JsonKey(name: "clash_mode")
   String? clashMode;
@@ -55,10 +56,8 @@ class RouteRule {
   @JsonKey(name: "rule_set")
   List<String>? ruleSet;
 
-
-
   RouteRule({
-    this.action,
+    this.action = RuleAction.route,
     this.protocol,
     this.clashMode,
     this.outbound,

@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../constants/rule_action.dart';
 
 part 'dns.g.dart';
 
@@ -52,7 +53,8 @@ class Server {
 
 @JsonSerializable()
 class DnsRule {
-  String server;
+  String action;
+  String? server;
   @JsonKey(name: "clash_mode")
   String? clashMode;
   @JsonKey(name: "rule_set")
@@ -68,7 +70,8 @@ class DnsRule {
   List<String>? domainRegex;
 
   DnsRule({
-    required this.server,
+    this.action = RuleAction.route,
+    this.server,
     this.clashMode,
     this.ruleSet,
     this.queryType,

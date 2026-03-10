@@ -7,3 +7,4 @@ export 'outbound_packet_encoding.dart';
 export 'clash_mode.dart';
 export 'flutter_sing_box_constants.dart';
 export 'log_level.dart';
+export 'rule_action.dart';

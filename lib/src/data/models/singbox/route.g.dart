@@ -27,7 +27,7 @@ Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
 };
 
 RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
-  action: json['action'] as String?,
+  action: json['action'] as String? ?? RuleAction.route,
   protocol: json['protocol'],
   clashMode: json['clash_mode'] as String?,
   outbound: json['outbound'] as String?,
@@ -60,7 +60,7 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
 );
 
 Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
-  'action': ?instance.action,
+  'action': instance.action,
   'protocol': ?instance.protocol,
   'clash_mode': ?instance.clashMode,
   'outbound': ?instance.outbound,
