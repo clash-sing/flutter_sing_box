@@ -57,6 +57,22 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
   ruleSet: (json['rule_set'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  ipCidr: (json['ip_cidr'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  sourceIpCidr: (json['source_ip_cidr'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  port: (json['port'] as List<dynamic>?)
+      ?.map((e) => (e as num).toInt())
+      .toList(),
+  portRange: (json['port_range'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  sourcePort: (json['source_port'] as List<dynamic>?)
+      ?.map((e) => (e as num).toInt())
+      .toList(),
+  sourcePortRange: (json['source_port_range'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
 );
 
 Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
@@ -74,6 +90,12 @@ Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
   'package_name': ?instance.packageName,
   'ip_is_private': ?instance.ipIsPrivate,
   'rule_set': ?instance.ruleSet,
+  'ip_cidr': ?instance.ipCidr,
+  'source_ip_cidr': ?instance.sourceIpCidr,
+  'port': ?instance.port,
+  'port_range': ?instance.portRange,
+  'source_port': ?instance.sourcePort,
+  'source_port_range': ?instance.sourcePortRange,
 };
 
 RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(

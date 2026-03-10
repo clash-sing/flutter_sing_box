@@ -55,6 +55,17 @@ class RouteRule {
   bool? ipIsPrivate;
   @JsonKey(name: "rule_set")
   List<String>? ruleSet;
+  @JsonKey(name: "ip_cidr")
+  List<String>? ipCidr;
+  @JsonKey(name: "source_ip_cidr")
+  List<String>? sourceIpCidr;
+  List<int>? port;
+  @JsonKey(name: "port_range")
+  List<String>? portRange;
+  @JsonKey(name: "source_port")
+  List<int>? sourcePort;
+  @JsonKey(name: "source_port_range")
+  List<String>? sourcePortRange;
 
   RouteRule({
     this.action = RuleAction.route,
@@ -71,6 +82,12 @@ class RouteRule {
     this.packageName,
     this.ipIsPrivate,
     this.ruleSet,
+    this.ipCidr,
+    this.sourceIpCidr,
+    this.port,
+    this.portRange,
+    this.sourcePort,
+    this.sourcePortRange,
   });
 
   factory RouteRule.fromJson(Map<String, dynamic> json) => _$RouteRuleFromJson(json);
