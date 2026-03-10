@@ -1,3 +1,19 @@
+## 1.0.9
+
+### Features
+* Add DNS rule action configuration and new domain matching fields
+* Add `RuleAction` constants for routing rules
+
+### Improvements
+* Optimize proxy configuration template and simplify DNS/route rules
+* Adjust default log level from `trace` to `info`
+* Update User-Agent string for better compatibility
+
+### Refactoring
+* Remove remote rule set configuration (geoip-cn, geosite-cn)
+* Simplify configuration structure and improve performance
+* Make Route fields optional for flexibility
+
 ## 1.0.8
 
 * Update `sing-box` dependency to `1.12.24` for Android.
