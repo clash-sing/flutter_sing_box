@@ -1,3 +1,10 @@
+## 1.0.10
+
+- **Route Rule**: Added IP CIDR and port filtering support
+    - New fields: `ip_cidr`, `source_ip_cidr`, `port`, `port_range`, `source_port`, `source_port_range`
+    - Enhanced traffic matching with IP and port-based routing
+    - Full JSON serialization support with backward compatibility
+
 ## 1.0.9
 
 ### Features
