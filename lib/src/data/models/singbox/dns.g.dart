@@ -43,19 +43,35 @@ Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
 };
 
 DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
+  action: json['action'] as String? ?? RuleAction.route,
+  server: json['server'] as String?,
   clashMode: json['clash_mode'] as String?,
-  server: json['server'] as String,
   ruleSet: (json['rule_set'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
   queryType: (json['query_type'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  domain: (json['domain'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  domainSuffix: (json['domain_suffix'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  domainKeyword: (json['domain_keyword'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  domainRegex: (json['domain_regex'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
 );
 
 Map<String, dynamic> _$DnsRuleToJson(DnsRule instance) => <String, dynamic>{
+  'action': instance.action,
+  'server': ?instance.server,
   'clash_mode': ?instance.clashMode,
-  'server': instance.server,
   'rule_set': ?instance.ruleSet,
   'query_type': ?instance.queryType,
+  'domain': ?instance.domain,
+  'domain_suffix': ?instance.domainSuffix,
+  'domain_keyword': ?instance.domainKeyword,
+  'domain_regex': ?instance.domainRegex,
 };

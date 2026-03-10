@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../constants/rule_action.dart';
 
 part 'dns.g.dart';
 
@@ -52,19 +53,32 @@ class Server {
 
 @JsonSerializable()
 class DnsRule {
+  String action;
+  String? server;
   @JsonKey(name: "clash_mode")
   String? clashMode;
-  String server;
   @JsonKey(name: "rule_set")
   List<String>? ruleSet;
   @JsonKey(name: "query_type")
   List<String>? queryType;
+  List<String>? domain;
+  @JsonKey(name: "domain_suffix")
+  List<String>? domainSuffix;
+  @JsonKey(name: "domain_keyword")
+  List<String>? domainKeyword;
+  @JsonKey(name: "domain_regex")
+  List<String>? domainRegex;
 
   DnsRule({
+    this.action = RuleAction.route,
+    this.server,
     this.clashMode,
-    required this.server,
     this.ruleSet,
     this.queryType,
+    this.domain,
+    this.domainSuffix,
+    this.domainKeyword,
+    this.domainRegex,
   });
 
   factory DnsRule.fromJson(Map<String, dynamic> json) => _$DnsRuleFromJson(json);
