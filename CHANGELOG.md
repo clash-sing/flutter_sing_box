@@ -1,3 +1,7 @@
+## 1.0.11
+
+* Update `sing-box` dependency to `1.12.25` for Android.
+
 ## 1.0.10
 
 - **Route Rule**: Added IP CIDR and port filtering support
