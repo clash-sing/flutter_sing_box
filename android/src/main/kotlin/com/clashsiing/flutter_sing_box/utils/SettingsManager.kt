@@ -97,8 +97,8 @@ object SettingsManager {
         const val PER_APP_PROXY_INCLUDE_LIST = "per_app_proxy_include_list"
         const val PER_APP_PROXY_MODE = "per_app_proxy_mode"
         const val PER_APP_PROXY_DISABLED = 0
-        const val PER_APP_PROXY_EXCLUDE = 1
-        const val PER_APP_PROXY_INCLUDE = 2
+        const val PER_APP_PROXY_INCLUDE = 1
+        const val PER_APP_PROXY_EXCLUDE = 2
         const val SYSTEM_PROXY_ENABLED = "system_proxy_enabled"
 
     }

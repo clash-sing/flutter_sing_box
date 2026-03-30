@@ -135,7 +135,18 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
                 }
             }
 
-            if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_EXCLUDE) {
+            if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_INCLUDE) {
+                val appList = SettingsManager.perAppProxyIncludeList
+                if (appList.isNotEmpty()) {
+                    appList.forEach {
+                        try {
+                            builder.addAllowedApplication(it)
+                        } catch (_: NameNotFoundException) {
+                        }
+                    }
+                    builder.addAllowedApplication(PluginManager.appContext.packageName)
+                }
+            } else if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_EXCLUDE) {
                 val appList = SettingsManager.perAppProxyExcludeList
                 appList.forEach {
                     try {
@@ -143,15 +154,6 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
                     } catch (_: NameNotFoundException) {
                     }
                 }
-            } else if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_INCLUDE) {
-                val appList = SettingsManager.perAppProxyIncludeList
-                appList.forEach {
-                    try {
-                        builder.addAllowedApplication(it)
-                    } catch (_: NameNotFoundException) {
-                    }
-                }
-                builder.addAllowedApplication(PluginManager.appContext.packageName)
             }
 /*
             if (SettingsManager.perAppProxyEnabled) {

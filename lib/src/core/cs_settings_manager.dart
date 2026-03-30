@@ -60,9 +60,9 @@ class CsSettingsManager {
 class _Keys {
   static const String perAppProxyMode = "per_app_proxy_mode";
   static const int perAppProxyDisabled = 0;
-  static const int perAppProxyExclude = 1;
-  static const int perAppProxyInclude = 2;
+  static const int perAppProxyInclude = 1;
+  static const int perAppProxyExclude = 2;
 
-  static const String excludeAppList = "per_app_proxy_exclude_list";
   static const String includeAppList = "per_app_proxy_include_list";
+  static const String excludeAppList = "per_app_proxy_exclude_list";
 }
