@@ -29,20 +29,20 @@ class CsSettingsManager {
     mmkv.encodeInt(_Keys.perAppProxyMode, mode);
   }
 
-  Set<String> getAppList(int mode) {
+  List<String> getAppList(int mode) {
     assert(mode == _Keys.perAppProxyDisabled || mode == _Keys.perAppProxyExclude || mode == _Keys.perAppProxyInclude, "Invalid app list mode");
     if (mode == _Keys.perAppProxyExclude) {
-      return Set<String>.from(jsonDecode(mmkv.decodeString(_Keys.excludeAppList) ?? "[]"));
+      return List<String>.from(jsonDecode(mmkv.decodeString(_Keys.excludeAppList) ?? "[]"));
     } else if (mode == _Keys.perAppProxyInclude) {
-      return Set<String>.from(jsonDecode(mmkv.decodeString(_Keys.includeAppList) ?? "[]"));
+      return List<String>.from(jsonDecode(mmkv.decodeString(_Keys.includeAppList) ?? "[]"));
     } else {
-      return <String>{};
+      return List.empty();
     }
   }
 
-  void setAppList(Set<String> appList, int mode) {
+  void setAppList(List<String> appList, int mode) {
     assert(mode == _Keys.perAppProxyDisabled || mode == _Keys.perAppProxyExclude || mode == _Keys.perAppProxyInclude, "Invalid app list mode");
-    final strAppPackages = jsonEncode(appList.toList(growable: false));
+    final strAppPackages = jsonEncode(appList);
     if (mode == _Keys.perAppProxyExclude) {
       mmkv.encodeString(_Keys.excludeAppList, strAppPackages);
     } else if (mode == _Keys.perAppProxyInclude) {
