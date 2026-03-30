@@ -1,3 +1,18 @@
+## 1.0.12
+### Features
+* 新增应用级代理模式功能（禁用/排除/包含三种模式）
+* 支持按应用列表配置代理规则
+
+### Improvements
+* 更新 MMKV 依赖至 2.4.0
+* 优化应用列表存储方式（使用 JSON 数组格式）
+* 更新 Android 构建环境（Kotlin 2.3.20, Gradle 8.14.4）
+
+### Refactoring
+* 移除 Inbound 模型中的 sniff 字段
+* 重构应用列表数据结构（List 与 Set 转换优化）
+
+
 ## 1.0.11
 
 * Update `sing-box` dependency to `1.12.25` for Android.
