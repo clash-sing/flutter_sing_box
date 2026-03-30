@@ -4,6 +4,7 @@ import com.clashsiing.flutter_sing_box.constant.ServiceMode
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.core.ProxyService
 import com.tencent.mmkv.MMKV
+import org.json.JSONArray
 
 object SettingsManager {
     const val MMKV_ID = "cs_settings"
@@ -40,24 +41,43 @@ object SettingsManager {
             mmkv.encode(Keys.STARTED_BY_USER, value)
         }
 
-    var perAppProxyEnabled: Boolean
-        get() = mmkv.decodeBool(Keys.PER_APP_PROXY_ENABLED, false)
-        set(value) {
-            mmkv.encode(Keys.PER_APP_PROXY_ENABLED, value)
-        }
-
-    var perAppProxyList: List<String>
-        get() = mmkv.decodeStringSet(Keys.PER_APP_PROXY_LIST, emptySet())?.toList() ?: emptyList()
-        set(value) {
-            mmkv.encode(Keys.PER_APP_PROXY_LIST, value.toSet())
-        }
-
+    /*
     var perAppProxyMode: Int
         get() = mmkv.decodeInt(Keys.PER_APP_PROXY_MODE,
             Keys.PER_APP_PROXY_EXCLUDE
         )
         set(value) {
             mmkv.encode(Keys.PER_APP_PROXY_MODE, value)
+        }
+*/
+
+    var perAppProxyMode: Int
+        get() = try {
+            mmkv.decodeInt(Keys.PER_APP_PROXY_MODE, Keys.PER_APP_PROXY_DISABLED)
+        } catch (_: Exception) {
+            Keys.PER_APP_PROXY_DISABLED
+        }
+        set(value) {
+            require(value in Keys.PER_APP_PROXY_DISABLED..Keys.PER_APP_PROXY_INCLUDE) {
+                "perAppProxyEnabled 的值必须在 0 到 2 之间，当前值为：$value"
+            }
+            mmkv.encode(Keys.PER_APP_PROXY_MODE, value)
+        }
+
+    val perAppProxyExcludeList: List<String>
+        get() {
+            val jsonStr = mmkv.decodeString(Keys.PER_APP_PROXY_EXCLUDE_LIST, "[]")
+            val jsonArray = JSONArray(jsonStr)
+            val list = (0 until jsonArray.length()).map { jsonArray.getString(it) }
+            return list
+        }
+
+    val perAppProxyIncludeList: List<String>
+        get() {
+            val jsonStr = mmkv.decodeString(Keys.PER_APP_PROXY_INCLUDE_LIST, "[]")
+            val jsonArray = JSONArray(jsonStr)
+            val list = (0 until jsonArray.length()).map { jsonArray.getString(it) }
+            return list
         }
 
     var systemProxyEnabled: Boolean
@@ -72,12 +92,13 @@ object SettingsManager {
         const val SELECTED_PROFILE = "selected_profile"
         const val DISABLE_MEMORY_LIMIT = "disable_memory_limit"
         const val STARTED_BY_USER = "started_by_user"
-        const val PER_APP_PROXY_ENABLED = "per_app_proxy_enabled"
-        const val PER_APP_PROXY_LIST = "per_app_proxy_list"
+//        const val PER_APP_PROXY_ENABLED = "per_app_proxy_enabled"
+        const val PER_APP_PROXY_EXCLUDE_LIST = "per_app_proxy_exclude_list"
+        const val PER_APP_PROXY_INCLUDE_LIST = "per_app_proxy_include_list"
         const val PER_APP_PROXY_MODE = "per_app_proxy_mode"
         const val PER_APP_PROXY_DISABLED = 0
-        const val PER_APP_PROXY_EXCLUDE = 1
-        const val PER_APP_PROXY_INCLUDE = 2
+        const val PER_APP_PROXY_INCLUDE = 1
+        const val PER_APP_PROXY_EXCLUDE = 2
         const val SYSTEM_PROXY_ENABLED = "system_proxy_enabled"
 
     }

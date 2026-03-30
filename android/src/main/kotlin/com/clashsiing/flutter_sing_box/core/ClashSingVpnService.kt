@@ -67,7 +67,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
         if (prepare(this) != null) error("android: missing vpn permission")
 
         val builder = Builder()
-            .setSession("sing-box")
+            .setSession("clash-sing")
             .setMtu(options.mtu)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -135,6 +135,27 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
                 }
             }
 
+            if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_INCLUDE) {
+                val appList = SettingsManager.perAppProxyIncludeList
+                if (appList.isNotEmpty()) {
+                    appList.forEach {
+                        try {
+                            builder.addAllowedApplication(it)
+                        } catch (_: NameNotFoundException) {
+                        }
+                    }
+                    builder.addAllowedApplication(PluginManager.appContext.packageName)
+                }
+            } else if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_EXCLUDE) {
+                val appList = SettingsManager.perAppProxyExcludeList
+                appList.forEach {
+                    try {
+                        builder.addDisallowedApplication(it)
+                    } catch (_: NameNotFoundException) {
+                    }
+                }
+            }
+/*
             if (SettingsManager.perAppProxyEnabled) {
                 val appList = SettingsManager.perAppProxyList
                 if (SettingsManager.perAppProxyMode == SettingsManager.Keys.PER_APP_PROXY_INCLUDE) {
@@ -174,6 +195,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
                     }
                 }
             }
+*/
         }
 
         if (options.isHTTPProxyEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

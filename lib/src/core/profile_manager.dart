@@ -127,6 +127,10 @@ class ProfileManager {
     mmkv.encodeString(_Keys.usingConfig, path);
   }
 
+  void clear() {
+    mmkv.clearAll();
+  }
+
 }
 
 class _Keys {

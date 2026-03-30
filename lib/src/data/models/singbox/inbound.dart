@@ -13,7 +13,6 @@ class Inbound {
   bool? autoRoute;
   @JsonKey(name: "strict_route")
   bool? strictRoute;
-  bool sniff;
   @JsonKey(name: "sniff_override_destination")
   bool? sniffOverrideDestination;
   Platform? platform;
@@ -29,7 +28,6 @@ class Inbound {
     this.stack,
     this.autoRoute,
     this.strictRoute,
-    required this.sniff,
     this.sniffOverrideDestination,
     this.platform,
     this.listen,

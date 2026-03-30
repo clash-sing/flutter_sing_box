@@ -68,7 +68,7 @@ android {
 
     dependencies {
         coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-        implementation("com.tencent:mmkv:2.2.4")
+        implementation("com.tencent:mmkv:2.4.0")
         modules {
             module("com.tencent:mmkv-static") {
                 replacedBy("com.tencent:mmkv", "Using mmkv for flutter")
