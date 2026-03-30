@@ -4,6 +4,7 @@ import com.clashsiing.flutter_sing_box.constant.ServiceMode
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.core.ProxyService
 import com.tencent.mmkv.MMKV
+import org.json.JSONArray
 
 object SettingsManager {
     const val MMKV_ID = "cs_settings"
@@ -63,15 +64,20 @@ object SettingsManager {
             mmkv.encode(Keys.PER_APP_PROXY_MODE, value)
         }
 
-    var perAppProxyExcludeList: List<String>
-        get() = mmkv.decodeStringSet(Keys.PER_APP_PROXY_EXCLUDE_LIST, emptySet())?.toList() ?: emptyList()
-        set(value) {
-            mmkv.encode(Keys.PER_APP_PROXY_EXCLUDE_LIST, value.toSet())
+    val perAppProxyExcludeList: List<String>
+        get() {
+            val jsonStr = mmkv.decodeString(Keys.PER_APP_PROXY_EXCLUDE_LIST, "[]")
+            val jsonArray = JSONArray(jsonStr)
+            val list = (0 until jsonArray.length()).map { jsonArray.getString(it) }
+            return list
         }
-    var perAppProxyIncludeList: List<String>
-        get() = mmkv.decodeStringSet(Keys.PER_APP_PROXY_INCLUDE_LIST, emptySet())?.toList() ?: emptyList()
-        set(value) {
-            mmkv.encode(Keys.PER_APP_PROXY_INCLUDE_LIST, value.toSet())
+
+    val perAppProxyIncludeList: List<String>
+        get() {
+            val jsonStr = mmkv.decodeString(Keys.PER_APP_PROXY_INCLUDE_LIST, "[]")
+            val jsonArray = JSONArray(jsonStr)
+            val list = (0 until jsonArray.length()).map { jsonArray.getString(it) }
+            return list
         }
 
     var systemProxyEnabled: Boolean

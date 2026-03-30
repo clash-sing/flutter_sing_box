@@ -67,7 +67,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
         if (prepare(this) != null) error("android: missing vpn permission")
 
         val builder = Builder()
-            .setSession("sing-box")
+            .setSession("clash-sing")
             .setMtu(options.mtu)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -151,6 +151,7 @@ class ClashSingVpnService : VpnService(), PlatformInterfaceWrapper {
                     } catch (_: NameNotFoundException) {
                     }
                 }
+                builder.addAllowedApplication(PluginManager.appContext.packageName)
             }
 /*
             if (SettingsManager.perAppProxyEnabled) {
