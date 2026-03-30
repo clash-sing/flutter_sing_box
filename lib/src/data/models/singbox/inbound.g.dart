@@ -16,7 +16,6 @@ Inbound _$InboundFromJson(Map<String, dynamic> json) => Inbound(
   stack: json['stack'] as String?,
   autoRoute: json['auto_route'] as bool?,
   strictRoute: json['strict_route'] as bool?,
-  sniff: json['sniff'] as bool,
   sniffOverrideDestination: json['sniff_override_destination'] as bool?,
   platform: json['platform'] == null
       ? null
@@ -33,7 +32,6 @@ Map<String, dynamic> _$InboundToJson(Inbound instance) => <String, dynamic>{
   'stack': ?instance.stack,
   'auto_route': ?instance.autoRoute,
   'strict_route': ?instance.strictRoute,
-  'sniff': instance.sniff,
   'sniff_override_destination': ?instance.sniffOverrideDestination,
   'platform': ?instance.platform?.toJson(),
   'listen': ?instance.listen,
