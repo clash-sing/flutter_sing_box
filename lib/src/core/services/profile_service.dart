@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
@@ -31,7 +30,7 @@ class ProfileService {
       File file = File(link.toFilePath());
       if (await file.exists()) {
         final String content = await file.readAsString();
-        apiResult = ApiResult<String>(content, {},);
+        apiResult = ApiResult<String>(content, {});
       } else {
         throw Exception('File not exists');
       }
@@ -55,6 +54,9 @@ class ProfileService {
       id: profileId,
       order: profileId,
       name: profileName,
+      outboundsCount: singBox.outbounds
+          .where((e) => e.outbounds?.isNotEmpty != true && e.type != OutboundType.direct)
+          .length,
       typed: typedProfile,
       userInfo: userInfo,
     );
@@ -101,7 +103,12 @@ class ProfileService {
     }
   }
 
-  TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, int? autoUpdateInterval, String filePath) {
+  TypedProfile _getTypedProfile(
+    Uri link,
+    Map<String, dynamic> headers,
+    int? autoUpdateInterval,
+    String filePath,
+  ) {
     final typedProfile = TypedProfile(
       type: isLocaleFile(link) ? ProfileType.local : ProfileType.remote,
       path: filePath,
@@ -142,12 +149,7 @@ class ProfileService {
       }
     }
     if (upload != null || download != null || total != null || expire != null) {
-      return UserInfo(
-        upload: upload,
-        download: download,
-        total: total,
-        expire: expire,
-      );
+      return UserInfo(upload: upload, download: download, total: total, expire: expire);
     } else {
       return null;
     }
