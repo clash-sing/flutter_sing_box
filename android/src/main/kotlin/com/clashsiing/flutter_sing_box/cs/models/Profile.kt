@@ -10,6 +10,7 @@ data class Profile(
     val id: Int,
     val order: Int,
     val name: String,
+    val outboundsCount: Int? = null,
     val typed: TypedProfile,
     val userInfo: UserInfo? = null,
 ) {
