@@ -44,11 +44,6 @@ class ProfileService {
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
 
-    // TODO: for debug
-    // final assetFile = 'packages/flutter_sing_box/assets/.local/no-urltest-20251122.json';
-    // final syyTreeString = await rootBundle.loadString(assetFile);
-    // final skyTreeMap = jsonDecode(syyTreeString);
-
     final singBox = await SingBoxConfigProvider.provide(apiResult.data);
     final profile = Profile(
       id: profileId,
