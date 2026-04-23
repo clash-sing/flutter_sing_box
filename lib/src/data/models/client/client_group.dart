@@ -1,5 +1,7 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+part 'client_group.freezed.dart';
 part 'client_group.g.dart';
 
 /// Represents a proxy group in the sing-box client.
@@ -41,31 +43,22 @@ class ClientGroup {
 }
 
 /// Represents an item within a proxy group.
-@JsonSerializable()
-class ClientGroupItem {
-  /// The tag of the item.
-  final String tag;
+@unfreezed
+abstract class ClientGroupItem with _$ClientGroupItem {
+  factory ClientGroupItem({
+    required final String tag,
+    required final String type,
 
-  /// The type of the item.
-  final String type;
+    /// The timestamp of the last URL test.
+    required int urlTestTime,
 
-  /// The timestamp of the last URL test.
-  final int urlTestTime;
-
-  /// The latency result of the last URL test in milliseconds.
-  final int urlTestDelay;
-
-  /// Creates a new [ClientGroupItem] instance.
-  ClientGroupItem({
-    required this.tag,
-    required this.type,
-    required this.urlTestTime,
-    required this.urlTestDelay,
-  });
+    /// The latency result of the last URL test in milliseconds.
+    required int urlTestDelay,
+  }) = _ClientGroupItem;
 
   /// Creates a new [ClientGroupItem] instance from a JSON map.
   factory ClientGroupItem.fromJson(Map<String, dynamic> json) => _$ClientGroupItemFromJson(json);
 
   /// Converts this [ClientGroupItem] instance to a JSON map.
-  Map<String, dynamic> toJson() => _$ClientGroupItemToJson(this);
- }
+  // Map<String, dynamic> toJson() => _$ClientGroupItemToJson(this);
+}

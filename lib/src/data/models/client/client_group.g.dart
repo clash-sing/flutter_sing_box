@@ -27,15 +27,15 @@ Map<String, dynamic> _$ClientGroupToJson(ClientGroup instance) =>
       'items': ?instance.items?.map((e) => e.toJson()).toList(),
     };
 
-ClientGroupItem _$ClientGroupItemFromJson(Map<String, dynamic> json) =>
-    ClientGroupItem(
+_ClientGroupItem _$ClientGroupItemFromJson(Map<String, dynamic> json) =>
+    _ClientGroupItem(
       tag: json['tag'] as String,
       type: json['type'] as String,
       urlTestTime: (json['urlTestTime'] as num).toInt(),
       urlTestDelay: (json['urlTestDelay'] as num).toInt(),
     );
 
-Map<String, dynamic> _$ClientGroupItemToJson(ClientGroupItem instance) =>
+Map<String, dynamic> _$ClientGroupItemToJson(_ClientGroupItem instance) =>
     <String, dynamic>{
       'tag': instance.tag,
       'type': instance.type,
