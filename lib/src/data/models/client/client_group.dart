@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 part 'client_group.freezed.dart';
 part 'client_group.g.dart';
@@ -11,19 +10,19 @@ class ClientGroup {
   final String tag;
 
   /// The type of the group (e.g., 'selector', 'urltest').
-  final String type;
+  String type;
 
   /// Whether the group allows selecting a specific proxy.
-  final bool selectable;
+  bool selectable;
 
   /// The tag of the currently selected proxy in this group.
-  final String selected;
+  String selected;
 
   /// Whether the group is expanded in the UI.
-  final bool isExpand;
+  bool isExpand;
 
   /// The list of items (proxies or other groups) in this group.
-  final List<ClientGroupItem>? items;
+  List<ClientGroupItem>? items;
 
   /// Creates a new [ClientGroup] instance.
   ClientGroup({
