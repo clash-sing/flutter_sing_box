@@ -38,3 +38,4 @@ migrate_working_dir/
 /.vscode
 
 /assets/.local/
+.gitnexus
