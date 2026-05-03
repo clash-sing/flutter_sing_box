@@ -108,6 +108,14 @@ class ProfileManager {
     return profiles;
   }
 
+  List<int> getProfileIds() {
+    List<String> keys = mmkv.allKeys.where((key) => key.startsWith(_Keys.profilePrefix)).toList();
+    return keys
+        .map((key) => int.tryParse(key.substring(_Keys.profilePrefix.length)))
+        .whereType<int>()
+        .toList();
+  }
+
   void sort(List<Profile> profiles) {
     for (int i = 0; i < profiles.length; i++) {
       final Profile profile = profiles[i];
@@ -118,8 +126,8 @@ class ProfileManager {
   }
 
   Future<File> getUsingConfig() async {
-    final String usingConfig = mmkv.decodeString(_Keys.usingConfig)
-        ?? (await getApplicationDocumentsDirectory()).path;
+    final String usingConfig =
+        mmkv.decodeString(_Keys.usingConfig) ?? (await getApplicationDocumentsDirectory()).path;
     return File('$usingConfig/${_Keys.usingConfigFilename}');
   }
 
@@ -130,7 +138,6 @@ class ProfileManager {
   void clear() {
     mmkv.clearAll();
   }
-
 }
 
 class _Keys {
