@@ -2,7 +2,6 @@ export '../src/data/models/index.dart';
 export '../src/constants/index.dart';
 export '../src/utils/index.dart';
 export '../src/core/index.dart';
-export '../src/custom/index.dart';
 
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
