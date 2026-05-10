@@ -20,6 +20,7 @@ class ProfileService {
     int? id,
     String? name,
     int? autoUpdateInterval,
+    String? userAgent,
   }) async {
     assert(subscribeLink != null || id != null);
     assert(subscribeLink == null || id == null);
@@ -40,7 +41,7 @@ class ProfileService {
         throw Exception('File not exists');
       }
     } else {
-      apiResult = await NetworkService().fetchSubscription(link);
+      apiResult = await NetworkService().fetchSubscription(link, userAgent: userAgent);
     }
 
     final profileId = id ?? ProfileStorage().generateProfileId;
