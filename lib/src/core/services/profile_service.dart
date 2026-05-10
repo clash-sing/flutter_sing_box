@@ -15,14 +15,19 @@ import '../../data/index.dart';
 ///   subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
 ///   content-type: text/html; charset=UTF-8
 class ProfileService {
-  Future<Profile> importProfile({Uri? subscribeLink, int? id, String? name, int? autoUpdateInterval}) async {
+  Future<Profile> importProfile({
+    Uri? subscribeLink,
+    int? id,
+    String? name,
+    int? autoUpdateInterval,
+  }) async {
     assert(subscribeLink != null || id != null);
     assert(subscribeLink == null || id == null);
     late final Uri link;
     if (subscribeLink != null) {
       link = subscribeLink;
     } else {
-      link = Uri.parse(ProfileManager().getProfile(id!)!.typed.subscribeUrl!);
+      link = Uri.parse(ProfileStorage().getProfile(id!)!.typed.subscribeUrl!);
     }
 
     late final ApiResult apiResult;
@@ -38,8 +43,8 @@ class ProfileService {
       apiResult = await NetworkService().fetchSubscription(link);
     }
 
-    final profileId = id ?? ProfileManager().generateProfileId;
-    final profilePath = await ProfileManager().getProfilePath(profileId);
+    final profileId = id ?? ProfileStorage().generateProfileId;
+    final profilePath = await ProfileStorage().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
@@ -55,7 +60,7 @@ class ProfileService {
       typed: typedProfile,
       userInfo: userInfo,
     );
-    await ProfileManager().addProfile(profile, singBox);
+    await ProfileStorage().addProfile(profile, singBox);
     return profile;
   }
 
@@ -151,6 +156,7 @@ class ProfileService {
   }
 
   bool isLocaleFile(Uri link) {
-    return link.scheme.toLowerCase() == Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
+    return link.scheme.toLowerCase() ==
+        Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
   }
 }

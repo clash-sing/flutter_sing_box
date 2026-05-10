@@ -20,7 +20,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   final List<Profile> _profiles = [];
   Profile? _selectedProfile;
 
-
   @override
   void initState() {
     super.initState();
@@ -32,17 +31,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> _loadProfiles() async {
-    _selectedProfile = ProfileManager().getSelectedProfile();
+    _selectedProfile = ProfileStorage().getSelectedProfile();
     _profiles.clear();
-    _profiles.addAll(ProfileManager().getProfiles());
+    _profiles.addAll(ProfileStorage().getProfiles());
     if (!mounted) return;
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   Future<void> _switchProfile(int profileId) async {
-    ProfileManager().setSelectedProfile(profileId);
+    ProfileStorage().setSelectedProfile(profileId);
     _loadProfiles();
     if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
       try {
@@ -106,8 +103,8 @@ class _HomePageState extends ConsumerState<HomePage> {
             icon: const Icon(Icons.menu),
             onPressed: () async {
               await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ConfigProfiles())
+                context,
+                MaterialPageRoute(builder: (context) => ConfigProfiles()),
               );
               _loadProfiles();
             },
@@ -121,7 +118,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildFloatingActionButton() {
     Widget buildButton(ProxyState proxyState) {
-      return  FloatingActionButton(
+      return FloatingActionButton(
         onPressed: () async {
           if (proxyState == ProxyState.started || proxyState == ProxyState.starting) {
             await FlutterSingBox().stopVpn();
@@ -134,13 +131,14 @@ class _HomePageState extends ConsumerState<HomePage> {
             : const Icon(Icons.play_arrow),
       );
     }
+
     final asyncProxyState = ref.watch(proxyStateStreamProvider);
     return asyncProxyState.when(
       data: (data) {
         return buildButton(data);
       },
       error: (error, stack) {
-        return FloatingActionButton( onPressed: null, child: Icon(Icons.error),);
+        return FloatingActionButton(onPressed: null, child: Icon(Icons.error));
       },
       loading: () => buildButton(ProxyState.stopped),
     );
@@ -154,21 +152,17 @@ class _HomePageState extends ConsumerState<HomePage> {
             Expanded(
               flex: 1,
               child: _profiles.isEmpty
-                  ? const Center( child: Text('No subscription'),)
+                  ? const Center(child: Text('No subscription'))
                   : ListView.builder(
-                  itemCount: _profiles.length,
-                  itemBuilder: (context, index) {
-                    return _buildProfileItem(_profiles[index]);
-                  }
-              ),
+                      itemCount: _profiles.length,
+                      itemBuilder: (context, index) {
+                        return _buildProfileItem(_profiles[index]);
+                      },
+                    ),
             ),
           ],
         ),
-        Positioned(
-          bottom: 16,
-          left: 16,
-          child: _buildOverviewButton(),
-        ),
+        Positioned(bottom: 16, left: 16, child: _buildOverviewButton()),
       ],
     );
   }
@@ -194,14 +188,11 @@ class _HomePageState extends ConsumerState<HomePage> {
     final asyncProxyState = ref.watch(proxyStateStreamProvider);
     return asyncProxyState.when(
       data: (data) {
-        if ( data == ProxyState.started || data == ProxyState.starting) {
+        if (data == ProxyState.started || data == ProxyState.starting) {
           return FloatingActionButton(
             heroTag: 'overview',
             onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ConnectedOverview())
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ConnectedOverview()));
             },
             child: const Icon(Icons.data_exploration),
           );

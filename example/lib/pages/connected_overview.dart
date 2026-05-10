@@ -21,7 +21,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   @override
   initState() {
     super.initState();
-    _profile = ProfileManager().getSelectedProfile();
+    _profile = ProfileStorage().getSelectedProfile();
     _initData();
   }
 
@@ -29,21 +29,18 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     final path = _profile?.typed.path;
     if (path?.isNotEmpty != true) return;
     final file = File(path!);
-    if (! await file.exists()) return;
+    if (!await file.exists()) return;
     try {
       final map = jsonDecode(await file.readAsString());
       _singBox = SingBox.fromJson(map);
       _groupItems.addAll(
-          _singBox!.outbounds.where(
-                  (outbound) => outbound.outbounds?.isNotEmpty == true)
-              .map((outbound) => GroupItem(outbound: outbound, isExpanded: false)
-          )
+        _singBox!.outbounds
+            .where((outbound) => outbound.outbounds?.isNotEmpty == true)
+            .map((outbound) => GroupItem(outbound: outbound, isExpanded: false)),
       );
 
       if (!mounted) return;
-      setState(() {
-
-      });
+      setState(() {});
     } catch (e) {
       debugPrint('Error: $e');
     }
@@ -54,8 +51,10 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
       setState(() {
         groupItem.selected = outboundTag;
       });
-      ref.read(flutterSingBoxProvider).selectOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
-    } catch(e) {
+      ref
+          .read(flutterSingBoxProvider)
+          .selectOutbound(groupTag: groupItem.outbound.tag, outboundTag: outboundTag);
+    } catch (e) {
       debugPrint('Error: $e');
     }
   }
@@ -63,18 +62,10 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_profile?.name ?? '服务未启动'),
-      ),
+      appBar: AppBar(title: Text(_profile?.name ?? '服务未启动')),
       body: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildConnectedStatus(),
-              _buildClashMode(),
-              _buildGroups(),
-            ],
-          ),
-        ),
+        child: Column(children: [_buildConnectedStatus(), _buildClashMode(), _buildGroups()]),
+      ),
     );
   }
 
@@ -82,11 +73,12 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     Row buildStatusRow(String text1, String text2) {
       return Row(
         children: [
-          Expanded(child: Text(text1),),
-          Expanded(child: Text(text2),),
+          Expanded(child: Text(text1)),
+          Expanded(child: Text(text2)),
         ],
       );
     }
+
     final asyncStatus = ref.watch(connectedStreamProvider);
     return asyncStatus.when(
       data: (status) {
@@ -94,21 +86,15 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
+              buildStatusRow('Memory: ${status.memory}', 'Goroutines: ${status.goroutines}'),
               buildStatusRow(
-                  'Memory: ${status.memory}',
-                  'Goroutines: ${status.goroutines}'
+                'ConnectionsIn: ${status.connectionsIn}',
+                'ConnectionsOut: ${status.connectionsOut}',
               ),
+              buildStatusRow('Uplink: ${status.uplink}', 'Downlink: ${status.downlink}'),
               buildStatusRow(
-                  'ConnectionsIn: ${status.connectionsIn}',
-                  'ConnectionsOut: ${status.connectionsOut}'
-              ),
-              buildStatusRow(
-                  'Uplink: ${status.uplink}',
-                  'Downlink: ${status.downlink}'
-              ),
-              buildStatusRow(
-                  'UplinkTotal: ${status.uplinkTotal}',
-                  'DownlinkTotal: ${status.downlinkTotal}'
+                'UplinkTotal: ${status.uplinkTotal}',
+                'DownlinkTotal: ${status.downlinkTotal}',
               ),
             ],
           ),
@@ -121,29 +107,28 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
 
   Widget _buildClashMode() {
     List<Widget> buildChildren(ClientClashMode clashMode) {
-      return clashMode.modes.map((mode) {
-        return OutlinedButton(
-          onPressed: () {
-            ref.read(flutterSingBoxProvider).setClashMode(mode);
-          },
-          style: OutlinedButton.styleFrom(
-            backgroundColor: mode == clashMode.currentMode
-              ? Colors.blue : Colors.white
-          ),
-          child: Text(mode,
-            style: TextStyle(color: mode == clashMode.currentMode ? Colors.white : Colors.blue),
-          ),
-        );
-      }).toList(growable: false);
+      return clashMode.modes
+          .map((mode) {
+            return OutlinedButton(
+              onPressed: () {
+                ref.read(flutterSingBoxProvider).setClashMode(mode);
+              },
+              style: OutlinedButton.styleFrom(
+                backgroundColor: mode == clashMode.currentMode ? Colors.blue : Colors.white,
+              ),
+              child: Text(
+                mode,
+                style: TextStyle(color: mode == clashMode.currentMode ? Colors.white : Colors.blue),
+              ),
+            );
+          })
+          .toList(growable: false);
     }
 
     final asyncClashMode = ref.watch(clashModeStreamProvider);
     return asyncClashMode.when(
       data: (data) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: buildChildren(data),
-        );
+        return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: buildChildren(data));
       },
       loading: () => Text('Clash Mode loading...'),
       error: (error, stack) => Text('Clash Mode Error: $error'),
@@ -154,20 +139,22 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
     if (_singBox == null) {
       return const SizedBox.shrink();
     }
-    ref.watch(groupStreamProvider).when(
-      data: (clientGroups) {
-        for (var clientGroup in clientGroups) {
-          final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
-          if (index > -1) {
-            _groupItems[index].selected = clientGroup.selected;
-            _groupItems[index].isExpanded = clientGroup.isExpand;
-            _groupItems[index].items = clientGroup.items ??  [];
-          }
-        }
-      },
-      loading: () {},
-      error: (error, stack) {},
-    );
+    ref
+        .watch(groupStreamProvider)
+        .when(
+          data: (clientGroups) {
+            for (var clientGroup in clientGroups) {
+              final index = _groupItems.indexWhere((item) => item.outbound.tag == clientGroup.tag);
+              if (index > -1) {
+                _groupItems[index].selected = clientGroup.selected;
+                _groupItems[index].isExpanded = clientGroup.isExpand;
+                _groupItems[index].items = clientGroup.items ?? [];
+              }
+            }
+          },
+          loading: () {},
+          error: (error, stack) {},
+        );
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ExpansionPanelList(
@@ -175,10 +162,9 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
           setState(() {
             _groupItems[index].isExpanded = isExpanded;
           });
-          ref.read(flutterSingBoxProvider).setGroupExpand(
-            groupTag: _groupItems[index].outbound.tag,
-            isExpand: isExpanded,
-          );
+          ref
+              .read(flutterSingBoxProvider)
+              .setGroupExpand(groupTag: _groupItems[index].outbound.tag, isExpand: isExpanded);
         },
         children: _groupItems.map((item) {
           return ExpansionPanel(
@@ -192,13 +178,11 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: Text(item.outbound.tag),),
+                        Expanded(child: Text(item.outbound.tag)),
                         IconButton(
                           icon: Icon(Icons.speed),
                           onPressed: () {
-                            ref.read(flutterSingBoxProvider).urlTest(
-                              groupTag: item.outbound.tag,
-                            );
+                            ref.read(flutterSingBoxProvider).urlTest(groupTag: item.outbound.tag);
                           },
                         ),
                         Text((item.outbound.outbounds?.length ?? 0).toString()),
@@ -207,12 +191,8 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                     Row(
                       children: [
                         Text(item.outbound.type),
-                        SizedBox(width: 12.0,),
-                        Expanded(
-                          child: Text(item.selected ?? '',
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        SizedBox(width: 12.0),
+                        Expanded(child: Text(item.selected ?? '', overflow: TextOverflow.ellipsis)),
                       ],
                     ),
                   ],
@@ -253,9 +233,11 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
         children: outbounds.map((outbound) {
           return Card(
             child: InkWell(
-              onTap: groupItem.outbound.type != OutboundType.selector ? null :() {
-                _selectOutbound(groupItem, outbound.tag);
-              },
+              onTap: groupItem.outbound.type != OutboundType.selector
+                  ? null
+                  : () {
+                      _selectOutbound(groupItem, outbound.tag);
+                    },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 color: groupItem.selected == outbound.tag ? Colors.blueAccent : Colors.white,
@@ -264,22 +246,38 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Spacer(),
-                    Text(outbound.tag,
+                    Text(
+                      outbound.tag,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        color: groupItem.selected == outbound.tag ? Colors.white : Colors.black,
+                      ),
                     ),
                     Spacer(),
                     Row(
                       children: [
-                        Text(outbound.type,
-                          style: TextStyle(fontSize: 12.0, color: groupItem.selected == outbound.tag ? Colors.white : Colors.black),
-                        ),
-                        SizedBox(width: 8.0,),
                         Text(
-                          groupItem.items.firstWhere(
-                                  (clientGroupItem) => clientGroupItem.tag == outbound.tag,
-                              orElse: () => ClientGroupItem(tag: '', type: '', urlTestTime: 0, urlTestDelay: 0,)
-                          ).urlTestDelay.toString()
+                          outbound.type,
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: groupItem.selected == outbound.tag ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          groupItem.items
+                              .firstWhere(
+                                (clientGroupItem) => clientGroupItem.tag == outbound.tag,
+                                orElse: () => ClientGroupItem(
+                                  tag: '',
+                                  type: '',
+                                  urlTestTime: 0,
+                                  urlTestDelay: 0,
+                                ),
+                              )
+                              .urlTestDelay
+                              .toString(),
                         ),
                       ],
                     ),

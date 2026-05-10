@@ -5,11 +5,11 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
-class ProfileManager {
-  static final ProfileManager _instance = ProfileManager._internal();
-  factory ProfileManager() => _instance;
+class ProfileStorage {
+  static final ProfileStorage _instance = ProfileStorage._internal();
+  factory ProfileStorage() => _instance;
 
-  ProfileManager._internal();
+  ProfileStorage._internal();
 
   MMKV? _mmkv;
 

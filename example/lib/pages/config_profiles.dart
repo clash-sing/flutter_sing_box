@@ -20,58 +20,56 @@ class _ConfigProfilesState extends State<ConfigProfiles> {
 
   void _loadProfiles() {
     profiles.clear();
-    profiles.addAll(
-        ProfileManager().getProfiles()
-    );
-    setState(() {
-
-    });
+    profiles.addAll(ProfileStorage().getProfiles());
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('订阅配置'),
-      ),
+      appBar: AppBar(title: const Text('订阅配置')),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           // _popImportOptions();
           await Navigator.of(context).push(
-              MaterialPageRoute(builder: (builder) {
+            MaterialPageRoute(
+              builder: (builder) {
                 return const NewRemoteProfile();
-              })
+              },
+            ),
           );
           _loadProfiles();
         },
         child: const Icon(Icons.add),
       ),
       body: Center(
-      child: profiles.isEmpty
-          ? const Text('暂无配置文件')
-          : ListView.builder(
-              controller: _scrollController,
-              itemCount: profiles.length,
-              itemBuilder: (context, index) {
-                final profile = profiles[index];
-                return ListTile(
-                  title: Text(profile.name),
-                  subtitle: Text(DateTime.fromMillisecondsSinceEpoch(profile.typed.lastUpdated).toString()),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      // TODO: 实现删除配置文件功能
-                      ProfileManager().deleteProfile(profile.id);
-                      _loadProfiles();
+        child: profiles.isEmpty
+            ? const Text('暂无配置文件')
+            : ListView.builder(
+                controller: _scrollController,
+                itemCount: profiles.length,
+                itemBuilder: (context, index) {
+                  final profile = profiles[index];
+                  return ListTile(
+                    title: Text(profile.name),
+                    subtitle: Text(
+                      DateTime.fromMillisecondsSinceEpoch(profile.typed.lastUpdated).toString(),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        // TODO: 实现删除配置文件功能
+                        ProfileStorage().deleteProfile(profile.id);
+                        _loadProfiles();
+                      },
+                    ),
+                    onTap: () {
+                      // TODO: 实现配置文件点击功能
                     },
-                  ),
-                  onTap: () {
-                    // TODO: 实现配置文件点击功能
-                  },
-                );
-              },
-            ),
-      )
+                  );
+                },
+              ),
+      ),
     );
   }
 
