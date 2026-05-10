@@ -2,38 +2,36 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
-import 'package:mmkv/mmkv.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ProfileStorage {
+  ProfileStorage._internal();
   static final ProfileStorage _instance = ProfileStorage._internal();
+  static ProfileStorage get instance => _instance;
   factory ProfileStorage() => _instance;
 
-  ProfileStorage._internal();
+  /// 仅用于单元测试, 用 [MemoryStorage] 代替默认的 [MmkvStorage]
+  static void mockInit() => _storage = MemoryStorage();
 
-  MMKV? _mmkv;
-
-  MMKV get mmkv {
-    _mmkv ??= MMKV("cs_profile", mode: MMKVMode.MULTI_PROCESS_MODE);
-    return _mmkv!;
-  }
+  static KeyValueStorage? _storage;
+  static KeyValueStorage get storage => _storage ??= MmkvStorage('cs_profile');
 
   Profile? getSelectedProfile() {
-    final profileId = mmkv.decodeInt(_Keys.selectedProfileId);
+    final profileId = storage.getInt(_Keys.selectedProfileId);
     return getProfile(profileId);
   }
 
   bool setSelectedProfile(int profileId) {
-    return mmkv.encodeInt(_Keys.selectedProfileId, profileId);
+    return storage.setInt(_Keys.selectedProfileId, profileId);
   }
 
   int get _maxId {
-    return mmkv.decodeInt(_Keys.maxId);
+    return storage.getInt(_Keys.maxId);
   }
 
   int get generateProfileId {
     final id = _maxId + 1;
-    mmkv.encodeInt(_Keys.maxId, id);
+    storage.setInt(_Keys.maxId, id);
     return id;
   }
 
@@ -52,7 +50,7 @@ class ProfileStorage {
 
   Profile? getProfile(int id) {
     final String key = _getProfileKey(id);
-    final String? jsonString = mmkv.decodeString(key);
+    final String? jsonString = storage.getString(key);
     if (jsonString?.isNotEmpty == true) {
       final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
       return Profile.fromJson(jsonMap);
@@ -65,7 +63,7 @@ class ProfileStorage {
     await File(profile.typed.path).writeAsString(content);
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
-    mmkv.encodeString(key, jsonString);
+    storage.setString(key, jsonString);
     if (getSelectedProfile() == null) {
       setSelectedProfile(profile.id);
     }
@@ -74,7 +72,7 @@ class ProfileStorage {
   void updateProfile(Profile profile) {
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
-    mmkv.encodeString(key, jsonString);
+    storage.setString(key, jsonString);
   }
 
   void deleteProfile(int id) {
@@ -83,22 +81,24 @@ class ProfileStorage {
       return;
     }
     final String key = _getProfileKey(profile.id);
-    mmkv.removeValue(key);
+    storage.removeValue(key);
     final file = File(profile.typed.path);
     file.deleteSync();
     final firstProfile = getProfiles().firstOrNull;
     if (firstProfile != null) {
       setSelectedProfile(firstProfile.id);
     } else {
-      mmkv.removeValue(_Keys.selectedProfileId);
+      storage.removeValue(_Keys.selectedProfileId);
     }
   }
 
   List<Profile> getProfiles() {
-    List<String> keys = mmkv.allKeys.where((key) => key.startsWith(_Keys.profilePrefix)).toList();
+    List<String> keys = storage.allKeys
+        .where((key) => key.startsWith(_Keys.profilePrefix))
+        .toList();
     List<Profile> profiles = [];
     for (String key in keys) {
-      final String? jsonString = mmkv.decodeString(key);
+      final String? jsonString = storage.getString(key);
       if (jsonString?.isNotEmpty == true) {
         final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
         profiles.add(Profile.fromJson(jsonMap));
@@ -109,7 +109,9 @@ class ProfileStorage {
   }
 
   List<int> getProfileIds() {
-    List<String> keys = mmkv.allKeys.where((key) => key.startsWith(_Keys.profilePrefix)).toList();
+    List<String> keys = storage.allKeys
+        .where((key) => key.startsWith(_Keys.profilePrefix))
+        .toList();
     return keys
         .map((key) => int.tryParse(key.substring(_Keys.profilePrefix.length)))
         .whereType<int>()
@@ -121,22 +123,22 @@ class ProfileStorage {
       final Profile profile = profiles[i];
       profile.order = i;
       final String jsonString = jsonEncode(profile.toJson());
-      mmkv.encodeString(_getProfileKey(profile.id), jsonString);
+      storage.setString(_getProfileKey(profile.id), jsonString);
     }
   }
 
   Future<File> getUsingConfig() async {
     final String usingConfig =
-        mmkv.decodeString(_Keys.usingConfig) ?? (await getApplicationDocumentsDirectory()).path;
+        storage.getString(_Keys.usingConfig) ?? (await getApplicationDocumentsDirectory()).path;
     return File('$usingConfig/${_Keys.usingConfigFilename}');
   }
 
   void setUsingConfig(String path) {
-    mmkv.encodeString(_Keys.usingConfig, path);
+    storage.setString(_Keys.usingConfig, path);
   }
 
   void clear() {
-    mmkv.clearAll();
+    storage.clearAll();
   }
 }
 
