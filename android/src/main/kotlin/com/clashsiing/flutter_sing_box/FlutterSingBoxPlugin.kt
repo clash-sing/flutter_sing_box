@@ -74,23 +74,8 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 }
             }
             "stopVpn" -> {
-                val context = activityBinding?.activity?.applicationContext
-                if (context != null) {
-//                    try {
-//                        Libbox.newStandaloneCommandClient().closeConnections()
-//                    } catch (e: Exception) {
-//                        Log.e(TAG, "Failed to close connections", e)
-//                    }
-/*
-                    context.sendBroadcast(
-                        Intent(Action.SERVICE_CLOSE).setPackage(context.packageName)
-                    )
-*/
-                    BoxService.stop()
-                    result.success(null)
-                } else {
-                    result.error("NO_CONTEXT", "无法获取Context实例", null)
-                }
+                BoxService.stop()
+                result.success(null)
             }
             "serviceReload" -> {
                 try {
