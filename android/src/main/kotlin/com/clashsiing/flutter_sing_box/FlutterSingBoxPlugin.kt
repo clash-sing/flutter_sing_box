@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.util.Log
 import com.clashsiing.flutter_sing_box.constant.Action
+import com.clashsiing.flutter_sing_box.core.BoxService
 import com.clashsiing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsiing.flutter_sing_box.cs.PluginManager
 import com.clashsiing.flutter_sing_box.cs.SingBoxConnector
@@ -80,15 +81,15 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
 //                    } catch (e: Exception) {
 //                        Log.e(TAG, "Failed to close connections", e)
 //                    }
+/*
                     context.sendBroadcast(
                         Intent(Action.SERVICE_CLOSE).setPackage(context.packageName)
                     )
-//                    BoxService.stop()
+*/
+                    BoxService.stop()
                     result.success(null)
-                    return
                 } else {
                     result.error("NO_CONTEXT", "无法获取Context实例", null)
-                    return
                 }
             }
             "serviceReload" -> {
