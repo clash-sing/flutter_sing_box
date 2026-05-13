@@ -60,17 +60,27 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
     private var serviceConnection: ServiceConnection? = null
 
+    private var proxyStatus: Status? = null
+
+    private var clientGroups: List<ClientGroup>? = null
+
     init {
         EventChannel(binaryMessenger, EVENT_CHANNEL_CONNECTED_STATUS).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { statusSink = events }
             override fun onCancel(arguments: Any?) { statusSink = null }
         })
         EventChannel(binaryMessenger, EVENT_CHANNEL_GROUP).setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { groupSink = events }
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                groupSink = events
+                clientGroups?.let { events?.success(Json.encodeToString(it)) }
+            }
             override fun onCancel(arguments: Any?) { groupSink = null }
         })
         EventChannel(binaryMessenger, EVENT_CHANNEL_CLASH_MODE).setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { clashModeSink = events }
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                clashModeSink = events
+                clientClashMode?.let { events?.success(Json.encodeToString(it)) }
+            }
             override fun onCancel(arguments: Any?) { clashModeSink = null }
         })
         EventChannel(binaryMessenger, EVENT_CHANNEL_LOG).setStreamHandler(object : EventChannel.StreamHandler {
@@ -78,7 +88,10 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             override fun onCancel(arguments: Any?) { logSink = null }
         })
         EventChannel(binaryMessenger, EVENT_CHANNEL_PROXY_STATE).setStreamHandler(object : EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) { proxyStateSink = events }
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                proxyStateSink = events
+                proxyStatus?.let { events?.success(it.name) }
+            }
             override fun onCancel(arguments: Any?) { proxyStateSink = null }
         })
     }
@@ -132,16 +145,15 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
     inner class ServiceCallback : IServiceCallback.Stub() {
         override fun onServiceStatusChanged(status: Int) {
-            val proxyStatus: Status = when (status) {
+            proxyStatus = when (status) {
                 Status.Stopped.ordinal -> Status.Stopped
                 Status.Starting.ordinal -> Status.Starting
                 Status.Started.ordinal -> Status.Started
                 Status.Stopping.ordinal -> Status.Stopping
                 else -> throw IllegalArgumentException("Unknown status: $status")
             }
-            Log.d(TAG, "onServiceStatusChanged: proxyStatus = ${proxyStatus.name}")
             coroutineScope?.launch(Dispatchers.Main.immediate) {
-                proxyStateSink?.success(proxyStatus.name)
+                proxyStateSink?.success(proxyStatus?.name)
             }
             coroutineScope?.launch {
                 if (proxyStatus == Status.Started) {
@@ -154,8 +166,9 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
         override fun onServiceAlert(type: Int, message: String?) {
             Log.e(TAG, "onServiceAlert: $type $message")
+            proxyStatus = Status.Stopped
             coroutineScope?.launch(Dispatchers.Main.immediate) {
-                proxyStateSink?.success(Status.Stopped.name)
+                proxyStateSink?.success(proxyStatus?.name)
             }
             disconnectClient()
         }
@@ -223,7 +236,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
     inner class GroupClient : CommandClient.Handler {
         override fun updateGroups(newGroups: MutableList<OutboundGroup>) {
             coroutineScope?.launch {
-                val clientGroups = newGroups.map(::ClientGroup)
+                clientGroups = newGroups.map(::ClientGroup)
                 val event = Json.encodeToString(clientGroups)
                 coroutineScope?.launch(Dispatchers.Main.immediate) {
                     groupSink?.success(event)

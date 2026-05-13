@@ -8,60 +8,111 @@ import 'package:yaml/yaml.dart';
 class SingBoxConfigProvider {
   static Future<SingBox> provide(final dynamic data) async {
     SingBox? singBox;
+    Exception? exception;
     try {
       if (data is Map<String, dynamic>) {
         try {
           singBox = SingBox.fromJson(data);
         } catch (e) {
+          exception = e is Error ? Exception('Error: $e') : e as Exception;
           singBox = await _fixSingBoxConfig(data);
         }
       } else if (data is String) {
-        try {
-          final config = jsonDecode(data);
-          singBox = SingBox.fromJson(config);
-        } catch (e) {
+        final String content = data.trim();
+        if (content.startsWith("{") && content.endsWith("}")) {
+          // 可能是 json (sing-box) 格式
+          final Map<String, dynamic> singBoxMap = jsonDecode(data);
           try {
-            final YamlMap yamlMap = loadYaml(data);
-            final outbounds = ClashProvider.provide(yamlMap);
-            final List<Map<String, dynamic>> listMap = outbounds
-                .map((element) => element.toJson())
-                .toList();
-            singBox = await _fixSingBoxConfig({"outbounds": listMap});
+            singBox = SingBox.fromJson(singBoxMap);
           } catch (e) {
-            final outbounds = Base64Provider.provide(data);
-            if (outbounds.isEmpty) {
-              throw Exception("Invalid base64 string");
-            }
-            outbounds.insert(
-              0,
-              Outbound(
-                tag: 'Auto',
-                type: OutboundType.urltest,
-                outbounds: outbounds.map((element) => element.tag).toList(),
-              ),
-            );
-            outbounds.insert(
-              0,
-              Outbound(
-                tag: FlutterSingBoxConstants.defaultGroup,
-                type: OutboundType.selector,
-                outbounds: outbounds.map((element) => element.tag).toList(),
-              ),
-            );
-            final List<Map<String, dynamic>> listMap = outbounds
-                .map((element) => element.toJson())
-                .toList();
-            singBox = await _fixSingBoxConfig({"outbounds": listMap});
+            exception = e is Error ? Exception('Error: $e') : e as Exception;
+            singBox = await _fixSingBoxConfig(singBoxMap);
           }
+        } else if (content.split(RegExp(r'\r?\n')).first.contains(':')) {
+          // 可能是 yaml 格式
+          final YamlMap yamlMap = loadYaml(data);
+          final outbounds = ClashProvider.provide(yamlMap);
+          final List<Map<String, dynamic>> listMap = outbounds
+              .map((element) => element.toJson())
+              .toList();
+          singBox = await _fixSingBoxConfig({"outbounds": listMap});
+        } else {
+          // 可能是 base64 格式
+          final outbounds = Base64Provider.provide(data);
+          if (outbounds.isEmpty) {
+            throw Exception("Invalid base64 string");
+          }
+          outbounds.insert(
+            0,
+            Outbound(
+              tag: 'Auto',
+              type: OutboundType.urltest,
+              outbounds: outbounds.map((element) => element.tag).toList(),
+            ),
+          );
+          outbounds.insert(
+            0,
+            Outbound(
+              tag: FlutterSingBoxConstants.defaultGroup,
+              type: OutboundType.selector,
+              outbounds: outbounds.map((element) => element.tag).toList(),
+            ),
+          );
+          final List<Map<String, dynamic>> listMap = outbounds
+              .map((element) => element.toJson())
+              .toList();
+          singBox = await _fixSingBoxConfig({"outbounds": listMap});
         }
+
+        // try {
+        //   final config = jsonDecode(data);
+        //   singBox = SingBox.fromJson(config);
+        // } catch (e) {
+        //   exception = e is Error ? Exception('Error: $e') : e as Exception;
+        //   try {
+        //     final YamlMap yamlMap = loadYaml(data);
+        //     final outbounds = ClashProvider.provide(yamlMap);
+        //     final List<Map<String, dynamic>> listMap = outbounds
+        //         .map((element) => element.toJson())
+        //         .toList();
+        //     singBox = await _fixSingBoxConfig({"outbounds": listMap});
+        //   } catch (e) {
+        //     exception = e is Error ? Exception('Error: $e') : e as Exception;
+        //     final outbounds = Base64Provider.provide(data);
+        //     if (outbounds.isEmpty) {
+        //       throw Exception("Invalid base64 string");
+        //     }
+        //     outbounds.insert(
+        //       0,
+        //       Outbound(
+        //         tag: 'Auto',
+        //         type: OutboundType.urltest,
+        //         outbounds: outbounds.map((element) => element.tag).toList(),
+        //       ),
+        //     );
+        //     outbounds.insert(
+        //       0,
+        //       Outbound(
+        //         tag: FlutterSingBoxConstants.defaultGroup,
+        //         type: OutboundType.selector,
+        //         outbounds: outbounds.map((element) => element.tag).toList(),
+        //       ),
+        //     );
+        //     final List<Map<String, dynamic>> listMap = outbounds
+        //         .map((element) => element.toJson())
+        //         .toList();
+        //     singBox = await _fixSingBoxConfig({"outbounds": listMap});
+        //   }
+        // }
       }
     } catch (e) {
+      exception = e is Error ? Exception('Error: $e') : e as Exception;
       debugPrint(e.toString());
     }
     if (singBox != null) {
       return singBox;
     } else {
-      singBox = throw Exception("Invalid content");
+      singBox = throw exception ?? Exception("Invalid content");
     }
   }
 
