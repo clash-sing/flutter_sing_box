@@ -1,7 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:dio/dio.dart';
-import 'package:flutter_sing_box/src/utils/user_agent_util.dart';
+import 'package:flutter_sing_box/src/core/services/subscribe_user_agent.dart';
 
 import '../../data/network/api_result.dart';
 import '../../data/network/dio_client.dart';
@@ -18,7 +18,7 @@ class NetworkService {
         options: Options(
           headers: {
             ...DioClient().dio.options.headers,
-            'User-Agent': userAgent ?? await UserAgentUtil.getDefaultUserAgent(),
+            'User-Agent': userAgent ?? await SubscribeUserAgent.getDefaultUserAgent(),
           },
         ),
       );

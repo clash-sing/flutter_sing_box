@@ -2,7 +2,7 @@ import 'dart:io' as io;
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
-class UserAgentUtil {
+class SubscribeUserAgent {
   static String? _cachedVersion;
 
   static Future<String> getDefaultUserAgent() async {
