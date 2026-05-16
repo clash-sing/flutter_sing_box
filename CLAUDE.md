@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Flutter plugin wrapping [sing-box](https://github.com/SagerNet/sing-box) for VPN proxy functionality. Only Android is production-ready; iOS/Windows/macOS/Linux are planned.
 
-- **Plugin package**: `com.clashsiing.flutter_sing_box`
+- **Plugin package**: `com.clashsing.flutter_sing_box`
 - **Dart SDK**: ^3.9.0, **Flutter**: >=3.3.0
 - **License**: GPL-3.0
 

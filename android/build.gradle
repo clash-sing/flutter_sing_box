@@ -1,4 +1,4 @@
-group = "com.clashsiing.flutter_sing_box"
+group = "com.clashsing.flutter_sing_box"
 version = "1.0-SNAPSHOT"
 
 buildscript {
@@ -28,7 +28,7 @@ apply plugin: "kotlin-android"
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 
 android {
-    namespace = "com.clashsiing.flutter_sing_box"
+    namespace = "com.clashsing.flutter_sing_box"
 
     compileSdk = 36
 

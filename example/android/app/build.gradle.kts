@@ -16,7 +16,7 @@ if (localPropsFile.exists()) {
 }
 
 android {
-    namespace = "com.clashsiing.flutter_sing_box_example"
+    namespace = "com.clashsing.flutter_sing_box_example"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.clashsiing.flutter_sing_box_example"
+        applicationId = "com.clashsing.flutter_sing_box_example"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 26

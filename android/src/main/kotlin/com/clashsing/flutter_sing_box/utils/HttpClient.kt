@@ -1,0 +1,42 @@
+package com.clashsing.flutter_sing_box.utils
+
+import com.clashsing.flutter_sing_box.ktx.unwrap
+import io.nekohasekai.libbox.Libbox
+import java.io.Closeable
+import java.util.Locale
+
+@Deprecated("改为由 Flutter 发起网络请求")
+class HttpClient : Closeable {
+    companion object {
+        val userAgent by lazy {
+            var userAgent = "SFA/"
+            userAgent += "1.12.9" //PluginManager.versionName
+            userAgent += " ("
+            userAgent += 575 //PluginManager.versionCode
+            userAgent += "; sing-box "
+            userAgent += "1.12.9"
+            userAgent += "; language "
+            userAgent += Locale.getDefault().toLanguageTag().replace("-", "_")
+            userAgent += ")"
+            userAgent
+        }
+    }
+
+    private val client = Libbox.newHTTPClient()
+
+    init {
+        client.modernTLS()
+    }
+
+    fun getString(url: String): String {
+        val request = client.newRequest()
+        request.setUserAgent(userAgent)
+        request.setURL(url)
+        val response = request.execute()
+        return response.content.unwrap
+    }
+
+    override fun close() {
+        client.close()
+    }
+}

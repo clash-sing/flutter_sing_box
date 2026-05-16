@@ -49,7 +49,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.clashsiing.flutter_sing_box
+        package: com.clashsing.flutter_sing_box
         pluginClass: FlutterSingBoxPlugin
       ios:
         pluginClass: FlutterSingBoxPlugin

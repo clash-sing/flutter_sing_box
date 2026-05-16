@@ -39,3 +39,4 @@ migrate_working_dir/
 
 /assets/.local/
 .gitnexus
+/.claude/settings.local.json
