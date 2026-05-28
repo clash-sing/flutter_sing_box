@@ -330,6 +330,7 @@ class BoxService(private val service: Service, private val platformInterface: Pl
             withContext(Dispatchers.Main) {
                 status.value = Status.Stopped
                 service.stopSelf()
+//                修复 ‘serviceReload’
                 if (isRestart) {
                     start()
                 }
@@ -383,6 +384,7 @@ class BoxService(private val service: Service, private val platformInterface: Pl
                 receiver,
                 IntentFilter().apply {
                     addAction(Action.SERVICE_CLOSE)
+                    addAction(Action.SERVICE_RESTART)     // 修复 ‘serviceReload’
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)
                     }
