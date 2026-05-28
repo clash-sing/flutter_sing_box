@@ -4,5 +4,7 @@ class FlutterSingBoxConstants {
   static const String localFilePrefix = 'file://';
   static const List<String> localSubscriptionFileExtensions = ['yaml', 'json', 'txt'];
   static const String defaultGroup = 'proxy';
+  static const String defaultUrlTestInterval = '3m';
+  static const int defaultUrlTestTolerance = 50;
   static const String defaultTestUrl = 'https://www.gstatic.com/generate_204';
 }

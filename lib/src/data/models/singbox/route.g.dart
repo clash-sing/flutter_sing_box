@@ -73,6 +73,7 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
   sourcePortRange: (json['source_port_range'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  timeout: json['timeout'] as String?,
 );
 
 Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
@@ -96,6 +97,7 @@ Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
   'port_range': ?instance.portRange,
   'source_port': ?instance.sourcePort,
   'source_port_range': ?instance.sourcePortRange,
+  'timeout': ?instance.timeout,
 };
 
 RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(

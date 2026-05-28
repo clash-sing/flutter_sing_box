@@ -32,6 +32,13 @@
           ".cn"
         ],
         "server": "system"
+      },
+      {
+        "rule_set": [
+          "geoip-cn",
+          "geosite-cn"
+        ],
+        "server": "system"
       }
     ],
     "independent_cache": true,
@@ -46,11 +53,10 @@
         "172.19.0.1/30",
         "fdfe:dcba:9876::1/126"
       ],
-      "mtu": 9000,
+      "mtu": 1400,
       "stack": "system",
       "auto_route": true,
       "strict_route": true,
-      "sniff": true,
       "sniff_override_destination": true,
       "platform": {
         "http_proxy": {
@@ -64,15 +70,15 @@
       "tag": "mixed",
       "type": "mixed",
       "listen": "127.0.0.1",
-      "listen_port": 8890,
-      "sniff": true
+      "listen_port": 8890
     }
   ],
   "route": {
     "default_domain_resolver": "system",
     "rules": [
       {
-        "action": "sniff"
+        "action": "sniff",
+        "timeout": "300ms"
       },
       {
         "protocol": "dns",
@@ -95,10 +101,33 @@
           ".cn"
         ],
         "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "geoip-cn",
+          "geosite-cn"
+        ],
+        "outbound": "direct"
       }
     ],
     "final": "proxy",
-    "auto_detect_interface": true
+    "auto_detect_interface": true,
+    "rule_set": [
+      {
+        "tag": "geoip-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs",
+        "download_detour": "direct"
+      },
+      {
+        "tag": "geosite-cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs",
+        "download_detour": "direct"
+      }
+    ]
   },
   "experimental": {
     "cache_file": {

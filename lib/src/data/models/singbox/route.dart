@@ -28,7 +28,6 @@ class Route {
   Map<String, dynamic> toJson() => _$RouteToJson(this);
 }
 
-
 @JsonSerializable()
 class RouteRule {
   String action;
@@ -66,6 +65,7 @@ class RouteRule {
   List<int>? sourcePort;
   @JsonKey(name: "source_port_range")
   List<String>? sourcePortRange;
+  String? timeout;
 
   RouteRule({
     this.action = RuleAction.route,
@@ -88,13 +88,13 @@ class RouteRule {
     this.portRange,
     this.sourcePort,
     this.sourcePortRange,
+    this.timeout,
   });
 
   factory RouteRule.fromJson(Map<String, dynamic> json) => _$RouteRuleFromJson(json);
 
   Map<String, dynamic> toJson() => _$RouteRuleToJson(this);
 }
-
 
 @JsonSerializable()
 class RuleSet {
