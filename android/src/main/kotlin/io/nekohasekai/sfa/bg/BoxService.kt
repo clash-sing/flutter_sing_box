@@ -64,6 +64,14 @@ class BoxService(private val service: Service, private val platformInterface: Pl
                 ),
             )
         }
+        // 修复 ‘serviceReload’
+        fun restart() {
+            PluginManager.appContext.sendBroadcast(
+                Intent(Action.SERVICE_RESTART).setPackage(
+                    PluginManager.appContext.packageName,
+                ),
+            )
+        }
     }
 
     var fileDescriptor: ParcelFileDescriptor? = null
@@ -80,6 +88,10 @@ class BoxService(private val service: Service, private val platformInterface: Pl
                 when (intent.action) {
                     Action.SERVICE_CLOSE -> {
                         stopService()
+                    }
+                    // 修复 ‘serviceReload’
+                    Action.SERVICE_RESTART -> {
+                        stopService(isRestart = true)
                     }
 
                     PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED -> {
@@ -195,9 +207,11 @@ class BoxService(private val service: Service, private val platformInterface: Pl
     }
 
     override fun serviceReload() {
-        runBlocking {
-            serviceReload0()
-        }
+        // 修复 ‘serviceReload’
+        restart()
+//        runBlocking {
+//            serviceReload0()
+//        }
     }
 
     suspend fun serviceReload0() {
@@ -227,6 +241,10 @@ class BoxService(private val service: Service, private val platformInterface: Pl
             return
         }
         lastProfileName = profile.name
+        // Bug fix：切换配置文件时，通知栏显示的配置文件名可能不是最新的
+        withContext(Dispatchers.Main) {
+            notification.show(lastProfileName, R.string.status_starting)
+        }
         try {
             commandServer.startOrReloadService(
                 content,
@@ -283,8 +301,12 @@ class BoxService(private val service: Service, private val platformInterface: Pl
         }
     }
 
+    /**
+     * 修复 ‘serviceReload’，添加参数 isRestart
+     *
+     */
     @OptIn(DelicateCoroutinesApi::class)
-    private fun stopService() {
+    private fun stopService(isRestart: Boolean = false) {
         if (status.value != Status.Started) return
         status.value = Status.Stopping
         if (receiverRegistered) {
@@ -308,6 +330,9 @@ class BoxService(private val service: Service, private val platformInterface: Pl
             withContext(Dispatchers.Main) {
                 status.value = Status.Stopped
                 service.stopSelf()
+                if (isRestart) {
+                    start()
+                }
             }
         }
     }
