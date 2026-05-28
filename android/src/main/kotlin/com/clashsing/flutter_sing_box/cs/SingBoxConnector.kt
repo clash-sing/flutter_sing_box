@@ -6,17 +6,19 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
-import com.clashsing.flutter_sing_box.aidl.IService
-import com.clashsing.flutter_sing_box.aidl.IServiceCallback
-import com.clashsing.flutter_sing_box.constant.Action
-import com.clashsing.flutter_sing_box.constant.Status
+import io.nekohasekai.sfa.aidl.IService
+import io.nekohasekai.sfa.aidl.IServiceCallback
+import io.nekohasekai.sfa.constant.Action
+import io.nekohasekai.sfa.constant.Status
+import io.nekohasekai.sfa.utils.CommandClient
+
 import com.clashsing.flutter_sing_box.cs.models.ClientClashMode
 import com.clashsing.flutter_sing_box.cs.models.ClientGroup
 import com.clashsing.flutter_sing_box.cs.models.ClientStatus
-import com.clashsing.flutter_sing_box.utils.CommandClient
 import com.clashsing.flutter_sing_box.utils.SettingsManager
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
+import io.nekohasekai.libbox.LogEntry
 import io.nekohasekai.libbox.OutboundGroup
 import io.nekohasekai.libbox.StatusMessage
 import kotlinx.coroutines.CoroutineScope
@@ -275,13 +277,41 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
         override fun clearLogs() {
             Log.d(TAG, "clearLogs: -------------------------")
         }
-        override fun appendLogs(message: List<String>) {
-            coroutineScope?.launch {
-                val event = Json.encodeToString(message)
-                coroutineScope?.launch(Dispatchers.Main.immediate) {
-                    logSink?.success(event)
+        override fun appendLogs(message: List<LogEntry>) {
+            // TODO: Unimplemented
+//            coroutineScope?.launch {
+//                val event = Json.encodeToString(message)
+//                coroutineScope?.launch(Dispatchers.Main.immediate) {
+//                    logSink?.success(event)
+//                }
+//            }
+        }
+/*
+        override fun appendLogs(message: List<LogEntry>) {
+            val processedLogs = message.map { processLogEntry(it) }
+            viewModelScope.launch(Dispatchers.Main) {
+                if (_uiState.value.isPaused) {
+                    bufferedLogs.addAll(processedLogs)
+                } else {
+                    val totalSize = allLogs.size + processedLogs.size
+                    val removeCount = (totalSize - maxLines).coerceAtLeast(0)
+
+                    if (removeCount > 0) {
+                        repeat(removeCount) {
+                            allLogs.removeFirst()
+                        }
+                    }
+
+                    allLogs.addAll(processedLogs)
+                    updateDisplayedLogs()
+
+                    if (_autoScrollEnabled.value && !_uiState.value.isPaused && !_uiState.value.isSearchActive) {
+                        scrollToBottom()
+                    }
                 }
             }
         }
+*/
+
     }
 }

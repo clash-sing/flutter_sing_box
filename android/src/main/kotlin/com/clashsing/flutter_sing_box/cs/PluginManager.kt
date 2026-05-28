@@ -6,11 +6,10 @@ import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.PowerManager
 import androidx.core.content.getSystemService
-import com.clashsing.flutter_sing_box.constant.Bugs
+import io.nekohasekai.sfa.constant.Bugs
 import com.clashsing.flutter_sing_box.utils.ProfileManager
 import com.clashsing.flutter_sing_box.utils.SettingsManager
 import com.tencent.mmkv.MMKV
-import go.Seq
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.SetupOptions
 import java.io.File
@@ -39,7 +38,7 @@ object PluginManager {
     }
 
     private fun initSingBox() {
-        Seq.setContext(appContext)
+//        Seq.setContext(appContext)
         Libbox.setLocale(Locale.getDefault().toLanguageTag().replace("-", "_"))
         val baseDir = appContext.filesDir
         baseDir.mkdirs()
@@ -52,6 +51,8 @@ object PluginManager {
             it.workingPath = workingDir.path
             it.tempPath = tempDir.path
             it.fixAndroidStack = Bugs.fixAndroidStack
+            it.logMaxLines = 3000
+            it.debug = false // TODO: 临时赋值 false
         })
         Libbox.redirectStderr(File(workingDir, "stderr.log").path)
     }

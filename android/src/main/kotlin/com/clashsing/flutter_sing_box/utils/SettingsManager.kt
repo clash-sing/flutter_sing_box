@@ -1,9 +1,9 @@
 package com.clashsing.flutter_sing_box.utils
 
-import com.clashsing.flutter_sing_box.constant.ServiceMode
-import com.clashsing.flutter_sing_box.core.ClashSingVpnService
-import com.clashsing.flutter_sing_box.core.ProxyService
+import io.nekohasekai.sfa.constant.ServiceMode
 import com.tencent.mmkv.MMKV
+import io.nekohasekai.sfa.bg.ProxyService
+import io.nekohasekai.sfa.bg.VPNService
 import org.json.JSONArray
 
 object SettingsManager {
@@ -28,7 +28,7 @@ object SettingsManager {
 
     fun serviceClass(): Class<*> {
         return when (serviceMode) {
-            ServiceMode.VPN -> ClashSingVpnService::class.java
+            ServiceMode.VPN -> VPNService::class.java
             else -> ProxyService::class.java
         }
     }
@@ -85,6 +85,11 @@ object SettingsManager {
         set(value) {
             mmkv.encode(Keys.SYSTEM_PROXY_ENABLED, value)
         }
+    var autoRedirect: Boolean
+        get() = mmkv.decodeBool(Keys.AUTO_REDIRECT, false)
+        set(value) {
+            mmkv.encode(Keys.AUTO_REDIRECT, value)
+        }
 
     object Keys {
         const val DYNAMIC_NOTIFICATION = "dynamic_notification"
@@ -100,6 +105,7 @@ object SettingsManager {
         const val PER_APP_PROXY_INCLUDE = 1
         const val PER_APP_PROXY_EXCLUDE = 2
         const val SYSTEM_PROXY_ENABLED = "system_proxy_enabled"
+        const val AUTO_REDIRECT = "auto_redirect"
 
     }
 }

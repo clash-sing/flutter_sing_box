@@ -3,9 +3,6 @@ package com.clashsing.flutter_sing_box
 import android.content.Intent
 import android.net.VpnService
 import android.util.Log
-import com.clashsing.flutter_sing_box.constant.Action
-import com.clashsing.flutter_sing_box.core.BoxService
-import com.clashsing.flutter_sing_box.core.ClashSingVpnService
 import com.clashsing.flutter_sing_box.cs.PluginManager
 import com.clashsing.flutter_sing_box.cs.SingBoxConnector
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -17,6 +14,7 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import io.nekohasekai.libbox.Libbox
+import io.nekohasekai.sfa.bg.BoxService
 import java.util.concurrent.atomic.AtomicReference
 
 class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
