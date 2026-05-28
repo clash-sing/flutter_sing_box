@@ -84,11 +84,7 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
                 }
             }
             "setClashMode" -> {
-                val clashMode = call.arguments as String?
-                if (clashMode.isNullOrBlank()) {
-                    result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
-                    return
-                }
+                val clashMode = call.arguments as String
                 if (singBoxConnector?.clientClashMode?.modes?.contains(clashMode) == true) {
                     Libbox.newStandaloneCommandClient().setClashMode(clashMode)
                     singBoxConnector?.clashModeClient?.connect()

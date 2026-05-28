@@ -119,9 +119,9 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
     internal fun disconnect() {
         Log.d(TAG, "disconnect ----------------------------")
         try {
+            disconnectClient()
             coroutineScope?.cancel()
             coroutineScope = null
-            disconnectClient()
             if (serviceConnection != null) {
                 context?.get()?.unbindService(serviceConnection!!)
                 serviceConnection = null
@@ -147,21 +147,24 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
 
     inner class ServiceCallback : IServiceCallback.Stub() {
         override fun onServiceStatusChanged(status: Int) {
-            proxyStatus = when (status) {
+            val tempStatus = when (status) {
                 Status.Stopped.ordinal -> Status.Stopped
                 Status.Starting.ordinal -> Status.Starting
                 Status.Started.ordinal -> Status.Started
                 Status.Stopping.ordinal -> Status.Stopping
                 else -> throw IllegalArgumentException("Unknown status: $status")
             }
-            coroutineScope?.launch(Dispatchers.Main.immediate) {
-                proxyStateSink?.success(proxyStatus?.name)
-            }
-            coroutineScope?.launch {
-                if (proxyStatus == Status.Started) {
-                    connectClient()
-                } else if (proxyStatus == Status.Stopped) {
-                    disconnectClient()
+            if (proxyStatus != tempStatus) {
+                proxyStatus = tempStatus
+                coroutineScope?.launch(Dispatchers.Main.immediate) {
+                    proxyStateSink?.success(proxyStatus?.name)
+                }
+                coroutineScope?.launch {
+                    if (proxyStatus == Status.Started) {
+                        connectClient()
+                    } else if (proxyStatus == Status.Stopped) {
+                        disconnectClient()
+                    }
                 }
             }
         }
@@ -278,6 +281,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<LogEntry>) {
+//            Log.d(TAG, "appendLogs: ${message.size}")
             // TODO: Unimplemented
 //            coroutineScope?.launch {
 //                val event = Json.encodeToString(message)
