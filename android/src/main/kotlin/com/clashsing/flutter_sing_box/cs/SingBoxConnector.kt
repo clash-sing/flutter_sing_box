@@ -283,6 +283,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<LogEntry>) {
+            if (logSink == null) return
             coroutineScope?.launch {
                 val clientLogs = message.map { ClientLog(it.level, it.message) }
                 val event = Json.encodeToString(clientLogs)
