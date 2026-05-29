@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sing_box/src/data/models/client/client_log.dart';
 
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
@@ -40,12 +41,18 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
 
   @override
   Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
-    return await methodChannel.invokeMethod('selectOutbound', {"groupTag": groupTag, "outboundTag": outboundTag});
+    return await methodChannel.invokeMethod('selectOutbound', {
+      "groupTag": groupTag,
+      "outboundTag": outboundTag,
+    });
   }
 
   @override
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
-    return await methodChannel.invokeMethod('setGroupExpand', {"groupTag": groupTag, "isExpand": isExpand});
+    return await methodChannel.invokeMethod('setGroupExpand', {
+      "groupTag": groupTag,
+      "isExpand": isExpand,
+    });
   }
 
   @override
@@ -62,8 +69,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   Stream<ClientStatus>? _connectedStatusStream;
   @override
   Stream<ClientStatus> get connectedStatusStream {
-    _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream()
-        .map((data) {
+    _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream().map((data) {
       return ClientStatus.fromJson(jsonDecode(data));
     });
     return _connectedStatusStream!;
@@ -73,8 +79,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   Stream<List<ClientGroup>>? _groupStream;
   @override
   Stream<List<ClientGroup>> get groupStream {
-    _groupStream ??= _eventChannelGroup.receiveBroadcastStream()
-        .map((data) {
+    _groupStream ??= _eventChannelGroup.receiveBroadcastStream().map((data) {
       final List<dynamic> list = jsonDecode(data);
       final groups = list.map((item) {
         return ClientGroup.fromJson(item);
@@ -89,17 +94,21 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
 
   @override
   Stream<ClientClashMode> get clashModeStream {
-    _clashModeStream ??= _eventChannelClashMode.receiveBroadcastStream()
-        .map((data) => ClientClashMode.fromJson(jsonDecode(data)));
+    _clashModeStream ??= _eventChannelClashMode.receiveBroadcastStream().map(
+      (data) => ClientClashMode.fromJson(jsonDecode(data)),
+    );
     return _clashModeStream!;
   }
 
   final _eventChannelLog = const EventChannel('log_event');
-  Stream<List<String>>? _logStream;
+  Stream<List<ClientLog>>? _logStream;
   @override
-  Stream<List<String>> get logStream {
-    _logStream ??= _eventChannelLog.receiveBroadcastStream()
-        .map((data) => (jsonDecode(data) as List).map((item) => item.toString()).toList());
+  Stream<List<ClientLog>> get logStream {
+    _logStream ??= _eventChannelLog.receiveBroadcastStream().map(
+      (data) => (jsonDecode(data) as List<dynamic>)
+          .map((item) => ClientLog.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
     return _logStream!;
   }
 
@@ -107,8 +116,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   Stream<ProxyState>? _proxyStateStream;
   @override
   Stream<ProxyState> get proxyStateStream {
-    _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream()
-    .map((data) {
+    _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().map((data) {
       if (data == ProxyState.stopped.name) return ProxyState.stopped;
       if (data == ProxyState.starting.name) return ProxyState.starting;
       if (data == ProxyState.started.name) return ProxyState.started;

@@ -77,7 +77,7 @@ class FlutterSingBox {
       FlutterSingBoxPlatform.instance.clashModeStream;
 
   /// A stream of log messages from the sing-box core.
-  Stream<List<String>> get logStream =>
+  Stream<List<ClientLog>> get logStream =>
       FlutterSingBoxPlatform.instance.logStream;
 
   /// A stream of proxy state updates.

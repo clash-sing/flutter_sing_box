@@ -29,7 +29,7 @@ final groupStreamProvider = StreamProvider<List<ClientGroup>>((ref) {
   return singBox.groupStream;
 });
 
-final logStreamProvider = StreamProvider<List<String>>((ref) {
+final logStreamProvider = StreamProvider<List<ClientLog>>((ref) {
   final singBox = ref.watch(flutterSingBoxProvider);
   return singBox.logStream;
 });

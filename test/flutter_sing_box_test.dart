@@ -59,7 +59,7 @@ class MockFlutterSingBoxPlatform
   Stream<List<ClientGroup>> get groupStream => throw UnimplementedError();
 
   @override
-  Stream<List<String>> get logStream => throw UnimplementedError();
+  Stream<List<ClientLog>> get logStream => throw UnimplementedError();
 
   @override
   Stream<ProxyState> get proxyStateStream => throw UnimplementedError();

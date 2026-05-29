@@ -1,4 +1,5 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box/src/data/models/client/client_log.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_sing_box_method_channel.dart';
@@ -90,7 +91,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   }
 
   /// A stream of log messages from the sing-box core.
-  Stream<List<String>> get logStream {
+  Stream<List<ClientLog>> get logStream {
     throw UnimplementedError('logStream has not been implemented.');
   }
 

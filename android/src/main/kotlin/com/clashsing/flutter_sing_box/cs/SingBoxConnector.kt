@@ -14,6 +14,7 @@ import io.nekohasekai.sfa.utils.CommandClient
 
 import com.clashsing.flutter_sing_box.cs.models.ClientClashMode
 import com.clashsing.flutter_sing_box.cs.models.ClientGroup
+import com.clashsing.flutter_sing_box.cs.models.ClientLog
 import com.clashsing.flutter_sing_box.cs.models.ClientStatus
 import com.clashsing.flutter_sing_box.utils.SettingsManager
 import io.flutter.plugin.common.BinaryMessenger
@@ -26,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.lang.ref.WeakReference
 
@@ -158,12 +160,12 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
                 proxyStatus = tempStatus
                 coroutineScope?.launch(Dispatchers.Main.immediate) {
                     proxyStateSink?.success(proxyStatus?.name)
-                }
-                coroutineScope?.launch {
-                    if (proxyStatus == Status.Started) {
-                        connectClient()
-                    } else if (proxyStatus == Status.Stopped) {
-                        disconnectClient()
+                    withContext(Dispatchers.Default) {
+                        if (proxyStatus == Status.Started) {
+                            connectClient()
+                        } else if (proxyStatus == Status.Stopped) {
+                            disconnectClient()
+                        }
                     }
                 }
             }
@@ -231,7 +233,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
                     downlinkTotal = status.downlinkTotal
                 )
                 val event = Json.encodeToString(clientStatus)
-                coroutineScope?.launch(Dispatchers.Main.immediate) {
+                withContext(Dispatchers.Main.immediate) {
                     statusSink?.success(event)
                 }
             }
@@ -243,7 +245,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             coroutineScope?.launch {
                 clientGroups = newGroups.map(::ClientGroup)
                 val event = Json.encodeToString(clientGroups)
-                coroutineScope?.launch(Dispatchers.Main.immediate) {
+                withContext(Dispatchers.Main.immediate) {
                     groupSink?.success(event)
                 }
             }
@@ -258,7 +260,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
                     currentMode = currentMode
                 )
                 val event = Json.encodeToString(clientClashMode)
-                coroutineScope?.launch(Dispatchers.Main.immediate) {
+                withContext(Dispatchers.Main.immediate) {
                     clashModeSink?.success(event)
                 }
             }
@@ -268,7 +270,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
                 clientClashMode?.let { clashMode ->
                     clashMode.currentMode = newMode
                     val event = Json.encodeToString(clashMode)
-                    coroutineScope?.launch(Dispatchers.Main.immediate) {
+                    withContext(Dispatchers.Main.immediate) {
                         clashModeSink?.success(event)
                     }
                 }
@@ -281,41 +283,15 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             Log.d(TAG, "clearLogs: -------------------------")
         }
         override fun appendLogs(message: List<LogEntry>) {
-//            Log.d(TAG, "appendLogs: ${message.size}")
-            // TODO: Unimplemented
-//            coroutineScope?.launch {
-//                val event = Json.encodeToString(message)
-//                coroutineScope?.launch(Dispatchers.Main.immediate) {
-//                    logSink?.success(event)
-//                }
-//            }
-        }
-/*
-        override fun appendLogs(message: List<LogEntry>) {
-            val processedLogs = message.map { processLogEntry(it) }
-            viewModelScope.launch(Dispatchers.Main) {
-                if (_uiState.value.isPaused) {
-                    bufferedLogs.addAll(processedLogs)
-                } else {
-                    val totalSize = allLogs.size + processedLogs.size
-                    val removeCount = (totalSize - maxLines).coerceAtLeast(0)
-
-                    if (removeCount > 0) {
-                        repeat(removeCount) {
-                            allLogs.removeFirst()
-                        }
-                    }
-
-                    allLogs.addAll(processedLogs)
-                    updateDisplayedLogs()
-
-                    if (_autoScrollEnabled.value && !_uiState.value.isPaused && !_uiState.value.isSearchActive) {
-                        scrollToBottom()
-                    }
+            coroutineScope?.launch {
+                val clientLogs = message.map { ClientLog(it.level, it.message) }
+                val event = Json.encodeToString(clientLogs)
+                Log.d(TAG, "appendLogs: $event")
+                withContext(Dispatchers.Main.immediate) {
+                    logSink?.success(event)
                 }
             }
         }
-*/
-
     }
+
 }
