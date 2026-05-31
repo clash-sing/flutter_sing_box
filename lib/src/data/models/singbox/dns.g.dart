@@ -13,17 +13,17 @@ Dns _$DnsFromJson(Map<String, dynamic> json) => Dns(
   rules: (json['rules'] as List<dynamic>)
       .map((e) => DnsRule.fromJson(e as Map<String, dynamic>))
       .toList(),
-  independentCache: json['independent_cache'] as bool,
-  dnsFinal: json['final'] as String,
-  strategy: json['strategy'] as String,
+  independentCache: json['independent_cache'] as bool?,
+  dnsFinal: json['final'] as String?,
+  strategy: json['strategy'] as String?,
 );
 
 Map<String, dynamic> _$DnsToJson(Dns instance) => <String, dynamic>{
   'servers': instance.servers.map((e) => e.toJson()).toList(),
   'rules': instance.rules.map((e) => e.toJson()).toList(),
-  'independent_cache': instance.independentCache,
-  'final': instance.dnsFinal,
-  'strategy': instance.strategy,
+  'independent_cache': ?instance.independentCache,
+  'final': ?instance.dnsFinal,
+  'strategy': ?instance.strategy,
 };
 
 Server _$ServerFromJson(Map<String, dynamic> json) => Server(

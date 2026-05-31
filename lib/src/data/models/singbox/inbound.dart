@@ -13,6 +13,7 @@ class Inbound {
   bool? autoRoute;
   @JsonKey(name: "strict_route")
   bool? strictRoute;
+  bool? sniff;
   @JsonKey(name: "sniff_override_destination")
   bool? sniffOverrideDestination;
   Platform? platform;
@@ -27,6 +28,7 @@ class Inbound {
     this.mtu,
     this.stack,
     this.autoRoute,
+    this.sniff,
     this.strictRoute,
     this.sniffOverrideDestination,
     this.platform,
@@ -57,13 +59,13 @@ class Platform {
 
 @JsonSerializable()
 class HttpProxy {
-  bool enabled;
+  bool? enabled;
   String server;
   @JsonKey(name: "server_port")
   int serverPort;
 
   HttpProxy({
-    required this.enabled,
+    this.enabled,
     required this.server,
     required this.serverPort,
   });

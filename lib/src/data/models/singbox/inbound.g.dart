@@ -15,6 +15,7 @@ Inbound _$InboundFromJson(Map<String, dynamic> json) => Inbound(
   mtu: (json['mtu'] as num?)?.toInt(),
   stack: json['stack'] as String?,
   autoRoute: json['auto_route'] as bool?,
+  sniff: json['sniff'] as bool?,
   strictRoute: json['strict_route'] as bool?,
   sniffOverrideDestination: json['sniff_override_destination'] as bool?,
   platform: json['platform'] == null
@@ -32,6 +33,7 @@ Map<String, dynamic> _$InboundToJson(Inbound instance) => <String, dynamic>{
   'stack': ?instance.stack,
   'auto_route': ?instance.autoRoute,
   'strict_route': ?instance.strictRoute,
+  'sniff': ?instance.sniff,
   'sniff_override_destination': ?instance.sniffOverrideDestination,
   'platform': ?instance.platform?.toJson(),
   'listen': ?instance.listen,
@@ -47,13 +49,13 @@ Map<String, dynamic> _$PlatformToJson(Platform instance) => <String, dynamic>{
 };
 
 HttpProxy _$HttpProxyFromJson(Map<String, dynamic> json) => HttpProxy(
-  enabled: json['enabled'] as bool,
+  enabled: json['enabled'] as bool?,
   server: json['server'] as String,
   serverPort: (json['server_port'] as num).toInt(),
 );
 
 Map<String, dynamic> _$HttpProxyToJson(HttpProxy instance) => <String, dynamic>{
-  'enabled': instance.enabled,
+  'enabled': ?instance.enabled,
   'server': instance.server,
   'server_port': instance.serverPort,
 };

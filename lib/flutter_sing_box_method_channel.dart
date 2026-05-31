@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sing_box/src/data/models/client/client_log.dart';
 
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';

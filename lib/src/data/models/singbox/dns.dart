@@ -8,17 +8,17 @@ class Dns {
   List<Server> servers;
   List<DnsRule> rules;
   @JsonKey(name: "independent_cache")
-  bool independentCache;
+  bool? independentCache;
   @JsonKey(name: "final")
-  String dnsFinal;
-  String strategy;
+  String? dnsFinal;
+  String? strategy;
 
   Dns({
     required this.servers,
     required this.rules,
-    required this.independentCache,
-    required this.dnsFinal,
-    required this.strategy,
+    this.independentCache,
+    this.dnsFinal,
+    this.strategy,
   });
 
   factory Dns.fromJson(Map<String, dynamic> json) => _$DnsFromJson(json);

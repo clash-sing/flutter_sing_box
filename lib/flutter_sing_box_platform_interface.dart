@@ -1,5 +1,4 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
-import 'package:flutter_sing_box/src/data/models/client/client_log.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'flutter_sing_box_method_channel.dart';

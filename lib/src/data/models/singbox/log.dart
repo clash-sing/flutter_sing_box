@@ -4,10 +4,10 @@ part 'log.g.dart';
 
 @JsonSerializable()
 class Log {
-  bool disabled;
-  String level;
+  bool? disabled;
+  String? level;
   String? output;
-  bool timestamp;
+  bool? timestamp;
 
   Log({
     required this.disabled,
