@@ -7,7 +7,7 @@ part 'route.g.dart';
 class Route {
   List<RouteRule> rules;
   @JsonKey(name: "auto_detect_interface")
-  bool autoDetectInterface;
+  bool? autoDetectInterface;
   @JsonKey(name: "default_domain_resolver")
   String? defaultDomainResolver;
   @JsonKey(name: "final")
@@ -17,7 +17,7 @@ class Route {
 
   Route({
     required this.rules,
-    required this.autoDetectInterface,
+    this.autoDetectInterface,
     this.defaultDomainResolver,
     this.routeFinal,
     this.ruleSet,
@@ -100,7 +100,7 @@ class RouteRule {
 class RuleSet {
   String tag;
   String type;
-  String format;
+  String? format;
   String? url;
   @JsonKey(name: "download_detour")
   String? downloadDetour;
@@ -111,7 +111,7 @@ class RuleSet {
   RuleSet({
     required this.tag,
     required this.type,
-    required this.format,
+    this.format,
     this.url,
     this.downloadDetour,
     this.updateInterval,

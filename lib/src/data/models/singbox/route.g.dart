@@ -10,7 +10,7 @@ Route _$RouteFromJson(Map<String, dynamic> json) => Route(
   rules: (json['rules'] as List<dynamic>)
       .map((e) => RouteRule.fromJson(e as Map<String, dynamic>))
       .toList(),
-  autoDetectInterface: json['auto_detect_interface'] as bool,
+  autoDetectInterface: json['auto_detect_interface'] as bool?,
   defaultDomainResolver: json['default_domain_resolver'] as String?,
   routeFinal: json['final'] as String?,
   ruleSet: (json['rule_set'] as List<dynamic>?)
@@ -20,7 +20,7 @@ Route _$RouteFromJson(Map<String, dynamic> json) => Route(
 
 Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
   'rules': instance.rules.map((e) => e.toJson()).toList(),
-  'auto_detect_interface': instance.autoDetectInterface,
+  'auto_detect_interface': ?instance.autoDetectInterface,
   'default_domain_resolver': ?instance.defaultDomainResolver,
   'final': ?instance.routeFinal,
   'rule_set': ?instance.ruleSet?.map((e) => e.toJson()).toList(),
@@ -103,7 +103,7 @@ Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
 RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(
   tag: json['tag'] as String,
   type: json['type'] as String,
-  format: json['format'] as String,
+  format: json['format'] as String?,
   url: json['url'] as String?,
   downloadDetour: json['download_detour'] as String?,
   updateInterval: json['update_interval'] as String?,
@@ -113,7 +113,7 @@ RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(
 Map<String, dynamic> _$RuleSetToJson(RuleSet instance) => <String, dynamic>{
   'tag': instance.tag,
   'type': instance.type,
-  'format': instance.format,
+  'format': ?instance.format,
   'url': ?instance.url,
   'download_detour': ?instance.downloadDetour,
   'update_interval': ?instance.updateInterval,
