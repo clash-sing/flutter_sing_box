@@ -28,13 +28,20 @@ class Route {
   Map<String, dynamic> toJson() => _$RouteToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class RouteRule {
   String action;
+  String? outbound;
+
+  /// 仅当 action 为 'redirect' 时有效，默认：default
+  String? method;
+
+  /// 仅当 action 为 'redirect' 时有效。
+  @JsonKey(name: "no_drop")
+  bool? noDrop;
   dynamic protocol;
   @JsonKey(name: "clash_mode")
   String? clashMode;
-  String? outbound;
   List<String>? domain;
   @JsonKey(name: "domain_suffix")
   List<String>? domainSuffix;
@@ -66,12 +73,57 @@ class RouteRule {
   @JsonKey(name: "source_port_range")
   List<String>? sourcePortRange;
   String? timeout;
+  List<String>? inbound;
+
+  /// 4 (A DNS 查询) 或 6 (AAAA DNS 查询)
+  @JsonKey(name: "ip_version")
+  int? ipVersion;
+
+  /// tcp 或 udp
+  String? network;
+  List<String>? client;
+  @JsonKey(name: "source_ip_is_private")
+  bool? sourceIpIsPrivate;
+  @JsonKey(name: "package_name_regex")
+  List<String>? packageNameRegex;
+  @JsonKey(name: "network_type")
+  List<String>? networkType;
+  @JsonKey(name: "network_is_expensive")
+  bool? networkIsExpensive;
+  @JsonKey(name: "network_is_constrained")
+  bool? networkIsConstrained;
+  @JsonKey(name: "default_interface_address")
+  List<String>? defaultInterfacAddress;
+  @JsonKey(name: "wifi_ssid")
+  List<String>? wifiSsid;
+  @JsonKey(name: "wifi_bssid")
+  List<String>? wifiBssid;
+  @JsonKey(name: "preferred_by")
+  List<String>? preferredBy;
+  @JsonKey(name: "source_mac_address")
+  List<String>? sourceMacAddress;
+  @JsonKey(name: "source_hostname")
+  List<String>? sourceHostname;
+  bool? invert;
+
+  /// 以下是逻辑字段 ///
+
+  /// 可选值：logical
+  String? type;
+
+  /// 可选值：and 或 or
+  String? mode;
+
+  /// 包括的规则
+  List<dynamic>? rules;
 
   RouteRule({
     this.action = RuleAction.route,
+    this.outbound,
+    this.method,
+    this.noDrop,
     this.protocol,
     this.clashMode,
-    this.outbound,
     this.domain,
     this.domainSuffix,
     this.domainKeyword,
@@ -89,6 +141,25 @@ class RouteRule {
     this.sourcePort,
     this.sourcePortRange,
     this.timeout,
+    this.inbound,
+    this.ipVersion,
+    this.network,
+    this.client,
+    this.sourceIpIsPrivate,
+    this.packageNameRegex,
+    this.networkType,
+    this.networkIsExpensive,
+    this.networkIsConstrained,
+    this.defaultInterfacAddress,
+    this.wifiSsid,
+    this.wifiBssid,
+    this.preferredBy,
+    this.sourceMacAddress,
+    this.sourceHostname,
+    this.invert,
+    this.type,
+    this.mode,
+    this.rules,
   });
 
   factory RouteRule.fromJson(Map<String, dynamic> json) => _$RouteRuleFromJson(json);
@@ -96,7 +167,7 @@ class RouteRule {
   Map<String, dynamic> toJson() => _$RouteRuleToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class RuleSet {
   String tag;
   String type;

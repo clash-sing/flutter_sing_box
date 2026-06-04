@@ -28,9 +28,11 @@ Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
 
 RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
   action: json['action'] as String? ?? RuleAction.route,
+  outbound: json['outbound'] as String?,
+  method: json['method'] as String?,
+  noDrop: json['no_drop'] as bool?,
   protocol: json['protocol'],
   clashMode: json['clash_mode'] as String?,
-  outbound: json['outbound'] as String?,
   domain: (json['domain'] as List<dynamic>?)?.map((e) => e as String).toList(),
   domainSuffix: (json['domain_suffix'] as List<dynamic>?)
       ?.map((e) => e as String)
@@ -74,13 +76,52 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
       ?.map((e) => e as String)
       .toList(),
   timeout: json['timeout'] as String?,
+  inbound: (json['inbound'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  ipVersion: (json['ip_version'] as num?)?.toInt(),
+  network: json['network'] as String?,
+  client: (json['client'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  sourceIpIsPrivate: json['source_ip_is_private'] as bool?,
+  packageNameRegex: (json['package_name_regex'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  networkType: (json['network_type'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  networkIsExpensive: json['network_is_expensive'] as bool?,
+  networkIsConstrained: json['network_is_constrained'] as bool?,
+  defaultInterfacAddress: (json['default_interface_address'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  wifiSsid: (json['wifi_ssid'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  wifiBssid: (json['wifi_bssid'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  preferredBy: (json['preferred_by'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  sourceMacAddress: (json['source_mac_address'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  sourceHostname: (json['source_hostname'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  invert: json['invert'] as bool?,
+  type: json['type'] as String?,
+  mode: json['mode'] as String?,
+  rules: json['rules'] as List<dynamic>?,
 );
 
 Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
   'action': instance.action,
+  'outbound': ?instance.outbound,
+  'method': ?instance.method,
+  'no_drop': ?instance.noDrop,
   'protocol': ?instance.protocol,
   'clash_mode': ?instance.clashMode,
-  'outbound': ?instance.outbound,
   'domain': ?instance.domain,
   'domain_suffix': ?instance.domainSuffix,
   'domain_keyword': ?instance.domainKeyword,
@@ -98,6 +139,25 @@ Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
   'source_port': ?instance.sourcePort,
   'source_port_range': ?instance.sourcePortRange,
   'timeout': ?instance.timeout,
+  'inbound': ?instance.inbound,
+  'ip_version': ?instance.ipVersion,
+  'network': ?instance.network,
+  'client': ?instance.client,
+  'source_ip_is_private': ?instance.sourceIpIsPrivate,
+  'package_name_regex': ?instance.packageNameRegex,
+  'network_type': ?instance.networkType,
+  'network_is_expensive': ?instance.networkIsExpensive,
+  'network_is_constrained': ?instance.networkIsConstrained,
+  'default_interface_address': ?instance.defaultInterfacAddress,
+  'wifi_ssid': ?instance.wifiSsid,
+  'wifi_bssid': ?instance.wifiBssid,
+  'preferred_by': ?instance.preferredBy,
+  'source_mac_address': ?instance.sourceMacAddress,
+  'source_hostname': ?instance.sourceHostname,
+  'invert': ?instance.invert,
+  'type': ?instance.type,
+  'mode': ?instance.mode,
+  'rules': ?instance.rules,
 };
 
 RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(

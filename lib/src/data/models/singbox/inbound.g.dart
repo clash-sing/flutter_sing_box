@@ -9,6 +9,7 @@ part of 'inbound.dart';
 Inbound _$InboundFromJson(Map<String, dynamic> json) => Inbound(
   tag: json['tag'] as String,
   type: json['type'] as String,
+  interfaceName: json['interface_name'] as String?,
   address: (json['address'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -28,6 +29,7 @@ Inbound _$InboundFromJson(Map<String, dynamic> json) => Inbound(
 Map<String, dynamic> _$InboundToJson(Inbound instance) => <String, dynamic>{
   'tag': instance.tag,
   'type': instance.type,
+  'interface_name': ?instance.interfaceName,
   'address': ?instance.address,
   'mtu': ?instance.mtu,
   'stack': ?instance.stack,

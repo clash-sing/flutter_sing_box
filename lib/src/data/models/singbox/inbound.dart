@@ -6,6 +6,8 @@ part 'inbound.g.dart';
 class Inbound {
   String tag;
   String type;
+  @JsonKey(name: "interface_name")
+  String? interfaceName;
   List<String>? address;
   int? mtu;
   String? stack;
@@ -24,6 +26,7 @@ class Inbound {
   Inbound({
     required this.tag,
     required this.type,
+    this.interfaceName,
     this.address,
     this.mtu,
     this.stack,
@@ -57,7 +60,7 @@ class Platform {
 }
 
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class HttpProxy {
   bool? enabled;
   String server;
