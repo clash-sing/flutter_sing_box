@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'client_log.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ClientLog {
   const ClientLog({required this.level, required this.message});
 

@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'client_clash_mode.g.dart';
 
 /// Represents the available and current Clash modes.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ClientClashMode {
   /// The list of available Clash modes (e.g., ['Global', 'Rule', 'Direct']).
   final List<String> modes;
