@@ -49,7 +49,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   network: json['network'] as String?,
   quic: json['quic'] as bool?,
   quicCongestionControl: json['quic_congestion_control'] as String?,
-  udpOverTcp: json['udp_over_tcp'] as bool?,
+  udpOverTcp: json['udp_over_tcp'],
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{

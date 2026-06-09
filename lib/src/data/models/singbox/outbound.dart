@@ -67,7 +67,7 @@ class Outbound {
   @JsonKey(name: "quic_congestion_control")
   String? quicCongestionControl;
   @JsonKey(name: "udp_over_tcp")
-  bool? udpOverTcp;  
+  dynamic udpOverTcp;  
 
   Outbound({
     required this.tag,
