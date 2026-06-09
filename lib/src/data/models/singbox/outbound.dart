@@ -15,6 +15,7 @@ class Outbound {
   String? server;
   @JsonKey(name: "server_port")
   int? serverPort;
+  String? username;
   String? password;
   String? uuid;
   String? security;
@@ -62,6 +63,11 @@ class Outbound {
 
   /// 启用的网络协议 ，tcp 或 udp。
   String? network;
+  bool? quic;
+  @JsonKey(name: "quic_congestion_control")
+  String? quicCongestionControl;
+  @JsonKey(name: "udp_over_tcp")
+  bool? udpOverTcp;  
 
   Outbound({
     required this.tag,
@@ -73,6 +79,7 @@ class Outbound {
     this.tolerance,
     this.server,
     this.serverPort,
+    this.username,
     this.password,
     this.uuid,
     this.security,
@@ -93,6 +100,9 @@ class Outbound {
     this.heartbeat,
     this.method,
     this.network,
+    this.quic,
+    this.quicCongestionControl,
+    this.udpOverTcp,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -111,14 +121,7 @@ class Tls {
   String? serverName;
   Utls? utls;
 
-  Tls({
-    this.alpn,
-    this.enabled,
-    this.disableSni,
-    this.insecure,
-    this.serverName,
-    this.utls,
-  });
+  Tls({this.alpn, this.enabled, this.disableSni, this.insecure, this.serverName, this.utls});
 
   factory Tls.fromJson(Map<String, dynamic> json) => _$TlsFromJson(json);
 

@@ -18,6 +18,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   tolerance: (json['tolerance'] as num?)?.toInt(),
   server: json['server'] as String?,
   serverPort: (json['server_port'] as num?)?.toInt(),
+  username: json['username'] as String?,
   password: json['password'] as String?,
   uuid: json['uuid'] as String?,
   security: json['security'] as String?,
@@ -46,6 +47,9 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   heartbeat: json['heartbeat'] as String?,
   method: json['method'] as String?,
   network: json['network'] as String?,
+  quic: json['quic'] as bool?,
+  quicCongestionControl: json['quic_congestion_control'] as String?,
+  udpOverTcp: json['udp_over_tcp'] as bool?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -58,6 +62,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'tolerance': ?instance.tolerance,
   'server': ?instance.server,
   'server_port': ?instance.serverPort,
+  'username': ?instance.username,
   'password': ?instance.password,
   'uuid': ?instance.uuid,
   'security': ?instance.security,
@@ -78,6 +83,9 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'heartbeat': ?instance.heartbeat,
   'method': ?instance.method,
   'network': ?instance.network,
+  'quic': ?instance.quic,
+  'quic_congestion_control': ?instance.quicCongestionControl,
+  'udp_over_tcp': ?instance.udpOverTcp,
 };
 
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
