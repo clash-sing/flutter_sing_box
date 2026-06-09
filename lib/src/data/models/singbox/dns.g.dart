@@ -22,6 +22,7 @@ Dns _$DnsFromJson(Map<String, dynamic> json) => Dns(
   timeout: json['timeout'] as String?,
   reverseMapping: json['reverse_mapping'] as bool?,
   clientSubnet: json['client_subnet'] as String?,
+  optimistic: json['optimistic'],
 );
 
 Map<String, dynamic> _$DnsToJson(Dns instance) => <String, dynamic>{
@@ -36,6 +37,7 @@ Map<String, dynamic> _$DnsToJson(Dns instance) => <String, dynamic>{
   'timeout': ?instance.timeout,
   'reverse_mapping': ?instance.reverseMapping,
   'client_subnet': ?instance.clientSubnet,
+  'optimistic': ?instance.optimistic,
 };
 
 Server _$ServerFromJson(Map<String, dynamic> json) => Server(

@@ -50,6 +50,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   quic: json['quic'] as bool?,
   quicCongestionControl: json['quic_congestion_control'] as String?,
   udpOverTcp: json['udp_over_tcp'],
+  interruptExistConnections: json['interrupt_exist_connections'] as bool?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -86,6 +87,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'quic': ?instance.quic,
   'quic_congestion_control': ?instance.quicCongestionControl,
   'udp_over_tcp': ?instance.udpOverTcp,
+  'interrupt_exist_connections': ?instance.interruptExistConnections,
 };
 
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(

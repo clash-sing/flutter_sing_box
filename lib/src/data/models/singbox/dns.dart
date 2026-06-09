@@ -24,6 +24,7 @@ class Dns {
   bool? reverseMapping;
   @JsonKey(name: "client_subnet")
   String? clientSubnet;
+  dynamic optimistic;
 
   Dns({
     required this.servers,
@@ -37,6 +38,7 @@ class Dns {
     this.timeout,
     this.reverseMapping,
     this.clientSubnet,
+    this.optimistic,
   });
 
   factory Dns.fromJson(Map<String, dynamic> json) => _$DnsFromJson(json);
