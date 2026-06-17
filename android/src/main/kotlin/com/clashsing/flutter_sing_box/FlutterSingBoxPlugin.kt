@@ -1,0 +1,227 @@
+package com.clashsing.flutter_sing_box
+
+import android.content.Intent
+import android.net.VpnService
+import android.util.Log
+import com.clashsing.flutter_sing_box.cs.PluginManager
+import com.clashsing.flutter_sing_box.cs.SingBoxConnector
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry
+import io.nekohasekai.libbox.Libbox
+import io.nekohasekai.sfa.bg.BoxService
+import java.util.concurrent.atomic.AtomicReference
+
+class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
+    companion object {
+        private const val TAG = "FlutterSingBoxPlugin"
+        private const val METHOD_CHANNEL_NAME = "flutter_sing_box_method"
+        private const val VPN_REQUEST_CODE = 1001
+    }
+
+    private lateinit var channel: MethodChannel
+    private var singBoxConnector: SingBoxConnector? = null
+    private var activityBinding: ActivityPluginBinding? = null
+    private val pendingStartVpnResult = AtomicReference<Result?>(null)
+
+    override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d(TAG, "onAttachedToEngine ---------------------------------")
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, METHOD_CHANNEL_NAME)
+        channel.setMethodCallHandler(this)
+        PluginManager.init(flutterPluginBinding.applicationContext)
+        singBoxConnector = SingBoxConnector(flutterPluginBinding.binaryMessenger)
+    }
+
+    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d(TAG, "onDetachedFromEngine ---------------------------------")
+        channel.setMethodCallHandler(null)
+        singBoxConnector = null
+    }
+
+    override fun onMethodCall(call: MethodCall, result: Result) {
+        when (call.method) {
+            "init" -> {
+                Log.d(TAG, "onMethodCall init ---------------------------------")
+                val activity = activityBinding?.activity
+                if (activity != null) {
+                    singBoxConnector?.connect(activity)
+                    result.success(null)
+                    return
+                } else {
+                    result.error("NO_ACTIVITY", "无法获取Activity实例", null)
+                    return
+                }
+            }
+            "startVpn" -> {
+                val activity = activityBinding?.activity
+                if (activity == null) {
+                    result.error("NO_ACTIVITY", "无法获取Activity实例", null)
+                    return
+                }
+                pendingStartVpnResult.set(result)
+                val intent = VpnService.prepare(activity)
+                if (intent != null) {
+                    activity.startActivityForResult(intent, VPN_REQUEST_CODE)
+                } else {
+                    startVpnService(result)
+                }
+            }
+            "stopVpn" -> {
+                BoxService.stop()
+                result.success(null)
+            }
+            "serviceReload" -> {
+                try {
+                    Libbox.newStandaloneCommandClient().serviceReload()
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("SERVICE_RELOAD_FAILED", "服务重载失败", e)
+                }
+            }
+            "setClashMode" -> {
+                val clashMode = call.arguments as String
+                if (singBoxConnector?.clientClashMode?.modes?.contains(clashMode) == true) {
+                    Libbox.newStandaloneCommandClient().setClashMode(clashMode)
+                    singBoxConnector?.clashModeClient?.connect()
+                    result.success(null)
+                } else {
+                    result.error("INVALID_CLASH_MODE", "无效的Clash模式", null)
+                }
+            }
+            "selectOutbound" -> {
+                val groupArgName = "groupTag"
+                val outboundArgName = "outboundTag"
+                if (call.arguments !is Map<*, *>) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                val argsMap = call.arguments as Map<*, *>
+                val groupTag = argsMap[groupArgName] as String?
+                val outboundTag = argsMap[outboundArgName] as String?
+                if (groupTag.isNullOrBlank() || outboundTag.isNullOrBlank()) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                try {
+                    Libbox.newStandaloneCommandClient().selectOutbound(groupTag, outboundTag)
+                    singBoxConnector?.groupClient?.connect()
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", e)
+                    return
+                }
+            }
+            "setGroupExpand" -> {
+                val groupArgName = "groupTag"
+                val expandArgName = "isExpand"
+                if (call.arguments !is Map<*, *>) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                val argsMap = call.arguments as Map<*, *>
+                val groupTag = argsMap[groupArgName] as String?
+                val isExpand = argsMap[expandArgName] as Boolean?
+                if (groupTag.isNullOrBlank() || isExpand == null) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                try {
+                    Libbox.newStandaloneCommandClient().setGroupExpand(groupTag, isExpand)
+                    singBoxConnector?.groupClient?.connect()
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", e)
+                    return
+                }
+            }
+            "urlTest" -> {
+                val groupTag = call.arguments as String?
+                if (groupTag.isNullOrBlank()) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", null)
+                    return
+                }
+                try {
+                    Libbox.newStandaloneCommandClient().urlTest(groupTag)
+                    result.success(null)
+                } catch (e: Exception) {
+                    result.error("INVALID_ARGUMENTS", "无效的参数", e)
+                    return
+                }
+            }
+            "getSingBoxVersion" -> {
+                val version = Libbox.version()
+                result.success(version)
+            }
+            else -> {
+                result.notImplemented()
+            }
+        }
+    }
+
+    private fun startVpnService(result: Result) {
+        try {
+            BoxService.start()
+            result.success(null)
+/*
+            val context = activityBinding?.activity?.applicationContext
+            if (context != null) {
+                val intent = Intent(context, ClashSingVpnService::class.java)
+                context.startForegroundService(intent)
+                result.success(null)
+                return
+            } else {
+                result.error("NO_CONTEXT", "无法获取Context实例", null)
+                return
+            }
+*/
+        } catch (e: Exception) {
+            result.error("VPN_ERROR", "启动VPN服务失败:\n${e.message}", null)
+        }
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        Log.d(TAG, "onAttachedToActivity --------------------")
+        activityBinding = binding
+        binding.addActivityResultListener(this)
+//        singBoxConnector?.connect()
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        Log.d(TAG, "onDetachedFromActivityForConfigChanges --------------------")
+        activityBinding?.removeActivityResultListener(this)
+        activityBinding = null
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Log.d(TAG, "onReattachedToActivityForConfigChanges --------------------")
+        activityBinding = binding
+        binding.addActivityResultListener(this)
+    }
+
+    override fun onDetachedFromActivity() {
+        Log.d(TAG, "onDetachedFromActivity --------------------")
+        singBoxConnector?.disconnect()
+        activityBinding?.removeActivityResultListener(this)
+        activityBinding = null
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        if (requestCode == VPN_REQUEST_CODE) {
+            val result = pendingStartVpnResult.getAndSet(null)
+            if (result != null) {
+                if (resultCode == android.app.Activity.RESULT_OK) {
+                    startVpnService(result)
+                } else {
+                    result.error("VPN_PERMISSION_DENIED", "用户拒绝了VPN权限", null)
+                }
+            }
+            return true
+        }
+        return false
+    }
+}

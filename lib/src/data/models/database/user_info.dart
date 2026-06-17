@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'user_info.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class UserInfo {
   int? upload;
   int? download;

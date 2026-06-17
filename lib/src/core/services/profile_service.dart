@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
@@ -16,14 +15,20 @@ import '../../data/index.dart';
 ///   subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
 ///   content-type: text/html; charset=UTF-8
 class ProfileService {
-  Future<Profile> importProfile({Uri? subscribeLink, int? id, String? name, int? autoUpdateInterval}) async {
+  Future<Profile> importProfile({
+    Uri? subscribeLink,
+    int? id,
+    String? name,
+    int? autoUpdateInterval,
+    String? userAgent,
+  }) async {
     assert(subscribeLink != null || id != null);
     assert(subscribeLink == null || id == null);
     late final Uri link;
     if (subscribeLink != null) {
       link = subscribeLink;
     } else {
-      link = Uri.parse(ProfileManager().getProfile(id!)!.typed.subscribeUrl!);
+      link = Uri.parse(ProfileStorage().getProfile(id!)!.typed.subscribeUrl!);
     }
 
     late final ApiResult apiResult;
@@ -31,34 +36,32 @@ class ProfileService {
       File file = File(link.toFilePath());
       if (await file.exists()) {
         final String content = await file.readAsString();
-        apiResult = ApiResult<String>(content, {},);
+        apiResult = ApiResult<String>(content, {});
       } else {
         throw Exception('File not exists');
       }
     } else {
-      apiResult = await NetworkService().fetchSubscription(link);
+      apiResult = await NetworkService().fetchSubscription(link, userAgent: userAgent);
     }
 
-    final profileId = id ?? ProfileManager().generateProfileId;
-    final profilePath = await ProfileManager().getProfilePath(profileId);
+    final profileId = id ?? ProfileStorage().generateProfileId;
+    final profilePath = await ProfileStorage().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
-
-    // TODO: for debug
-    // final assetFile = 'packages/flutter_sing_box/assets/.local/no-urltest-20251122.json';
-    // final syyTreeString = await rootBundle.loadString(assetFile);
-    // final skyTreeMap = jsonDecode(syyTreeString);
 
     final singBox = await SingBoxConfigProvider.provide(apiResult.data);
     final profile = Profile(
       id: profileId,
       order: profileId,
       name: profileName,
+      outboundsCount: singBox.outbounds
+          .where((e) => e.outbounds?.isNotEmpty != true && e.type != OutboundType.direct)
+          .length,
       typed: typedProfile,
       userInfo: userInfo,
     );
-    await ProfileManager().addProfile(profile, singBox);
+    await ProfileStorage().addProfile(profile, singBox);
     return profile;
   }
 
@@ -101,7 +104,12 @@ class ProfileService {
     }
   }
 
-  TypedProfile _getTypedProfile(Uri link, Map<String, dynamic> headers, int? autoUpdateInterval, String filePath) {
+  TypedProfile _getTypedProfile(
+    Uri link,
+    Map<String, dynamic> headers,
+    int? autoUpdateInterval,
+    String filePath,
+  ) {
     final typedProfile = TypedProfile(
       type: isLocaleFile(link) ? ProfileType.local : ProfileType.remote,
       path: filePath,
@@ -142,18 +150,14 @@ class ProfileService {
       }
     }
     if (upload != null || download != null || total != null || expire != null) {
-      return UserInfo(
-        upload: upload,
-        download: download,
-        total: total,
-        expire: expire,
-      );
+      return UserInfo(upload: upload, download: download, total: total, expire: expire);
     } else {
       return null;
     }
   }
 
   bool isLocaleFile(Uri link) {
-    return link.scheme.toLowerCase() == Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
+    return link.scheme.toLowerCase() ==
+        Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
   }
 }

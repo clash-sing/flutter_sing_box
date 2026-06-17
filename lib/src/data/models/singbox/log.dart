@@ -2,18 +2,18 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'log.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Log {
-  bool disabled;
-  String level;
+  bool? disabled;
+  String? level;
   String? output;
-  bool timestamp;
+  bool? timestamp;
 
   Log({
-    required this.disabled,
-    required this.level,
+    this.disabled,
+    this.level,
     this.output,
-    required this.timestamp,
+    this.timestamp,
   });
 
   factory Log.fromJson(Map<String, dynamic> json) => _$LogFromJson(json);

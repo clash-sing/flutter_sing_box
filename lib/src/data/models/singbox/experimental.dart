@@ -19,7 +19,7 @@ class Experimental {
   Map<String, dynamic> toJson() => _$ExperimentalToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class CacheFile {
   bool? enabled;
   @JsonKey(name: "store_fakeip")
@@ -38,7 +38,7 @@ class CacheFile {
   Map<String, dynamic> toJson() => _$CacheFileToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ClashApi {
   @JsonKey(name: "external_controller")
   String? externalController;

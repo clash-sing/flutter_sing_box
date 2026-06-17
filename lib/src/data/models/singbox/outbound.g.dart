@@ -12,11 +12,13 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   outbounds: (json['outbounds'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  defaultTag: json['default'] as String?,
   url: json['url'] as String?,
   interval: json['interval'] as String?,
   tolerance: (json['tolerance'] as num?)?.toInt(),
   server: json['server'] as String?,
   serverPort: (json['server_port'] as num?)?.toInt(),
+  username: json['username'] as String?,
   password: json['password'] as String?,
   uuid: json['uuid'] as String?,
   security: json['security'] as String?,
@@ -43,7 +45,13 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   udpRelayMode: json['udp_relay_mode'] as String?,
   udpOverStream: json['udp_over_stream'] as bool?,
   heartbeat: json['heartbeat'] as String?,
-)..defaultTag = json['default'] as String?;
+  method: json['method'] as String?,
+  network: json['network'] as String?,
+  quic: json['quic'] as bool?,
+  quicCongestionControl: json['quic_congestion_control'] as String?,
+  udpOverTcp: json['udp_over_tcp'],
+  interruptExistConnections: json['interrupt_exist_connections'] as bool?,
+);
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'tag': instance.tag,
@@ -55,6 +63,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'tolerance': ?instance.tolerance,
   'server': ?instance.server,
   'server_port': ?instance.serverPort,
+  'username': ?instance.username,
   'password': ?instance.password,
   'uuid': ?instance.uuid,
   'security': ?instance.security,
@@ -73,13 +82,19 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'udp_relay_mode': ?instance.udpRelayMode,
   'udp_over_stream': ?instance.udpOverStream,
   'heartbeat': ?instance.heartbeat,
+  'method': ?instance.method,
+  'network': ?instance.network,
+  'quic': ?instance.quic,
+  'quic_congestion_control': ?instance.quicCongestionControl,
+  'udp_over_tcp': ?instance.udpOverTcp,
+  'interrupt_exist_connections': ?instance.interruptExistConnections,
 };
 
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
   alpn: (json['alpn'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  enabled: json['enabled'] as bool,
+  enabled: json['enabled'] as bool?,
   disableSni: json['disable_sni'] as bool?,
-  insecure: json['insecure'] as bool,
+  insecure: json['insecure'] as bool?,
   serverName: json['server_name'] as String?,
   utls: json['utls'] == null
       ? null
@@ -88,21 +103,21 @@ Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
 
 Map<String, dynamic> _$TlsToJson(Tls instance) => <String, dynamic>{
   'alpn': ?instance.alpn,
-  'enabled': instance.enabled,
+  'enabled': ?instance.enabled,
   'disable_sni': ?instance.disableSni,
-  'insecure': instance.insecure,
+  'insecure': ?instance.insecure,
   'server_name': ?instance.serverName,
   'utls': ?instance.utls?.toJson(),
 };
 
 Utls _$UtlsFromJson(Map<String, dynamic> json) => Utls(
-  enabled: json['enabled'] as bool,
-  fingerprint: json['fingerprint'] as String,
+  enabled: json['enabled'] as bool?,
+  fingerprint: json['fingerprint'] as String?,
 );
 
 Map<String, dynamic> _$UtlsToJson(Utls instance) => <String, dynamic>{
-  'enabled': instance.enabled,
-  'fingerprint': instance.fingerprint,
+  'enabled': ?instance.enabled,
+  'fingerprint': ?instance.fingerprint,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(
@@ -122,8 +137,8 @@ Map<String, dynamic> _$TransportToJson(Transport instance) => <String, dynamic>{
 };
 
 Multiplex _$MultiplexFromJson(Map<String, dynamic> json) =>
-    Multiplex(enabled: json['enabled'] as bool);
+    Multiplex(enabled: json['enabled'] as bool?);
 
 Map<String, dynamic> _$MultiplexToJson(Multiplex instance) => <String, dynamic>{
-  'enabled': instance.enabled,
+  'enabled': ?instance.enabled,
 };

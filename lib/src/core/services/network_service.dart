@@ -1,6 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:dio/dio.dart';
+import 'package:flutter_sing_box/src/core/services/subscribe_user_agent.dart';
 
 import '../../data/network/api_result.dart';
 import '../../data/network/dio_client.dart';
@@ -10,26 +11,31 @@ class NetworkService {
   static final NetworkService instance = NetworkService._internal();
   factory NetworkService() => instance;
 
-  Future<ApiResult<dynamic>> fetchSubscription(Uri uri) async {
+  Future<ApiResult<dynamic>> fetchSubscription(Uri uri, {String? userAgent}) async {
     try {
-      final response = await DioClient().dio.getUri(uri, options: Options(
-        headers: {
-          ...DioClient().dio.options.headers,
-          // 'User-Agent': await _getUserAgent(),
-        }
-      ));
+      final response = await DioClient().dio.getUri(
+        uri,
+        options: Options(
+          headers: {
+            ...DioClient().dio.options.headers,
+            'User-Agent': userAgent ?? await SubscribeUserAgent.getDefaultUserAgent(),
+          },
+        ),
+      );
       if (response.statusCode == io.HttpStatus.ok) {
         final apiResult = ApiResult(response.data, response.headers.map);
         return apiResult;
       } else {
-        throw Exception('Failed to load, statusCode: ${response.statusCode}, message: ${response.statusMessage}, for $uri');
+        throw Exception(
+          'Failed to load, statusCode: ${response.statusCode}, message: ${response.statusMessage}, for $uri',
+        );
       }
     } catch (e) {
       rethrow;
     }
   }
 
-/*
+  /*
   Future<String> _getUserAgent() async {
     final deviceInfo = await _getDeviceInfo();
     return '($deviceInfo) mihomo/1.19.15 ClashMeta/1.19.15 sing-box/1.12.12 v2ray';
@@ -60,5 +66,4 @@ class NetworkService {
     return device;
   }
 */
-
 }

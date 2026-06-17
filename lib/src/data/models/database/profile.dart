@@ -10,6 +10,7 @@ class Profile {
   int id;
   int order;
   String name;
+  int? outboundsCount;
   TypedProfile typed;
   UserInfo? userInfo;
 
@@ -17,6 +18,7 @@ class Profile {
     required this.id,
     required this.order,
     required this.name,
+    required this.outboundsCount,
     required this.typed,
     this.userInfo,
   });
@@ -28,12 +30,14 @@ class Profile {
   Profile copyWith({
     int? order,
     String? name,
+    int? outboundsCount,
     TypedProfile? typed,
   }) =>
       Profile(
         id: id,
         order: order ?? this.order,
         name: name ?? this.name,
+        outboundsCount: outboundsCount ?? this.outboundsCount,
         typed: typed ?? this.typed,
         userInfo: userInfo,
       );

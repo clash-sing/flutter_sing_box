@@ -2,7 +2,7 @@ export '../src/data/models/index.dart';
 export '../src/constants/index.dart';
 export '../src/utils/index.dart';
 export '../src/core/index.dart';
-export '../src/custom/index.dart';
+export '../src/storage/index.dart';
 
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
@@ -77,7 +77,7 @@ class FlutterSingBox {
       FlutterSingBoxPlatform.instance.clashModeStream;
 
   /// A stream of log messages from the sing-box core.
-  Stream<List<String>> get logStream =>
+  Stream<List<ClientLog>> get logStream =>
       FlutterSingBoxPlatform.instance.logStream;
 
   /// A stream of proxy state updates.

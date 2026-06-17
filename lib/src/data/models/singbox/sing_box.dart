@@ -14,17 +14,17 @@ class SingBox {
   Dns dns;
   List<Inbound> inbounds;
   Route route;
-  Experimental experimental;
   List<Outbound> outbounds;
-  Log log;
+  Experimental? experimental;
+  Log? log;
 
   SingBox({
     required this.dns,
     required this.inbounds,
     required this.route,
-    required this.experimental,
     required this.outbounds,
-    required this.log,
+    this.experimental,
+    this.log,
   });
 
   factory SingBox.fromJson(Map<String, dynamic> json) => _$SingBoxFromJson(json);

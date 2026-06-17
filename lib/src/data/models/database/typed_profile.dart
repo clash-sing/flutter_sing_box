@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'typed_profile.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class TypedProfile {
   ProfileType type;
   String path;

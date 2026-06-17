@@ -90,7 +90,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   }
 
   /// A stream of log messages from the sing-box core.
-  Stream<List<String>> get logStream {
+  Stream<List<ClientLog>> get logStream {
     throw UnimplementedError('logStream has not been implemented.');
   }
 

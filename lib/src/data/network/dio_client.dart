@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
+
 /// User-Agent 格式说明：APP名称/APP版本 (编译版本好; 平台 系统版本; 内核名称/内核版本)
 
 class DioClient {
@@ -23,7 +24,7 @@ class DioClient {
           // 'User-Agent': 'mihomo/1.19.13 ClashMeta clash-verge v2ray',
           // 'User-Agent': 'ClashSing/1.0 (1; sing-box 1.12.10; mihomo 1.19.13; ClashMeta; clash-verge; v2ray; language zh_Hans_CN)',
           // 'User-Agent': 'ClashSing/1.2 (Android 13) sing-box/1.12.10 ClashMeta/1.19.15',
-          'User-Agent': 'sing-box 1.12.24;mihomo/1.19.16;ClashMeta;clash-verge;v2ray',
+          // 'User-Agent': 'sing-box 1.12.24;mihomo/1.19.16;ClashMeta;clash-verge;v2ray',
           'Accept': 'application/json, application/yaml;q=0.9, text/plain;q=0.8',
           'Accept-Encoding': 'gzip',
         },

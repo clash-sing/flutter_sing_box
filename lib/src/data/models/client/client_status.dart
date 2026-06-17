@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'client_status.g.dart';
 
 /// Represents the status of the sing-box client.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ClientStatus {
   /// The current memory usage in bytes.
   int memory;

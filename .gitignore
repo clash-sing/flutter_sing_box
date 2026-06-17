@@ -31,7 +31,6 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
-GEMINI.md
 /NUL
 /AGENTS.md
 /.qoder
@@ -39,3 +38,5 @@ GEMINI.md
 /.vscode
 
 /assets/.local/
+.gitnexus
+/.claude/settings.local.json

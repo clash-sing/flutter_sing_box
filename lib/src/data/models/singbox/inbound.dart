@@ -6,6 +6,8 @@ part 'inbound.g.dart';
 class Inbound {
   String tag;
   String type;
+  @JsonKey(name: "interface_name")
+  String? interfaceName;
   List<String>? address;
   int? mtu;
   String? stack;
@@ -13,6 +15,7 @@ class Inbound {
   bool? autoRoute;
   @JsonKey(name: "strict_route")
   bool? strictRoute;
+  bool? sniff;
   @JsonKey(name: "sniff_override_destination")
   bool? sniffOverrideDestination;
   Platform? platform;
@@ -23,10 +26,12 @@ class Inbound {
   Inbound({
     required this.tag,
     required this.type,
+    this.interfaceName,
     this.address,
     this.mtu,
     this.stack,
     this.autoRoute,
+    this.sniff,
     this.strictRoute,
     this.sniffOverrideDestination,
     this.platform,
@@ -55,15 +60,15 @@ class Platform {
 }
 
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class HttpProxy {
-  bool enabled;
+  bool? enabled;
   String server;
   @JsonKey(name: "server_port")
   int serverPort;
 
   HttpProxy({
-    required this.enabled,
+    this.enabled,
     required this.server,
     required this.serverPort,
   });

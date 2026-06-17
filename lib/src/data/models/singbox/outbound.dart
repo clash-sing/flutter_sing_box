@@ -15,6 +15,7 @@ class Outbound {
   String? server;
   @JsonKey(name: "server_port")
   int? serverPort;
+  String? username;
   String? password;
   String? uuid;
   String? security;
@@ -35,16 +36,20 @@ class Outbound {
   @JsonKey(name: "disable_mtu_discovery")
   bool? disableMtuDiscovery;
   Multiplex? multiplex;
+
   /// 在客户端启用 0-RTT QUIC 连接握手 这对性能影响不大，因为协议是完全复用的，
   /// 强烈建议禁用此功能，因为它容易受到重放攻击。
   @JsonKey(name: "zero_rtt_handshake")
   bool? zeroRttHandshake;
+
   /// QUIC 拥塞控制算法，可选值: cubic/new_reno/bbr，默认使用 cubic。
   @JsonKey(name: "congestion_control")
   String? congestionControl;
+
   /// UDP 包中继模式，可以是 native/quic，与 udp_over_stream 冲突。
   @JsonKey(name: "udp_relay_mode")
   String? udpRelayMode;
+
   /// TUIC 的 UDP over TCP 协议 移植， 旨在提供 TUIC 不提供的 基于 QUIC 流的 UDP 中继模式。
   /// 由于它是一个附加协议，因此您需要使用 sing-box 或其他兼容的程序作为服务器。
   /// 此模式在正确的 UDP 代理场景中没有任何积极作用，仅适用于中继流式 UDP 流量（基本上是 QUIC 流）。
@@ -53,15 +58,30 @@ class Outbound {
   bool? udpOverStream;
   String? heartbeat;
 
+  /// Shadowsocks 的加密方法，可选值: aes-256-gcm/aes-192-gcm/aes-128-gcm/chacha20-ietf-poly1305，等等。
+  String? method;
+
+  /// 启用的网络协议 ，tcp 或 udp。
+  String? network;
+  bool? quic;
+  @JsonKey(name: "quic_congestion_control")
+  String? quicCongestionControl;
+  @JsonKey(name: "udp_over_tcp")
+  dynamic udpOverTcp;
+  @JsonKey(name: "interrupt_exist_connections")
+  bool? interruptExistConnections;
+
   Outbound({
     required this.tag,
     required this.type,
     this.outbounds,
+    this.defaultTag,
     this.url,
     this.interval,
     this.tolerance,
     this.server,
     this.serverPort,
+    this.username,
     this.password,
     this.uuid,
     this.security,
@@ -80,6 +100,12 @@ class Outbound {
     this.udpRelayMode,
     this.udpOverStream,
     this.heartbeat,
+    this.method,
+    this.network,
+    this.quic,
+    this.quicCongestionControl,
+    this.udpOverTcp,
+    this.interruptExistConnections,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -90,45 +116,34 @@ class Outbound {
 @JsonSerializable(explicitToJson: true)
 class Tls {
   List<String>? alpn;
-  bool enabled;
+  bool? enabled;
   @JsonKey(name: "disable_sni")
   bool? disableSni;
-  bool insecure;
+  bool? insecure;
   @JsonKey(name: "server_name")
   String? serverName;
   Utls? utls;
 
-  Tls({
-    this.alpn,
-    required this.enabled,
-    this.disableSni,
-    required this.insecure,
-    this.serverName,
-    this.utls,
-  });
+  Tls({this.alpn, this.enabled, this.disableSni, this.insecure, this.serverName, this.utls});
 
   factory Tls.fromJson(Map<String, dynamic> json) => _$TlsFromJson(json);
 
   Map<String, dynamic> toJson() => _$TlsToJson(this);
 }
 
-
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Utls {
-  bool enabled;
-  String fingerprint;
+  bool? enabled;
+  String? fingerprint;
 
-  Utls({
-    required this.enabled,
-    required this.fingerprint,
-  });
+  Utls({this.enabled, this.fingerprint});
 
   factory Utls.fromJson(Map<String, dynamic> json) => _$UtlsFromJson(json);
 
   Map<String, dynamic> toJson() => _$UtlsToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Transport {
   String type;
   String? path;
@@ -151,16 +166,13 @@ class Transport {
   Map<String, dynamic> toJson() => _$TransportToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Multiplex {
-  bool enabled;
+  bool? enabled;
 
-  Multiplex({
-    required this.enabled,
-  });
+  Multiplex({this.enabled});
 
   factory Multiplex.fromJson(Map<String, dynamic> json) => _$MultiplexFromJson(json);
 
   Map<String, dynamic> toJson() => _$MultiplexToJson(this);
-
 }
