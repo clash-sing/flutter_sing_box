@@ -1,3 +1,4 @@
+/// The lifecycle state of the proxy (VPN) service.
 enum ProxyState {
   /// The proxy is stopped.
   stopped('Stopped'),
@@ -16,5 +17,6 @@ enum ProxyState {
 
   const ProxyState(this.name);
 
+  /// The display name of this state.
   final String name;
 }
