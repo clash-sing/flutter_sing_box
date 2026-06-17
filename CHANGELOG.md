@@ -1,3 +1,12 @@
+## 1.1.1
+### Documentation
+* 全面补全公开 API 的英文 dartdoc 注释，覆盖 constants、providers、services、network、storage 等模块，提升 pub.dev 文档覆盖率评分
+
+### Dependencies
+* 升级 `device_info_plus`：`^12.2.0` → `^13.1.0`
+* 升级 `package_info_plus`：`^9.0.0` → `^10.1.0`
+
+
 ## 1.1.0
 ### ⚠️ 重要变更（Breaking Changes）
 * 最低环境要求提升：Dart SDK `^3.9.0` → `^3.11.0`，Flutter `>=3.3.0` → `>=3.41.0`
