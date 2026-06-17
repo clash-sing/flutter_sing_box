@@ -9,9 +9,11 @@ import 'package:flutter/foundation.dart';
 class DioClient {
   DioClient._internal();
   static final DioClient _instance = DioClient._internal();
+  /// Creates the singleton [DioClient] instance.
   factory DioClient() => _instance;
 
   late final Dio _dio = _initDio();
+  /// The configured [Dio] instance.
   Dio get dio => _dio;
 
   Dio _initDio() {
