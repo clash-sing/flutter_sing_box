@@ -28,21 +28,12 @@
 | 平台 | 支持 | 状态 |
 | :--- |:-------:| :--- |
 | Android |    ✅    | 生产就绪 |
+| Windows |   🚧    | 开发中 |
 | iOS |    ☐    | 计划中 |
-| Windows |   ☐️    | 计划中 |
 | macOS |   ☐️    | 计划中 |
 | Linux |    ☐    | 计划中 |
 
 ## 快速开始
-
-### 安装
-
-将 `flutter_sing_box` 添加到您的 `pubspec.yaml` 文件中：
-
-```yaml
-dependencies:
-  flutter_sing_box: ^1.0.3
-```
 
 ### 初始化
 

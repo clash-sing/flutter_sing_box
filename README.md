@@ -28,21 +28,12 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 | Platform | Support | Status |
 | :--- |:-------:| :--- |
 | Android |    ✅    | Production Ready |
+| Windows |   🚧    | In Development |
 | iOS |    ☐    | Planned |
-| Windows |   ☐️    | Planned |
 | macOS |   ☐️    | Planned |
 | Linux |    ☐    | Planned |
 
 ## Getting Started
-
-### Installation
-
-Add `flutter_sing_box` to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  flutter_sing_box: ^1.0.3
-```
 
 ### Initialization
 
