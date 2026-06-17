@@ -5,7 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:yaml/yaml.dart';
 
+/// Builds a normalized [SingBox] config from raw subscription content.
 class SingBoxConfigProvider {
+  /// Parses [data] into a [SingBox] config.
+  ///
+  /// [data] may be a [Map], a JSON string, a YAML string, or a Base64 string.
+  /// Throws an [Exception] if the content cannot be parsed.
   static Future<SingBox> provide(final dynamic data) async {
     SingBox? singBox;
     Exception? exception;

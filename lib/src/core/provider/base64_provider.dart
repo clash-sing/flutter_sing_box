@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 
+ /// Decodes a Base64-encoded subscription into a list of [Outbound]s.
  class Base64Provider {
+  /// Parses the Base64-encoded [data] into a list of [Outbound]s.
+  ///
+  /// Throws an [Exception] if [data] is not a valid Base64 string.
   static List<Outbound> provide(String data) {
     final base64String = data.replaceAll(RegExp(r'\s+'), '');
     // 检查长度是否为4的倍数

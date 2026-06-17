@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:yaml/yaml.dart';
 
+/// Converts a Clash-format subscription into a list of [Outbound]s.
 class ClashProvider {
+  /// Builds a list of [Outbound]s from the Clash-format [yamlMap].
   static List<Outbound> provide(YamlMap yamlMap) {
     final Map<String, dynamic> clashMap = yamlMap.toMap();
     // remove mieru proxy, sing-box 不支持 mieru
@@ -31,7 +33,10 @@ class ClashProvider {
   }
 }
 
+/// Extensions for converting a [ClashProxy] into an [Outbound].
 extension ClashProxyExt on ClashProxy {
+  /// Converts this Clash proxy into a sing-box [Outbound], or `null`
+  /// if the proxy type is unsupported.
   Outbound? toOutbound() {
     final outbound = switch (type) {
       ClashProxyType.hysteria2 => Outbound(
@@ -121,6 +126,7 @@ extension ClashProxyExt on ClashProxy {
   }
 }
 
+/// Extensions for converting a [ClashGroup] into an [Outbound].
 extension ClashGroupExt on ClashGroup {
   String _singBoxInterval() {
     if (interval != null) {
@@ -131,6 +137,8 @@ extension ClashGroupExt on ClashGroup {
     }
   }
 
+  /// Converts this Clash group into a sing-box [Outbound], or `null`
+  /// if the group type is unsupported.
   Outbound? toOutbound() {
     final outbound = switch (type) {
       ClashGroupType.select => Outbound(type: OutboundType.selector, tag: name, outbounds: proxies),
