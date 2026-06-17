@@ -1,3 +1,40 @@
+## 1.1.1
+### ⚠️ 重要变更（Breaking Changes）
+* 最低环境要求提升：Dart SDK `^3.9.0` → `^3.11.0`，Flutter `>=3.3.0` → `>=3.41.0`
+* 修正 Android 插件包名拼写：`com.clashsiing.flutter_sing_box` → `com.clashsing.flutter_sing_box`（如有原生层引用或 consumer-rules 配置，请同步更新）
+* 引入 freezed 代码生成框架，新增 `freezed` 与 `freezed_annotation` 依赖
+
+### Features
+* 新增 Rule Set（规则集）配置支持，并优化 sing-box 配置模板结构
+* 支持自定义订阅请求的 User-Agent，并内置默认 User-Agent 生成工具
+* 大幅扩展 sing-box 配置模型字段：Outbound 新增 `username`、`quic` 等出站配置；DNS / Route 模型补充多项字段
+* 新增独立 storage 存储模块，引入 `KeyValueStorage` 抽象接口（支持 MMKV / Memory 等实现）
+* 新增 `CsSettingsStorage`，用于管理按应用代理设置
+* 新增 `ClientLog` 数据模型
+* Profile 新增 `outboundsCount` 出站数量统计字段，并支持获取所有 Profile ID
+* 新增 `defaultTestUrl` 常量
+
+### Improvements
+* 缓存 sing-box 版本号，避免重复获取（性能优化）
+* 为模型添加 `explicitToJson` 配置，修复嵌套模型的 JSON 序列化问题
+* 重构 VPN 服务启动逻辑，缓存事件流状态
+* 升级 JSON 序列化依赖：`json_annotation` → 4.12.0、`json_serializable` → 6.14.0
+* 移除 VpnService 的 `android:process=":remote"` 属性
+
+### Fixes
+* 修复 VPN 服务重启功能
+* 修复 Clash 模式设置与连接管理问题
+* 修复 Android 端关闭服务的逻辑
+* `appendLogs` 方法增加 `logSink` 空值保护，避免空指针异常
+
+### Refactoring
+* 重构存储层：`ProfileManager` 重命名为 `ProfileStorage`，以 `KeyValueStorage` 抽象接口替代 MMKV 直接调用
+* `ClientGroupItem` / `ClientGroup` 迁移至 freezed 数据类
+* 将 Route 与 RuleSet 部分必填字段改为可选，提升配置灵活性
+* 重构 Android 服务实现并更新依赖
+* 清理废弃的 custom 模块及调试代码
+
+
 ## 1.0.12
 ### Features
 * 新增应用级代理模式功能（禁用/排除/包含三种模式）
