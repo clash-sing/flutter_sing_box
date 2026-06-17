@@ -15,6 +15,9 @@ import '../../data/index.dart';
 ///   subscription-userinfo: upload=8761515695; download=60139076905; total=214748364800; expire=1777514961
 ///   content-type: text/html; charset=UTF-8
 class ProfileService {
+  /// Imports a subscription into local storage and returns the created [Profile].
+  ///
+  /// Either [subscribeLink] or [id] must be provided (but not both).
   Future<Profile> importProfile({
     Uri? subscribeLink,
     int? id,
@@ -156,6 +159,7 @@ class ProfileService {
     }
   }
 
+  /// Returns true when [link] points to a local file subscription.
   bool isLocaleFile(Uri link) {
     return link.scheme.toLowerCase() ==
         Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
