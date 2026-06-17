@@ -1,4 +1,4 @@
-## 1.1.1
+## 1.1.0
 ### ⚠️ 重要变更（Breaking Changes）
 * 最低环境要求提升：Dart SDK `^3.9.0` → `^3.11.0`，Flutter `>=3.3.0` → `>=3.41.0`
 * 修正 Android 插件包名拼写：`com.clashsiing.flutter_sing_box` → `com.clashsing.flutter_sing_box`（如有原生层引用或 consumer-rules 配置，请同步更新）
