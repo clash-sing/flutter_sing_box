@@ -1,4 +1,4 @@
-## 1.1.1
+## 1.1.2
 ### Documentation
 * 全面补全公开 API 的英文 dartdoc 注释，覆盖 constants、providers、services、network、storage 等模块，提升 pub.dev 文档覆盖率评分
 
