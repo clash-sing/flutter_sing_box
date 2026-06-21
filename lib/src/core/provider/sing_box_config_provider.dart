@@ -161,6 +161,9 @@ class SingBoxConfigProvider {
           case OutboundType.tuic:
             sbOutbound = Outbound.fromJson(outbound);
             break;
+          case OutboundType.naive:
+            sbOutbound = Outbound.fromJson(outbound);
+            break;
           default:
             break;
         }

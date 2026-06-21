@@ -50,10 +50,14 @@ Server _$ServerFromJson(Map<String, dynamic> json) => Server(
   neighborDomain: (json['neighbor_domain'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
-  path: (json['path'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  path: json['path'] as String?,
   serverPort: (json['server_port'] as num?)?.toInt(),
   service: json['service'] as String?,
   acceptDefaultResolvers: json['accept_default_resolvers'] as bool?,
+  domainResolver: json['domain_resolver'] as String?,
+  tls: json['tls'] == null
+      ? null
+      : Tls.fromJson(json['tls'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
@@ -68,6 +72,8 @@ Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
   'server_port': ?instance.serverPort,
   'service': ?instance.service,
   'accept_default_resolvers': ?instance.acceptDefaultResolvers,
+  'domain_resolver': ?instance.domainResolver,
+  'tls': ?instance.tls?.toJson(),
 };
 
 DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(

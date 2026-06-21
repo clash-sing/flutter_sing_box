@@ -1,5 +1,7 @@
+import 'package:flutter_sing_box/src/constants/rule_action.dart';
 import 'package:json_annotation/json_annotation.dart';
-import '../../../constants/rule_action.dart';
+
+import 'tls.dart';
 
 part 'dns.g.dart';
 
@@ -59,12 +61,15 @@ class Server {
   bool? preferGo;
   @JsonKey(name: "neighbor_domain")
   List<String>? neighborDomain;
-  List<String>? path;
+  String? path;
   @JsonKey(name: "server_port")
   int? serverPort;
   String? service;
   @JsonKey(name: "accept_default_resolvers")
   bool? acceptDefaultResolvers;
+  @JsonKey(name: "domain_resolver")
+  String? domainResolver;
+  Tls? tls;
 
   Server({
     required this.tag,
@@ -78,6 +83,8 @@ class Server {
     this.serverPort,
     this.service,
     this.acceptDefaultResolvers,
+    this.domainResolver,
+    this.tls,
   });
 
   factory Server.fromJson(Map<String, dynamic> json) => _$ServerFromJson(json);
