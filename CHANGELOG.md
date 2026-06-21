@@ -1,3 +1,17 @@
+## 1.1.3
+### Features
+* 新增 naive 协议出站类型支持
+* 新增独立的 TLS 配置模型（`tls.dart`）
+* 为 Outbound 模型新增 `domainResolver` 字段
+* DNS Server 模型新增 `domain_resolver` 与 `tls` 字段
+
+### Fixes
+* 修正 DNS Server 模型 `path` 字段类型：`List<String>` → `String`
+
+### Improvements
+* 移除 sing-box 模板配置中的 `sniff_override_destination` 选项
+
+
 ## 1.1.2
 ### Documentation
 * 全面补全公开 API 的英文 dartdoc 注释，覆盖 constants、providers、services、network、storage 等模块，提升 pub.dev 文档覆盖率评分
