@@ -71,6 +71,8 @@ class Outbound {
   dynamic udpOverTcp;
   @JsonKey(name: "interrupt_exist_connections")
   bool? interruptExistConnections;
+  @JsonKey(name: "domain_resolver")
+  String? domainResolver;
 
   Outbound({
     required this.tag,
@@ -107,6 +109,7 @@ class Outbound {
     this.quicCongestionControl,
     this.udpOverTcp,
     this.interruptExistConnections,
+    this.domainResolver,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);

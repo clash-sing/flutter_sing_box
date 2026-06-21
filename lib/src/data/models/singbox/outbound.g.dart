@@ -51,6 +51,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   quicCongestionControl: json['quic_congestion_control'] as String?,
   udpOverTcp: json['udp_over_tcp'],
   interruptExistConnections: json['interrupt_exist_connections'] as bool?,
+  domainResolver: json['domain_resolver'] as String?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -88,6 +89,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'quic_congestion_control': ?instance.quicCongestionControl,
   'udp_over_tcp': ?instance.udpOverTcp,
   'interrupt_exist_connections': ?instance.interruptExistConnections,
+  'domain_resolver': ?instance.domainResolver,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(
