@@ -1,3 +1,8 @@
+## 1.1.4
+### Dependencies
+* 升级 Android 端 `libbox`（sing-box 内核）：`1.13.12` → `1.13.14`
+
+
 ## 1.1.3
 ### Features
 * 新增 naive 协议出站类型支持
