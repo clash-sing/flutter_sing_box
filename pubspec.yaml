@@ -51,8 +51,13 @@ flutter:
       android:
         package: com.clashsing.flutter_sing_box
         pluginClass: FlutterSingBoxPlugin
+        dartPluginClass: MethodChannelFlutterSingBox
+      windows:
+        pluginClass: FlutterSingBoxPluginCApi
+        dartPluginClass: FlutterSingBoxWindows
       ios:
         pluginClass: FlutterSingBoxPlugin
+        dartPluginClass: MethodChannelFlutterSingBox
 
   # To add assets to your plugin package, add an assets section, like this:
   assets:

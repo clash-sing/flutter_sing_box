@@ -4,6 +4,11 @@ export '../src/utils/index.dart';
 export '../src/core/index.dart';
 export '../src/storage/index.dart';
 
+// 导出各平台的 Dart 实现，供 Flutter 自动生成的 dart_plugin_registrant.dart
+// 通过主 library 访问并调用其 registerWith()（pubspec 中已声明 dartPluginClass）。
+export 'flutter_sing_box_method_channel.dart';
+export 'flutter_sing_box_windows.dart';
+
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
