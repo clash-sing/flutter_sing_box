@@ -67,6 +67,8 @@ flutter:
       platforms: [ windows ]
     - path: assets/windows/libcronet.dll
       platforms: [ windows ]
+    - path: assets/windows/clash_sing_helper.exe
+      platforms: [ windows ]
 #    - assets/.local/
 
   #   - images/a_dot_burr.jpeg

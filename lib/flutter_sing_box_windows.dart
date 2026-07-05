@@ -32,5 +32,15 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       assetPathLibcronet,
       p.dirname(io.Platform.resolvedExecutable),
     );
+
+    // 释放独立服务程序 clash_sing_helper.exe，供 queryServiceStatus 调用。
+    const String assetPathHelper = '$assetBasePath/windows/clash_sing_helper.exe';
+    final helperResult = await AssetUtil.copyAssetToDirectory(
+      assetPathHelper,
+      p.dirname(io.Platform.resolvedExecutable),
+    );
+    if (!helperResult) {
+      throw Exception('复制 clash_sing_helper.exe 资源失败');
+    }
   }
 }
