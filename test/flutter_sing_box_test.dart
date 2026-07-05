@@ -69,6 +69,11 @@ class MockFlutterSingBoxPlatform
     throw UnimplementedError();
   }
 
+  @override
+  Future<WindowsServiceStatus> queryServiceStatus() {
+    throw UnimplementedError();
+  }
+
 }
 
 void main() {

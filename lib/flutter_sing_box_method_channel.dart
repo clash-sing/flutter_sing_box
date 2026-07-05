@@ -67,6 +67,12 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     return await methodChannel.invokeMethod('getSingBoxVersion');
   }
 
+  @override
+  Future<WindowsServiceStatus> queryServiceStatus() async {
+    // Android / iOS 等非 Windows 桌面平台走此默认实现，无该服务概念。
+    return WindowsServiceStatus.unsupported;
+  }
+
   final _eventChannelConnectedStatus = const EventChannel('connected_status_event');
   Stream<ClientStatus>? _connectedStatusStream;
   @override

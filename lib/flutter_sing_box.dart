@@ -69,6 +69,11 @@ class FlutterSingBox {
     return await FlutterSingBoxPlatform.instance.getSingBoxVersion();
   }
 
+  /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
+  Future<WindowsServiceStatus> queryServiceStatus() {
+    return FlutterSingBoxPlatform.instance.queryServiceStatus();
+  }
+
   /// A stream of client connection status updates.
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;

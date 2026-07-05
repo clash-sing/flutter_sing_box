@@ -74,6 +74,14 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('getSingBoxVersion() has not been implemented.');
   }
 
+  /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
+  ///
+  /// 仅 Windows 平台实现真正执行（调用 clash_sing_helper.exe status）；
+  /// 其他平台返回 [WindowsServiceStatus.unsupported]。
+  Future<WindowsServiceStatus> queryServiceStatus() {
+    throw UnimplementedError('queryServiceStatus() has not been implemented.');
+  }
+
   /// A stream of client connection status updates.
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');
