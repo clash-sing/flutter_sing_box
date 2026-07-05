@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io' as io;
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
@@ -42,5 +43,52 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
+  }
+
+  /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
+  ///
+  /// 流程：确保 helper.json 就绪 → 调用 clash_sing_helper.exe status
+  /// → 解析 stdout。任何异常（超时、进程失败、文件缺失）一律返回 [WindowsServiceStatus.error]。
+  @override
+  Future<WindowsServiceStatus> queryServiceStatus() async {
+    try {
+      await ensureHelperJson();
+
+      final String exeDir = p.dirname(io.Platform.resolvedExecutable);
+      final io.File helperExe = io.File(p.join(exeDir, 'clash_sing_helper.exe'));
+      if (!await helperExe.exists()) {
+        return WindowsServiceStatus.error;
+      }
+
+      final io.ProcessResult result = await io.Process.run(helperExe.path, ['status'])
+          .timeout(const Duration(seconds: 5));
+      return WindowsServiceStatus.fromHelperOutput(
+        (result.stdout ?? '').toString().trim(),
+      );
+    } catch (_) {
+      return WindowsServiceStatus.error;
+    }
+  }
+
+  /// 确保 helper.exe 同目录下存在合法的 helper.json（status 命令的强依赖）。
+  ///
+  /// - 已存在则**不覆盖**（保护服务运行时回写的 port 字段）。
+  /// - [dir] 仅用于测试注入；默认为 exe 同目录。
+  @visibleForTesting
+  Future<void> ensureHelperJson({String? dir}) async {
+    final String directory = dir ?? p.dirname(io.Platform.resolvedExecutable);
+    final io.File file = io.File(p.join(directory, 'helper.json'));
+    if (await file.exists()) return;
+
+    await file.parent.create(recursive: true);
+    final Map<String, dynamic> config = <String, dynamic>{
+      'execute': p.join(directory, 'sing-box.exe'),
+      'config': p.join(directory, 'sing-box-config.json'),
+      'helperName': windowsServiceName,
+      'helperDisplayName': windowsServiceDisplayName,
+      'helperDescription': windowsServiceDescription,
+      'port': 0,
+    };
+    await file.writeAsString(jsonEncode(config));
   }
 }
