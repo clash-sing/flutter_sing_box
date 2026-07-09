@@ -17,7 +17,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
 
   @override
   Future<void> init() async {
-    debugPrint('flutter_sing_box 插件初始化 Windows 平台');
+    debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
+
     const String assetBasePath = 'packages/flutter_sing_box/assets';
 
     const String assetPathSingBox = '$assetBasePath/windows/sing-box.exe';
@@ -43,6 +44,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
+    debugPrint('flutter_sing_box 插件初始化 Windows 平台 endTime = ${DateTime.now()}');
   }
 
   /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
@@ -60,11 +62,10 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return WindowsServiceStatus.error;
       }
 
-      final io.ProcessResult result = await io.Process.run(helperExe.path, ['status'])
-          .timeout(const Duration(seconds: 5));
-      return WindowsServiceStatus.fromHelperOutput(
-        (result.stdout ?? '').toString().trim(),
-      );
+      final io.ProcessResult result = await io.Process.run(helperExe.path, [
+        'status',
+      ]).timeout(const Duration(seconds: 5));
+      return WindowsServiceStatus.fromHelperOutput((result.stdout ?? '').toString().trim());
     } catch (_) {
       return WindowsServiceStatus.error;
     }
