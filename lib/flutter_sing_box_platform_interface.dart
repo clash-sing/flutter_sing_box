@@ -1,8 +1,6 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'flutter_sing_box_method_channel.dart';
-
 /// The interface that implementations of flutter_sing_box must implement.
 ///
 /// Platform implementations should extend this class rather than implementing it as an `interface`.
@@ -80,6 +78,15 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
   /// 其他平台返回 [WindowsServiceStatus.unsupported]。
   Future<WindowsServiceStatus> queryServiceStatus() {
     throw UnimplementedError('queryServiceStatus() has not been implemented.');
+  }
+
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+    required int port,
+  }) async {
+    throw UnimplementedError('installService() has not been implemented.');
   }
 
   /// A stream of client connection status updates.

@@ -12,6 +12,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   static void registerWith() {
     FlutterSingBoxPlatform.instance = MethodChannelFlutterSingBox();
   }
+
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_sing_box_method');
@@ -72,6 +73,14 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     // Android / iOS 等非 Windows 桌面平台走此默认实现，无该服务概念。
     return WindowsServiceStatus.unsupported;
   }
+
+  @override
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+    required int port,
+  }) async => true;
 
   final _eventChannelConnectedStatus = const EventChannel('connected_status_event');
   Stream<ClientStatus>? _connectedStatusStream;

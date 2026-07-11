@@ -54,7 +54,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<WindowsServiceStatus> queryServiceStatus() async {
     try {
-      await ensureHelperJson();
+      // await ensureHelperJson();
 
       final String exeDir = p.dirname(io.Platform.resolvedExecutable);
       final io.File helperExe = io.File(p.join(exeDir, 'clash_sing_helper.exe'));
@@ -68,6 +68,33 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       return WindowsServiceStatus.fromHelperOutput((result.stdout ?? '').toString().trim());
     } catch (_) {
       return WindowsServiceStatus.error;
+    }
+  }
+
+  @override
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+    required int port,
+  }) async {
+    try {
+      await ensureHelperJson();
+      final String exeDir = p.dirname(io.Platform.resolvedExecutable);
+      final io.File helperExe = io.File(p.join(exeDir, 'clash_sing_helper.exe'));
+      if (!await helperExe.exists()) {
+        return false;
+      }
+
+      final io.ProcessResult result = await io.Process.run(helperExe.path, [
+        'install',
+      ]).timeout(const Duration(seconds: 5));
+      final stdout = (result.stdout ?? '').toString().trim();
+      debugPrint('installService stdout = $stdout');
+      return true;
+    } catch (e) {
+      debugPrint('flutter_sing_box 插件安装服务失败, $e');
+      return false;
     }
   }
 

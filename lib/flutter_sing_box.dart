@@ -46,7 +46,10 @@ class FlutterSingBox {
   /// [groupTag] The tag of the group.
   /// [outboundTag] The tag of the outbound to select.
   Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
-    return await FlutterSingBoxPlatform.instance.selectOutbound(groupTag: groupTag, outboundTag: outboundTag);
+    return await FlutterSingBoxPlatform.instance.selectOutbound(
+      groupTag: groupTag,
+      outboundTag: outboundTag,
+    );
   }
 
   /// Sets the expansion state of a group in the UI.
@@ -54,7 +57,10 @@ class FlutterSingBox {
   /// [groupTag] The tag of the group.
   /// [isExpand] Whether the group should be expanded or collapsed.
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
-    return await FlutterSingBoxPlatform.instance.setGroupExpand(groupTag: groupTag, isExpand: isExpand);
+    return await FlutterSingBoxPlatform.instance.setGroupExpand(
+      groupTag: groupTag,
+      isExpand: isExpand,
+    );
   }
 
   /// Performs a URL test for a specific group.
@@ -74,23 +80,33 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.queryServiceStatus();
   }
 
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+    required int port,
+  }) {
+    return FlutterSingBoxPlatform.instance.installService(
+      serviceName: serviceName,
+      displayName: displayName,
+      description: description,
+      port: port,
+    );
+  }
+
   /// A stream of client connection status updates.
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 
   /// A stream of client group updates.
-  Stream<List<ClientGroup>> get groupStream =>
-      FlutterSingBoxPlatform.instance.groupStream;
+  Stream<List<ClientGroup>> get groupStream => FlutterSingBoxPlatform.instance.groupStream;
 
   /// A stream of client Clash mode updates.
-  Stream<ClientClashMode> get clashModeStream =>
-      FlutterSingBoxPlatform.instance.clashModeStream;
+  Stream<ClientClashMode> get clashModeStream => FlutterSingBoxPlatform.instance.clashModeStream;
 
   /// A stream of log messages from the sing-box core.
-  Stream<List<ClientLog>> get logStream =>
-      FlutterSingBoxPlatform.instance.logStream;
+  Stream<List<ClientLog>> get logStream => FlutterSingBoxPlatform.instance.logStream;
 
   /// A stream of proxy state updates.
-  Stream<ProxyState> get proxyStateStream =>
-      FlutterSingBoxPlatform.instance.proxyStateStream;
+  Stream<ProxyState> get proxyStateStream => FlutterSingBoxPlatform.instance.proxyStateStream;
 }

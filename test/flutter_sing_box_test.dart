@@ -1,13 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
-import 'package:flutter_sing_box/flutter_sing_box_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockFlutterSingBoxPlatform
-    with MockPlatformInterfaceMixin
-    implements FlutterSingBoxPlatform {
-
+class MockFlutterSingBoxPlatform with MockPlatformInterfaceMixin implements FlutterSingBoxPlatform {
   @override
   Future<void> init() {
     throw UnimplementedError();
@@ -48,7 +44,6 @@ class MockFlutterSingBoxPlatform
     throw UnimplementedError();
   }
 
-
   @override
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 
@@ -74,6 +69,15 @@ class MockFlutterSingBoxPlatform
     throw UnimplementedError();
   }
 
+  @override
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+    required int port,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {
