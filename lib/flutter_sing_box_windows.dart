@@ -64,6 +64,18 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
   }
 
+  /// 构造通过 PowerShell 以管理员权限(runas)启动 [helperExePath] 执行
+  /// `install` 的命令行参数。抽成独立方法便于单测参数形状。
+  @visibleForTesting
+  List<String> buildRunasArgs(String helperExePath) {
+    return <String>[
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      "Start-Process -FilePath '$helperExePath' -ArgumentList 'install' -Verb RunAs",
+    ];
+  }
+
   @override
   Future<bool> installService(HelperConfig config) async {
     try {
