@@ -58,4 +58,63 @@ void main() {
       expect(args.last, contains(r"'C:\Program Files\app\helper.exe'"));
     });
   });
+
+  group('FlutterSingBoxWindows.waitForServiceReady', () {
+    late FlutterSingBoxWindows inst;
+
+    setUp(() {
+      inst = FlutterSingBoxWindows();
+    });
+
+    test('命中 running 立即返回 true', () async {
+      final ok = await inst.waitForServiceReady(
+        queryStatus: () async => WindowsServiceStatus.running,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
+      expect(ok, isTrue);
+    });
+
+    test('命中 stopped 返回 true(已安装即视为成功)', () async {
+      final ok = await inst.waitForServiceReady(
+        queryStatus: () async => WindowsServiceStatus.stopped,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
+      expect(ok, isTrue);
+    });
+
+    test('超时仍为 notInstalled 返回 false', () async {
+      var calls = 0;
+      DateTime clock() {
+        calls += 1;
+        // 前几次调用返回 base(允许轮询),第 4 次起跳过 deadline(15s)触发退出。
+        if (calls <= 3) return DateTime(2026, 7, 13);
+        return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
+      }
+
+      final ok = await inst.waitForServiceReady(
+        queryStatus: () async => WindowsServiceStatus.notInstalled,
+        delay: (_) async {},
+        now: clock,
+      );
+      expect(ok, isFalse);
+    });
+
+    test('先 notInstalled/unknown 后 running 的序列能轮询命中', () async {
+      final statuses = <WindowsServiceStatus>[
+        WindowsServiceStatus.notInstalled,
+        WindowsServiceStatus.unknown,
+        WindowsServiceStatus.running,
+      ];
+      var i = 0;
+      final ok = await inst.waitForServiceReady(
+        queryStatus: () async => statuses[i++],
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13), // 恒定时间,确保不超时
+      );
+      expect(ok, isTrue);
+      expect(i, 3); // 确认轮询了 3 次才命中
+    });
+  });
 }

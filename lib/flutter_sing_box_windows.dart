@@ -76,6 +76,31 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     ];
   }
 
+  /// 轮询服务状态,直到命中 [WindowsServiceStatus.running] 或
+  /// [WindowsServiceStatus.stopped](视为"已安装"),或超过 [deadline]。
+  ///
+  /// 抽成独立方法便于单测:[queryStatus]、[delay]、[now] 均可注入。
+  /// 返回 `true` 表示服务已安装(可能已运行);`false` 表示超时仍未安装。
+  @visibleForTesting
+  Future<bool> waitForServiceReady({
+    required Future<WindowsServiceStatus> Function() queryStatus,
+    required Future<void> Function(Duration) delay,
+    required DateTime Function() now,
+    Duration pollInterval = const Duration(milliseconds: 500),
+    Duration deadline = const Duration(seconds: 15),
+  }) async {
+    final DateTime end = now().add(deadline);
+    while (now().isBefore(end)) {
+      final WindowsServiceStatus status = await queryStatus();
+      if (status == WindowsServiceStatus.running ||
+          status == WindowsServiceStatus.stopped) {
+        return true;
+      }
+      await delay(pollInterval);
+    }
+    return false;
+  }
+
   @override
   Future<bool> installService(HelperConfig config) async {
     try {
