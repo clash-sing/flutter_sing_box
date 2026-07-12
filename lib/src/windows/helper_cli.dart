@@ -40,6 +40,10 @@ class HelperCli {
 
   /// 构造通过 PowerShell 以管理员权限(runas)启动 [helperExePath] 执行
   /// [subCommand] 的命令行参数。抽成独立方法便于单测参数形状。
+  ///
+  /// 安全前提：[helperExePath] 来自受控 asset 释放路径、假定不含单引号；
+  /// [subCommand] 为封闭枚举（install/uninstall/start/stop/status），
+  /// 故直接单引号插值无需转义。
   @visibleForTesting
   static List<String> buildRunasArgs(String helperExePath, String subCommand) {
     return <String>[
