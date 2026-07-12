@@ -1,6 +1,8 @@
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 
+import '../constants/windows_service.dart';
+
 /// helper.exe 一次调用的完整结果，便于单测断言与失败诊断。
 class HelperCliResult {
   final bool ok; // 进程正常退出（exitCode == 0 且未超时）
@@ -42,5 +44,28 @@ class HelperCli {
       '-Command',
       "Start-Process -FilePath '$helperExePath' -ArgumentList '$subCommand' -Verb RunAs",
     ];
+  }
+
+  /// 轮询服务状态，直到 [target] 命中或超过 [deadline]。
+  ///
+  /// 泛化自原 `FlutterSingBoxWindows.waitForServiceReady`：调用方传入
+  /// [target] 判定（install→running/stopped，uninstall→notInstalled，
+  /// start→running）。[queryStatus]/[delay]/[now] 注入便于单测。
+  /// 返回 `true` 表示命中目标，`false` 表示超时。
+  @visibleForTesting
+  Future<bool> waitUntilStatus({
+    required Future<WindowsServiceStatus> Function() queryStatus,
+    required bool Function(WindowsServiceStatus) target,
+    required Future<void> Function(Duration) delay,
+    required DateTime Function() now,
+    Duration pollInterval = const Duration(milliseconds: 500),
+    Duration deadline = const Duration(seconds: 15),
+  }) async {
+    final DateTime end = now().add(deadline);
+    while (now().isBefore(end)) {
+      if (target(await queryStatus())) return true;
+      await delay(pollInterval);
+    }
+    return false;
   }
 }
