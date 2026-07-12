@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'dart:io' as io;
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
+import 'package:flutter_sing_box/src/windows/helper_cli.dart';
 
 class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @visibleForTesting
@@ -32,7 +32,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       throw Exception('复制 libcronet.dll 资源失败');
     }
 
-    // 释放独立服务程序 clash_sing_helper.exe，供 queryServiceStatus 调用。
+    // 释放独立服务程序 clash_sing_helper.exe，供 HelperCli 调用。
     const String assetPathHelper = '$assetBasePath/windows/clash_sing_helper.exe';
     final helperResult = await AssetUtil.copyAssetToDirectory(assetPathHelper, dir.path);
     if (!helperResult) {
@@ -41,123 +41,44 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 endTime = ${DateTime.now()}');
   }
 
+  /// 基于 exe 同目录构造 HelperCli（每次调用重建，无状态，轻量）。
+  Future<HelperCli> _buildCli(io.Directory dir) async {
+    return HelperCli(helperExePath: p.join(dir.path, 'clash_sing_helper.exe'));
+  }
+
   /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
   ///
-  /// 流程：确保 helper.json 就绪 → 调用 clash_sing_helper.exe status
-  /// → 解析 stdout。任何异常（超时、进程失败、文件缺失）一律返回 [WindowsServiceStatus.error]。
+  /// 流程：定位 helper.exe → 不存在直接返回 error → 委托 HelperCli.status。
+  /// 任何异常（超时、进程失败）由 HelperCli 归一为 [WindowsServiceStatus.error]。
   @override
   Future<WindowsServiceStatus> queryServiceStatus() async {
     try {
-      // await ensureHelperJson();
-      final io.Directory exeDir = await ProfileStorage().getStorageDirectory();
-      final io.File helperExe = io.File(p.join(exeDir.path, 'clash_sing_helper.exe'));
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
         return WindowsServiceStatus.error;
       }
-
-      final io.ProcessResult result = await io.Process.run(helperExe.path, [
-        'status',
-      ]).timeout(const Duration(seconds: 5));
-      return WindowsServiceStatus.fromHelperOutput((result.stdout ?? '').toString().trim());
+      final cli = await _buildCli(dir);
+      return cli.status();
     } catch (_) {
       return WindowsServiceStatus.error;
     }
-  }
-
-  /// 构造通过 PowerShell 以管理员权限(runas)启动 [helperExePath] 执行
-  /// `install` 的命令行参数。抽成独立方法便于单测参数形状。
-  @visibleForTesting
-  List<String> buildRunasArgs(String helperExePath) {
-    return <String>[
-      '-NoProfile',
-      '-NonInteractive',
-      '-Command',
-      "Start-Process -FilePath '$helperExePath' -ArgumentList 'install' -Verb RunAs",
-    ];
-  }
-
-  /// 轮询服务状态,直到命中 [WindowsServiceStatus.running] 或
-  /// [WindowsServiceStatus.stopped](视为"已安装"),或超过 [deadline]。
-  ///
-  /// 抽成独立方法便于单测:[queryStatus]、[delay]、[now] 均可注入。
-  /// 返回 `true` 表示服务已安装(可能已运行);`false` 表示超时仍未安装。
-  @visibleForTesting
-  Future<bool> waitForServiceReady({
-    required Future<WindowsServiceStatus> Function() queryStatus,
-    required Future<void> Function(Duration) delay,
-    required DateTime Function() now,
-    Duration pollInterval = const Duration(milliseconds: 500),
-    Duration deadline = const Duration(seconds: 15),
-  }) async {
-    final DateTime end = now().add(deadline);
-    while (now().isBefore(end)) {
-      final WindowsServiceStatus status = await queryStatus();
-      if (status == WindowsServiceStatus.running ||
-          status == WindowsServiceStatus.stopped) {
-        return true;
-      }
-      await delay(pollInterval);
-    }
-    return false;
   }
 
   @override
   Future<bool> installService(HelperConfig config) async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      await _ensureHelperJson(config: config, dir: dir.path);
       final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
         return false;
       }
-
-      // 通过 PowerShell Start-Process -Verb RunAs 触发 UAC 提权启动 helper.exe。
-      // Start-Process 默认不 -Wait,powershell.exe 在提权进程启动后即退出;
-      // 故此处等的是 powershell.exe 自身退出码:
-      //   exit 0  → 用户同意 UAC,提权进程已开始执行 install;
-      //   exit ≠0 → 用户拒绝 UAC 或路径无效,直接判定失败,不再轮询。
-      final io.ProcessResult psResult = await io.Process.run(
-        'powershell.exe',
-        buildRunasArgs(helperExe.path),
-      ).timeout(const Duration(seconds: 15));
-      if (psResult.exitCode != 0) {
-        debugPrint(
-          'runas 启动 helper 失败, exitCode=${psResult.exitCode}, '
-          'stderr=${psResult.stderr}',
-        );
-        return false;
-      }
-
-      // 提权进程已在执行 install,轮询服务状态判定最终结果。
-      return waitForServiceReady(
-        queryStatus: queryServiceStatus,
-        delay: (Duration d) => Future<void>.delayed(d),
-        now: () => DateTime.now(),
-      );
+      final cli = await _buildCli(dir);
+      return cli.install(config);
     } catch (e) {
       debugPrint('flutter_sing_box 插件安装服务失败, $e');
       return false;
     }
-  }
-
-  /// 确保 helper.exe 同目录下存在合法的 helper.json（status 命令的强依赖）。
-  ///
-  /// - 已存在则**不覆盖**（保护服务运行时回写的 port 字段）。
-  /// - [dir] 仅用于测试注入；默认为 exe 同目录。
-  Future<void> _ensureHelperJson({required HelperConfig config, required String dir}) async {
-    final io.File file = io.File(p.join(dir, 'helper.json'));
-    if (await file.exists()) return;
-
-    await file.parent.create(recursive: true);
-    // final Map<String, dynamic> config = <String, dynamic>{
-    //   'execute': p.join(directory, 'sing-box.exe'),
-    //   'config': p.join(directory, 'sing-box-config.json'),
-    //   'helperName': windowsServiceName,
-    //   'helperDisplayName': windowsServiceDisplayName,
-    //   'helperDescription': windowsServiceDescription,
-    //   'port': 0,
-    // };
-    await file.writeAsString(jsonEncode(config));
   }
 
   @override
