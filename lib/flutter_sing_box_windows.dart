@@ -111,12 +111,29 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return false;
       }
 
-      final io.ProcessResult result = await io.Process.run(helperExe.path, [
-        'install',
-      ]).timeout(const Duration(seconds: 5));
-      final stdout = (result.stdout ?? '').toString().trim();
-      debugPrint('installService stdout = $stdout');
-      return true;
+      // 通过 PowerShell Start-Process -Verb RunAs 触发 UAC 提权启动 helper.exe。
+      // Start-Process 默认不 -Wait,powershell.exe 在提权进程启动后即退出;
+      // 故此处等的是 powershell.exe 自身退出码:
+      //   exit 0  → 用户同意 UAC,提权进程已开始执行 install;
+      //   exit ≠0 → 用户拒绝 UAC 或路径无效,直接判定失败,不再轮询。
+      final io.ProcessResult psResult = await io.Process.run(
+        'powershell.exe',
+        buildRunasArgs(helperExe.path),
+      ).timeout(const Duration(seconds: 15));
+      if (psResult.exitCode != 0) {
+        debugPrint(
+          'runas 启动 helper 失败, exitCode=${psResult.exitCode}, '
+          'stderr=${psResult.stderr}',
+        );
+        return false;
+      }
+
+      // 提权进程已在执行 install,轮询服务状态判定最终结果。
+      return waitForServiceReady(
+        queryStatus: queryServiceStatus,
+        delay: (Duration d) => Future<void>.delayed(d),
+        now: () => DateTime.now(),
+      );
     } catch (e) {
       debugPrint('flutter_sing_box 插件安装服务失败, $e');
       return false;
