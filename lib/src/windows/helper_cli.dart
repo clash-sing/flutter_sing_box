@@ -106,4 +106,27 @@ class HelperCli {
           ok: false, exitCode: -1, stdout: '', stderr: e.toString(), timedOut: false);
     }
   }
+
+  /// 查询服务状态：`helper.exe status` → 解析 stdout。
+  /// 进程失败（含超时、异常）一律返回 [WindowsServiceStatus.error]。
+  Future<WindowsServiceStatus> status() async {
+    final HelperCliResult r = await run(
+      'status',
+      elevated: false,
+      timeout: const Duration(seconds: 5),
+    );
+    if (!r.ok) return WindowsServiceStatus.error;
+    return WindowsServiceStatus.fromHelperOutput(r.stdout);
+  }
+
+  /// 停止服务：`helper.exe stop`（Go 端内部走 HTTP API 同步关闭）。
+  /// 成功判定：exitCode == 0。
+  Future<bool> stop() async {
+    final HelperCliResult r = await run(
+      'stop',
+      elevated: false,
+      timeout: const Duration(seconds: 5),
+    );
+    return r.ok;
+  }
 }

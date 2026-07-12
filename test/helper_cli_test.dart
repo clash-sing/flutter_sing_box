@@ -161,4 +161,66 @@ void main() {
       expect(r.stderr, contains('boom'));
     });
   });
+
+  group('HelperCli.status', () {
+    final table = <String, WindowsServiceStatus>{
+      'running': WindowsServiceStatus.running,
+      'stopped': WindowsServiceStatus.stopped,
+      'notInstalled': WindowsServiceStatus.notInstalled,
+      'unknown': WindowsServiceStatus.unknown,
+      'error': WindowsServiceStatus.error,
+    };
+    for (final entry in table.entries) {
+      test('解析 stdout "${entry.key}"', () async {
+        final cli = HelperCli(
+          helperExePath: 'x',
+          runner: (exe, args) async => io.ProcessResult(0, 0, entry.key, ''),
+        );
+        expect(await cli.status(), entry.value);
+      });
+    }
+    test('进程失败(exitCode 非 0) → error', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 1, '', 'boom'),
+      );
+      expect(await cli.status(), WindowsServiceStatus.error);
+    });
+    test('未识别 stdout → unknown', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, 'whatever', ''),
+      );
+      expect(await cli.status(), WindowsServiceStatus.unknown);
+    });
+  });
+
+  group('HelperCli.stop', () {
+    test('exitCode 0 → true', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      expect(await cli.stop(), isTrue);
+    });
+    test('exitCode 非 0 → false', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 2, '', 'err'),
+      );
+      expect(await cli.stop(), isFalse);
+    });
+    test('验证非提权调用形状: runner 收到 [stop]', () async {
+      List<String>? seen;
+      final cli = HelperCli(
+        helperExePath: r'C:\a\helper.exe',
+        runner: (exe, args) async {
+          seen = args;
+          return io.ProcessResult(0, 0, '', '');
+        },
+      );
+      await cli.stop();
+      expect(seen, ['stop']);
+    });
+  });
 }
