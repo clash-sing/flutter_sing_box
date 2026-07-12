@@ -75,12 +75,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<bool> installService({
-    required String serviceName,
-    required String displayName,
-    required String description,
-    required int port,
-  }) async => true;
+  Future<bool> installService(HelperConfig config) async => true;
 
   final _eventChannelConnectedStatus = const EventChannel('connected_status_event');
   Stream<ClientStatus>? _connectedStatusStream;

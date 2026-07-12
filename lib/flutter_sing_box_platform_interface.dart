@@ -80,12 +80,7 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('queryServiceStatus() has not been implemented.');
   }
 
-  Future<bool> installService({
-    required String serviceName,
-    required String displayName,
-    required String description,
-    required int port,
-  }) async {
+  Future<bool> installService(HelperConfig config) async {
     throw UnimplementedError('installService() has not been implemented.');
   }
 

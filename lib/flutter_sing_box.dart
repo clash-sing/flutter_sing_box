@@ -80,18 +80,8 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.queryServiceStatus();
   }
 
-  Future<bool> installService({
-    required String serviceName,
-    required String displayName,
-    required String description,
-    required int port,
-  }) {
-    return FlutterSingBoxPlatform.instance.installService(
-      serviceName: serviceName,
-      displayName: displayName,
-      description: description,
-      port: port,
-    );
+  Future<bool> installService(HelperConfig config) {
+    return FlutterSingBoxPlatform.instance.installService(config);
   }
 
   /// A stream of client connection status updates.

@@ -72,14 +72,9 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<bool> installService({
-    required String serviceName,
-    required String displayName,
-    required String description,
-    required int port,
-  }) async {
+  Future<bool> installService(HelperConfig config) async {
     try {
-      await ensureHelperJson();
+      await ensureHelperJson(config);
       final String exeDir = p.dirname(io.Platform.resolvedExecutable);
       final io.File helperExe = io.File(p.join(exeDir, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
@@ -103,20 +98,22 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// - 已存在则**不覆盖**（保护服务运行时回写的 port 字段）。
   /// - [dir] 仅用于测试注入；默认为 exe 同目录。
   @visibleForTesting
-  Future<void> ensureHelperJson({String? dir}) async {
+  Future<void> ensureHelperJson(HelperConfig config, {String? dir}) async {
     final String directory = dir ?? p.dirname(io.Platform.resolvedExecutable);
     final io.File file = io.File(p.join(directory, 'helper.json'));
     if (await file.exists()) return;
 
     await file.parent.create(recursive: true);
-    final Map<String, dynamic> config = <String, dynamic>{
-      'execute': p.join(directory, 'sing-box.exe'),
-      'config': p.join(directory, 'sing-box-config.json'),
-      'helperName': windowsServiceName,
-      'helperDisplayName': windowsServiceDisplayName,
-      'helperDescription': windowsServiceDescription,
-      'port': 0,
-    };
+    // final Map<String, dynamic> config = <String, dynamic>{
+    //   'execute': p.join(directory, 'sing-box.exe'),
+    //   'config': p.join(directory, 'sing-box-config.json'),
+    //   'helperName': windowsServiceName,
+    //   'helperDisplayName': windowsServiceDisplayName,
+    //   'helperDescription': windowsServiceDescription,
+    //   'port': 0,
+    // };
     await file.writeAsString(jsonEncode(config));
   }
+
+  
 }

@@ -70,14 +70,10 @@ class MockFlutterSingBoxPlatform with MockPlatformInterfaceMixin implements Flut
   }
 
   @override
-  Future<bool> installService({
-    required String serviceName,
-    required String displayName,
-    required String description,
-    required int port,
-  }) {
+  Future<bool> installService(HelperConfig config) {
     throw UnimplementedError();
   }
+
 }
 
 void main() {
