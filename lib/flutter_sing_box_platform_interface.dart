@@ -84,6 +84,24 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('installService() has not been implemented.');
   }
 
+  /// 卸载 Windows 系统服务。
+  ///
+  /// 仅 Windows 平台实现真正执行（UAC 提权调用 clash_sing_helper.exe uninstall
+  /// 并轮询确认）；其他平台返回 `false`。
+  Future<bool> uninstallService() async {
+    throw UnimplementedError('uninstallService() has not been implemented.');
+  }
+
+  /// 启动已安装的 Windows 系统服务。
+  Future<bool> startService() async {
+    throw UnimplementedError('startService() has not been implemented.');
+  }
+
+  /// 停止 Windows 系统服务（helper 内部走 HTTP API 同步关闭）。
+  Future<bool> stopService() async {
+    throw UnimplementedError('stopService() has not been implemented.');
+  }
+
   /// A stream of client connection status updates.
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');

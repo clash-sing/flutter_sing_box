@@ -82,6 +82,48 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   @override
+  Future<bool> uninstallService() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      if (!await helperExe.exists()) return false;
+      final cli = await _buildCli(dir);
+      return cli.uninstall();
+    } catch (e) {
+      debugPrint('flutter_sing_box 插件卸载服务失败, $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> startService() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      if (!await helperExe.exists()) return false;
+      final cli = await _buildCli(dir);
+      return cli.start();
+    } catch (e) {
+      debugPrint('flutter_sing_box 插件启动服务失败, $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> stopService() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      if (!await helperExe.exists()) return false;
+      final cli = await _buildCli(dir);
+      return cli.stop();
+    } catch (e) {
+      debugPrint('flutter_sing_box 插件停止服务失败, $e');
+      return false;
+    }
+  }
+
+  @override
   Future<String> getSingBoxVersion() async {
     return '1.13.14';
   }

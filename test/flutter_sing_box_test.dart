@@ -74,6 +74,21 @@ class MockFlutterSingBoxPlatform with MockPlatformInterfaceMixin implements Flut
     throw UnimplementedError();
   }
 
+  @override
+  Future<bool> uninstallService() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> startService() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> stopService() {
+    throw UnimplementedError();
+  }
+
 }
 
 void main() {

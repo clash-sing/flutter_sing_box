@@ -84,6 +84,21 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.installService(config);
   }
 
+  /// 卸载 Windows 系统服务。
+  Future<bool> uninstallService() {
+    return FlutterSingBoxPlatform.instance.uninstallService();
+  }
+
+  /// 启动已安装的 Windows 系统服务。
+  Future<bool> startService() {
+    return FlutterSingBoxPlatform.instance.startService();
+  }
+
+  /// 停止 Windows 系统服务。
+  Future<bool> stopService() {
+    return FlutterSingBoxPlatform.instance.stopService();
+  }
+
   /// A stream of client connection status updates.
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
