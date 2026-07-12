@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
 
 import '../constants/windows_service.dart';
+import '../data/models/windows/helper_config.dart';
 
 /// helper.exe 一次调用的完整结果，便于单测断言与失败诊断。
 class HelperCliResult {
@@ -128,5 +131,47 @@ class HelperCli {
       timeout: const Duration(seconds: 5),
     );
     return r.ok;
+  }
+
+  /// 确保 helper.exe 同目录下存在合法的 helper.json（install/status 等的强依赖）。
+  ///
+  /// - 已存在则**不覆盖**（保护服务运行时回写的 port 字段）。
+  @visibleForTesting
+  Future<void> ensureHelperJson(HelperConfig config) async {
+    final io.File file =
+        io.File(p.join(p.dirname(helperExePath), 'helper.json'));
+    if (await file.exists()) return;
+    await file.parent.create(recursive: true);
+    await file.writeAsString(jsonEncode(config.toJson()));
+  }
+
+  /// 安装并启动服务：先写 helper.json → `helper.exe install`（UAC 提权）
+  /// → 轮询直到 running/stopped。
+  ///
+  /// [queryStatus]/[delay]/[now] 仅供测试注入；默认用自身 [status] 与真实时间。
+  Future<bool> install(
+    HelperConfig config, {
+    Future<WindowsServiceStatus> Function()? queryStatus,
+    Future<void> Function(Duration)? delay,
+    DateTime Function()? now,
+  }) async {
+    await ensureHelperJson(config);
+    final HelperCliResult r = await run(
+      'install',
+      elevated: true,
+      timeout: const Duration(seconds: 15),
+    );
+    if (!r.ok) {
+      debugPrint(
+          'helper install runas 失败, exitCode=${r.exitCode}, stderr=${r.stderr}');
+      return false;
+    }
+    return waitUntilStatus(
+      queryStatus: queryStatus ?? status,
+      target: (s) =>
+          s == WindowsServiceStatus.running || s == WindowsServiceStatus.stopped,
+      delay: delay ?? ((Duration d) => Future<void>.delayed(d)),
+      now: now ?? DateTime.now,
+    );
   }
 }

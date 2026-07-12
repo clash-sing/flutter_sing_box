@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
+import 'package:path/path.dart' as p;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_sing_box/src/constants/windows_service.dart';
+import 'package:flutter_sing_box/src/data/models/windows/helper_config.dart';
 import 'package:flutter_sing_box/src/windows/helper_cli.dart';
 
 void main() {
@@ -221,6 +224,120 @@ void main() {
       );
       await cli.stop();
       expect(seen, ['stop']);
+    });
+  });
+
+  HelperConfig makeConfig() => HelperConfig(
+        helperServiceName: 'clash_sing_service',
+        helperServiceDisplayName: 'Clash Sing Service',
+        helperServiceDescription: 'desc',
+        singBoxExecute: r'C:\a\sing-box.exe',
+        singBoxConfig: r'C:\a\using_config.json',
+        singBoxPort: 0,
+      );
+
+  group('HelperCli.ensureHelperJson', () {
+    late io.Directory tmp;
+    setUp(() async {
+      tmp = await io.Directory.systemTemp.createTemp('helper_json_test_');
+    });
+    tearDown(() async {
+      if (await tmp.exists()) await tmp.delete(recursive: true);
+    });
+
+    test('不存在则写入合法 json', () async {
+      final cli = HelperCli(helperExePath: p.join(tmp.path, 'helper.exe'));
+      await cli.ensureHelperJson(makeConfig());
+      final file = io.File(p.join(tmp.path, 'helper.json'));
+      expect(await file.exists(), isTrue);
+      final Map<String, dynamic> json =
+          jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      expect(json['helperName'], 'clash_sing_service');
+      expect(json['execute'], r'C:\a\sing-box.exe');
+    });
+
+    test('已存在则不覆盖', () async {
+      final cli = HelperCli(helperExePath: p.join(tmp.path, 'helper.exe'));
+      await cli.ensureHelperJson(makeConfig());
+      final first = await io.File(p.join(tmp.path, 'helper.json')).readAsString();
+      // 用不同 config 再调一次
+      await cli.ensureHelperJson(HelperConfig(
+        helperServiceName: 'other',
+        helperServiceDisplayName: 'd',
+        helperServiceDescription: 'd',
+        singBoxExecute: 'x',
+        singBoxConfig: 'y',
+        singBoxPort: 999,
+      ));
+      expect(await io.File(p.join(tmp.path, 'helper.json')).readAsString(), first);
+    });
+  });
+
+  group('HelperCli.install', () {
+    late io.Directory tmp;
+    setUp(() async {
+      tmp = await io.Directory.systemTemp.createTemp('helper_install_test_');
+    });
+    tearDown(() async {
+      if (await tmp.exists()) await tmp.delete(recursive: true);
+    });
+    HelperCli cliWithRunner(
+            Future<io.ProcessResult> Function(String, List<String>) runner) =>
+        HelperCli(helperExePath: p.join(tmp.path, 'helper.exe'), runner: runner);
+
+    test('runas 失败(退出码非 0)直接返回 false，不轮询', () async {
+      var polled = false;
+      final cli = cliWithRunner(
+          (exe, args) async => io.ProcessResult(0, 1, '', 'denied'));
+      final ok = await cli.install(
+        makeConfig(),
+        queryStatus: () async {
+          polled = true;
+          return WindowsServiceStatus.running;
+        },
+      );
+      expect(ok, isFalse);
+      expect(polled, isFalse);
+    });
+
+    test('runas 成功 + 轮询命中 running 返回 true', () async {
+      final cli =
+          cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
+      final ok = await cli.install(
+        makeConfig(),
+        queryStatus: () async => WindowsServiceStatus.running,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
+      expect(ok, isTrue);
+    });
+
+    test('runas 成功但轮询超时返回 false', () async {
+      var calls = 0;
+      DateTime clock() {
+        calls += 1;
+        if (calls <= 3) return DateTime(2026, 7, 13);
+        return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
+      }
+      final cli =
+          cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
+      final ok = await cli.install(
+        makeConfig(),
+        queryStatus: () async => WindowsServiceStatus.notInstalled,
+        delay: (_) async {},
+        now: clock,
+      );
+      expect(ok, isFalse);
+    });
+
+    test('install 调用前会写入 helper.json', () async {
+      final cli =
+          cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
+      await cli.install(makeConfig(),
+          queryStatus: () async => WindowsServiceStatus.running,
+          delay: (_) async {},
+          now: () => DateTime(2026, 7, 13));
+      expect(await io.File(p.join(tmp.path, 'helper.json')).exists(), isTrue);
     });
   });
 }
