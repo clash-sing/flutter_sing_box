@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io' as io;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_sing_box/src/constants/windows_service.dart';
 import 'package:flutter_sing_box/src/windows/helper_cli.dart';
@@ -82,6 +85,80 @@ void main() {
         now: clock,
       );
       expect(ok, isFalse);
+    });
+  });
+
+  group('HelperCli.run', () {
+    test('非提权: runner 收到 helperExe + [subCommand]；exitCode0→ok:true；stdout 已 trim', () async {
+      String? seenExe;
+      List<String>? seenArgs;
+      final cli = HelperCli(
+        helperExePath: r'C:\a\helper.exe',
+        runner: (exe, args) async {
+          seenExe = exe;
+          seenArgs = args;
+          return io.ProcessResult(0, 0, '  running\n', '');
+        },
+      );
+      final r = await cli.run('status',
+          elevated: false, timeout: const Duration(seconds: 5));
+      expect(r.ok, isTrue);
+      expect(r.exitCode, 0);
+      expect(r.stdout, 'running');
+      expect(r.timedOut, isFalse);
+      expect(seenExe, r'C:\a\helper.exe');
+      expect(seenArgs, ['status']);
+    });
+
+    test('非提权 exitCode 非 0 → ok:false', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 2, '', 'boom'),
+      );
+      final r = await cli.run('stop',
+          elevated: false, timeout: const Duration(seconds: 5));
+      expect(r.ok, isFalse);
+      expect(r.exitCode, 2);
+    });
+
+    test('提权: runner 收到 powershell.exe + runasArgs(含子命令)', () async {
+      String? seenExe;
+      List<String>? seenArgs;
+      final cli = HelperCli(
+        helperExePath: r'C:\a\helper.exe',
+        runner: (exe, args) async {
+          seenExe = exe;
+          seenArgs = args;
+          return io.ProcessResult(0, 0, '', '');
+        },
+      );
+      await cli.run('install',
+          elevated: true, timeout: const Duration(seconds: 5));
+      expect(seenExe, 'powershell.exe');
+      expect(seenArgs!.last, contains("-ArgumentList 'install'"));
+    });
+
+    test('超时 → ok:false timedOut:true', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) => Completer<io.ProcessResult>().future, // 永不完成
+      );
+      final r = await cli.run('status',
+          elevated: false, timeout: const Duration(milliseconds: 10));
+      expect(r.ok, isFalse);
+      expect(r.timedOut, isTrue);
+    });
+
+    test('runner 抛异常 → ok:false stderr 记录', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async =>
+            throw const io.ProcessException('x', <String>[], 'boom'),
+      );
+      final r = await cli.run('status',
+          elevated: false, timeout: const Duration(seconds: 5));
+      expect(r.ok, isFalse);
+      expect(r.stderr, contains('boom'));
     });
   });
 }

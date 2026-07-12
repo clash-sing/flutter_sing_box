@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
 
@@ -67,5 +68,42 @@ class HelperCli {
       await delay(pollInterval);
     }
     return false;
+  }
+
+  /// 执行 helper 子命令。
+  ///
+  /// - [elevated] 为 `true` 时通过 PowerShell `Start-Process -Verb RunAs`
+  ///   触发 UAC 提权（用于 install/uninstall/start），等的是 powershell.exe
+  ///   自身退出码（0=同意 UAC，非 0=拒绝/路径无效）；最终状态需靠轮询确认。
+  /// - [elevated] 为 `false` 时直接运行 helper.exe（用于 status/stop）。
+  /// 任何异常（超时、ProcessException）一律 catch 成 `ok:false` 的结果。
+  @visibleForTesting
+  Future<HelperCliResult> run(
+    String subCommand, {
+    required bool elevated,
+    required Duration timeout,
+  }) async {
+    try {
+      final io.ProcessResult r;
+      if (elevated) {
+        r = await _runner('powershell.exe', buildRunasArgs(helperExePath, subCommand))
+            .timeout(timeout);
+      } else {
+        r = await _runner(helperExePath, [subCommand]).timeout(timeout);
+      }
+      return HelperCliResult(
+        ok: r.exitCode == 0,
+        exitCode: r.exitCode,
+        stdout: (r.stdout ?? '').toString().trim(),
+        stderr: (r.stderr ?? '').toString(),
+        timedOut: false,
+      );
+    } on TimeoutException {
+      return const HelperCliResult(
+          ok: false, exitCode: -1, stdout: '', stderr: '', timedOut: true);
+    } catch (e) {
+      return HelperCliResult(
+          ok: false, exitCode: -1, stdout: '', stderr: e.toString(), timedOut: false);
+    }
   }
 }
