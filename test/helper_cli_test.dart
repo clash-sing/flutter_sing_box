@@ -340,4 +340,81 @@ void main() {
       expect(await io.File(p.join(tmp.path, 'helper.json')).exists(), isTrue);
     });
   });
+
+  group('HelperCli.uninstall', () {
+    test('runas 失败直接返回 false', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 1, '', 'denied'),
+      );
+      final ok = await cli.uninstall(
+        queryStatus: () async => WindowsServiceStatus.notInstalled,
+      );
+      expect(ok, isFalse);
+    });
+    test('runas 成功 + 轮询命中 notInstalled 返回 true', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.uninstall(
+        queryStatus: () async => WindowsServiceStatus.notInstalled,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
+      expect(ok, isTrue);
+    });
+    test('验证提权调用形状: runner 收到 powershell.exe + uninstall', () async {
+      String? seenExe;
+      List<String>? seenArgs;
+      final cli = HelperCli(
+        helperExePath: r'C:\a\helper.exe',
+        runner: (exe, args) async {
+          seenExe = exe;
+          seenArgs = args;
+          return io.ProcessResult(0, 0, '', '');
+        },
+      );
+      await cli.uninstall(
+        queryStatus: () async => WindowsServiceStatus.notInstalled,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
+      expect(seenExe, 'powershell.exe');
+      expect(seenArgs!.last, contains("-ArgumentList 'uninstall'"));
+    });
+  });
+
+  group('HelperCli.start', () {
+    test('runas 成功 + 轮询命中 running 返回 true', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.start(
+        queryStatus: () async => WindowsServiceStatus.running,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
+      expect(ok, isTrue);
+    });
+    test('轮询超时返回 false', () async {
+      var calls = 0;
+      DateTime clock() {
+        calls += 1;
+        if (calls <= 3) return DateTime(2026, 7, 13);
+        return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
+      }
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.start(
+        queryStatus: () async => WindowsServiceStatus.stopped,
+        delay: (_) async {},
+        now: clock,
+      );
+      expect(ok, isFalse);
+    });
+  });
 }

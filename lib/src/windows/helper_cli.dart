@@ -174,4 +174,56 @@ class HelperCli {
       now: now ?? DateTime.now,
     );
   }
+
+  /// 卸载服务：`helper.exe uninstall`（UAC 提权）→ 轮询直到 notInstalled。
+  ///
+  /// [queryStatus]/[delay]/[now] 仅供测试注入；默认用自身 [status] 与真实时间。
+  Future<bool> uninstall({
+    Future<WindowsServiceStatus> Function()? queryStatus,
+    Future<void> Function(Duration)? delay,
+    DateTime Function()? now,
+  }) async {
+    final HelperCliResult r = await run(
+      'uninstall',
+      elevated: true,
+      timeout: const Duration(seconds: 15),
+    );
+    if (!r.ok) {
+      debugPrint(
+          'helper uninstall runas 失败, exitCode=${r.exitCode}, stderr=${r.stderr}');
+      return false;
+    }
+    return waitUntilStatus(
+      queryStatus: queryStatus ?? status,
+      target: (s) => s == WindowsServiceStatus.notInstalled,
+      delay: delay ?? ((Duration d) => Future<void>.delayed(d)),
+      now: now ?? DateTime.now,
+    );
+  }
+
+  /// 启动已安装的服务：`helper.exe start`（UAC 提权）→ 轮询直到 running。
+  ///
+  /// [queryStatus]/[delay]/[now] 仅供测试注入；默认用自身 [status] 与真实时间。
+  Future<bool> start({
+    Future<WindowsServiceStatus> Function()? queryStatus,
+    Future<void> Function(Duration)? delay,
+    DateTime Function()? now,
+  }) async {
+    final HelperCliResult r = await run(
+      'start',
+      elevated: true,
+      timeout: const Duration(seconds: 15),
+    );
+    if (!r.ok) {
+      debugPrint(
+          'helper start runas 失败, exitCode=${r.exitCode}, stderr=${r.stderr}');
+      return false;
+    }
+    return waitUntilStatus(
+      queryStatus: queryStatus ?? status,
+      target: (s) => s == WindowsServiceStatus.running,
+      delay: delay ?? ((Duration d) => Future<void>.delayed(d)),
+      now: now ?? DateTime.now,
+    );
+  }
 }
