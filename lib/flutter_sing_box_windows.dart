@@ -18,29 +18,23 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<void> init() async {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
-
+    final io.Directory dir = await ProfileStorage().getStorageDirectory();
     const String assetBasePath = 'packages/flutter_sing_box/assets';
 
     const String assetPathSingBox = '$assetBasePath/windows/sing-box.exe';
-    const String assetPathLibcronet = '$assetBasePath/windows/libcronet.dll';
-    final singBoxResult = await AssetUtil.copyAssetToDirectory(
-      assetPathSingBox,
-      p.dirname(io.Platform.resolvedExecutable),
-    );
+    final singBoxResult = await AssetUtil.copyAssetToDirectory(assetPathSingBox, dir.path);
     if (!singBoxResult) {
       throw Exception('复制 sing_box.exe 资源失败');
     }
-    await AssetUtil.copyAssetToDirectory(
-      assetPathLibcronet,
-      p.dirname(io.Platform.resolvedExecutable),
-    );
+    const String assetPathLibcronet = '$assetBasePath/windows/libcronet.dll';
+    final libcronetResult = await AssetUtil.copyAssetToDirectory(assetPathLibcronet, dir.path);
+    if (!libcronetResult) {
+      throw Exception('复制 libcronet.dll 资源失败');
+    }
 
     // 释放独立服务程序 clash_sing_helper.exe，供 queryServiceStatus 调用。
     const String assetPathHelper = '$assetBasePath/windows/clash_sing_helper.exe';
-    final helperResult = await AssetUtil.copyAssetToDirectory(
-      assetPathHelper,
-      p.dirname(io.Platform.resolvedExecutable),
-    );
+    final helperResult = await AssetUtil.copyAssetToDirectory(assetPathHelper, dir.path);
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
@@ -55,9 +49,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<WindowsServiceStatus> queryServiceStatus() async {
     try {
       // await ensureHelperJson();
-
-      final String exeDir = p.dirname(io.Platform.resolvedExecutable);
-      final io.File helperExe = io.File(p.join(exeDir, 'clash_sing_helper.exe'));
+      final io.Directory exeDir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(exeDir.path, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
         return WindowsServiceStatus.error;
       }
@@ -74,9 +67,9 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<bool> installService(HelperConfig config) async {
     try {
-      await ensureHelperJson(config);
-      final String exeDir = p.dirname(io.Platform.resolvedExecutable);
-      final io.File helperExe = io.File(p.join(exeDir, 'clash_sing_helper.exe'));
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      await _ensureHelperJson(config: config, dir: dir.path);
+      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
         return false;
       }
@@ -97,10 +90,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   ///
   /// - 已存在则**不覆盖**（保护服务运行时回写的 port 字段）。
   /// - [dir] 仅用于测试注入；默认为 exe 同目录。
-  @visibleForTesting
-  Future<void> ensureHelperJson(HelperConfig config, {String? dir}) async {
-    final String directory = dir ?? p.dirname(io.Platform.resolvedExecutable);
-    final io.File file = io.File(p.join(directory, 'helper.json'));
+  Future<void> _ensureHelperJson({required HelperConfig config, required String dir}) async {
+    final io.File file = io.File(p.join(dir, 'helper.json'));
     if (await file.exists()) return;
 
     await file.parent.create(recursive: true);
@@ -115,5 +106,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     await file.writeAsString(jsonEncode(config));
   }
 
-  
+  @override
+  Future<String> getSingBoxVersion() async {
+    return '1.13.14';
+  }
 }

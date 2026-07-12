@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,6 +15,15 @@ class ProfileStorage {
 
   static KeyValueStorage? _storage;
   static KeyValueStorage get storage => _storage ??= MmkvStorage('cs_profile');
+
+  Future<io.Directory> getStorageDirectory() async {
+    if (io.Platform.isAndroid) {
+      return await getApplicationDocumentsDirectory();
+    } else if (io.Platform.isWindows) {
+      return await getApplicationCacheDirectory();
+    }
+    return await getApplicationDocumentsDirectory();
+  }
 
   Profile? getSelectedProfile() {
     final profileId = storage.getInt(_Keys.selectedProfileId);
@@ -40,8 +49,8 @@ class ProfileStorage {
   }
 
   Future<String> getProfilePath(int id) async {
-    final Directory documentsDir = await getApplicationDocumentsDirectory();
-    final profilesDir = Directory('${documentsDir.path}/profiles');
+    final io.Directory documentsDir = await getStorageDirectory();
+    final profilesDir = io.Directory('${documentsDir.path}/profiles');
     if (!await profilesDir.exists()) {
       await profilesDir.create(recursive: true);
     }
@@ -60,7 +69,7 @@ class ProfileStorage {
 
   Future<void> addProfile(Profile profile, SingBox singBox) async {
     final content = jsonEncode(singBox.toJson());
-    await File(profile.typed.path).writeAsString(content);
+    await io.File(profile.typed.path).writeAsString(content);
     final String key = _getProfileKey(profile.id);
     final String jsonString = jsonEncode(profile.toJson());
     storage.setString(key, jsonString);
@@ -82,7 +91,7 @@ class ProfileStorage {
     }
     final String key = _getProfileKey(profile.id);
     storage.removeValue(key);
-    final file = File(profile.typed.path);
+    final file = io.File(profile.typed.path);
     file.deleteSync();
     final firstProfile = getProfiles().firstOrNull;
     if (firstProfile != null) {
@@ -127,10 +136,10 @@ class ProfileStorage {
     }
   }
 
-  Future<File> getUsingConfig() async {
+  Future<io.File> getUsingConfig() async {
     final String usingConfig =
-        storage.getString(_Keys.usingConfig) ?? (await getApplicationDocumentsDirectory()).path;
-    return File('$usingConfig/${_Keys.usingConfigFilename}');
+        storage.getString(_Keys.usingConfig) ?? (await getStorageDirectory()).path;
+    return io.File('$usingConfig/${_Keys.usingConfigFilename}');
   }
 
   void setUsingConfig(String path) {
