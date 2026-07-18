@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'package:path/path.dart' as p;
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:path_provider/path_provider.dart';
@@ -139,7 +140,7 @@ class ProfileStorage {
   Future<io.File> getUsingConfig() async {
     final String usingConfig =
         storage.getString(_Keys.usingConfig) ?? (await getStorageDirectory()).path;
-    return io.File('$usingConfig/${_Keys.usingConfigFilename}');
+    return io.File(p.join(usingConfig, _Keys.usingConfigFilename));
   }
 
   void setUsingConfig(String path) {

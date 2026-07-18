@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'package:flutter_sing_box/src/data/models/windows/windows_constants.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -19,22 +20,26 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<void> init() async {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
     final io.Directory dir = await ProfileStorage().getStorageDirectory();
-    const String assetBasePath = 'packages/flutter_sing_box/assets';
-
-    const String assetPathSingBox = '$assetBasePath/windows/sing-box.exe';
-    final singBoxResult = await AssetUtil.copyAssetToDirectory(assetPathSingBox, dir.path);
+    final singBoxResult = await AssetUtil.copyAssetToDirectory(
+      WindowsConstants.singBoxAsset,
+      dir.path,
+    );
     if (!singBoxResult) {
       throw Exception('复制 sing_box.exe 资源失败');
     }
-    const String assetPathLibcronet = '$assetBasePath/windows/libcronet.dll';
-    final libcronetResult = await AssetUtil.copyAssetToDirectory(assetPathLibcronet, dir.path);
+    final libcronetResult = await AssetUtil.copyAssetToDirectory(
+      WindowsConstants.libcronetAsset,
+      dir.path,
+    );
     if (!libcronetResult) {
       throw Exception('复制 libcronet.dll 资源失败');
     }
 
     // 释放独立服务程序 clash_sing_helper.exe，供 HelperCli 调用。
-    const String assetPathHelper = '$assetBasePath/windows/clash_sing_helper.exe';
-    final helperResult = await AssetUtil.copyAssetToDirectory(assetPathHelper, dir.path);
+    final helperResult = await AssetUtil.copyAssetToDirectory(
+      WindowsConstants.helperAsset,
+      dir.path,
+    );
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
@@ -43,7 +48,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
 
   /// 基于 exe 同目录构造 HelperCli（每次调用重建，无状态，轻量）。
   HelperCli _buildCli(io.Directory dir) {
-    return HelperCli(helperExePath: p.join(dir.path, 'clash_sing_helper.exe'));
+    return HelperCli(helperExePath: p.join(dir.path, WindowsConstants.helperFileName));
   }
 
   /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
@@ -56,11 +61,11 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<WindowsServiceStatus> queryServiceStatus() async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return WindowsServiceStatus.notInstalled;
       }
-      final io.File configFile = io.File(p.join(dir.path, 'helper.json'));
+      final io.File configFile = io.File(p.join(dir.path, WindowsConstants.helperConfigFileName));
       if (!await configFile.exists()) {
         return WindowsServiceStatus.notInstalled;
       }
@@ -79,14 +84,15 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }) async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final String usingConfig = (await ProfileStorage().getUsingConfig()).path;
       HelperConfig config = HelperConfig(
         helperServiceName: serviceName,
         helperServiceDisplayName: displayName,
         helperServiceDescription: description,
-        singBoxExecute: p.join(dir.path, 'sing-box.exe'),
-        singBoxConfig: p.join(dir.path, 'using_config.json'),
+        singBoxExecute: p.join(dir.path, WindowsConstants.singBoxFileName),
+        singBoxConfig: usingConfig,
       );
-      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
       }
@@ -102,7 +108,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<bool> uninstallService() async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
       }
@@ -118,7 +124,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<bool> startService() async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
       }
@@ -134,7 +140,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<bool> stopService() async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
       }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:flutter/foundation.dart';
+import 'package:flutter_sing_box/src/data/models/windows/windows_constants.dart';
 import 'package:path/path.dart' as p;
 
 import '../constants/windows_service.dart';
@@ -143,7 +144,7 @@ class HelperCli {
   @visibleForTesting
   Future<void> ensureHelperJson(HelperConfig config) async {
     final io.File file =
-        io.File(p.join(p.dirname(helperExePath), 'helper.json'));
+        io.File(p.join(p.dirname(helperExePath), WindowsConstants.helperConfigFileName));
     if (await file.exists()) return;
     await file.parent.create(recursive: true);
     await file.writeAsString(jsonEncode(config.toJson()));
