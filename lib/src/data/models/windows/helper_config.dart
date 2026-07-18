@@ -15,7 +15,7 @@ class HelperConfig {
   @JsonKey(name: "config")
   final String singBoxConfig;
   @JsonKey(name: "port")
-  final int singBoxPort;
+  final int helperPort;
 
   HelperConfig({
     required this.helperServiceName,
@@ -23,7 +23,7 @@ class HelperConfig {
     required this.helperServiceDescription,
     required this.singBoxExecute,
     required this.singBoxConfig,
-    required this.singBoxPort,
+    this.helperPort = 0,
   });
 
   factory HelperConfig.fromJson(Map<String, dynamic> json) => _$HelperConfigFromJson(json);

@@ -80,8 +80,16 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.queryServiceStatus();
   }
 
-  Future<bool> installService(HelperConfig config) {
-    return FlutterSingBoxPlatform.instance.installService(config);
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+  }) {
+    return FlutterSingBoxPlatform.instance.installService(
+      serviceName: serviceName,
+      displayName: displayName,
+      description: description,
+    );
   }
 
   /// 卸载 Windows 系统服务。

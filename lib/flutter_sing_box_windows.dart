@@ -58,7 +58,11 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
       final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
-        return WindowsServiceStatus.error;
+        return WindowsServiceStatus.notInstalled;
+      }
+      final io.File configFile = io.File(p.join(dir.path, 'helper.json'));
+      if (!await configFile.exists()) {
+        return WindowsServiceStatus.notInstalled;
       }
       final cli = _buildCli(dir);
       return cli.status();
@@ -68,9 +72,20 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<bool> installService(HelperConfig config) async {
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+  }) async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      HelperConfig config = HelperConfig(
+        helperServiceName: serviceName,
+        helperServiceDisplayName: displayName,
+        helperServiceDescription: description,
+        singBoxExecute: p.join(dir.path, 'sing-box.exe'),
+        singBoxConfig: p.join(dir.path, 'using_config.json'),
+      );
       final io.File helperExe = io.File(p.join(dir.path, 'clash_sing_helper.exe'));
       if (!await helperExe.exists()) {
         return false;

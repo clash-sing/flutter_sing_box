@@ -75,7 +75,11 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   }
 
   @override
-  Future<bool> installService(HelperConfig config) async => true;
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+  }) async => true;
 
   @override
   Future<bool> uninstallService() async => false;

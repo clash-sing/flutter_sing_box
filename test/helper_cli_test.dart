@@ -81,6 +81,7 @@ void main() {
         if (calls <= 3) return DateTime(2026, 7, 13);
         return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
       }
+
       final ok = await cli.waitUntilStatus(
         queryStatus: () async => WindowsServiceStatus.notInstalled,
         target: (s) => s == WindowsServiceStatus.running,
@@ -103,8 +104,7 @@ void main() {
           return io.ProcessResult(0, 0, '  running\n', '');
         },
       );
-      final r = await cli.run('status',
-          elevated: false, timeout: const Duration(seconds: 5));
+      final r = await cli.run('status', elevated: false, timeout: const Duration(seconds: 5));
       expect(r.ok, isTrue);
       expect(r.exitCode, 0);
       expect(r.stdout, 'running');
@@ -118,8 +118,7 @@ void main() {
         helperExePath: 'x',
         runner: (exe, args) async => io.ProcessResult(0, 2, '', 'boom'),
       );
-      final r = await cli.run('stop',
-          elevated: false, timeout: const Duration(seconds: 5));
+      final r = await cli.run('stop', elevated: false, timeout: const Duration(seconds: 5));
       expect(r.ok, isFalse);
       expect(r.exitCode, 2);
     });
@@ -135,8 +134,7 @@ void main() {
           return io.ProcessResult(0, 0, '', '');
         },
       );
-      await cli.run('install',
-          elevated: true, timeout: const Duration(seconds: 5));
+      await cli.run('install', elevated: true, timeout: const Duration(seconds: 5));
       expect(seenExe, 'powershell.exe');
       expect(seenArgs!.last, contains("-ArgumentList 'install'"));
     });
@@ -146,8 +144,7 @@ void main() {
         helperExePath: 'x',
         runner: (exe, args) => Completer<io.ProcessResult>().future, // 永不完成
       );
-      final r = await cli.run('status',
-          elevated: false, timeout: const Duration(milliseconds: 10));
+      final r = await cli.run('status', elevated: false, timeout: const Duration(milliseconds: 10));
       expect(r.ok, isFalse);
       expect(r.timedOut, isTrue);
     });
@@ -155,11 +152,9 @@ void main() {
     test('runner 抛异常 → ok:false stderr 记录', () async {
       final cli = HelperCli(
         helperExePath: 'x',
-        runner: (exe, args) async =>
-            throw const io.ProcessException('x', <String>[], 'boom'),
+        runner: (exe, args) async => throw const io.ProcessException('x', <String>[], 'boom'),
       );
-      final r = await cli.run('status',
-          elevated: false, timeout: const Duration(seconds: 5));
+      final r = await cli.run('status', elevated: false, timeout: const Duration(seconds: 5));
       expect(r.ok, isFalse);
       expect(r.stderr, contains('boom'));
     });
@@ -228,13 +223,12 @@ void main() {
   });
 
   HelperConfig makeConfig() => HelperConfig(
-        helperServiceName: 'clash_sing_service',
-        helperServiceDisplayName: 'Clash Sing Service',
-        helperServiceDescription: 'desc',
-        singBoxExecute: r'C:\a\sing-box.exe',
-        singBoxConfig: r'C:\a\using_config.json',
-        singBoxPort: 0,
-      );
+    helperServiceName: 'clash_sing_service',
+    helperServiceDisplayName: 'Clash Sing Service',
+    helperServiceDescription: 'desc',
+    singBoxExecute: r'C:\a\sing-box.exe',
+    singBoxConfig: r'C:\a\using_config.json',
+  );
 
   group('HelperCli.ensureHelperJson', () {
     late io.Directory tmp;
@@ -261,14 +255,15 @@ void main() {
       await cli.ensureHelperJson(makeConfig());
       final first = await io.File(p.join(tmp.path, 'helper.json')).readAsString();
       // 用不同 config 再调一次
-      await cli.ensureHelperJson(HelperConfig(
-        helperServiceName: 'other',
-        helperServiceDisplayName: 'd',
-        helperServiceDescription: 'd',
-        singBoxExecute: 'x',
-        singBoxConfig: 'y',
-        singBoxPort: 999,
-      ));
+      await cli.ensureHelperJson(
+        HelperConfig(
+          helperServiceName: 'other',
+          helperServiceDisplayName: 'd',
+          helperServiceDescription: 'd',
+          singBoxExecute: 'x',
+          singBoxConfig: 'y',
+        ),
+      );
       expect(await io.File(p.join(tmp.path, 'helper.json')).readAsString(), first);
     });
   });
@@ -281,14 +276,12 @@ void main() {
     tearDown(() async {
       if (await tmp.exists()) await tmp.delete(recursive: true);
     });
-    HelperCli cliWithRunner(
-            Future<io.ProcessResult> Function(String, List<String>) runner) =>
+    HelperCli cliWithRunner(Future<io.ProcessResult> Function(String, List<String>) runner) =>
         HelperCli(helperExePath: p.join(tmp.path, 'helper.exe'), runner: runner);
 
     test('runas 失败(退出码非 0)直接返回 false，不轮询', () async {
       var polled = false;
-      final cli = cliWithRunner(
-          (exe, args) async => io.ProcessResult(0, 1, '', 'denied'));
+      final cli = cliWithRunner((exe, args) async => io.ProcessResult(0, 1, '', 'denied'));
       final ok = await cli.install(
         makeConfig(),
         queryStatus: () async {
@@ -301,8 +294,7 @@ void main() {
     });
 
     test('runas 成功 + 轮询命中 running 返回 true', () async {
-      final cli =
-          cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
+      final cli = cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
       final ok = await cli.install(
         makeConfig(),
         queryStatus: () async => WindowsServiceStatus.running,
@@ -319,8 +311,8 @@ void main() {
         if (calls <= 3) return DateTime(2026, 7, 13);
         return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
       }
-      final cli =
-          cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
+
+      final cli = cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
       final ok = await cli.install(
         makeConfig(),
         queryStatus: () async => WindowsServiceStatus.notInstalled,
@@ -331,12 +323,13 @@ void main() {
     });
 
     test('install 调用前会写入 helper.json', () async {
-      final cli =
-          cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
-      await cli.install(makeConfig(),
-          queryStatus: () async => WindowsServiceStatus.running,
-          delay: (_) async {},
-          now: () => DateTime(2026, 7, 13));
+      final cli = cliWithRunner((exe, args) async => io.ProcessResult(0, 0, '', ''));
+      await cli.install(
+        makeConfig(),
+        queryStatus: () async => WindowsServiceStatus.running,
+        delay: (_) async {},
+        now: () => DateTime(2026, 7, 13),
+      );
       expect(await io.File(p.join(tmp.path, 'helper.json')).exists(), isTrue);
     });
   });
@@ -347,9 +340,7 @@ void main() {
         helperExePath: 'x',
         runner: (exe, args) async => io.ProcessResult(0, 1, '', 'denied'),
       );
-      final ok = await cli.uninstall(
-        queryStatus: () async => WindowsServiceStatus.notInstalled,
-      );
+      final ok = await cli.uninstall(queryStatus: () async => WindowsServiceStatus.notInstalled);
       expect(ok, isFalse);
     });
     test('runas 成功 + 轮询命中 notInstalled 返回 true', () async {
@@ -371,6 +362,7 @@ void main() {
         if (calls <= 3) return DateTime(2026, 7, 13);
         return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
       }
+
       final cli = HelperCli(
         helperExePath: 'x',
         runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
@@ -439,6 +431,7 @@ void main() {
         if (calls <= 3) return DateTime(2026, 7, 13);
         return DateTime(2026, 7, 13).add(const Duration(seconds: 20));
       }
+
       final cli = HelperCli(
         helperExePath: 'x',
         runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),

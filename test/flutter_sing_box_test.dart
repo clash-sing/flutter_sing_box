@@ -70,11 +70,6 @@ class MockFlutterSingBoxPlatform with MockPlatformInterfaceMixin implements Flut
   }
 
   @override
-  Future<bool> installService(HelperConfig config) {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<bool> uninstallService() {
     throw UnimplementedError();
   }
@@ -89,6 +84,14 @@ class MockFlutterSingBoxPlatform with MockPlatformInterfaceMixin implements Flut
     throw UnimplementedError();
   }
 
+  @override
+  Future<bool> installService({
+    required String serviceName,
+    required String displayName,
+    required String description,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 void main() {

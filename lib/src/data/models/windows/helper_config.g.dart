@@ -12,7 +12,7 @@ HelperConfig _$HelperConfigFromJson(Map<String, dynamic> json) => HelperConfig(
   helperServiceDescription: json['helperDescription'] as String,
   singBoxExecute: json['execute'] as String,
   singBoxConfig: json['config'] as String,
-  singBoxPort: (json['port'] as num).toInt(),
+  helperPort: (json['port'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$HelperConfigToJson(HelperConfig instance) =>
@@ -22,5 +22,5 @@ Map<String, dynamic> _$HelperConfigToJson(HelperConfig instance) =>
       'helperDescription': instance.helperServiceDescription,
       'execute': instance.singBoxExecute,
       'config': instance.singBoxConfig,
-      'port': instance.singBoxPort,
+      'port': instance.helperPort,
     };
