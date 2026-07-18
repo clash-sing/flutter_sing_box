@@ -51,11 +51,11 @@ class ProfileStorage {
 
   Future<String> getProfilePath(int id) async {
     final io.Directory documentsDir = await getStorageDirectory();
-    final profilesDir = io.Directory('${documentsDir.path}/profiles');
+    final profilesDir = io.Directory(p.join(documentsDir.path, 'profiles'));
     if (!await profilesDir.exists()) {
       await profilesDir.create(recursive: true);
     }
-    return "${profilesDir.path}/${_getProfileKey(id)}.json";
+    return p.join(profilesDir.path, '${_getProfileKey(id)}.json');
   }
 
   Profile? getProfile(int id) {
