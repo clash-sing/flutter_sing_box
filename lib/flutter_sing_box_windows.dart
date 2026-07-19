@@ -4,14 +4,11 @@ import 'package:flutter_sing_box/src/constants/windows_constants.dart';
 import 'package:flutter_sing_box/src/windows/helper_http_client.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
 import 'package:flutter_sing_box/src/windows/helper_cli.dart';
 
 class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
-  @visibleForTesting
-  final methodChannel = const MethodChannel('flutter_sing_box');
 
   /// Registers this class as the default instance of [FlutterSingBoxPlatform].
   static void registerWith() {
@@ -45,6 +42,10 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
+
+    final state = await HelperHttpClient().status();
+    _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
+    _proxyStateStreamController!.add(state);
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 endTime = ${DateTime.now()}');
   }
 
@@ -161,17 +162,20 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
 
   @override
   Future<void> startVpn() async {
-    return await HelperHttpClient().start();
+    await HelperHttpClient().start();
+    _proxyStateStreamController?.add(ProxyState.starting);
   }
 
   @override
   Future<void> stopVpn() async {
-    return await HelperHttpClient().stop();
+    await HelperHttpClient().stop();
+    _proxyStateStreamController?.add(ProxyState.stopping);
   }
 
   @override
   Future<void> serviceReload() async {
-    return await HelperHttpClient().restart();
+    await HelperHttpClient().restart();
+    _proxyStateStreamController?.add(ProxyState.starting);
   }
 
   static StreamController<ProxyState>? _proxyStateStreamController;
