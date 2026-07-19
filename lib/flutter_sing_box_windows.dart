@@ -175,17 +175,24 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     await HelperHttpClient().restart();
   }
 
-  static StreamController<ProxyState>? _proxyStateStreamController;
-  static StreamController<ProxyState> get proxyStateStreamController =>
-      _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
+  ProxyState _lastProxyState = ProxyState.stopped;
+  StreamController<ProxyState>? _proxyStateStreamController;
+
+  StreamController<ProxyState> get _controller {
+    _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
+    return _proxyStateStreamController!;
+  }
+
+  /// 供 HelperHttpClient 调用,取代直接访问 controller。
+  void emitProxyState(ProxyState state) {
+    _lastProxyState = state;
+    _controller.add(state);
+  }
 
   @override
-  Stream<ProxyState> get proxyStateStream {
-    if (_proxyStateStreamController == null) {
-      _proxyStateStreamController = StreamController<ProxyState>.broadcast();
-      _proxyStateStreamController!.add(ProxyState.stopped);
-    }
-    return _proxyStateStreamController!.stream;
+  Stream<ProxyState> get proxyStateStream async* {
+    yield _lastProxyState; // 新订阅者立即拿到当前状态
+    yield* _controller.stream;
   }
 
   void dispose() {
