@@ -9,7 +9,6 @@ import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
 import 'package:flutter_sing_box/src/windows/helper_cli.dart';
 
 class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
-
   /// Registers this class as the default instance of [FlutterSingBoxPlatform].
   static void registerWith() {
     FlutterSingBoxPlatform.instance = FlutterSingBoxWindows();
@@ -18,6 +17,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<void> init() async {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
+    _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
+    
     final io.Directory dir = await ProfileStorage().getStorageDirectory();
     final singBoxResult = await AssetUtil.copyAssetToDirectory(
       WindowsConstants.singBoxAsset,
@@ -43,9 +44,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
 
-    final state = await HelperHttpClient().status();
-    _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
-    _proxyStateStreamController!.add(state);
+    HelperHttpClient().status();
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 endTime = ${DateTime.now()}');
   }
 
@@ -179,6 +178,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   static StreamController<ProxyState>? _proxyStateStreamController;
+  static StreamController<ProxyState>? get proxyStateStreamController =>
+      _proxyStateStreamController;
   @override
   Stream<ProxyState> get proxyStateStream {
     if (_proxyStateStreamController == null) {
