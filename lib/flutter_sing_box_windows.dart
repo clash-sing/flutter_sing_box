@@ -189,6 +189,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     _controller.add(state);
   }
 
+  /// TODO: async* 的理论竞态，可改为 Stream.multi。但竞态窗口极窄，无需 Stream.multi。
   @override
   Stream<ProxyState> get proxyStateStream async* {
     yield _lastProxyState; // 新订阅者立即拿到当前状态
