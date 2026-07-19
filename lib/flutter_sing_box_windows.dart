@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io' as io;
 import 'package:flutter_sing_box/src/constants/windows_constants.dart';
+import 'package:flutter_sing_box/src/windows/helper_http_client.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -155,5 +157,35 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<String> getSingBoxVersion() async {
     return '1.13.14';
+  }
+
+  @override
+  Future<void> startVpn() async {
+    return await HelperHttpClient().start();
+  }
+
+  @override
+  Future<void> stopVpn() async {
+    return await HelperHttpClient().stop();
+  }
+
+  @override
+  Future<void> serviceReload() async {
+    return await HelperHttpClient().restart();
+  }
+
+  static StreamController<ProxyState>? _proxyStateStreamController;
+  @override
+  Stream<ProxyState> get proxyStateStream {
+    if (_proxyStateStreamController == null) {
+      _proxyStateStreamController = StreamController<ProxyState>.broadcast();
+      _proxyStateStreamController!.add(ProxyState.stopped);
+    }
+    return _proxyStateStreamController!.stream;
+  }
+
+  void dispose() {
+    _proxyStateStreamController?.close();
+    _proxyStateStreamController = null;
   }
 }

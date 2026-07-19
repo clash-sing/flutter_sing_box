@@ -32,26 +32,63 @@ class HelperHttpClient {
   //   return getApplicationCacheDirectory();
   // }
 
-  Future<bool> start() async {
-    config ??= await _getHelperConfig();
-    if (config != null) {
-      final result = await dio.get('${config!.helperPort}/start');
+  Future<void> start() async {
+    try {
+      config ??= await _getHelperConfig();
+      if (config == null) throw Exception('Helper config not found');
+      final result = await dio.get('${config?.helperPort}/start');
       if (result.data == successValue) {
-        return true;
+        return;
       }
+      throw Exception(result.data);
+    } catch (e) {
+      throw Exception('Error starting helper: $e');
     }
-    return false;
   }
 
-  Future<bool> stop() async {
-    config ??= await _getHelperConfig();
-    if (config != null) {
-      final result = await dio.get('${config!.helperPort}/stop');
+  Future<void> stop() async {
+    try {
+      config ??= await _getHelperConfig();
+      if (config == null) throw Exception('Helper config not found');
+      final result = await dio.get('${config?.helperPort}/stop');
       if (result.data == successValue) {
-        return true;
+        return;
       }
+      throw Exception(result.data);
+    } catch (e) {
+      throw Exception('Error starting helper: $e');
     }
-    return false;
+  }
+
+  Future<void> restart() async {
+    try {
+      config ??= await _getHelperConfig();
+      if (config == null) throw Exception('Helper config not found');
+      final result = await dio.get('${config?.helperPort}/restart');
+      if (result.data == successValue) {
+        return;
+      }
+      throw Exception(result.data);
+    } catch (e) {
+      throw Exception('Error starting helper: $e');
+    }
+  }
+
+  Future<ProxyState> status() async {
+    try {
+      config ??= await _getHelperConfig();
+      if (config == null) throw Exception('Helper config not found');
+      final result = await dio.get('${config?.helperPort}/status');
+      if (result.data == 'running') {
+        return ProxyState.started;
+      } else if (result.data == 'stopped') {
+        return ProxyState.stopped;
+      } else {
+        return ProxyState.unknown;
+      }
+    } catch (e) {
+      throw Exception('Error starting helper: $e');
+    }
   }
 
   Future<HelperConfig?> _getHelperConfig() async {
