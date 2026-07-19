@@ -17,8 +17,6 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<void> init() async {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
-    _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
-    
     final io.Directory dir = await ProfileStorage().getStorageDirectory();
     final singBoxResult = await AssetUtil.copyAssetToDirectory(
       WindowsConstants.singBoxAsset,
@@ -43,8 +41,11 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
-
-    HelperHttpClient().status();
+    final serviceStatus = await queryServiceStatus();
+    if (serviceStatus == WindowsServiceStatus.running ||
+        serviceStatus == WindowsServiceStatus.stopped) {
+      HelperHttpClient().status();
+    }
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 endTime = ${DateTime.now()}');
   }
 
@@ -162,24 +163,22 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<void> startVpn() async {
     await HelperHttpClient().start();
-    _proxyStateStreamController?.add(ProxyState.starting);
   }
 
   @override
   Future<void> stopVpn() async {
     await HelperHttpClient().stop();
-    _proxyStateStreamController?.add(ProxyState.stopping);
   }
 
   @override
   Future<void> serviceReload() async {
     await HelperHttpClient().restart();
-    _proxyStateStreamController?.add(ProxyState.starting);
   }
 
   static StreamController<ProxyState>? _proxyStateStreamController;
-  static StreamController<ProxyState>? get proxyStateStreamController =>
-      _proxyStateStreamController;
+  static StreamController<ProxyState> get proxyStateStreamController =>
+      _proxyStateStreamController ??= StreamController<ProxyState>.broadcast();
+
   @override
   Stream<ProxyState> get proxyStateStream {
     if (_proxyStateStreamController == null) {

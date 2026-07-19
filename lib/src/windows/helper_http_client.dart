@@ -34,12 +34,12 @@ class HelperHttpClient {
 
   Future<void> start() async {
     try {
-      FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.starting);
+      FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.starting);
       config ??= await _getHelperConfig();
       if (config == null) throw Exception('Helper config not found');
       final result = await dio.get('${config?.helperPort}/start');
       if (result.data == successValue) {
-        FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.started);
+        FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.started);
         return;
       }
       throw Exception(result.data);
@@ -50,12 +50,12 @@ class HelperHttpClient {
 
   Future<void> stop() async {
     try {
-      FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.stopping);
+      FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.stopping);
       config ??= await _getHelperConfig();
       if (config == null) throw Exception('Helper config not found');
       final result = await dio.get('${config?.helperPort}/stop');
       if (result.data == successValue) {
-        FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.stopped);
+        FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.stopped);
         return;
       }
       throw Exception(result.data);
@@ -66,12 +66,12 @@ class HelperHttpClient {
 
   Future<void> restart() async {
     try {
-      FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.starting);
+      FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.starting);
       config ??= await _getHelperConfig();
       if (config == null) throw Exception('Helper config not found');
       final result = await dio.get('${config?.helperPort}/restart');
       if (result.data == successValue) {
-        FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.started);
+        FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.started);
         return;
       }
       throw Exception(result.data);
@@ -86,11 +86,11 @@ class HelperHttpClient {
       if (config == null) throw Exception('Helper config not found');
       final result = await dio.get('${config?.helperPort}/status');
       if (result.data == 'running') {
-        FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.started);
+        FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.started);
       } else if (result.data == 'stopped') {
-        FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.stopped);
+        FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.stopped);
       } else {
-        FlutterSingBoxWindows.proxyStateStreamController?.add(ProxyState.unknown);
+        FlutterSingBoxWindows.proxyStateStreamController.add(ProxyState.unknown);
       }
     } catch (e) {
       throw Exception('Error starting helper: $e');
