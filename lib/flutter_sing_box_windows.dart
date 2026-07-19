@@ -1,5 +1,5 @@
 import 'dart:io' as io;
-import 'package:flutter_sing_box/src/data/models/windows/windows_constants.dart';
+import 'package:flutter_sing_box/src/constants/windows_constants.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
