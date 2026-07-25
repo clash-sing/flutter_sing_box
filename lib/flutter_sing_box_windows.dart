@@ -196,8 +196,32 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     yield* _controller.stream;
   }
 
+
+  StreamController<ClientClashMode>? _clashModeStreamController;
+  ClientClashMode? _lastClashMode;
+
+  StreamController<ClientClashMode> get _clashModeController {
+    _clashModeStreamController ??= StreamController<ClientClashMode>.broadcast();
+    return _clashModeStreamController!;
+  }
+
+  /// 供 HelperHttpClient 在连接成功后回调,取代直接访问 controller。
+  void emitClashMode(ClientClashMode mode) {
+    _lastClashMode = mode;
+    _clashModeController.add(mode);
+  }
+
+  /// TODO: async* 的理论竞态,可改为 Stream.multi。但竞态窗口极窄,与 proxyStateStream 一致。
+  @override
+  Stream<ClientClashMode> get clashModeStream async* {
+    if (_lastClashMode != null) yield _lastClashMode!; // 新订阅者立即拿到当前模式
+    yield* _clashModeController.stream;
+  }
+  
   void dispose() {
     _proxyStateStreamController?.close();
     _proxyStateStreamController = null;
+    _clashModeStreamController?.close();
+    _clashModeStreamController = null;
   }
 }
