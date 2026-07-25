@@ -16,6 +16,7 @@ class ClashHttpClient {
   late final Dio dio = _initDio();
 
   static const String _baseUrl = 'http://127.0.0.1:9090';
+  // ignore: unused_field
   static const String _wsBaseUrl = 'ws://127.0.0.1:9090';
 
   Dio _initDio() {
