@@ -205,7 +205,6 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     const Duration interval = Duration(milliseconds: 800);
     for (int i = 0; i < maxAttempts; i++) {
       try {
-        ClashHttpClient().getGroups();
         final mode = await ClashHttpClient().getClashMode();
         emitClashMode(mode);
         return;
@@ -247,10 +246,32 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     yield* _clashModeController.stream;
   }
 
+  StreamController<List<ClientGroup>>? _clientGroupStreamController;
+  List<ClientGroup>? _clientGroups;
+
+  StreamController<List<ClientGroup>> get _clientGroupController {
+    _clientGroupStreamController ??= StreamController<List<ClientGroup>>.broadcast();
+    return _clientGroupStreamController!;
+  }
+
+  /// 供 HelperHttpClient 在连接成功后回调,取代直接访问 controller。
+  void emitClientGroups(List<ClientGroup> groups) {
+    _clientGroups = groups;
+    _clientGroupController.add(groups);
+  }
+
+  @override
+  Stream<List<ClientGroup>> get groupStream async* {
+    if (_clientGroups != null) yield _clientGroups!; // 新订阅者立即拿到当前模式
+    yield* _clientGroupController.stream;
+  }
+
   void dispose() {
     _proxyStateStreamController?.close();
     _proxyStateStreamController = null;
     _clashModeStreamController?.close();
     _clashModeStreamController = null;
+    _clientGroupStreamController?.close();
+    _clientGroupStreamController = null;
   }
 }
