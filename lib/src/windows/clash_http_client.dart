@@ -86,13 +86,16 @@ class ClashHttpClient {
         return OutboundType.selector;
       case _ProxyType.urlTest:
         return OutboundType.urltest;
+      case _ProxyType.direct:
+        return OutboundType.direct;
       default:
-        return type;
+        return type.toLowerCase();
     }
   }
 }
 
 abstract class _ProxyType {
+  // ignore: unused_field
   static const String fallback = 'Fallback';
   static const String selector = 'Selector';
   static const String direct = 'Direct';
