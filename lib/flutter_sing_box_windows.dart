@@ -205,6 +205,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     const Duration interval = Duration(milliseconds: 800);
     for (int i = 0; i < maxAttempts; i++) {
       try {
+        ClashHttpClient().getGroups();
         final mode = await ClashHttpClient().getClashMode();
         emitClashMode(mode);
         return;
@@ -224,7 +225,6 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     yield _lastProxyState; // 新订阅者立即拿到当前状态
     yield* _controller.stream;
   }
-
 
   StreamController<ClientClashMode>? _clashModeStreamController;
   ClientClashMode? _lastClashMode;
@@ -246,7 +246,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (_lastClashMode != null) yield _lastClashMode!; // 新订阅者立即拿到当前模式
     yield* _clashModeController.stream;
   }
-  
+
   void dispose() {
     _proxyStateStreamController?.close();
     _proxyStateStreamController = null;

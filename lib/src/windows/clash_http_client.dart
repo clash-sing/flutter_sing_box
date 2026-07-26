@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_sing_box/flutter_sing_box.dart';
+import 'package:flutter_sing_box/src/data/models/clash/clash_api_proxy.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_configs.dart';
 import 'package:flutter_sing_box/src/data/models/client/client_clash_mode.dart';
 
@@ -31,26 +33,57 @@ class ClashHttpClient {
     return dio;
   }
 
-  Future<ClashConfigs> getConfigs() async {
+  /// 拉取 /configs 并映射为代理模式,供连接成功后刷新 clashModeStream。
+  /// 将 [ClashConfigs] 映射为 UI 层使用的 [ClientClashMode]。
+  Future<ClientClashMode> getClashMode() async {
     final response = await dio.get('/configs');
     final Map<String, dynamic> map = response.data is Map
         ? response.data
         : jsonDecode(response.data);
     final configs = ClashConfigs.fromJson(map);
-    return configs;
+    return ClientClashMode(modes: configs.modeList, currentMode: configs.mode);
   }
 
-  /// 将 [ClashConfigs] 映射为 UI 层使用的 [ClientClashMode]（纯函数,可单测）。
-  static ClientClashMode modeFromConfigs(ClashConfigs configs) {
-    return ClientClashMode(
-      modes: configs.modeList,
-      currentMode: configs.mode,
+  Future<List<ClientGroup>> getGroups() async {
+    final response = await dio.get('/proxies');
+    final Map<String, dynamic> map = response.data is Map
+        ? response.data
+        : jsonDecode(response.data);
+
+    final Map<String, dynamic> proxiesMap = map['proxies'];
+    final List<ClashApiProxy> proxies = proxiesMap.entries.map((entry) {
+      return ClashApiProxy.fromJson(entry.value as Map<String, dynamic>);
+    }).toList();
+    proxies.removeWhere(
+      (proxy) => proxy.type == _ProxyType.fallback || proxy.type == _ProxyType.direct,
     );
+    final List<ClientGroup> groups = proxies.map((proxy) {
+      return ClientGroup(
+        tag: proxy.name,
+        type: proxy.type,
+        selectable: proxy.type != _ProxyType.urlTest,
+        selected: proxy.now ?? '',
+        isExpand: false,
+        items: proxy.all?.map((item) {
+          ClashApiProxy proxyItem = proxies.firstWhere((p) => p.name == item);
+          return ClientGroupItem(
+            tag: proxyItem.name,
+            type: proxyItem.type,
+            urlTestTime: proxyItem.histories.isNotEmpty
+                ? proxyItem.histories.first.localTime.millisecondsSinceEpoch
+                : 0,
+            urlTestDelay: proxyItem.histories.isNotEmpty ? proxyItem.histories.first.delay : 0,
+          );
+        }).toList(),
+      );
+    }).toList();
+    return groups;
   }
+}
 
-  /// 拉取 /configs 并映射为代理模式,供连接成功后刷新 clashModeStream。
-  Future<ClientClashMode> getClashMode() async {
-    final configs = await getConfigs();
-    return modeFromConfigs(configs);
-  }
+abstract class _ProxyType {
+  static const String fallback = 'Fallback';
+  static const String selector = 'Selector';
+  static const String direct = 'Direct';
+  static const String urlTest = 'URLTest';
 }
