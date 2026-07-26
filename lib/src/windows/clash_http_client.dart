@@ -54,13 +54,13 @@ class ClashHttpClient {
     final List<ClashApiProxy> proxies = proxiesMap.entries.map((entry) {
       return ClashApiProxy.fromJson(entry.value as Map<String, dynamic>);
     }).toList();
-    proxies.removeWhere(
-      (proxy) => proxy.type == _ProxyType.fallback || proxy.type == _ProxyType.direct,
-    );
-    final List<ClientGroup> groups = proxies.map((proxy) {
+    final groupProxies = proxies
+        .where((proxy) => proxy.type == _ProxyType.urlTest || proxy.type == _ProxyType.selector)
+        .toList();
+    final List<ClientGroup> groups = groupProxies.map((proxy) {
       return ClientGroup(
         tag: proxy.name,
-        type: proxy.type,
+        type: _convert2OutboundType(proxy.type),
         selectable: proxy.type != _ProxyType.urlTest,
         selected: proxy.now ?? '',
         isExpand: false,
@@ -68,7 +68,7 @@ class ClashHttpClient {
           ClashApiProxy proxyItem = proxies.firstWhere((p) => p.name == item);
           return ClientGroupItem(
             tag: proxyItem.name,
-            type: proxyItem.type,
+            type: _convert2OutboundType(proxyItem.type),
             urlTestTime: proxyItem.histories.isNotEmpty
                 ? proxyItem.histories.first.localTime.millisecondsSinceEpoch
                 : 0,
@@ -78,6 +78,17 @@ class ClashHttpClient {
       );
     }).toList();
     return groups;
+  }
+
+  static String _convert2OutboundType(String type) {
+    switch (type) {
+      case _ProxyType.selector:
+        return OutboundType.selector;
+      case _ProxyType.urlTest:
+        return OutboundType.urltest;
+      default:
+        return type;
+    }
   }
 }
 
