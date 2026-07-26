@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' as io;
 import 'package:flutter_sing_box/src/constants/windows_constants.dart';
 import 'package:flutter_sing_box/src/windows/helper_http_client.dart';
+import 'package:flutter_sing_box/src/windows/clash_http_client.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
@@ -184,9 +185,37 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   /// 供 HelperHttpClient 调用,取代直接访问 controller。
+  ///
+  /// 连接成功(started)时顺带后台刷新代理模式——clash mode 的数据来源与推送
+  /// 都内聚在本类,HelperHttpClient 只管 helper service 控制与状态转发。
   void emitProxyState(ProxyState state) {
     _lastProxyState = state;
     _controller.add(state);
+    if (state == ProxyState.started) {
+      unawaited(_refreshClashMode());
+    }
+  }
+
+  /// 连接成功后拉取代理模式并回推到 clashModeStream。
+  ///
+  /// fire-and-forget: 失败仅 debugPrint,不影响 proxyState 流、不阻塞连接流程。
+  /// 9090 在 sing-box 进程刚拉起时未必就绪,故重试 3 次、间隔 800ms。
+  Future<void> _refreshClashMode() async {
+    const int maxAttempts = 3;
+    const Duration interval = Duration(milliseconds: 800);
+    for (int i = 0; i < maxAttempts; i++) {
+      try {
+        final mode = await ClashHttpClient().getClashMode();
+        emitClashMode(mode);
+        return;
+      } catch (e) {
+        debugPrint('拉取 clash mode 失败 (第 ${i + 1}/$maxAttempts 次): $e');
+        if (i < maxAttempts - 1) {
+          await Future.delayed(interval);
+        }
+      }
+    }
+    debugPrint('拉取 clash mode 最终失败,放弃本轮刷新');
   }
 
   /// TODO: async* 的理论竞态，可改为 Stream.multi。但竞态窗口极窄，无需 Stream.multi。
