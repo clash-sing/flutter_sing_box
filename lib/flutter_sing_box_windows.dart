@@ -193,6 +193,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     _controller.add(state);
     if (state == ProxyState.started) {
       unawaited(_refreshClashMode());
+      unawaited(_refreshClientGroup());
     }
   }
 
@@ -216,6 +217,24 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       }
     }
     debugPrint('拉取 clash mode 最终失败,放弃本轮刷新');
+  }
+
+  Future<void> _refreshClientGroup() async {
+    const int maxAttempts = 3;
+    const Duration interval = Duration(milliseconds: 800);
+    for (int i = 0; i < maxAttempts; i++) {
+      try {
+        final groups = await ClashHttpClient().getGroups();
+        emitClientGroups(groups);
+        return;
+      } catch (e) {
+        debugPrint('拉取 proxies 失败 (第 ${i + 1}/$maxAttempts 次): $e');
+        if (i < maxAttempts - 1) {
+          await Future.delayed(interval);
+        }
+      }
+    }
+    debugPrint('拉取 proxies 最终失败,放弃本轮刷新');
   }
 
   /// TODO: async* 的理论竞态，可改为 Stream.multi。但竞态窗口极窄，无需 Stream.multi。
