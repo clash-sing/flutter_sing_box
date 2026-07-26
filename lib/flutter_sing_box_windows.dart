@@ -193,7 +193,9 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     _controller.add(state);
     if (state == ProxyState.started) {
       unawaited(_refreshClashMode());
-      unawaited(_refreshClientGroup());
+      _startGroupRefresh();
+    } else if (state == ProxyState.stopped) {
+      _cancelGroupRefresh();
     }
   }
 
@@ -219,22 +221,40 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     debugPrint('拉取 clash mode 最终失败,放弃本轮刷新');
   }
 
-  Future<void> _refreshClientGroup() async {
-    const int maxAttempts = 3;
-    const Duration interval = Duration(milliseconds: 800);
-    for (int i = 0; i < maxAttempts; i++) {
+  /// group 轮询的「代」：每次启动新一轮自增,使上一轮自动退出;
+  /// stopped / dispose 也自增以取消所有在飞轮询。
+  int _groupRefreshGeneration = 0;
+
+  /// 启动一轮新的 group 轮询;自增 generation 使上一轮自动退出,
+  /// 天然处理 start/restart/status 多处重复触发 started 的并发防护。
+  void _startGroupRefresh() {
+    final int gen = ++_groupRefreshGeneration;
+    unawaited(_refreshClientGroup(gen));
+  }
+
+  /// 取消所有在飞的 group 轮询(stopped / dispose 调用)。
+  void _cancelGroupRefresh() {
+    _groupRefreshGeneration++;
+  }
+
+  /// 连接成功后每秒持续拉取 proxies 回推 groupStream,直到 stopped / dispose 取消。
+  ///
+  /// fire-and-forget: 失败仅 debugPrint、不中断循环、不影响 proxyState 流。
+  /// 串行循环(上一次完成才发下一次)避免请求重叠;用 [gen] 配合
+  /// [_groupRefreshGeneration] 做取消与重复 started 的并发防护。
+  Future<void> _refreshClientGroup(int gen) async {
+    while (gen == _groupRefreshGeneration) {
       try {
         final groups = await ClashHttpClient().getGroups();
-        emitClientGroups(groups);
-        return;
-      } catch (e) {
-        debugPrint('拉取 proxies 失败 (第 ${i + 1}/$maxAttempts 次): $e');
-        if (i < maxAttempts - 1) {
-          await Future.delayed(interval);
+        // 拉取期间若已被取消(generation 变了),丢弃这次结果,避免把过期数据推给 UI。
+        if (gen == _groupRefreshGeneration) {
+          emitClientGroups(groups);
         }
+      } catch (e) {
+        debugPrint('拉取 proxies 失败: $e');
       }
+      await Future.delayed(const Duration(seconds: 1));
     }
-    debugPrint('拉取 proxies 最终失败,放弃本轮刷新');
   }
 
   /// TODO: async* 的理论竞态，可改为 Stream.multi。但竞态窗口极窄，无需 Stream.multi。
@@ -286,6 +306,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   void dispose() {
+    _cancelGroupRefresh();
     _proxyStateStreamController?.close();
     _proxyStateStreamController = null;
     _clashModeStreamController?.close();
