@@ -99,6 +99,12 @@ class ClashHttpClient {
     return groups;
   }
 
+  Future<void> testGroup(String groupTag) async {
+    final params = 'timeout=5000&url=${Uri.encodeQueryComponent(CsSettingsStorage().getTestUrl())}';
+    final response = await dio.get('/group/${Uri.encodeQueryComponent(groupTag)}/delay?$params');
+    debugPrint('testGroup response date: ${response.data}');
+  }
+
   static String _convert2OutboundType(String type) {
     switch (type) {
       case _ProxyType.selector:
