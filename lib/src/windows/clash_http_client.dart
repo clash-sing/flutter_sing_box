@@ -50,6 +50,11 @@ class ClashHttpClient {
     return ClientClashMode(modes: configs.modeList, currentMode: configs.mode);
   }
 
+  Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
+    final response = await dio.put('/proxies/$groupTag', data: {'name': outboundTag});
+    debugPrint('setOutbound response date: ${response.data}');
+  }
+
   Future<List<ClientGroup>> getGroups() async {
     final response = await dio.get('/proxies');
     final Map<String, dynamic> map = response.data is Map

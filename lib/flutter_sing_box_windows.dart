@@ -182,6 +182,11 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     unawaited(_refreshClashMode());
   }
 
+  @override
+  Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
+    await ClashHttpClient().setOutbound(groupTag: groupTag, outboundTag: outboundTag);
+  }
+
   ProxyState _lastProxyState = ProxyState.stopped;
   StreamController<ProxyState>? _proxyStateStreamController;
 
