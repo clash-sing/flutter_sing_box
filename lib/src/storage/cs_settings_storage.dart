@@ -60,6 +60,25 @@ class CsSettingsStorage {
     setPerAppProxyMode(mode);
   }
 
+  int getClashApiPort() {
+    return storage.getInt(
+      _Keys.clashApiPort,
+      defaultValue: FlutterSingBoxConstants.defaultClashApiPort,
+    );
+  }
+
+  void setClashApiPort(int? port) {
+    storage.setInt(_Keys.clashApiPort, port);
+  }
+
+  String getTestUrl() {
+    return storage.getString(_Keys.testUrl) ?? FlutterSingBoxConstants.defaultTestUrl;
+  }
+
+  void setTestUrl(String? url) {
+    storage.setString(_Keys.testUrl, url);
+  }
+
   void clear() {
     storage.clearAll();
   }
@@ -73,4 +92,6 @@ class _Keys {
 
   static const String includeAppList = "per_app_proxy_include_list";
   static const String excludeAppList = "per_app_proxy_exclude_list";
+  static const String clashApiPort = "clash_api_port";
+  static const String testUrl = "test_url";
 }

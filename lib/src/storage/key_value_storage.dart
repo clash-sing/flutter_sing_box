@@ -2,18 +2,24 @@
 abstract class KeyValueStorage {
   /// Reads the string value for [key], or null if absent.
   String? getString(String key);
+
   /// Stores [value] under [key]; returns true on success.
-  bool setString(String key, String value);
+  bool setString(String key, String? value);
 
   /// Reads the int value for [key], or [defaultValue] if absent.
   int getInt(String key, {int defaultValue = 0});
+
   /// Stores [value] under [key]; returns true on success.
-  bool setInt(String key, int value);
+  bool setInt(String key, int? value);
 
   /// Reads the bool value for [key], or [defaultValue] if absent.
   bool getBool(String key, {bool defaultValue = false});
+
   /// Stores [value] under [key]; returns true on success.
-  bool setBool(String key, bool value);
+  bool setBool(String key, bool? value);
+
+  double getDouble(String key, {double defaultValue = 0.0});
+  bool setDouble(String key, double? value);
 
   /// Removes the value stored under [key].
   void removeValue(String key);

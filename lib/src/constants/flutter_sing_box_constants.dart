@@ -23,4 +23,6 @@ class FlutterSingBoxConstants {
   static const String defaultTestUrl = 'https://www.gstatic.com/generate_204';
 
   static const String assetBasePath = 'packages/flutter_sing_box/assets/';
+
+  static const int defaultClashApiPort = 9090;
 }

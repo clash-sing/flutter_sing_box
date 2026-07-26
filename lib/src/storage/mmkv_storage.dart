@@ -13,21 +13,56 @@ class MmkvStorage implements KeyValueStorage {
   String? getString(String key) => _mmkv.decodeString(key);
 
   @override
-  bool setString(String key, String value) => _mmkv.encodeString(key, value);
+  bool setString(String key, String? value) {
+    if (value == null) {
+      _mmkv.removeValue(key);
+      return true;
+    } else {
+      return _mmkv.encodeString(key, value);
+    }
+  }
 
   @override
   int getInt(String key, {int defaultValue = 0}) =>
       _mmkv.decodeInt(key, defaultValue: defaultValue);
 
   @override
-  bool setInt(String key, int value) => _mmkv.encodeInt(key, value);
+  bool setInt(String key, int? value) {
+    if (value == null) {
+      _mmkv.removeValue(key);
+      return true;
+    } else {
+      return _mmkv.encodeInt(key, value);
+    }
+  }
 
   @override
   bool getBool(String key, {bool defaultValue = false}) =>
       _mmkv.decodeBool(key, defaultValue: defaultValue);
 
   @override
-  bool setBool(String key, bool value) => _mmkv.encodeBool(key, value);
+  bool setBool(String key, bool? value) {
+    if (value == null) {
+      _mmkv.removeValue(key);
+      return true;
+    } else {
+      return _mmkv.encodeBool(key, value);
+    }
+  }
+
+  @override
+  double getDouble(String key, {double defaultValue = 0.0}) =>
+      _mmkv.decodeDouble(key, defaultValue: defaultValue);
+
+  @override
+  bool setDouble(String key, double? value) {
+    if (value == null) {
+      _mmkv.removeValue(key);
+      return true;
+    } else {
+      return _mmkv.encodeDouble(key, value);
+    }
+  }
 
   @override
   void removeValue(String key) => _mmkv.removeValue(key);
@@ -42,4 +77,5 @@ class MmkvStorage implements KeyValueStorage {
 
   @override
   void clearAll() => _mmkv.clearAll();
+
 }

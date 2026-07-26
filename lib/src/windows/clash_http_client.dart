@@ -18,9 +18,9 @@ class ClashHttpClient {
 
   late final Dio dio = _initDio();
 
-  static const String _baseUrl = 'http://127.0.0.1:9090';
+  static const String _baseUrl = 'http://127.0.0.1:';
   // ignore: unused_field
-  static const String _wsBaseUrl = 'ws://127.0.0.1:9090';
+  static const String _wsBaseUrl = 'ws://127.0.0.1:';
 
   Dio _initDio() {
     final options = BaseOptions(
@@ -35,14 +35,14 @@ class ClashHttpClient {
   }
 
   Future<void> setClashMode(String mode) async {
-    final response = await dio.patch('/configs', data: {'mode': mode});
+    final response = await dio.patch('${CsSettingsStorage().getClashApiPort()}/configs', data: {'mode': mode});
     debugPrint('Set clash mode response date: ${response.data}');
   }
 
   /// 拉取 /configs 并映射为代理模式,供连接成功后刷新 clashModeStream。
   /// 将 [ClashConfigs] 映射为 UI 层使用的 [ClientClashMode]。
   Future<ClientClashMode> getClashMode() async {
-    final response = await dio.get('/configs');
+    final response = await dio.get('${CsSettingsStorage().getClashApiPort()}/configs');
     final Map<String, dynamic> map = response.data is Map
         ? response.data
         : jsonDecode(response.data);
@@ -51,12 +51,12 @@ class ClashHttpClient {
   }
 
   Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
-    final response = await dio.put('/proxies/$groupTag', data: {'name': outboundTag});
+    final response = await dio.put('${CsSettingsStorage().getClashApiPort()}/proxies/$groupTag', data: {'name': outboundTag});
     debugPrint('setOutbound response date: ${response.data}');
   }
 
   Future<List<ClientGroup>> getGroups() async {
-    final response = await dio.get('/proxies');
+    final response = await dio.get('${CsSettingsStorage().getClashApiPort()}/proxies');
     final Map<String, dynamic> map = response.data is Map
         ? response.data
         : jsonDecode(response.data);
