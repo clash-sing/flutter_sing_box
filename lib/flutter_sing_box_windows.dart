@@ -176,6 +176,12 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     await HelperHttpClient().restart();
   }
 
+  @override
+  Future<void> setClashMode(String mode) async {
+    await ClashHttpClient().setClashMode(mode);
+    unawaited(_refreshClashMode());
+  }
+
   ProxyState _lastProxyState = ProxyState.stopped;
   StreamController<ProxyState>? _proxyStateStreamController;
 

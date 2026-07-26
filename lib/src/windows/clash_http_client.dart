@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_api_proxy.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_configs.dart';
@@ -31,6 +32,11 @@ class ClashHttpClient {
     final Dio dio = Dio(options);
     dio.interceptors.add(LogInterceptor());
     return dio;
+  }
+
+  Future<void> setClashMode(String mode) async {
+    final response = await dio.patch('/configs', data: {'mode': mode});
+    debugPrint('Set clash mode response date: ${response.data}');
   }
 
   /// 拉取 /configs 并映射为代理模式,供连接成功后刷新 clashModeStream。
