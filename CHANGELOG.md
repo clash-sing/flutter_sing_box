@@ -1,3 +1,35 @@
+## 1.1.5
+### Features
+* **新增 Windows 平台支持**（开发中，桌面端以系统服务方式托管 sing-box 进程，弥补桌面平台缺少 VPN Service 的能力）：
+  * 新增服务管理接口：`installService` / `uninstallService` / `queryServiceStatus`，基于 PowerShell runas 提权安装并轮询状态判定结果
+  * 实现 Windows 平台的 VPN 控制与代理状态监听（`proxyStateStream`）
+  * 新增 `HelperCli`，封装 `clash_sing_helper.exe` 的全部 CLI 子命令（status / stop / install / uninstall / start）
+* **Windows 端 Clash API 支持**：
+  * 新增 Clash 配置模型与 HTTP 客户端
+  * 实现 Clash 模式读取与切换（`clashModeStream`、`setClashMode`）
+  * 实现代理组数据获取、出站节点切换与 URL 延迟测试
+* 存储层新增 Clash API 端口与测试 URL 配置项
+
+### Improvements
+* 升级 Android 端 `libbox`（sing-box 内核）：`1.13.14` → `1.13.15`
+* 升级 Windows 端 `sing-box.exe` 至 `1.13.15`
+* Clash API 端口支持动态适配变化
+* 移除 Android 端未使用的位置权限
+
+### Fixes
+* 修复 Windows 端 Clash HTTP 客户端代理类型映射错误
+* 修正 Windows 端 Clash 代理组解析与类型转换逻辑
+
+### Refactoring
+* 重构服务安装接口：参数收敛为 `HelperConfig` 对象，硬编码路径提取为常量
+* 将服务管理能力（uninstall / start / stop）上升到平台抽象层与门面
+* 优化代理状态流控制器初始化与状态分发逻辑
+* `FlutterSingBoxWindows` 委托 `HelperCli`，移除已迁移的辅助方法
+
+### Dependencies
+* 升级 `dio`：→ `^5.10.0`
+
+
 ## 1.1.4
 ### Dependencies
 * 升级 Android 端 `libbox`（sing-box 内核）：`1.13.12` → `1.13.14`
