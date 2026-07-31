@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_api_proxy.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_configs.dart';
-import 'package:flutter_sing_box/src/data/models/client/client_clash_mode.dart';
 
 /// ws://127.0.0.1:9090/connections?token=
 /// ws://127.0.0.1:9090/memory?token=
