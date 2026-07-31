@@ -79,6 +79,37 @@ class CsSettingsStorage {
     storage.setString(_Keys.testUrl, url);
   }
 
+  /// Windows 桌面端代理模式（tun / systemProxy），默认 tun。
+  ProxyMode get proxyMode {
+    final name = storage.getString(_Keys.proxyMode);
+    return ProxyMode.values.firstWhere(
+      (m) => m.name == name,
+      orElse: () => ProxyMode.tun,
+    );
+  }
+
+  set proxyMode(ProxyMode mode) {
+    storage.setString(_Keys.proxyMode, mode.name);
+  }
+
+  /// mixed 入站监听端口，默认 8890。
+  int get mixedPort {
+    return storage.getInt(_Keys.mixedPort, defaultValue: FlutterSingBoxConstants.defaultMixedPort);
+  }
+
+  set mixedPort(int? port) {
+    storage.setInt(_Keys.mixedPort, port);
+  }
+
+  /// 系统代理是否处于已设状态（崩溃自愈用标志）。
+  bool get systemProxyActive {
+    return storage.getBool(_Keys.systemProxyActive, defaultValue: false);
+  }
+
+  set systemProxyActive(bool value) {
+    storage.setBool(_Keys.systemProxyActive, value);
+  }
+
   void clear() {
     storage.clearAll();
   }
@@ -94,4 +125,8 @@ class _Keys {
   static const String excludeAppList = "per_app_proxy_exclude_list";
   static const String clashApiPort = "clash_api_port";
   static const String testUrl = "test_url";
+
+  static const String proxyMode = "proxy_mode";
+  static const String mixedPort = "mixed_port";
+  static const String systemProxyActive = "system_proxy_active";
 }
