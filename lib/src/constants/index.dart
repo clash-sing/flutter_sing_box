@@ -9,3 +9,4 @@ export 'flutter_sing_box_constants.dart';
 export 'rule_action.dart';
 export 'windows_service.dart';
 export 'inbound_type.dart';
+export 'proxy_mode.dart';

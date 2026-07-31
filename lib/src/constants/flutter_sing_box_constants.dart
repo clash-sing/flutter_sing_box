@@ -25,4 +25,7 @@ class FlutterSingBoxConstants {
   static const String assetBasePath = 'packages/flutter_sing_box/assets/';
 
   static const int defaultClashApiPort = 9090;
+
+  /// mixed 入站（HTTP+SOCKS 合一）默认监听端口。
+  static const int defaultMixedPort = 8890;
 }
