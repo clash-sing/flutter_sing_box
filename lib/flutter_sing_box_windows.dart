@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
 import 'package:flutter_sing_box/src/windows/helper_cli.dart';
+import 'package:flutter_sing_box/src/windows/system_proxy_service.dart';
 
 class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// Registers this class as the default instance of [FlutterSingBoxPlatform].
@@ -46,6 +47,13 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (serviceStatus == WindowsServiceStatus.running ||
         serviceStatus == WindowsServiceStatus.stopped) {
       HelperHttpClient().status();
+    }
+    // 崩溃自愈: 若上次异常退出遗留了系统代理,且 sing-box 当前未运行,则清除
+    if (CsSettingsStorage().systemProxyActive) {
+      final status = await queryServiceStatus();
+      if (status != WindowsServiceStatus.running) {
+        await SystemProxyService().disable();
+      }
     }
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 endTime = ${DateTime.now()}');
   }
@@ -210,8 +218,16 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (state == ProxyState.started) {
       unawaited(_refreshClashMode());
       _startGroupRefresh();
+      // 系统代理模式：sing-box 已起，设系统代理
+      if (CsSettingsStorage().proxyMode == ProxyMode.systemProxy) {
+        unawaited(SystemProxyService().enable());
+      }
     } else if (state == ProxyState.stopped) {
       _cancelGroupRefresh();
+      // 只要标志位说系统代理还开着就清(覆盖断开/切换重启/崩溃后停止)
+      if (CsSettingsStorage().systemProxyActive) {
+        unawaited(SystemProxyService().disable());
+      }
     }
   }
 
