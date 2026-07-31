@@ -14,9 +14,9 @@ abstract class SystemProxyApplier {
 
 /// 在 Windows 上设置/清除系统代理的高层服务。
 ///
-/// [enable] 仅在 [SystemProxyApplier] 成功后置 `systemProxyActive=true`；
-/// [disable] 置 `systemProxyActive=false`。FFI 异常仅 debugPrint，不抛出
-/// （系统代理是 best-effort，不应阻断连接流程）。
+/// `enable`/`disable` 以 best-effort 方式调用 applier；无论 FFI 成功与否，
+/// 均在调用后置/清 `systemProxyActive` 标志（FFI 失败也置位，保持状态一致
+/// 并交由崩溃自愈兜底）。FFI 异常仅 debugPrint，不抛出、不阻断连接流程。
 class SystemProxyService {
   SystemProxyService({SystemProxyApplier? applier}) : _applier = applier;
   final SystemProxyApplier? _applier;
