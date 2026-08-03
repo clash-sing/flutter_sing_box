@@ -12,7 +12,6 @@ allprojects {
 plugins {
     id("com.android.library")
     kotlin("plugin.serialization") version "2.4.10"
-
 }
 
 android {
