@@ -25,10 +25,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlin {
-        jvmToolchain(17)
-    }
-
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.clashsing.flutter_sing_box_example"
@@ -39,29 +35,12 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-    val jksFile = file("release.keystore")
-    signingConfigs {
-        create("release") {
-            keyAlias = localProps["keyAlias"] as String?
-            keyPassword = localProps["keyPassword"] as String?
-            storeFile = jksFile
-            storePassword = localProps["storePassword"] as String?
-        }
-    }
 
     buildTypes {
-        getByName("release") {
-            ndk {
-                abiFilters.clear()
-                abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
-            }
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            isShrinkResources = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        release {
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -76,6 +55,12 @@ android {
                 replacedBy("com.tencent:mmkv", "Using mmkv for flutter")
             }
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 
