@@ -68,7 +68,7 @@ kotlin {
 }
 
 dependencies {
-    implementation("com.github.singbox-android:libbox:1.13.16")
+    implementation("com.github.singbox-android:libbox:1.13.18")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation("com.tencent:mmkv:2.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
