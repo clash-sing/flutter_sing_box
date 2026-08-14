@@ -82,7 +82,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return WindowsServiceStatus.notInstalled;
       }
       final cli = _buildCli(dir);
-      return cli.status();
+      return await cli.status();
     } catch (_) {
       return WindowsServiceStatus.error;
     }
@@ -109,7 +109,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return false;
       }
       final cli = _buildCli(dir);
-      return cli.install(config);
+      return await cli.install(config);
     } catch (e) {
       debugPrint('flutter_sing_box 插件安装服务失败, $e');
       return false;
@@ -125,7 +125,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return false;
       }
       final cli = _buildCli(dir);
-      return cli.uninstall();
+      return await cli.uninstall();
     } catch (e) {
       debugPrint('flutter_sing_box 插件卸载服务失败, $e');
       return false;
@@ -141,7 +141,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return false;
       }
       final cli = _buildCli(dir);
-      return cli.start();
+      return await cli.start();
     } catch (e) {
       debugPrint('flutter_sing_box 插件启动服务失败, $e');
       return false;
@@ -157,7 +157,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         return false;
       }
       final cli = _buildCli(dir);
-      return cli.stop();
+      return await cli.stop();
     } catch (e) {
       debugPrint('flutter_sing_box 插件停止服务失败, $e');
       return false;

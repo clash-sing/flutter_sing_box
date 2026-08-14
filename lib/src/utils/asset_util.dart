@@ -65,7 +65,7 @@ abstract final class AssetUtil {
 
       // 写入目标位置（目标被运行中进程锁定时自动重命名降级）
       await destFile.parent.create(recursive: true);
-      return writeBytesWithRenameFallback(bytes, destFile);
+      return await writeBytesWithRenameFallback(bytes, destFile);
     } catch (e) {
       debugPrint('复制 asset 到目录失败: $assetPath -> $destPath, $e');
       return false;
