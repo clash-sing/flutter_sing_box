@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:yaml/yaml.dart';
 
