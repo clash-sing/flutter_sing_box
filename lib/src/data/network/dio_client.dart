@@ -16,6 +16,13 @@ class DioClient {
   /// The configured [Dio] instance.
   Dio get dio => _dio;
 
+  /// 是否放行证书校验失败的 HTTPS 连接。
+  ///
+  /// 由宿主 App 的「允许不安全连接」设置驱动（默认 false，严格校验）。
+  /// [HttpClient.badCertificateCallback] 在每次握手失败时都会重新读取本字段，
+  /// 运行期修改即时生效，无需重建客户端。
+  bool allowBadCertificates = false;
+
   Dio _initDio() {
     final myDio = Dio(
       BaseOptions(
@@ -37,10 +44,13 @@ class DioClient {
     myDio.httpClientAdapter = IOHttpClientAdapter(
       createHttpClient: () {
         final client = HttpClient();
-        // 允许自签名证书（仅用于测试环境）
-        if (kDebugMode) {
-          client.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-        }
+        // 证书校验失败时询问此回调：debug 构建一律放行（便于抓包调试），
+        // release 构建遵循 [allowBadCertificates] 开关（默认拒绝）。
+        // Windows 桌面端的典型触发场景：订阅站点证书链不完整（未下发
+        // 中间证书），且本机没有中间证书缓存（如全新系统），导致
+        // CERTIFICATE_VERIFY_FAILED。详见 Dart VM 的证书静态枚举机制。
+        client.badCertificateCallback = (X509Certificate cert, String host, int port) =>
+            kDebugMode || allowBadCertificates;
         return client;
       },
     );

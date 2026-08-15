@@ -1,4 +1,5 @@
 export '../src/data/models/index.dart';
+export '../src/data/network/index.dart';
 export '../src/constants/index.dart';
 export '../src/utils/index.dart';
 export '../src/core/index.dart';
