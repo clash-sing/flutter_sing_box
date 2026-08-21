@@ -18,7 +18,7 @@ abstract class SystemProxyApplier {
 /// 均在调用后置/清 `systemProxyActive` 标志（FFI 失败也置位，保持状态一致
 /// 并交由崩溃自愈兜底）。FFI 异常仅 debugPrint，不抛出、不阻断连接流程。
 class SystemProxyService {
-  SystemProxyService({SystemProxyApplier? applier}) : _applier = applier;
+  SystemProxyService({this._applier});
   final SystemProxyApplier? _applier;
 
   Future<void> enable() async {

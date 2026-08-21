@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 
-import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
-import '../../data/index.dart';
 
 /// Example:
 ///   content-disposition: attachment;filename*=UTF-8''%E7%8B%97%E7%8B%97%E5%8A%A0%E9%80%9F.com
