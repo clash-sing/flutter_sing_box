@@ -218,12 +218,14 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (state == ProxyState.started) {
       unawaited(_refreshClashMode());
       _startGroupRefresh();
+      _startLogSubscribe();
       // 系统代理模式：sing-box 已起，设系统代理
       if (CsSettingsStorage().proxyMode == ProxyMode.systemProxy) {
         unawaited(SystemProxyService().enable());
       }
     } else if (state == ProxyState.stopped) {
       _cancelGroupRefresh();
+      _cancelLogSubscribe();
       // 只要标志位说系统代理还开着就清(覆盖断开/切换重启/崩溃后停止)
       if (CsSettingsStorage().systemProxyActive) {
         unawaited(SystemProxyService().disable());
@@ -337,13 +339,69 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     yield* _clientGroupController.stream;
   }
 
+  StreamController<List<ClientLog>>? _logStreamController;
+
+  StreamController<List<ClientLog>> get _logController {
+    _logStreamController ??= StreamController<List<ClientLog>>.broadcast();
+    return _logStreamController!;
+  }
+
+  /// 推送日志到 logStream。日志是事件流而非状态，不做 _last 缓存重放
+  /// （切页面的订阅者不应看到重复的最后一条），与 Android 端行为一致。
+  void emitLogs(List<ClientLog> logs) {
+    _logController.add(logs);
+  }
+
+  @override
+  Stream<List<ClientLog>> get logStream => _logController.stream;
+
+  StreamSubscription<List<ClientLog>>? _logSubscription;
+  Timer? _logReconnectTimer;
+
+  /// 启动 Clash API 日志 WS 订阅（started 时调用）。
+  ///
+  /// 重复 started（restart/status 多处触发）时先取消旧订阅再重连，天然幂等。
+  void _startLogSubscribe() {
+    _cancelLogSubscribe();
+    _logSubscription = ClashHttpClient().subscribeLogs().listen(
+      emitLogs,
+      onError: (Object e) => debugPrint('日志流订阅出错: $e'),
+      onDone: _scheduleLogReconnect,
+    );
+  }
+
+  /// 取消日志订阅与在途重连（stopped / dispose 调用）。
+  void _cancelLogSubscribe() {
+    _logReconnectTimer?.cancel();
+    _logReconnectTimer = null;
+    unawaited(_logSubscription?.cancel());
+    _logSubscription = null;
+  }
+
+  /// 断线/出错后延迟 2 秒重连：仅当仍处于 started 且未被显式取消。
+  ///
+  /// 重试间隔同时覆盖「started 时 sing-box 刚拉起、Clash API 尚未就绪」的场景，
+  /// 与 [_refreshClashMode] 的重试理由一致。
+  void _scheduleLogReconnect() {
+    if (_lastProxyState != ProxyState.started) return;
+    _logReconnectTimer?.cancel();
+    _logReconnectTimer = Timer(const Duration(seconds: 2), () {
+      if (_lastProxyState == ProxyState.started) {
+        _startLogSubscribe();
+      }
+    });
+  }
+
   void dispose() {
     _cancelGroupRefresh();
+    _cancelLogSubscribe();
     _proxyStateStreamController?.close();
     _proxyStateStreamController = null;
     _clashModeStreamController?.close();
     _clashModeStreamController = null;
     _clientGroupStreamController?.close();
     _clientGroupStreamController = null;
+    _logStreamController?.close();
+    _logStreamController = null;
   }
 }

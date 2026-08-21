@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_api_proxy.dart';
 import 'package:flutter_sing_box/src/data/models/clash/clash_configs.dart';
 
+/// ws://127.0.0.1:9090/logs
 /// ws://127.0.0.1:9090/connections?token=
 /// ws://127.0.0.1:9090/memory?token=
 /// ws://127.0.0.1:9090/traffic?token=
@@ -14,8 +17,9 @@ class ClashHttpClient {
   ClashHttpClient._();
   static final ClashHttpClient _instance = ClashHttpClient._();
   factory ClashHttpClient() => _instance;
-  // ignore: unused_field
-  static const String _wsBaseUrl = 'ws://127.0.0.1:9090';
+
+  /// Clash API WebSocket 基地址，端口与 [dio] 同源（CsSettingsStorage），端口变更即生效。
+  String get _wsBaseUrl => 'ws://127.0.0.1:${CsSettingsStorage().getClashApiPort()}';
 
   Dio? _dio;
   int? _dioPort;
@@ -102,6 +106,71 @@ class ClashHttpClient {
     final params = 'timeout=5000&url=${Uri.encodeQueryComponent(CsSettingsStorage().getTestUrl())}';
     final response = await dio.get('/group/${Uri.encodeQueryComponent(groupTag)}/delay?$params');
     debugPrint('testGroup response date: ${response.data}');
+  }
+
+  /// 订阅 sing-box 日志流（Clash API GET /logs WebSocket）。
+  ///
+  /// 每条消息 {"type":"info","payload":"..."} 解析为 [ClientLog] 并单条包 List，
+  /// 与 Android 端批量接口的形状对齐；连接失败以流错误抛出，重试策略由调用方决定。
+  ///
+  /// 注意：dart:io WebSocket 的订阅取消既不关闭连接也不完成（会挂住
+  /// `await for` 的取消传播），因此不能用 async* 直接转发 socket，
+  /// 需用 controller 桥接并在 onCancel 中显式关闭 socket。
+  Stream<List<ClientLog>> subscribeLogs() {
+    final controller = StreamController<List<ClientLog>>();
+    io.WebSocket? socket;
+    var cancelled = false;
+    controller.onListen = () async {
+      try {
+        final s = await io.WebSocket.connect('$_wsBaseUrl/logs');
+        // 连接建立期间已被取消：直接关闭新连接，避免泄漏。
+        if (cancelled) {
+          await s.close();
+          return;
+        }
+        socket = s;
+        s.listen(
+          (message) {
+            final map = jsonDecode(message as String) as Map<String, dynamic>;
+            controller.add([
+              ClientLog(
+                level: _mapLogLevel(map['type'] as String?),
+                message: map['payload'] as String? ?? '',
+              ),
+            ]);
+          },
+          onError: (Object error) {
+            controller.addError(error);
+            unawaited(controller.close());
+          },
+          onDone: () => unawaited(controller.close()),
+        );
+      } catch (error) {
+        controller.addError(error);
+        await controller.close();
+      }
+    };
+    controller.onCancel = () async {
+      cancelled = true;
+      await socket?.close();
+    };
+    return controller.stream;
+  }
+
+  /// Clash 日志 type 字符串 → ClientLog.level 数字（0=Panic..6=Trace），未知按 info 处理。
+  static int _mapLogLevel(String? type) {
+    switch (type) {
+      case 'debug':
+        return 5;
+      case 'info':
+        return 4;
+      case 'warning':
+        return 3;
+      case 'error':
+        return 2;
+      default:
+        return 4;
+    }
   }
 
   static String _convert2OutboundType(String type) {
