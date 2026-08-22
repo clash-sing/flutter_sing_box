@@ -230,7 +230,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.1.6"
+    version: "1.1.7"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -447,42 +447,42 @@ packages:
     dependency: "direct main"
     description:
       name: mmkv
-      sha256: af1b7a0f1ebf6dd26c0bbcf8a214eb0ac4d456d6087363719d7bccfa7615b95b
+      sha256: "35ac6a8a82c478ad27da0a80f1a13b4294a43d44190e07cd90cfae5701da8cce"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   mmkv_android:
     dependency: transitive
     description:
       name: mmkv_android
-      sha256: "0ba77fdfa74c42c06ada6dae7bef5634482e983cf41adecf79441a3d52b4ef12"
+      sha256: "57a834577adc2dcb9fb7f5b4336dc2320c0cdbe85c54f6a979f29a9b3ca61a27"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   mmkv_ios:
     dependency: transitive
     description:
       name: mmkv_ios
-      sha256: "2db1adfcb54bdcbe53270ae558d6f328c98fc93431dc6951aafe37c2ec1b2cb1"
+      sha256: "0d5aa7c3fd181b31a13297ab90dc6daab97324c7fc1c0c2897490c05649da12b"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   mmkv_linux:
     dependency: transitive
     description:
       name: mmkv_linux
-      sha256: ca193279250054089736ae4aba36b31ed615bdae1f85f2f7235f668299ccedca
+      sha256: b8dd1e6d36aa96d8bfb88bf68ebe16c420a37f3f6b2dc5223f81c151e4b27bd1
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   mmkv_ohos:
     dependency: transitive
     description:
       name: mmkv_ohos
-      sha256: "6d53f04e556acd265fa8e0841b17696009c76c4ec3d6bef0d81e4cc16de2d683"
+      sha256: b9b561776ff38e029ead03dda0af716d02b3b6cd698f8de8c599cbe3c9b571cb
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   mmkv_platform_interface:
     dependency: transitive
     description:
@@ -495,10 +495,10 @@ packages:
     dependency: transitive
     description:
       name: mmkv_win32
-      sha256: a8f97c1d9c92073b0a92237093d54a6d4bf2203cd1420cb4bdacb8c70d62e340
+      sha256: "544f708d6e8821eb4ba10c07a23a049d7d6155eb81f89edfedbda1b0f4647447"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   node_preamble:
     dependency: transitive
     description:
