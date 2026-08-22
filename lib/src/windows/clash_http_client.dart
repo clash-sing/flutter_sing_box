@@ -132,6 +132,7 @@ class ClashHttpClient {
         s.listen(
           (message) {
             final map = jsonDecode(message as String) as Map<String, dynamic>;
+            // debugPrint('Clash log: $map');
             controller.add([
               ClientLog(
                 level: _mapLogLevel(map['type'] as String?),
@@ -164,7 +165,7 @@ class ClashHttpClient {
         return 5;
       case 'info':
         return 4;
-      case 'warning':
+      case 'warn':
         return 3;
       case 'error':
         return 2;
