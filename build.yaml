@@ -1,5 +1,12 @@
 targets:
   $default:
+    sources:
+      # example 是独立的 Flutter 应用包，桌面平台构建时会在其
+      # windows/flutter/ephemeral/.plugin_symlinks 下生成指向 pub 缓存与插件自身的
+      # 符号链接，build_runner 会沿链接把第三方插件的测试文件当作本包源码处理，
+      # 因注解（如 @GenerateMocks）无法在本包依赖中解析而导致构建失败，故整体排除
+      exclude:
+        - example/**
     builders:
       json_serializable:
         options:

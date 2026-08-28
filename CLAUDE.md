@@ -17,10 +17,11 @@ Flutter plugin wrapping [sing-box](https://github.com/SagerNet/sing-box) for VPN
 flutter pub get
 
 # 代码生成（修改 @JsonSerializable 模型后必须运行）
-dart run build_runner build --delete-conflicting-outputs
+# 注：新版 build_runner 默认删除冲突输出，旧参数 --delete-conflicting-outputs 已被移除，传入会警告并忽略
+dart run build_runner build
 
 # 持续监听并生成
-dart run build_runner watch --delete-conflicting-outputs
+dart run build_runner watch
 
 # 静态分析
 flutter analyze --fatal-infos

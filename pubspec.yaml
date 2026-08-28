@@ -25,15 +25,15 @@ dependencies:
   crypto: ^3.0.6
   win32: ^6.3.0
   ffi: ^2.2.0
-  material_ui: ^1.0.0
+  material_ui: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.10.0
+  build_runner: ^2.16.0
   json_serializable: ^6.14.0
-  freezed: ^3.2.5
+  freezed: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
