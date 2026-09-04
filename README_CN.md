@@ -13,7 +13,8 @@
 
 ## 功能特性
 
-- **VPN 服务管理**: 在支持的平台上轻松启动和停止 VPN 服务。
+- **VPN / 服务管理**: 在 Android 上通过 VpnService 启停 VPN 服务；在 Windows 上以系统服务方式托管 sing-box，提供 `installService()` / `uninstallService()` / `queryServiceStatus()` 服务生命周期管理接口。
+- **双代理模式（Windows）**: Tun 模式（虚拟网卡整机透明代理）与系统代理模式（基于注册表，覆盖遵守系统代理的应用）。
 - **高级配置支持**:
     - **原生 sing-box**: 直接支持原生 JSON 配置。
     - **YAML 转 sing-box**: 自动转换 Clash 风格的 YAML 配置。
@@ -28,7 +29,7 @@
 | 平台 | 支持 | 状态 |
 | :--- |:-------:| :--- |
 | Android |    ✅    | 生产就绪 |
-| Windows |   🚧    | 开发中 |
+| Windows |    ✅    | 生产就绪 |
 | iOS |    ☐    | 计划中 |
 | macOS |   ☐️    | 计划中 |
 | Linux |    ☐    | 计划中 |
@@ -74,6 +75,14 @@ FlutterSingBox().connectedStatusStream.listen((status) {
   print("上传: ${status.uplink}, 下载: ${status.downlink}");
 });
 ```
+
+### Windows 平台说明
+
+在 Windows 上，sing-box 以系统服务（`clash_sing_service`）方式运行，而非 VPN 服务：
+
+- 首次使用需调用 `installService()` 安装服务（会触发 UAC 提权确认）；可通过 `queryServiceStatus()` 查询服务状态、`uninstallService()` 卸载服务。
+- `startVpn()` / `stopVpn()` 在 Windows 上映射为系统服务的启动 / 停止。
+- 通过 `ProxyMode` 提供两种代理模式：`tun`（默认，虚拟网卡整机透明代理）与 `systemProxy`（基于注册表的系统代理，默认混合端口 `8890`）。
 
 ## 示例
 

@@ -13,7 +13,8 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 
 ## Features
 
-- **VPN Service Management**: Easily start and stop VPN services on supported platforms.
+- **VPN / Service Management**: Start and stop VPN services on Android (VpnService); on Windows, sing-box is hosted as a system service, with `installService()` / `uninstallService()` / `queryServiceStatus()` for service lifecycle management.
+- **Dual Proxy Modes (Windows)**: Tun mode (system-wide transparent proxying via a virtual network adapter) and System Proxy mode (registry-based, covering apps that respect the system proxy).
 - **Advanced Configuration Support**:
     - **Native sing-box**: Direct support for native JSON configurations.
     - **YAML to sing-box**: Automatic conversion of Clash-style YAML configurations.
@@ -28,7 +29,7 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 | Platform | Support | Status |
 | :--- |:-------:| :--- |
 | Android |    ✅    | Production Ready |
-| Windows |   🚧    | In Development |
+| Windows |    ✅    | Production Ready |
 | iOS |    ☐    | Planned |
 | macOS |   ☐️    | Planned |
 | Linux |    ☐    | Planned |
@@ -74,6 +75,14 @@ FlutterSingBox().connectedStatusStream.listen((status) {
   print("Uplink: ${status.uplink}, Downlink: ${status.downlink}");
 });
 ```
+
+### Windows Notes
+
+On Windows, sing-box runs as a system service (`clash_sing_service`) instead of a VPN service:
+
+- Call `installService()` once to install the service (this triggers a UAC elevation prompt). Use `queryServiceStatus()` to check its state and `uninstallService()` to remove it.
+- `startVpn()` / `stopVpn()` map to starting and stopping the service.
+- Two proxy modes are available via `ProxyMode`: `tun` (default, system-wide transparent proxying) and `systemProxy` (registry-based system proxy, default mixed port `8890`).
 
 ## Example
 
