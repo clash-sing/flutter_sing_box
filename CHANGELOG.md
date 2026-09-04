@@ -1,3 +1,37 @@
+## 1.2.0
+### 🎉 里程碑：Windows 平台正式支持
+
+自 1.1.5 的"开发中"状态转入正式可用：桌面端以系统服务方式托管 sing-box 进程，并支持系统代理设置与 Clash API 实时日志。
+
+### ⚠️ 重要变更（Breaking Changes）
+* 最低环境要求提升：Dart SDK `^3.11.0` → `^3.12.0`，Flutter `>=3.41.0` → `>=3.44.0`
+
+### Features
+* **Windows 平台正式支持**：
+  * 新增 `SystemProxyService`：通过 Windows FFI 设置/清除系统代理
+  * 新增 `ProxyMode` 枚举与 `defaultMixedPort` 常量；`CsSettingsStorage` 新增 `proxyMode` / `mixedPort` / `systemProxyActive` 配置项
+  * `emitProxyState` 与系统代理开/关联动；`init` 增加崩溃自愈逻辑
+  * 新增 Clash API 实时日志订阅（`logStream`）：基于 WebSocket 连接 `/logs` 端点，支持断线自动重连与自定义 API 端口
+* **资源释放机制增强**：改为在内存中比对资源与目标文件的 SHA256，避免临时文件写入与清理；针对 Windows 下运行中的 exe 被独占锁定（errno 32）的问题，实现旧文件重命名为 `.old` 后再写入新文件的降级策略
+* 网络层 `DioClient` 新增 `allowBadCertificates` 开关，运行时动态控制证书校验，解决 Windows 桌面端因订阅站点证书链不完整导致的请求失败问题
+
+### Fixes
+* 修复 Windows 端 Clash 日志级别映射错误（`warning` → `warn`）
+* 修复 Windows 平台服务操作（状态检查、安装、卸载、启动、停止）及资源复制方法中缺失 `await` 的异步调用
+
+### Improvements
+* Android 构建脚本由 Groovy（`build.gradle`）迁移至 Kotlin DSL（`build.gradle.kts`），要求 AGP 9.0.1 / Kotlin 2.3.20 / Java 17
+* 移除 Android 端不必要的权限
+* 简化 pubspec.yaml 中的 Windows 平台资源配置
+* example 示例：升级 Android 构建工具链（Gradle / AGP / Kotlin / SDK），UI 层由 `flutter/material` 迁移至 material_ui
+
+### Dependencies
+* 升级 sing-box 内核（Android `libbox` / Windows `sing-box.exe`）：`1.13.15` → `1.13.21`
+* 升级 MMKV：`2.4.1` → `2.4.2`（2.4.1 存在 Windows 端 MSVC cbridge 崩溃问题）
+* 升级 `dio`：→ `^5.11.1`
+* 移除 `path_provider` 依赖
+
+
 ## 1.1.5
 ### Features
 * **新增 Windows 平台支持**（开发中，桌面端以系统服务方式托管 sing-box 进程，弥补桌面平台缺少 VPN Service 的能力）：
