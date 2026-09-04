@@ -159,6 +159,8 @@ class ClashHttpClient {
   }
 
   /// Clash 日志 type 字符串 → ClientLog.level 数字（0=Panic..6=Trace），未知按 info 处理。
+  ///
+  /// warn 同时匹配 'warn'（sing-box 实际发送）与 'warning'（Clash 生态惯例）。
   static int _mapLogLevel(String? type) {
     switch (type) {
       case 'debug':
@@ -166,6 +168,7 @@ class ClashHttpClient {
       case 'info':
         return 4;
       case 'warn':
+      case 'warning':
         return 3;
       case 'error':
         return 2;

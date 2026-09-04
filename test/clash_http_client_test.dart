@@ -62,12 +62,13 @@ void main() {
       addTearDown(serverSocket.close);
       serverSocket.add(jsonEncode({'type': 'debug', 'payload': 'm1'}));
       serverSocket.add(jsonEncode({'type': 'warning', 'payload': 'm2'}));
+      serverSocket.add(jsonEncode({'type': 'warn', 'payload': 'm2b'}));
       serverSocket.add(jsonEncode({'type': 'error', 'payload': 'm3'}));
       serverSocket.add(jsonEncode({'type': 'whatever', 'payload': 'm4'}));
 
-      await until(() => levels.length >= 4);
-      expect(levels, [5, 3, 2, 4]);
-      expect(messages, ['m1', 'm2', 'm3', 'm4']);
+      await until(() => levels.length >= 5);
+      expect(levels, [5, 3, 3, 2, 4]);
+      expect(messages, ['m1', 'm2', 'm2b', 'm3', 'm4']);
       await subscription.cancel();
     });
 
