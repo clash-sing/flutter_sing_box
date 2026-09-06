@@ -84,7 +84,7 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 
 ### Native Side (Android)
 
-- Kotlin, min SDK 26, sing-box libbox **1.13.21** (jitpack `com.github.singbox-android:libbox`) — keep this version in sync when upgrading sing-box
+- Kotlin, min SDK 26, sing-box libbox **1.14.0** (jitpack `com.github.singbox-android:libbox`) — keep this version in sync when upgrading sing-box
 - **Read `android/CLAUDE.md` before touching `android/`** — it documents the two-package layout (plugin layer + vendored sing-box-for-android service layer), the `:remote` process model, AIDL vs libbox CommandClient channels, and known gotchas.
 
 ### Windows Side

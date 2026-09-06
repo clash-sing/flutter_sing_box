@@ -10,6 +10,7 @@ import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.LogEntry
 import io.nekohasekai.libbox.LogIterator
 import io.nekohasekai.libbox.OutboundGroup
+import io.nekohasekai.libbox.OutboundGroupItemIterator
 import io.nekohasekai.libbox.OutboundGroupIterator
 import io.nekohasekai.libbox.StatusMessage
 import io.nekohasekai.libbox.StringIterator
@@ -140,6 +141,10 @@ open class CommandClient(
             }
             cachedGroups = groups
             getAllHandlers().forEach { it.updateGroups(groups) }
+        }
+
+        // libbox 1.14 新增回调；本插件未订阅 CommandOutbounds 命令，不会被触发
+        override fun writeOutbounds(message: OutboundGroupItemIterator?) {
         }
 
         override fun setDefaultLogLevel(level: Int) {

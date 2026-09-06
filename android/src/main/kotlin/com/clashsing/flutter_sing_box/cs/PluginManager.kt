@@ -12,7 +12,6 @@ import com.clashsing.flutter_sing_box.utils.SettingsManager
 import com.tencent.mmkv.MMKV
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.SetupOptions
-import java.io.File
 import java.util.Locale
 
 object PluginManager {
@@ -54,7 +53,8 @@ object PluginManager {
             it.logMaxLines = 3000
             it.debug = false // TODO: 临时赋值 false
         })
-        Libbox.redirectStderr(File(workingDir, "stderr.log").path)
+        // libbox 1.14 移除了 Libbox.redirectStderr：Setup() 现在自动把 stderr
+        // 重定向到 workingDir/CrashReport-<source>.log，无需手动调用
     }
 
     val connectivity by lazy { appContext.getSystemService<ConnectivityManager>() ?: throw throwError() }
