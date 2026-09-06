@@ -30,18 +30,7 @@ jobs:
 
   publish:
     needs: build
-    runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      id-token: write # OIDC 自动发布所需的身份令牌权限
-    steps:
-      - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Publish dry-run validation
-        run: flutter pub publish --dry-run
-      - name: Publish
-        run: flutter pub publish --force
+    # 官方发布 workflow：内部完成 checkout、OIDC 令牌 provision（依赖 id-token: write）、
+    # Flutter SDK 装载、dart pub get、dry-run 校验与 dart pub publish -f
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
