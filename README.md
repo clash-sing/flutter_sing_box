@@ -5,7 +5,7 @@
 
 English | [中文简体](README_CN.md)
 
-A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform.
+A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform, bundling the sing-box `1.14.0` core on Android and Windows.
 
 ## 🚀 Projects Using This Plugin
 
@@ -16,11 +16,11 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 - **VPN / Service Management**: Start and stop VPN services on Android (VpnService); on Windows, sing-box is hosted as a system service, with `installService()` / `uninstallService()` / `queryServiceStatus()` for service lifecycle management.
 - **Dual Proxy Modes (Windows)**: Tun mode (system-wide transparent proxying via a virtual network adapter) and System Proxy mode (registry-based, covering apps that respect the system proxy).
 - **Advanced Configuration Support**:
-    - **Native sing-box**: Direct support for native JSON configurations.
+    - **Native sing-box**: Direct support for native JSON configurations (the new DNS format is required — the legacy `dns.servers` format was removed in sing-box 1.14.0).
     - **YAML to sing-box**: Automatic conversion of Clash-style YAML configurations.
     - **Base64 to sing-box**: Seamless parsing of Base64 encoded subscription links.
 - **Profile Management**: Import, manage, and switch between local and remote profiles (subscription links).
-- **Clash API Support**: Full support for Clash-compatible API for managing proxies, groups, and selecting outbounds.
+- **Clash API Support**: Full support for the Clash-compatible API — manage proxies and groups, select outbounds, test latency, and stream real-time logs over WebSocket (with automatic reconnection).
 - **Real-time Monitoring**: Monitor connection status, traffic (uplink/downlink), and logs in real-time via streams.
 - **Multi-Protocol Support**: Inherits support for various protocols from sing-box, including Hysteria, TUIC, WireGuard, Shadowsocks, and more.
 
@@ -33,6 +33,10 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 | iOS |    ☐    | Planned |
 | macOS |   ☐️    | Planned |
 | Linux |    ☐    | Planned |
+
+## Requirements
+
+- Flutter `>=3.44.0` / Dart SDK `^3.12.2`
 
 ## Getting Started
 

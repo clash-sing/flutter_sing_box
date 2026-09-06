@@ -4,16 +4,22 @@ import android.annotation.SuppressLint
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Process
+import android.provider.Settings
 import android.system.OsConstants
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.clashsing.flutter_sing_box.cs.PluginManager
+import io.nekohasekai.libbox.BridgeOptions
+import io.nekohasekai.libbox.BridgeSession
 import io.nekohasekai.libbox.ConnectionOwner
 import io.nekohasekai.libbox.InterfaceUpdateListener
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.libbox.LocalDNSTransport
+import io.nekohasekai.libbox.NeighborUpdateListener
 import io.nekohasekai.libbox.NetworkInterfaceIterator
 import io.nekohasekai.libbox.PlatformInterface
+import io.nekohasekai.libbox.PlatformUser
+import io.nekohasekai.libbox.ShellSession
 import io.nekohasekai.libbox.StringIterator
 import io.nekohasekai.libbox.TunOptions
 import io.nekohasekai.libbox.WIFIState
@@ -21,9 +27,6 @@ import java.net.Inet6Address
 import java.net.InetSocketAddress
 import java.net.InterfaceAddress
 import java.net.NetworkInterface
-import java.security.KeyStore
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 import io.nekohasekai.libbox.NetworkInterface as LibboxNetworkInterface
 
 interface PlatformInterfaceWrapper : PlatformInterface {
@@ -97,6 +100,15 @@ interface PlatformInterfaceWrapper : PlatformInterface {
                 networkInterfaces.find { it.name == boxInterface.name } ?: continue
             boxInterface.dnsServer =
                 StringArray(linkProperties.dnsServers.mapNotNull { it.hostAddress }.iterator())
+            boxInterface.gateway =
+                StringArray(
+                    linkProperties.routes
+                        .filter { it.destination.prefixLength == 0 }
+                        .mapNotNull { it.gateway }
+                        .filterNot { it.isAnyLocalAddress }
+                        .mapNotNull { it.hostAddress }
+                        .iterator(),
+                )
             boxInterface.type =
                 when {
                     networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> Libbox.InterfaceTypeWIFI
@@ -163,21 +175,48 @@ interface PlatformInterfaceWrapper : PlatformInterface {
 
     override fun localDNSTransport(): LocalDNSTransport? = LocalResolver
 
-    @OptIn(ExperimentalEncodingApi::class)
-    override fun systemCertificates(): StringIterator {
-        val certificates = mutableListOf<String>()
-        val keyStore = KeyStore.getInstance("AndroidCAStore")
-        if (keyStore != null) {
-            keyStore.load(null, null)
-            val aliases = keyStore.aliases()
-            while (aliases.hasMoreElements()) {
-                val cert = keyStore.getCertificate(aliases.nextElement())
-                certificates.add(
-                    "-----BEGIN CERTIFICATE-----\n" + Base64.encode(cert.encoded) + "\n-----END CERTIFICATE-----",
-                )
-            }
-        }
-        return StringArray(certificates.iterator())
+    // ---- 以下为 libbox 1.14 在 PlatformInterface 上新增的接口方法 ----
+    // 本插件不提供 SFA 的 root shell / bridge / 邻居表监控等基础设施，
+    // 相关方法按官方最简方式返回"不支持"或空实现（usePlatformShell/usePlatformBridge
+    // 返回 false 后，Go 侧不会调用对应的 shell/bridge 方法）。
+
+    override fun startNeighborMonitor(listener: NeighborUpdateListener?) {
+    }
+
+    override fun usePlatformShell(): Boolean = false
+
+    override fun checkPlatformShell() {
+    }
+
+    override fun openShellSession(
+        user: PlatformUser?,
+        command: String?,
+        environ: StringIterator?,
+        term: String?,
+        rows: Int,
+        cols: Int,
+    ): ShellSession = error("not supported")
+
+    override fun readSystemSSHHostKey(): String = error("not supported")
+
+    override fun lookupSFTPServer(): String = error("not supported")
+
+    override fun tailscaleHostname(): String = Settings.Global.getString(
+        PluginManager.appContext.contentResolver,
+        Settings.Global.DEVICE_NAME,
+    )?.takeIf { it.isNotBlank() }
+        ?: "${Build.MANUFACTURER} ${Build.MODEL}"
+
+    override fun usePlatformBridge(): Boolean = false
+
+    override fun createBridge(options: BridgeOptions?): BridgeSession = error("not supported")
+
+    override fun lookupUser(username: String?): PlatformUser = error("not supported")
+
+    override fun registerMyInterface(name: String?) {
+    }
+
+    override fun closeNeighborMonitor(listener: NeighborUpdateListener?) {
     }
 
     private class InterfaceArray(private val iterator: Iterator<LibboxNetworkInterface>) : NetworkInterfaceIterator {

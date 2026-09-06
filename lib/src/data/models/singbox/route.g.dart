@@ -16,6 +16,7 @@ Route _$RouteFromJson(Map<String, dynamic> json) => Route(
   ruleSet: (json['rule_set'] as List<dynamic>?)
       ?.map((e) => RuleSet.fromJson(e as Map<String, dynamic>))
       .toList(),
+  defaultHttpClient: json['default_http_client'] as String?,
 );
 
 Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
@@ -24,10 +25,11 @@ Map<String, dynamic> _$RouteToJson(Route instance) => <String, dynamic>{
   'default_domain_resolver': ?instance.defaultDomainResolver,
   'final': ?instance.routeFinal,
   'rule_set': ?instance.ruleSet?.map((e) => e.toJson()).toList(),
+  'default_http_client': ?instance.defaultHttpClient,
 };
 
 RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
-  action: json['action'] as String? ?? RuleAction.route,
+  action: json['action'] as String?,
   outbound: json['outbound'] as String?,
   method: json['method'] as String?,
   noDrop: json['no_drop'] as bool?,
@@ -116,7 +118,7 @@ RouteRule _$RouteRuleFromJson(Map<String, dynamic> json) => RouteRule(
 );
 
 Map<String, dynamic> _$RouteRuleToJson(RouteRule instance) => <String, dynamic>{
-  'action': instance.action,
+  'action': ?instance.action,
   'outbound': ?instance.outbound,
   'method': ?instance.method,
   'no_drop': ?instance.noDrop,
@@ -165,9 +167,11 @@ RuleSet _$RuleSetFromJson(Map<String, dynamic> json) => RuleSet(
   type: json['type'] as String,
   format: json['format'] as String?,
   url: json['url'] as String?,
-  downloadDetour: json['download_detour'] as String?,
   updateInterval: json['update_interval'] as String?,
   path: json['path'] as String?,
+  rules: (json['rules'] as List<dynamic>?)
+      ?.map((e) => RouteRule.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$RuleSetToJson(RuleSet instance) => <String, dynamic>{
@@ -175,7 +179,7 @@ Map<String, dynamic> _$RuleSetToJson(RuleSet instance) => <String, dynamic>{
   'type': instance.type,
   'format': ?instance.format,
   'url': ?instance.url,
-  'download_detour': ?instance.downloadDetour,
   'update_interval': ?instance.updateInterval,
   'path': ?instance.path,
+  'rules': ?instance.rules?.map((e) => e.toJson()).toList(),
 };

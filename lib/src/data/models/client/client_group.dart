@@ -45,8 +45,8 @@ class ClientGroup {
 @unfreezed
 abstract class ClientGroupItem with _$ClientGroupItem {
   factory ClientGroupItem({
-    required final String tag,
-    required final String type,
+    required String tag,
+    required String type,
 
     /// The timestamp of the last URL test.
     required int urlTestTime,

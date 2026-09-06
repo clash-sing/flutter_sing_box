@@ -21,6 +21,7 @@ SingBox _$SingBoxFromJson(Map<String, dynamic> json) => SingBox(
   log: json['log'] == null
       ? null
       : Log.fromJson(json['log'] as Map<String, dynamic>),
+  httpClients: json['http_clients'] as List<dynamic>?,
 );
 
 Map<String, dynamic> _$SingBoxToJson(SingBox instance) => <String, dynamic>{
@@ -30,4 +31,5 @@ Map<String, dynamic> _$SingBoxToJson(SingBox instance) => <String, dynamic>{
   'outbounds': instance.outbounds.map((e) => e.toJson()).toList(),
   'experimental': ?instance.experimental?.toJson(),
   'log': ?instance.log?.toJson(),
+  'http_clients': ?instance.httpClients,
 };

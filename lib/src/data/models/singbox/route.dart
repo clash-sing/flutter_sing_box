@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import '../../../constants/rule_action.dart';
 
 part 'route.g.dart';
 
@@ -14,6 +13,8 @@ class Route {
   String? routeFinal;
   @JsonKey(name: "rule_set")
   List<RuleSet>? ruleSet;
+  @JsonKey(name: "default_http_client")
+  String? defaultHttpClient;
 
   Route({
     required this.rules,
@@ -21,6 +22,7 @@ class Route {
     this.defaultDomainResolver,
     this.routeFinal,
     this.ruleSet,
+    this.defaultHttpClient,
   });
 
   factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
@@ -30,7 +32,7 @@ class Route {
 
 @JsonSerializable(explicitToJson: true)
 class RouteRule {
-  String action;
+  String? action;
   String? outbound;
 
   /// 仅当 action 为 'redirect' 时有效，默认：default
@@ -118,7 +120,7 @@ class RouteRule {
   List<dynamic>? rules;
 
   RouteRule({
-    this.action = RuleAction.route,
+    this.action,
     this.outbound,
     this.method,
     this.noDrop,
@@ -173,20 +175,19 @@ class RuleSet {
   String type;
   String? format;
   String? url;
-  @JsonKey(name: "download_detour")
-  String? downloadDetour;
   @JsonKey(name: "update_interval")
   String? updateInterval;
   String? path;
+  List<RouteRule>? rules;
 
   RuleSet({
     required this.tag,
     required this.type,
     this.format,
     this.url,
-    this.downloadDetour,
     this.updateInterval,
     this.path,
+    this.rules,
   });
 
   factory RuleSet.fromJson(Map<String, dynamic> json) => _$RuleSetFromJson(json);

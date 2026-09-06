@@ -418,8 +418,10 @@ class BoxService(private val service: Service, private val platformInterface: Pl
     }
 
     internal fun sendNotification(notification: Notification) {
+        // libbox 1.14：identifier 语义变为通知 tag，频道 ID 改由 typeID 派生（对齐上游 SFA）
+        val channel = "notification-${notification.typeID}"
         val builder =
-            NotificationCompat.Builder(service, notification.identifier).setShowWhen(false)
+            NotificationCompat.Builder(service, channel).setShowWhen(false)
                 .setContentTitle(notification.title).setContentText(notification.body)
                 .setOnlyAlertOnce(true).setSmallIcon(R.drawable.ic_menu)
                 .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -444,17 +446,32 @@ class BoxService(private val service: Service, private val platformInterface: Pl
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 PluginManager.notification.createNotificationChannel(
                     NotificationChannel(
-                        notification.identifier,
+                        channel,
                         notification.typeName,
                         NotificationManager.IMPORTANCE_HIGH,
                     ),
                 )
             }
-            PluginManager.notification.notify(notification.typeID, builder.build())
+            PluginManager.notification.notify(notification.identifier, notification.typeID, builder.build())
         }
+    }
+
+    internal fun cancelNotification(identifier: String, typeID: Int) {
+        GlobalScope.launch(Dispatchers.Main) {
+            PluginManager.notification.cancel(identifier, typeID)
+        }
+    }
+
+    override fun triggerNativeCrash() {
+        Thread {
+            Thread.sleep(200)
+            throw RuntimeException("debug native crash")
+        }.start()
     }
 
     override fun writeDebugMessage(message: String?) {
         Log.d("sing-box", message!!)
     }
+
+    override fun connectSSHAgent(): Int = -1
 }
