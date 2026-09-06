@@ -37,3 +37,31 @@ jobs:
     # 官方发布 workflow：内部完成 checkout、OIDC 令牌 provision、
     # Flutter SDK 装载、dart pub get、dry-run 校验与 dart pub publish -f
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+
+  release:
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write # 创建 GitHub Release 所需
+    steps:
+      - uses: actions/checkout@v7
+      - name: 从 CHANGELOG 提取本版本说明并创建 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          # 幂等保护：Release 已存在则跳过，允许安全重跑
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "Release $TAG 已存在，跳过创建"
+            exit 0
+          fi
+          # 字面量匹配段落标题（避免版本号中的 . 被当作正则），提取到下一处 ## 之前
+          awk -v ver="## $VERSION" 'index($0, ver)==1{p=1; print; next} p && /^## /{exit} p{print}' CHANGELOG.md > /tmp/notes.md
+          if [ ! -s /tmp/notes.md ]; then
+            echo "CHANGELOG.md 中未找到 $VERSION 段落，回退为自动生成说明"
+            gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+          else
+            gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "$TAG" --notes-file /tmp/notes.md
+          fi
