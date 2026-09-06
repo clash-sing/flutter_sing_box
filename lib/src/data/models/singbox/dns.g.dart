@@ -77,7 +77,7 @@ Map<String, dynamic> _$ServerToJson(Server instance) => <String, dynamic>{
 };
 
 DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
-  action: json['action'] as String? ?? RuleAction.route,
+  action: json['action'] as String?,
   server: json['server'] as String?,
   strategy: json['strategy'] as String?,
   disableCache: json['disable_cache'] as bool?,
@@ -164,7 +164,7 @@ DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
       ?.map((e) => e as String)
       .toList(),
   ruleSetIpCidrMatchSource: json['rule_set_ip_cidr_match_source'] as bool?,
-  matchResponse: json['match_response'] as bool?,
+  matchResponse: json['match_response'],
   ipCidr: (json['ip_cidr'] as List<dynamic>?)?.map((e) => e as String).toList(),
   ipIsPrivate: json['ip_is_private'] as bool?,
   ipAcceptAny: json['ip_accept_any'] as bool?,
@@ -175,11 +175,16 @@ DnsRule _$DnsRuleFromJson(Map<String, dynamic> json) => DnsRule(
       .toList(),
   type: json['type'] as String?,
   mode: json['mode'] as String?,
-  rules: json['rules'] as List<dynamic>?,
+  rules: (json['rules'] as List<dynamic>?)
+      ?.map((e) => DnsRule.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  race: json['race'] as bool?,
+  rcode: json['rcode'] as String?,
+  tag: json['tag'] as String?,
 );
 
 Map<String, dynamic> _$DnsRuleToJson(DnsRule instance) => <String, dynamic>{
-  'action': instance.action,
+  'action': ?instance.action,
   'server': ?instance.server,
   'strategy': ?instance.strategy,
   'disable_cache': ?instance.disableCache,
@@ -227,5 +232,8 @@ Map<String, dynamic> _$DnsRuleToJson(DnsRule instance) => <String, dynamic>{
   'outbound': ?instance.outbound,
   'type': ?instance.type,
   'mode': ?instance.mode,
-  'rules': ?instance.rules,
+  'rules': ?instance.rules?.map((e) => e.toJson()).toList(),
+  'race': ?instance.race,
+  'rcode': ?instance.rcode,
+  'tag': ?instance.tag,
 };

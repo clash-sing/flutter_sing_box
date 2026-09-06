@@ -52,6 +52,11 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   udpOverTcp: json['udp_over_tcp'],
   interruptExistConnections: json['interrupt_exist_connections'] as bool?,
   domainResolver: json['domain_resolver'] as String?,
+  hopInterval: json['hop_interval'] as String?,
+  hopIntervalMax: json['hop_interval_max'] as String?,
+  bbrProfile: json['bbr_profile'] as String?,
+  disableChromeParrot: json['disable_chrome_parrot'] as bool?,
+  realm: json['realm'],
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -90,6 +95,11 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'udp_over_tcp': ?instance.udpOverTcp,
   'interrupt_exist_connections': ?instance.interruptExistConnections,
   'domain_resolver': ?instance.domainResolver,
+  'hop_interval': ?instance.hopInterval,
+  'hop_interval_max': ?instance.hopIntervalMax,
+  'bbr_profile': ?instance.bbrProfile,
+  'disable_chrome_parrot': ?instance.disableChromeParrot,
+  'realm': ?instance.realm,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(

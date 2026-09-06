@@ -17,6 +17,8 @@ class SingBox {
   List<Outbound> outbounds;
   Experimental? experimental;
   Log? log;
+  @JsonKey(name: "http_clients")
+  List<dynamic>? httpClients;
 
   SingBox({
     required this.dns,
@@ -25,6 +27,7 @@ class SingBox {
     required this.outbounds,
     this.experimental,
     this.log,
+    this.httpClients,
   });
 
   factory SingBox.fromJson(Map<String, dynamic> json) => _$SingBoxFromJson(json);

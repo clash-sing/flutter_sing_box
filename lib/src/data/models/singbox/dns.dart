@@ -1,4 +1,3 @@
-import 'package:flutter_sing_box/src/constants/rule_action.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'tls.dart';
@@ -94,7 +93,7 @@ class Server {
 
 @JsonSerializable(explicitToJson: true)
 class DnsRule {
-  String action;
+  String? action;
   String? server;
   @Deprecated('已在 sing-box 1.14.0 废弃，且将在 sing-box 1.16.0 中被移除。')
   String? strategy;
@@ -169,7 +168,7 @@ class DnsRule {
   @JsonKey(name: "rule_set_ip_cidr_match_source")
   bool? ruleSetIpCidrMatchSource;
   @JsonKey(name: "match_response")
-  bool? matchResponse;
+  dynamic matchResponse;
   @JsonKey(name: "ip_cidr")
   List<String>? ipCidr;
   @JsonKey(name: "ip_is_private")
@@ -191,10 +190,17 @@ class DnsRule {
   String? mode;
 
   /// 包括的规则
-  List<dynamic>? rules;
+  List<DnsRule>? rules;
+
+  bool? race;
+
+  /// 仅用于 action = 'predefined' 时有效
+  String? rcode;
+
+  String? tag;
 
   DnsRule({
-    this.action = RuleAction.route,
+    this.action,
     this.server,
     this.strategy,
     this.disableCache,
@@ -243,6 +249,9 @@ class DnsRule {
     this.type,
     this.mode,
     this.rules,
+    this.race,
+    this.rcode,
+    this.tag,
   });
 
   factory DnsRule.fromJson(Map<String, dynamic> json) => _$DnsRuleFromJson(json);

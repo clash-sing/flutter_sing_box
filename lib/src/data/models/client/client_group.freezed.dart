@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ClientGroupItem {
 
- String get tag; String get type;/// The timestamp of the last URL test.
+ String get tag; set tag(String value); String get type; set type(String value);/// The timestamp of the last URL test.
  int get urlTestTime;/// The timestamp of the last URL test.
  set urlTestTime(int value);/// The latency result of the last URL test in milliseconds.
  int get urlTestDelay;/// The latency result of the last URL test in milliseconds.
@@ -35,7 +35,8 @@ $ClientGroupItemCopyWith<ClientGroupItem> get copyWith => _$ClientGroupItemCopyW
 
 @override
 String toString() {
-  return 'ClientGroupItem(tag: $tag, type: $type, urlTestTime: $urlTestTime, urlTestDelay: $urlTestDelay)';
+  final _this = this as ClientGroupItem;
+  return 'ClientGroupItem(tag: ${_this.tag}, type: ${_this.type}, urlTestTime: ${_this.urlTestTime}, urlTestDelay: ${_this.urlTestDelay})';
 }
 
 
@@ -213,8 +214,8 @@ class _ClientGroupItem implements ClientGroupItem {
    _ClientGroupItem({required this.tag, required this.type, required this.urlTestTime, required this.urlTestDelay});
   factory _ClientGroupItem.fromJson(Map<String, dynamic> json) => _$ClientGroupItemFromJson(json);
 
-@override final  String tag;
-@override final  String type;
+@override  String tag;
+@override  String type;
 /// The timestamp of the last URL test.
 @override  int urlTestTime;
 /// The latency result of the last URL test in milliseconds.
@@ -235,7 +236,7 @@ Map<String, dynamic> toJson() {
 
 @override
 String toString() {
-  return 'ClientGroupItem(tag: $tag, type: $type, urlTestTime: $urlTestTime, urlTestDelay: $urlTestDelay)';
+    return 'ClientGroupItem(tag: $tag, type: $type, urlTestTime: $urlTestTime, urlTestDelay: $urlTestDelay)';
 }
 
 

@@ -74,6 +74,17 @@ class Outbound {
   @JsonKey(name: "domain_resolver")
   String? domainResolver;
 
+  @JsonKey(name: "hop_interval")
+  String? hopInterval;
+  @JsonKey(name: "hop_interval_max")
+  String? hopIntervalMax;
+  @JsonKey(name: "bbr_profile")
+  String? bbrProfile;
+  @JsonKey(name: "disable_chrome_parrot")
+  bool? disableChromeParrot;
+  //TODO: 自 sing-box 1.14.0 起，Hysteria2 引入 realm 字段
+  dynamic realm;
+
   Outbound({
     required this.tag,
     required this.type,
@@ -110,6 +121,11 @@ class Outbound {
     this.udpOverTcp,
     this.interruptExistConnections,
     this.domainResolver,
+    this.hopInterval,
+    this.hopIntervalMax,
+    this.bbrProfile,
+    this.disableChromeParrot,
+    this.realm,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
