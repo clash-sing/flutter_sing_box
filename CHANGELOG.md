@@ -1,15 +1,24 @@
-## Unreleased
+## 1.3.0
 
 ### Dependencies
-* 升级 Android 端 sing-box 内核（`libbox`）：`1.13.21` → `1.14.0`（Windows 端 `sing-box.exe` 版本不变，另行升级）
+* 升级 sing-box 内核至 `1.14.0`：Android 端（`libbox`，jitpack）`1.13.21` → `1.14.0`；Windows 端 `sing-box.exe` / `libcronet.dll` 二进制同步升级
 
-### Compatibility（适配 libbox 1.14.0 接口破坏性变更，对齐上游 sing-box-for-android 1.14.0）
+### Compatibility（适配 libbox 1.14.0 接口破坏性变更）
 * `PlatformInterface`：移除已删除的 `systemCertificates()`；新增 13 个接口方法的默认实现（shell / bridge / 邻居表监控等按"不支持"处理）；`getInterfaces()` 补充 `gateway` 网关信息
 * `TunOptions`：`dnsServerAddress` 由单值改为迭代器，`openTun` 迁移到 `dnsMode` + 多 DNS 服务器写入
 * `CommandServerHandler`：补齐 `triggerNativeCrash()` / `connectSSHAgent()`
 * `CommandClientHandler`：补齐 `writeOutbounds()`（本插件未订阅该命令，空实现）
 * 通知 API：`identifier` 语义变为通知 tag，`sendNotification` 频道改由 `typeID` 派生，并新增 `cancelNotification`
 * 移除已被 libbox 删除的 `Libbox.redirectStderr()` 调用（`Setup()` 现自动重定向 stderr 至 `CrashReport-<source>.log`）
+
+### Features
+* 配置模型扩展，补齐 sing-box 1.14.0 新字段：
+  * `DnsRule`：新增 `race` / `rcode` / `tag` 字段；`action` 改为可空并移除 `RuleAction.route` 默认值；`rules` 细化为 `List<DnsRule>`；`matchResponse` 放宽为 `dynamic`
+  * `RouteRule`：`action` 改为可空并移除 `RuleAction.route` 默认值
+  * `RuleSet`：新增本地规则 `rules`（inline rule-set）；移除已废弃的 `downloadDetour`
+  * `Outbound`：新增 `hopInterval` / `hopIntervalMax` / `bbrProfile` / `disableChromeParrot` / `realm`（Hysteria2 相关）字段
+  * `Route` / `SingBox`：新增 `defaultHttpClient` / `httpClients` 字段
+  * `ClientGroupItem`：`tag` / `type` 改为可变字段
 
 ### ⚠️ 运行时行为提示
 * sing-box 1.14.0 已硬移除 1.12 弃用的旧版 DNS 服务器格式（legacy `dns.servers`）：旧格式配置启动即失败，用户配置需使用新版 DNS 格式（插件内的 Clash/Base64 配置转换器生成的新格式不受影响）
