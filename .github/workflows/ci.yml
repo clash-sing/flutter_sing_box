@@ -31,6 +31,9 @@ jobs:
   publish:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
-    # 官方发布 workflow：内部完成 checkout、OIDC 令牌 provision（依赖 id-token: write）、
+    # 调用方必须先授权，被调用的官方 workflow 内部的 id-token: write 才能生效
+    permissions:
+      id-token: write # 允许官方发布 workflow 换取 OIDC 令牌
+    # 官方发布 workflow：内部完成 checkout、OIDC 令牌 provision、
     # Flutter SDK 装载、dart pub get、dry-run 校验与 dart pub publish -f
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
