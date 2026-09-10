@@ -1,144 +1,435 @@
 {
-  "dns": {
-    "servers": [
-      {
-        "tag": "system",
-        "type": "local"
-      },
-      {
-        "tag": "alidoh",
-        "type": "https",
-        "server": "223.5.5.5"
-      },
-      {
-        "tag": "remote",
-        "type": "fakeip",
-        "inet4_range": "198.18.0.0/15",
-        "inet6_range": "fc00::/18"
-      }
-    ],
-    "rules": [
-      {
-        "clash_mode": "global",
-        "query_type": [
-          "A",
-          "AAAA"
-        ],
-        "server": "remote"
-      },
-      {
-        "clash_mode": "direct",
-        "domain_suffix": [
-          ".cn"
-        ],
-        "server": "system"
-      },
-      {
-        "rule_set": [
-          "geoip-cn",
-          "geosite-cn"
-        ],
-        "server": "system"
-      }
-    ],
-    "independent_cache": true,
-    "final": "alidoh",
-    "strategy": "prefer_ipv6"
-  },
-  "inbounds": [
-    {
-      "tag": "tun",
-      "type": "tun",
-      "address": [
-        "172.19.0.1/30",
-        "fdfe:dcba:9876::1/126"
-      ],
-      "mtu": 1400,
-      "stack": "system",
-      "auto_route": true,
-      "strict_route": true,
-      "platform": {
-        "http_proxy": {
-          "enabled": false,
-          "server": "127.0.0.1",
-          "server_port": 8890
+    "$schema": "https://sing-box.sagernet.org/schema.json",
+    "http_clients": [
+        {
+            "tag": "default"
         }
-      }
-    },
-    {
-      "tag": "mixed",
-      "type": "mixed",
-      "listen": "127.0.0.1",
-      "listen_port": 8890
-    }
-  ],
-  "route": {
-    "default_domain_resolver": "system",
-    "rules": [
-      {
-        "action": "sniff",
-        "timeout": "300ms"
-      },
-      {
-        "protocol": "dns",
-        "action": "hijack-dns"
-      },
-      {
-        "protocol": [
-          "quic"
-        ],
-        "action": "reject"
-      },
-      {
-        "clash_mode": "global",
-        "outbound": "proxy"
-      },
-      {
-        "clash_mode": "direct",
-        "ip_is_private": true,
-        "domain_suffix": [
-          ".cn"
-        ],
-        "outbound": "direct"
-      },
-      {
-        "rule_set": [
-          "geoip-cn",
-          "geosite-cn"
-        ],
-        "outbound": "direct"
-      }
     ],
-    "final": "proxy",
-    "auto_detect_interface": true,
-    "rule_set": [
-      {
-        "tag": "geoip-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs",
-        "download_detour": "direct"
-      },
-      {
-        "tag": "geosite-cn",
-        "type": "remote",
-        "format": "binary",
-        "url": "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs",
-        "download_detour": "direct"
-      }
-    ]
-  },
-  "experimental": {
-    "cache_file": {
-      "enabled": true,
-      "store_fakeip": true
+    "dns": {
+        "servers": [
+            {
+                "tag": "system",
+                "type": "local"
+            },
+            {
+                "tag": "alidoh",
+                "type": "https",
+                "server": "223.5.5.5",
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "insecure": true
+                }
+            },
+            {
+                "tag": "udp-bytedance",
+                "type": "udp",
+                "server": "180.184.2.2"
+            },
+            {
+                "tag": "remote",
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0\/15",
+                "inet6_range": "fc00::\/18"
+            }
+        ],
+        "rules": [
+            {
+                "query_type": [
+                    "HTTPS",
+                    "SVCB"
+                ],
+                "action": "predefined",
+                "rcode": "NOERROR"
+            },
+            {
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {
+                        "ip_version": 6
+                    },
+                    {
+                        "domain_suffix": [
+                            "lan",
+                            "local"
+                        ],
+                        "invert": true
+                    },
+                    {
+                        "default_interface_address": [
+                            "2000::\/3"
+                        ],
+                        "invert": true
+                    }
+                ],
+                "action": "predefined",
+                "rcode": "NOERROR"
+            },
+            {
+                "domain_suffix": [
+                    "lan",
+                    "local"
+                ],
+                "action": "route",
+                "server": "system"
+            },
+            {
+                "clash_mode": "global",
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ],
+                "action": "route",
+                "server": "remote"
+            },
+            {
+                "clash_mode": "direct",
+                "action": "evaluate",
+                "server": "system",
+                "tag": "plaintext-direct-system",
+                "timeout": "1s"
+            },
+            {
+                "clash_mode": "direct",
+                "action": "evaluate",
+                "server": "udp-bytedance",
+                "tag": "plaintext-direct-bytedance",
+                "timeout": "1s"
+            },
+            {
+                "match_response": "plaintext-direct-system",
+                "response_rcode": "NOERROR",
+                "action": "respond",
+                "race": true
+            },
+            {
+                "match_response": "plaintext-direct-bytedance",
+                "response_rcode": "NOERROR",
+                "action": "respond",
+                "race": true
+            },
+            {
+                "clash_mode": "direct",
+                "action": "route",
+                "server": "system"
+            },
+            {
+                "domain_suffix": [
+                    "play.google.com",
+                    "accounts.google.com",
+                    "android.clients.google.com",
+                    "android.apis.google.com",
+                    "dl.google.com",
+                    "dl-ssl.google.com",
+                    "m.google.com",
+                    "www.google.com",
+                    "googleapis.com",
+                    "googleapis.cn",
+                    "gvt1.com",
+                    "gvt2.com",
+                    "gvt3.com",
+                    "ggpht.com",
+                    "googleusercontent.com",
+                    "gstatic.com",
+                    "android.com",
+                    "googleplay.com",
+                    "xn--ngstr-lra8j.com",
+                    "google-analytics.com"
+                ],
+                "action": "route",
+                "server": "remote"
+            },
+            {
+                "rule_set": [
+                    "dns-plaintext",
+                    "geosite-cn"
+                ],
+                "action": "evaluate",
+                "server": "system",
+                "tag": "plaintext-system",
+                "timeout": "1s"
+            },
+            {
+                "rule_set": [
+                    "dns-plaintext",
+                    "geosite-cn"
+                ],
+                "action": "evaluate",
+                "server": "udp-bytedance",
+                "tag": "plaintext-bytedance",
+                "timeout": "1s"
+            },
+            {
+                "match_response": "plaintext-system",
+                "response_rcode": "NOERROR",
+                "action": "respond",
+                "race": true
+            },
+            {
+                "match_response": "plaintext-bytedance",
+                "response_rcode": "NOERROR",
+                "action": "respond",
+                "race": true
+            },
+            {
+                "rule_set": [
+                    "dns-plaintext",
+                    "geosite-cn"
+                ],
+                "action": "route",
+                "server": "system"
+            },
+            {
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ],
+                "action": "route",
+                "server": "remote"
+            },
+            {
+                "action": "route",
+                "server": "system"
+            }
+        ],
+        "strategy": "prefer_ipv4"
     },
-    "clash_api": {}
-  },
-  "outbounds": [],
-  "log": {
-    "disabled": false,
-    "level": "info",
-    "timestamp": true
-  }
+    "inbounds": [
+        {
+            "tag": "tun",
+            "type": "tun",
+            "address": [
+                "172.19.0.1\/30",
+                "fdfe:dcba:9876::1\/126"
+            ],
+            "mtu": 1500,
+            "dns_mode": "hijack",
+            "stack": "system",
+            "auto_route": true,
+            "strict_route": true,
+            "platform": {
+                "http_proxy": {
+                    "enabled": false,
+                    "server": "127.0.0.1",
+                    "server_port": 8895
+                }
+            }
+        },
+        {
+            "tag": "mixed",
+            "type": "mixed",
+            "listen": "127.0.0.1",
+            "listen_port": 8895
+        }
+    ],
+    "route": {
+        "default_domain_resolver": "system",
+        "rules": [
+            {
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {
+                        "ip_version": 6
+                    },
+                    {
+                        "rule_set": [
+                            "geoip-cn"
+                        ]
+                    },
+                    {
+                        "default_interface_address": [
+                            "2000::\/3"
+                        ],
+                        "invert": true
+                    }
+                ],
+                "action": "reject",
+                "no_drop": true
+            },
+            {
+                "action": "sniff",
+                "timeout": "300ms"
+            },
+            {
+                "protocol": "dns",
+                "action": "hijack-dns"
+            },
+            {
+                "clash_mode": "direct",
+                "action": "route",
+                "outbound": "direct"
+            },
+            {
+                "clash_mode": "global",
+                "action": "route",
+                "outbound": "proxy"
+            },
+            {
+                "ip_is_private": true,
+                "action": "route",
+                "outbound": "direct"
+            },
+            {
+                "domain_suffix": [
+                    "play.google.com",
+                    "accounts.google.com",
+                    "android.clients.google.com",
+                    "android.apis.google.com",
+                    "dl.google.com",
+                    "dl-ssl.google.com",
+                    "m.google.com",
+                    "www.google.com",
+                    "googleapis.com",
+                    "googleapis.cn",
+                    "gvt1.com",
+                    "gvt2.com",
+                    "gvt3.com",
+                    "ggpht.com",
+                    "googleusercontent.com",
+                    "gstatic.com",
+                    "android.com",
+                    "googleplay.com",
+                    "xn--ngstr-lra8j.com",
+                    "google-analytics.com"
+                ],
+                "action": "route",
+                "outbound": "proxy"
+            },
+            {
+                "domain_suffix": [
+                    "baidu.com",
+                    "bdstatic.com",
+                    "bdimg.com",
+                    "baidubce.com",
+                    "deepseek.com",
+                    "doubao.com",
+                    "douyin.com",
+                    "byteimg.com",
+                    "bytedance.com",
+                    "feishu.cn",
+                    "xiaohongshu.com",
+                    "xhscdn.com",
+                    "163.com",
+                    "126.net",
+                    "taobao.com",
+                    "tmall.com",
+                    "alipay.com",
+                    "mmstat.com",
+                    "msn.cn",
+                    "qq.com",
+                    "qpic.cn",
+                    "gtimg.com",
+                    "tencent.com",
+                    "tencent-cloud.net",
+                    "myqcloud.com",
+                    "wechat.com",
+                    "weixin.qq.com"
+                ],
+                "action": "route",
+                "outbound": "direct"
+            },
+            {
+                "rule_set": [
+                    "geoip-cn",
+                    "geosite-cn"
+                ],
+                "action": "route",
+                "outbound": "direct"
+            },
+            {
+                "protocol": [
+                    "quic"
+                ],
+                "action": "reject"
+            }
+        ],
+        "final": "proxy",
+        "auto_detect_interface": true,
+        "default_http_client": "default",
+        "rule_set": [
+            {
+                "tag": "dns-plaintext",
+                "type": "inline",
+                "rules": [
+                    {
+                        "domain_suffix": [
+                            "baidu.com",
+                            "bdstatic.com",
+                            "bdimg.com",
+                            "baidubce.com",
+                            "deepseek.com",
+                            "doubao.com",
+                            "douyin.com",
+                            "byteimg.com",
+                            "bytedance.com",
+                            "feishu.cn",
+                            "xiaohongshu.com",
+                            "xhscdn.com",
+                            "163.com",
+                            "126.net",
+                            "taobao.com",
+                            "tmall.com",
+                            "alipay.com",
+                            "mmstat.com",
+                            "msn.cn",
+                            "qq.com",
+                            "qpic.cn",
+                            "gtimg.com",
+                            "tencent.com",
+                            "tencent-cloud.net",
+                            "myqcloud.com",
+                            "wechat.com",
+                            "weixin.qq.com",
+                            "cdn-go.cn",
+                            "ntp.org.cn",
+                            "time.edu.cn",
+                            "aliyun.com"
+                        ],
+                        "domain": [
+                            "time.windows.com",
+                            "time.nist.gov",
+                            "time.apple.com",
+                            "time.asia.apple.com",
+                            "time1.cloud.tencent.com",
+                            "time.ustc.edu.cn",
+                            "pool.ntp.org",
+                            "ntp.ubuntu.com"
+                        ]
+                    },
+                    {
+                        "domain_regex": [
+                            "^stun[.-].+"
+                        ]
+                    }
+                ]
+            },
+            {
+                "tag": "geoip-cn",
+                "type": "remote",
+                "format": "binary",
+                "url": "https:\/\/testingcf.jsdelivr.net\/gh\/SagerNet\/sing-geoip@rule-set\/geoip-cn.srs"
+            },
+            {
+                "tag": "geosite-cn",
+                "type": "remote",
+                "format": "binary",
+                "url": "https:\/\/testingcf.jsdelivr.net\/gh\/SagerNet\/sing-geosite@rule-set\/geosite-cn.srs"
+            }
+        ]
+    },
+    "experimental": {
+        "cache_file": {
+            "enabled": true,
+            "store_fakeip": true
+        },
+        "clash_api": {}
+    },
+    "outbounds": [],
+    "log": {
+        "disabled": false,
+        "level": "info",
+        "timestamp": true
+    }
 }

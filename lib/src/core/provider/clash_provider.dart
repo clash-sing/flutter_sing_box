@@ -46,6 +46,7 @@ extension ClashProxyExt on ClashProxy {
         serverPort: port,
         serverPorts: ports?.isNotEmpty == true ? [ports!.replaceAll('-', ':')] : null,
         password: password,
+        bbrProfile: bbrProfile,
         upMbps: up,
         downMbps: down,
         tls: Tls(
@@ -85,6 +86,7 @@ extension ClashProxyExt on ClashProxy {
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni ?? "",
+          utls: Utls(enabled: true, fingerprint: "chrome"),
         ),
       ),
       ClashProxyType.trojan => Outbound(
@@ -133,7 +135,7 @@ extension ClashGroupExt on ClashGroup {
       final int min = interval! ~/ 60;
       return '${min}m';
     } else {
-      return '10m';
+      return '3m';
     }
   }
 
@@ -149,6 +151,7 @@ extension ClashGroupExt on ClashGroup {
         url: url,
         interval: _singBoxInterval(),
         tolerance: 50,
+        interruptExistConnections: true,
       ),
       _ => null,
     };

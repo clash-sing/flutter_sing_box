@@ -30,6 +30,7 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   reduceRtt: json['reduce-rtt'] as bool?,
   congestionControl: json['congestion-control'] as String?,
   udpRelayMode: json['udp-relay-mode'] as String?,
+  bbrProfile: json['bbr-profile'] as String?,
 );
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -57,4 +58,5 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'reduce-rtt': ?instance.reduceRtt,
       'congestion-control': ?instance.congestionControl,
       'udp-relay-mode': ?instance.udpRelayMode,
+      'bbr-profile': ?instance.bbrProfile,
     };

@@ -28,17 +28,23 @@ class ClashProxy {
   bool? fastOpen;
   @JsonKey(name: "disable_mtu_discovery")
   bool? disableMtuDiscovery;
+
   /// 用于 TUIC V5 的用户唯一识别码,使用TUIC V4时不可书写
   String? uuid;
+
   /// 是否在客户端启用 QUIC 的 0-RTT 握手这可以减少连接建立时间，但可能增加重放攻击的风险
   @JsonKey(name: "reduce-rtt")
   bool? reduceRtt;
+
   /// QUIC 拥塞控制算法，可选项为 cubic/new_reno/bbr
   @JsonKey(name: "congestion-control")
   String? congestionControl;
+
   /// UDP数据包中继模式，可以是 native/quic
   @JsonKey(name: "udp-relay-mode")
   String? udpRelayMode;
+  @JsonKey(name: "bbr-profile")
+  String? bbrProfile;
 
   ClashProxy({
     required this.name,
@@ -64,6 +70,7 @@ class ClashProxy {
     this.reduceRtt,
     this.congestionControl,
     this.udpRelayMode,
+    this.bbrProfile,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);

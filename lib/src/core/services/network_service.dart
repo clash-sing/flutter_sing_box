@@ -9,8 +9,10 @@ import '../../data/network/dio_client.dart';
 /// Fetches subscription content over the network.
 class NetworkService {
   NetworkService._internal();
+
   /// The singleton instance of [NetworkService].
   static final NetworkService instance = NetworkService._internal();
+
   /// Creates the singleton [NetworkService] instance.
   factory NetworkService() => instance;
 
