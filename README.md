@@ -21,7 +21,7 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
     - **Base64 to sing-box**: Seamless parsing of Base64 encoded subscription links.
 - **Profile Management**: Import, manage, and switch between local and remote profiles (subscription links).
 - **Clash API Support**: Full support for the Clash-compatible API — manage proxies and groups, select outbounds, test latency, and stream real-time logs over WebSocket (with automatic reconnection).
-- **Real-time Monitoring**: Monitor connection status, traffic (uplink/downlink), and logs in real-time via streams.
+- **Real-time Monitoring**: Monitor connection status, traffic (uplink/downlink), and logs in real-time via streams; the proxy lifecycle is exposed as a `ProxyState` sealed class, whose `ProxyStopped.errMessage` carries the reason of an abnormal stop (start failure, core crash, etc.).
 - **Multi-Protocol Support**: Inherits support for various protocols from sing-box, including Hysteria, TUIC, WireGuard, Shadowsocks, and more.
 
 ## Platform Support
@@ -36,7 +36,7 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 
 ## Requirements
 
-- Flutter `>=3.44.0` / Dart SDK `^3.12.2`
+- Flutter `>=3.44.0` / Dart SDK `^3.12.0`
 
 ## Getting Started
 
@@ -66,6 +66,8 @@ try {
 }
 ```
 
+> Since 2.0.0, startup failures on Windows are no longer thrown from this future — they are reported via `proxyStateStream` instead (see [Listen to Proxy State](#listen-to-proxy-state) below).
+
 #### Stop VPN
 
 ```dart
@@ -80,13 +82,42 @@ FlutterSingBox().connectedStatusStream.listen((status) {
 });
 ```
 
+#### Listen to Proxy State
+
+The proxy lifecycle is exposed as a `ProxyState` **sealed class** — `ProxyStopped` / `ProxyStarting` / `ProxyStarted` / `ProxyStopping` — best consumed with exhaustive pattern matching:
+
+```dart
+FlutterSingBox().proxyStateStream.listen((state) {
+  switch (state) {
+    case ProxyStopped(:final errMessage) when errMessage != null:
+      print("Abnormally stopped: $errMessage");
+    case ProxyStopped():
+      print("Stopped");
+    case ProxyStarting():
+      print("Starting...");
+    case ProxyStarted():
+      print("Started");
+    case ProxyStopping():
+      print("Stopping...");
+  }
+});
+```
+
+`ProxyStopped.errMessage` is non-null when the service stopped abnormally (start failure, core crash) — on both Android and Windows, this is the single source of truth for startup failures.
+
 ### Windows Notes
 
 On Windows, sing-box runs as a system service (`clash_sing_service`) instead of a VPN service:
 
 - Call `installService()` once to install the service (this triggers a UAC elevation prompt). Use `queryServiceStatus()` to check its state and `uninstallService()` to remove it.
 - `startVpn()` / `stopVpn()` map to starting and stopping the service.
+- Since 2.0.0, `startVpn()` / `serviceReload()` failures no longer throw; the reason is emitted as `ProxyStopped(errMessage: ...)` on `proxyStateStream`.
 - Two proxy modes are available via `ProxyMode`: `tun` (default, system-wide transparent proxying) and `systemProxy` (registry-based system proxy, default mixed port `8890`).
+
+### Migrating to 2.0.0
+
+- **`ProxyState` is now a sealed class** — `ProxyStopped` / `ProxyStarting` / `ProxyStarted` / `ProxyStopping`, each its own `final class`. Exhaustive `switch`es over the old enum must migrate to type patterns (`case ProxyStopped():`). Legacy `== ProxyState.started`-style comparisons keep working via preserved `static const` compatibility constants, and `name` / `fromName()` keep their original semantics.
+- **Windows: startup failures no longer throw.** `startVpn()` / `serviceReload()` emit the failure reason as `ProxyStopped(errMessage: ...)` on `proxyStateStream` (also resetting the state machine from `starting`), making the state stream the single source of truth for startup failures.
 
 ## Example
 
