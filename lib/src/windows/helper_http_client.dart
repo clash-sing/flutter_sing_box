@@ -89,10 +89,8 @@ class HelperHttpClient {
       final result = await dio.get('${config?.helperPort}/status');
       if (result.data == 'running') {
         _platform.emitProxyState(ProxyState.started);
-      } else if (result.data == 'stopped') {
-        _platform.emitProxyState(ProxyState.stopped);
       } else {
-        _platform.emitProxyState(ProxyState.unknown);
+        _platform.emitProxyState(ProxyState.stopped);
       }
     } catch (e) {
       throw Exception('Error starting helper: $e');

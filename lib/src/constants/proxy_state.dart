@@ -10,13 +10,18 @@ enum ProxyState {
   started('Started'),
 
   /// The proxy is stopping.
-  stopping('Stopping'),
-
-  /// The proxy is in an unknown state.
-  unknown('Unknown');
+  stopping('Stopping');
 
   const ProxyState(this.name);
 
   /// The display name of this state.
   final String name;
+
+  /// Returns the [ProxyState] corresponding to the given display name.
+  static ProxyState fromName(String name) {
+    for (var state in ProxyState.values) {
+      if (state.name == name) return state;
+    }
+    return ProxyState.stopped;
+  }
 }

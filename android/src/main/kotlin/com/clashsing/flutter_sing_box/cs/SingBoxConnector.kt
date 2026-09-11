@@ -175,7 +175,7 @@ class SingBoxConnector(binaryMessenger: BinaryMessenger) {
             Log.e(TAG, "onServiceAlert: $type $message")
             proxyStatus = Status.Stopped
             coroutineScope?.launch(Dispatchers.Main.immediate) {
-                proxyStateSink?.success(proxyStatus?.name)
+                proxyStateSink?.error(Status.Stopped.name, message, null)
             }
             disconnectClient()
         }

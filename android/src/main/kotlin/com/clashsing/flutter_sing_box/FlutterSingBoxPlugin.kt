@@ -167,18 +167,6 @@ class FlutterSingBoxPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Pl
         try {
             BoxService.start()
             result.success(null)
-/*
-            val context = activityBinding?.activity?.applicationContext
-            if (context != null) {
-                val intent = Intent(context, ClashSingVpnService::class.java)
-                context.startForegroundService(intent)
-                result.success(null)
-                return
-            } else {
-                result.error("NO_CONTEXT", "无法获取Context实例", null)
-                return
-            }
-*/
         } catch (e: Exception) {
             result.error("VPN_ERROR", "启动VPN服务失败:\n${e.message}", null)
         }

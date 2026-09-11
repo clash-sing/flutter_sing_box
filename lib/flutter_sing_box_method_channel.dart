@@ -141,13 +141,27 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   Stream<ProxyState>? _proxyStateStream;
   @override
   Stream<ProxyState> get proxyStateStream {
-    _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().map((data) {
-      if (data == ProxyState.stopped.name) return ProxyState.stopped;
-      if (data == ProxyState.starting.name) return ProxyState.starting;
-      if (data == ProxyState.started.name) return ProxyState.started;
-      if (data == ProxyState.stopping.name) return ProxyState.stopping;
-      return ProxyState.unknown;
-    });
+        _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().transform(
+      StreamTransformer<dynamic, ProxyState>.fromHandlers(
+        handleData: (data, sink) {
+          debugPrint('proxyStateStream handleData: $data');
+          sink.add(ProxyState.fromName(data.toString()));
+        },
+        handleError: (error, stackTrace, sink) {
+          debugPrint('proxyStateStream handleError: $error');
+          sink.add(
+            ProxyState.stopped,
+          );
+        },
+      ),
+    );
+    // _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().map((data) {
+    //   if (data == ProxyState.stopped.name) return ProxyState.stopped;
+    //   if (data == ProxyState.starting.name) return ProxyState.starting;
+    //   if (data == ProxyState.started.name) return ProxyState.started;
+    //   if (data == ProxyState.stopping.name) return ProxyState.stopping;
+    //   return ProxyState.unknown;
+    // });
     return _proxyStateStream!;
   }
 }
