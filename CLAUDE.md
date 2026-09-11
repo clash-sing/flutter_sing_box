@@ -57,7 +57,7 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 
 | Directory | Purpose |
 |-----------|---------|
-| `constants/` | Enums: `ClashMode`, `ProfileType`, `OutboundType`, `ProxyState`, `LogLevel`, `ProxyMode` (tun/systemProxy), `WindowsServiceStatus`, etc.; plus `FlutterSingBoxConstants` (default mixed port 8890 / Clash API port 9090, template asset path) |
+| `constants/` | Enums: `ProfileType`, `OutboundType`, `ProxyMode` (tun/systemProxy), `WindowsServiceStatus`, etc.; non-enum constants: `ClashMode` (string-constants class) and `ProxyState` (sealed class, see Key Design Patterns); plus `FlutterSingBoxConstants` (default mixed port 8890 / Clash API port 9090, template asset path) |
 | `core/provider/` | Config format converters: `SingBoxConfigProvider` (native JSON), `ClashProvider` (YAML→sing-box), `Base64Provider` (Base64 subscription→sing-box) |
 | `core/services/` | `ProfileService` (profile CRUD), `NetworkService` (HTTP for remote profiles) |
 | `storage/` | `KeyValueStorage` abstraction with two impls — `MmkvStorage` (production) and `MemoryStorage` (unit tests, no native dependency); `ProfileStorage` / `CsSettingsStorage` sit on top |
@@ -73,7 +73,8 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 ### Key Design Patterns
 
 - **Index barrels**: Each subdirectory has an `index.dart` that re-exports public API
-- **JSON serialization**: All models use `json_serializable` + `build_runner`; `build.yaml` sets `include_if_null: false` (null fields are omitted from output)
+- **JSON serialization**: Models use `json_serializable` + `build_runner` (some UI-facing client models like `ClientGroup` also use freezed `@unfreezed`); `build.yaml` sets `include_if_null: false` (null fields are omitted from output)
+- **`ProxyState` is a sealed class, not an enum** (breaking change in 2.0.0): four subclasses `ProxyStopped` / `ProxyStarting` / `ProxyStarted` / `ProxyStopping`, handled by exhaustive pattern matching; only `ProxyStopped` carries data — `errMessage` non-null means an abnormal stop (start failure, core crash). `ProxyState.stopped` / `.started` etc. remain as const shortcuts for legacy equality checks.
 - **MMKV**: multi-process mode — on Android the Dart side writes the config path and the `:remote` VPN service process reads it (the only config hand-off between processes; details in `android/CLAUDE.md`)
 - **Config providers**: Strategy pattern for converting subscription formats (native/YAML/Base64) into sing-box JSON
 
@@ -92,6 +93,8 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 - The `windows/` native dir is only a CMake + C-API registration stub (`FlutterSingBoxPluginCApi`); all Windows logic lives in Dart.
 - `init()` copies three bundled assets (`assets/windows/`: `sing-box.exe`, `libcronet.dll`, `clash_sing_helper.exe`) next to the app executable, then clears a stale system proxy left over from a previous crash.
 - Runtime flow: `HelperCli` drives the `clash_sing_service` Windows system service (installed via a UAC-elevated helper), which runs sing-box as LocalSystem and exposes an HTTP API. Two proxy modes via `ProxyMode`: `tun` (default, system-wide) and `systemProxy` (registry-based, default mixed port 8890).
+- Since 2.0.0, Windows `start()` / `restart()` **no longer throw on failure** — the failure reason is emitted on `proxyStateStream` as `ProxyStopped(errMessage: ...)` (also resetting the state machine from `starting`), making the state stream the single source of truth for startup failures; callers awaiting these futures cannot catch failures from the returned future. Aligned with the Android native alert path.
+- The bundled `sing-box.exe` / `libcronet.dll` are core version **1.14.0** — keep them in sync with the Android libbox version when upgrading sing-box.
 - `clash_sing_helper.exe` is built by the sibling Go repo `clash_sing_service` — after changing it, rebuild and overwrite `assets/windows/clash_sing_helper.exe` here, or apps keep using the old version (full cross-repo chain described in the workspace-level `../CLAUDE.md`).
 
 ## Conventions
@@ -101,11 +104,12 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 - `*.g.dart` files are auto-generated — never edit them directly; regenerate with `build_runner`
 - When adding/modifying model classes with `@JsonSerializable`, always run build_runner afterward
 - Default branch is `main`; daily development happens on `develop`. GitNexus regression comparisons use `base_ref: "main"`.
+- `doc/superpowers/` (plans / specs) is working documentation, not build input — don't treat it as code.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **flutter_sing_box** (2485 symbols, 4723 relationships, 131 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **flutter_sing_box** (2537 symbols, 4849 relationships, 141 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 
