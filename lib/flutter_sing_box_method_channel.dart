@@ -141,7 +141,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   Stream<ProxyState>? _proxyStateStream;
   @override
   Stream<ProxyState> get proxyStateStream {
-        _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().transform(
+    _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().transform(
       StreamTransformer<dynamic, ProxyState>.fromHandlers(
         handleData: (data, sink) {
           debugPrint('proxyStateStream handleData: $data');
@@ -149,19 +149,13 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
         },
         handleError: (error, stackTrace, sink) {
           debugPrint('proxyStateStream handleError: $error');
-          sink.add(
-            ProxyState.stopped,
-          );
+          // Android 原生侧异常停止经 EventSink.error(code: "Stopped", message: 错误信息) 下发，
+          // PlatformException.message 即错误原因；其他错误兜底用 toString。
+          final message = error is PlatformException ? error.message : null;
+          sink.add(ProxyStopped(errMessage: message ?? error.toString()));
         },
       ),
     );
-    // _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().map((data) {
-    //   if (data == ProxyState.stopped.name) return ProxyState.stopped;
-    //   if (data == ProxyState.starting.name) return ProxyState.starting;
-    //   if (data == ProxyState.started.name) return ProxyState.started;
-    //   if (data == ProxyState.stopping.name) return ProxyState.stopping;
-    //   return ProxyState.unknown;
-    // });
     return _proxyStateStream!;
   }
 }

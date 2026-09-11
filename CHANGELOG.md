@@ -1,3 +1,16 @@
+## 2.0.0
+
+### ⚠️ Breaking change
+* `ProxyState` is now a `sealed class` (was an enum); each state is its own `final class`: `ProxyStopped` / `ProxyStarting` / `ProxyStarted` / `ProxyStopping`
+  * `ProxyStopped` carries a nullable `errMessage` (non-null = abnormal stop, e.g. start failure or core crash) with value-based `==` / `hashCode`; the other three states are const singletons
+  * Existing `== ProxyState.started`-style comparisons keep working via preserved `static const` compatibility constants (`ProxyState.stopped` / `.starting` / `.started` / `.stopping`); exhaustive switches over the old enum must migrate to type patterns (`case ProxyStopped():`)
+  * The `name` getter and `fromName()` keep their original semantics
+* Windows: `start()` / `restart()` no longer throw on failure; the failure reason is emitted as `ProxyStopped(errMessage: ...)` on `proxyStateStream` (also resetting the state machine from `starting`), making the state stream the single source of truth for startup failures — aligned with the Android native alert path; callers awaiting these futures can no longer catch failures from the returned future
+
+### Features
+* Android `proxyStateStream`: abnormal-stop events from the native side (`EventSink.error(code: "Stopped", message)`) now surface their error message as `ProxyStopped.errMessage` instead of being swallowed
+
+
 ## 1.3.0
 
 ### Dependencies

@@ -46,7 +46,8 @@ class HelperHttpClient {
       }
       throw Exception(result.data);
     } catch (e) {
-      throw Exception('Error starting helper: $e');
+      // 错误唯一出口是状态流：emit 带 errMessage 的 stopped 归位状态机，不再上抛异常
+      _platform.emitProxyState(ProxyStopped(errMessage: e.toString()));
     }
   }
 
@@ -78,7 +79,8 @@ class HelperHttpClient {
       }
       throw Exception(result.data);
     } catch (e) {
-      throw Exception('Error starting helper: $e');
+      // 错误唯一出口是状态流：emit 带 errMessage 的 stopped 归位状态机，不再上抛异常
+      _platform.emitProxyState(ProxyStopped(errMessage: e.toString()));
     }
   }
 
