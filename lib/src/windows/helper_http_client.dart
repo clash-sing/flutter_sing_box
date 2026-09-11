@@ -52,18 +52,14 @@ class HelperHttpClient {
   }
 
   Future<void> stop() async {
-    try {
-      _platform.emitProxyState(ProxyState.stopping);
-      config ??= await _getHelperConfig();
-      if (config == null) throw Exception('Helper config not found');
-      final result = await dio.get('${config?.helperPort}/stop');
-      if (result.data == successValue) {
-        _platform.emitProxyState(ProxyState.stopped);
-        return;
-      }
+    _platform.emitProxyState(ProxyState.stopping);
+    config ??= await _getHelperConfig();
+    if (config == null) throw Exception('Helper config not found');
+    final result = await dio.get('${config?.helperPort}/stop');
+    if (result.data == successValue) {
+      _platform.emitProxyState(ProxyState.stopped);
+    } else {
       throw Exception(result.data);
-    } catch (e) {
-      throw Exception('Error starting helper: $e');
     }
   }
 
