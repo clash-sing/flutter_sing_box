@@ -1,3 +1,9 @@
+## 2.0.1
+
+### Documentation
+* Update the showcase project name (`clash_sing` → `clash-sing`) in README / README_CN to match the renamed repository
+
+
 ## 2.0.0
 
 ### ⚠️ Breaking change
