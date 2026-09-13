@@ -9,7 +9,7 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 
 ## 🚀 Projects Using This Plugin
 
-- [**clash_sing**](https://github.com/clash-sing/clash_sing): A full-featured GUI client based on sing-box and Clash, providing a powerful and intuitive user experience.
+- [**clash-sing**](https://github.com/clash-sing/clash-sing): A full-featured GUI client based on sing-box and Clash, providing a powerful and intuitive user experience.
 
 ## Features
 
