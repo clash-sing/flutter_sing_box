@@ -1,14 +1,18 @@
 /// Shared constant values used across the flutter_sing_box plugin.
-class FlutterSingBoxConstants {
+abstract class FlutterSingBoxConstants {
   /// The asset path of the sing-box config template bundled with the plugin.
   static const templateConfig =
       'packages/flutter_sing_box/assets/configs/singbox_config_template.json';
 
-  /// The URI scheme prefix that marks a local file subscription.
+  /// 标记本地文件订阅的 URI 前缀（全平台统一）。
+  ///
+  /// 本地文件路径一律经 [Uri.file] 归一化为 file:///... 形式后存储，
+  /// 不再按平台区分（Windows 原始盘符路径会被 [Uri.parse] 误判为
+  /// 单字母 scheme，导致识别失败）。
   static const String localFilePrefix = 'file://';
 
   /// The file extensions accepted for local subscription files.
-  static const List<String> localSubscriptionFileExtensions = ['yaml', 'json', 'txt'];
+  static const List<String> localSubscriptionFileExtensions = ['json', 'yaml', 'yml', 'txt'];
 
   /// The default outbound group tag.
   static const String defaultGroup = 'proxy';

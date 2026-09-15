@@ -34,7 +34,7 @@ class ProfileService {
     }
 
     late final ApiResult apiResult;
-    if (isLocaleFile(link)) {
+    if (isLocalFile(link)) {
       File file = File(link.toFilePath());
       if (await file.exists()) {
         final String content = await file.readAsString();
@@ -67,13 +67,24 @@ class ProfileService {
     return profile;
   }
 
+  /// 将原始订阅输入解析为 [Uri]。
+  ///
+  /// Windows 盘符路径（如 C:\... 或 C:/...）与 UNC 路径（\\server\share\...）
+  /// 归一化为规范 file URI——# / 空格 / 中文等特殊字符会被正确编码，
+  /// 避免被当作 fragment 分隔符截断；其余输入（file://、http(s):// 等）
+  /// 按普通 URI 解析。
+  static Uri parseSubscribeLink(String raw) {
+    final isWindowsPath = RegExp(r'^[A-Za-z]:[\\/]').hasMatch(raw) || raw.startsWith(r'\\');
+    return isWindowsPath ? Uri.file(raw, windows: true) : Uri.parse(raw);
+  }
+
   String _getProfileName(Uri link, String? name, Map<String, dynamic> headers) {
     const contentDispositionKey = 'content-disposition';
     const profileTitleKey = 'profile-title';
 
     if (name?.trim().isNotEmpty == true) {
       return name!.trim();
-    } else if (isLocaleFile(link)) {
+    } else if (isLocalFile(link)) {
       return link.toFilePath().split(p.separator).last;
     }
 
@@ -113,7 +124,7 @@ class ProfileService {
     String filePath,
   ) {
     final typedProfile = TypedProfile(
-      type: isLocaleFile(link) ? ProfileType.local : ProfileType.remote,
+      type: isLocalFile(link) ? ProfileType.local : ProfileType.remote,
       path: filePath,
       lastUpdated: DateTime.now().millisecondsSinceEpoch,
       autoUpdateInterval: autoUpdateInterval,
@@ -158,9 +169,9 @@ class ProfileService {
     }
   }
 
-  /// Returns true when [link] points to a local file subscription.
-  bool isLocaleFile(Uri link) {
-    return link.scheme.toLowerCase() ==
-        Uri.tryParse(FlutterSingBoxConstants.localFilePrefix)?.scheme;
-  }
+  /// 判断 [link] 是否指向本地文件订阅。
+  ///
+  /// 仅识别规范 file URI（file:///...）；Windows 盘符 / UNC 路径
+  /// 需先经 [parseSubscribeLink] 归一化。
+  bool isLocalFile(Uri link) => link.isScheme('file');
 }
