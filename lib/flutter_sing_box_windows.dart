@@ -166,7 +166,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
 
   @override
   Future<String> getSingBoxVersion() async {
-    return '1.14.0';
+    return '1.14.1';
   }
 
   @override
