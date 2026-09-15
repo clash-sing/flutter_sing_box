@@ -1,3 +1,11 @@
+## 2.0.2
+
+### Dependencies
+* Upgrade sing-box core to `1.14.1`
+
+### Fixes and improvements
+* Minor bug fixes and performance improvements
+
 ## 2.0.1
 
 ### Documentation
