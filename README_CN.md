@@ -5,7 +5,7 @@
 
 [English](README.md) | 中文简体
 
-一个基于 [sing-box](https://github.com/SagerNet/sing-box) 的强大 Flutter 插件，sing-box 是一个通用的代理平台。本插件在 Android 与 Windows 平台内置 sing-box `1.14.0` 内核。
+一个基于 [sing-box](https://github.com/SagerNet/sing-box) 的强大 Flutter 插件，sing-box 是一个通用的代理平台。本插件在 Android 与 Windows 平台内置 sing-box `1.14.1` 内核。
 
 ## 🚀 使用此插件的项目
 
@@ -16,7 +16,7 @@
 - **VPN / 服务管理**: 在 Android 上通过 VpnService 启停 VPN 服务；在 Windows 上以系统服务方式托管 sing-box，提供 `installService()` / `uninstallService()` / `queryServiceStatus()` 服务生命周期管理接口。
 - **双代理模式（Windows）**: Tun 模式（虚拟网卡整机透明代理）与系统代理模式（基于注册表，覆盖遵守系统代理的应用）。
 - **高级配置支持**:
-    - **原生 sing-box**: 直接支持原生 JSON 配置（需使用新版 DNS 格式——sing-box 1.14.0 已移除旧版 `dns.servers` 格式）。
+    - **原生 sing-box**: 直接支持原生 JSON 配置（需使用新版 DNS 格式——sing-box 1.14.1 已移除旧版 `dns.servers` 格式）。
     - **YAML 转 sing-box**: 自动转换 Clash 风格的 YAML 配置。
     - **Base64 转 sing-box**: 无缝解析 Base64 编码的订阅链接。
 - **配置文件管理**: 导入、管理并在本地和远程配置文件（订阅链接）之间切换。

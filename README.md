@@ -5,7 +5,7 @@
 
 English | [中文简体](README_CN.md)
 
-A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform, bundling the sing-box `1.14.0` core on Android and Windows.
+A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform, bundling the sing-box `1.14.1` core on Android and Windows.
 
 ## 🚀 Projects Using This Plugin
 
@@ -16,7 +16,7 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 - **VPN / Service Management**: Start and stop VPN services on Android (VpnService); on Windows, sing-box is hosted as a system service, with `installService()` / `uninstallService()` / `queryServiceStatus()` for service lifecycle management.
 - **Dual Proxy Modes (Windows)**: Tun mode (system-wide transparent proxying via a virtual network adapter) and System Proxy mode (registry-based, covering apps that respect the system proxy).
 - **Advanced Configuration Support**:
-    - **Native sing-box**: Direct support for native JSON configurations (the new DNS format is required — the legacy `dns.servers` format was removed in sing-box 1.14.0).
+    - **Native sing-box**: Direct support for native JSON configurations (the new DNS format is required — the legacy `dns.servers` format was removed in sing-box 1.14.1).
     - **YAML to sing-box**: Automatic conversion of Clash-style YAML configurations.
     - **Base64 to sing-box**: Seamless parsing of Base64 encoded subscription links.
 - **Profile Management**: Import, manage, and switch between local and remote profiles (subscription links).
