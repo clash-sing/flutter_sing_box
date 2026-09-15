@@ -3,7 +3,7 @@
 [![pub package](https://img.shields.io/pub/v/flutter_sing_box.svg)](https://pub.dev/packages/flutter_sing_box)
 [![license](https://img.shields.io/github/license/clash-sing/flutter_sing_box.svg)](https://github.com/clash-sing/flutter_sing_box/blob/master/LICENSE)
 
-[English](README.md) | 中文简体
+[English](https://github.com/clash-sing/flutter_sing_box/blob/main/README.md) | 中文简体
 
 一个基于 [sing-box](https://github.com/SagerNet/sing-box) 的强大 Flutter 插件，sing-box 是一个通用的代理平台。本插件在 Android 与 Windows 平台内置 sing-box `1.14.1` 内核。
 
