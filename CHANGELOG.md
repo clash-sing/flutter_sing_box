@@ -1,3 +1,8 @@
+## 2.0.3
+
+### Fixes and improvements
+* Bug fixes
+
 ## 2.0.2
 
 ### Dependencies
