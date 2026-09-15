@@ -1,3 +1,16 @@
+## 2.0.4
+
+### ⚠️ Breaking change
+* `ProfileService.isLocaleFile` renamed to `isLocalFile` (typo fix); it now recognizes only canonical `file:` URIs — raw Windows paths must be normalized via `parseSubscribeLink` first
+
+### Features
+* Add `ProfileService.parseSubscribeLink(String)`: normalizes Windows drive-letter paths (`C:\...` / `C:/...`) and UNC paths (`\\server\share\...`) into canonical `file:` URIs, with special characters (`#` / spaces / non-ASCII) percent-encoded instead of being truncated as a fragment separator; all other inputs are parsed as regular URIs
+* `FlutterSingBoxConstants.localFilePrefix` is now the constant `'file://'` on all platforms (was an empty string on Windows, which made every string match the prefix)
+
+### Fixes
+* Windows: local-file subscriptions were never recognized — a drive-letter path parses with a single-letter scheme (`c:`), so it was misclassified as a remote URL and the import always failed; importing local files now works on Windows
+
+
 ## 2.0.3
 
 ### Fixes and improvements
