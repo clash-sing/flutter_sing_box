@@ -116,14 +116,14 @@ On Windows, sing-box runs as a system service (`clash_sing_service`) instead of 
 
 ### Android 32-bit (armeabi-v7a) Builds
 
-MMKV 2.x 不再支持 32 位 Android。若你的应用需要发布 armeabi-v7a 包（如 32 位 Android TV 盒子），可将 `mmkv` 依赖降级到 1.3.x——本插件对 mmkv 的约束已放宽（`>=1.3.17 <3.0.0`），且原生侧会从 `pubspec.lock` 读取实际解析的 mmkv 版本、自动配对同版 `com.tencent:mmkv` AAR，无需在 Gradle 里手工同步版本：
+MMKV 2.x no longer supports 32-bit Android. If your app needs to ship an armeabi-v7a package (e.g. for 32-bit Android TV boxes), you can downgrade the `mmkv` dependency to 1.3.x — this plugin's constraint is relaxed (`>=1.3.17 <3.0.0`), and the native side reads the actually-resolved mmkv version from `pubspec.lock` and automatically pairs the same-version `com.tencent:mmkv` AAR, so you don't need to sync versions manually in Gradle:
 
 ```yaml
 dependencies:
-  mmkv: 1.3.17   # 32 位 Android 车道；64 位车道保持 ^2.4.x
+  mmkv: 1.3.17   # 32-bit Android lane; keep ^2.4.x for the 64-bit lane
 ```
 
-注意：Dart 侧 mmkv 与原生 AAR 必须同版（两者 cbridge 签名跨大版本不兼容），自动配对机制保证了这一点——请勿在应用 Gradle 里另行手写 mmkv 版本覆盖它。
+Note: the Dart-side mmkv and the native AAR must be the same version (their cbridge signatures are incompatible across major versions); the automatic pairing mechanism guarantees this — do not override it by hand-writing an mmkv version in your app's Gradle.
 
 ### Migrating to 2.0.0
 

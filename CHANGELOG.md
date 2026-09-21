@@ -1,7 +1,7 @@
 ## 2.0.5
 
-- 放宽 mmkv 版本约束至 `>=1.3.17 <3.0.0`：上层应用可为 32 位 Android（armeabi-v7a）把 mmkv 降级到 1.3.x。
-- Android 原生依赖改为从 `pubspec.lock` 自动配对与 Dart 侧同版的 `com.tencent:mmkv`，消除手工同步版本的错配风险。
+* Relax the mmkv version constraint to `>=1.3.17 <3.0.0`: apps can now downgrade mmkv to 1.3.x for 32-bit Android (armeabi-v7a).
+* The Android native dependency now reads the actually-resolved mmkv version from `pubspec.lock` and automatically pairs the same-version `com.tencent:mmkv` AAR, eliminating the version-mismatch risk of manual syncing.
 
 ## 2.0.4
 
