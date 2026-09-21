@@ -114,6 +114,17 @@ FlutterSingBox().proxyStateStream.listen((state) {
 - 自 2.0.0 起，`startVpn()` / `serviceReload()` 失败不再抛出异常；失败原因以 `ProxyStopped(errMessage: ...)` 形式经 `proxyStateStream` 发出。
 - 通过 `ProxyMode` 提供两种代理模式：`tun`（默认，虚拟网卡整机透明代理）与 `systemProxy`（基于注册表的系统代理，默认混合端口 `8890`）。
 
+### Android 32 位（armeabi-v7a）构建
+
+MMKV 2.x 不再支持 32 位 Android。若你的应用需要发布 armeabi-v7a 包（如 32 位 Android TV 盒子），可将 `mmkv` 依赖降级到 1.3.x——本插件对 mmkv 的约束已放宽（`>=1.3.17 <3.0.0`），且原生侧会从 `pubspec.lock` 读取实际解析的 mmkv 版本、自动配对同版 `com.tencent:mmkv` AAR，无需在 Gradle 里手工同步版本：
+
+```yaml
+dependencies:
+  mmkv: 1.3.17   # 32 位 Android 车道；64 位车道保持 ^2.4.x
+```
+
+注意：Dart 侧 mmkv 与原生 AAR 必须同版（两者 cbridge 签名跨大版本不兼容），自动配对机制保证了这一点——请勿在应用 Gradle 里另行手写 mmkv 版本覆盖它。
+
 ### 迁移到 2.0.0
 
 - **`ProxyState` 改为密封类**——`ProxyStopped` / `ProxyStarting` / `ProxyStarted` / `ProxyStopping`，各为独立的 `final class`。对旧枚举的穷尽 `switch` 必须迁移为类型模式（`case ProxyStopped():`）；旧式 `== ProxyState.started` 比较通过保留的 `static const` 兼容常量继续可用，`name` / `fromName()` 语义不变。
