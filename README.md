@@ -114,6 +114,17 @@ On Windows, sing-box runs as a system service (`clash_sing_service`) instead of 
 - Since 2.0.0, `startVpn()` / `serviceReload()` failures no longer throw; the reason is emitted as `ProxyStopped(errMessage: ...)` on `proxyStateStream`.
 - Two proxy modes are available via `ProxyMode`: `tun` (default, system-wide transparent proxying) and `systemProxy` (registry-based system proxy, default mixed port `8890`).
 
+### Android 32-bit (armeabi-v7a) Builds
+
+MMKV 2.x 不再支持 32 位 Android。若你的应用需要发布 armeabi-v7a 包（如 32 位 Android TV 盒子），可将 `mmkv` 依赖降级到 1.3.x——本插件对 mmkv 的约束已放宽（`>=1.3.17 <3.0.0`），且原生侧会从 `pubspec.lock` 读取实际解析的 mmkv 版本、自动配对同版 `com.tencent:mmkv` AAR，无需在 Gradle 里手工同步版本：
+
+```yaml
+dependencies:
+  mmkv: 1.3.17   # 32 位 Android 车道；64 位车道保持 ^2.4.x
+```
+
+注意：Dart 侧 mmkv 与原生 AAR 必须同版（两者 cbridge 签名跨大版本不兼容），自动配对机制保证了这一点——请勿在应用 Gradle 里另行手写 mmkv 版本覆盖它。
+
 ### Migrating to 2.0.0
 
 - **`ProxyState` is now a sealed class** — `ProxyStopped` / `ProxyStarting` / `ProxyStarted` / `ProxyStopping`, each its own `final class`. Exhaustive `switch`es over the old enum must migrate to type patterns (`case ProxyStopped():`). Legacy `== ProxyState.started`-style comparisons keep working via preserved `static const` compatibility constants, and `name` / `fromName()` keep their original semantics.
