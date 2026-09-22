@@ -66,8 +66,16 @@ flutter:
   # To add assets to your plugin package, add an assets section, like this:
   assets:
     - assets/configs/
+    # Windows 二进制按 CPU 架构分目录打包（目录资产非递归，三个目录都要显式声明；
+    # 父目录只含 LICENSE）。运行时按真机架构选择其一释放，见 WindowsArch。
     - path: assets/windows/
-      platforms: 
+      platforms:
+        - windows
+    - path: assets/windows/amd64/
+      platforms:
+        - windows
+    - path: assets/windows/arm64/
+      platforms:
         - windows
 
   #   - images/a_dot_burr.jpeg

@@ -1,7 +1,9 @@
-/.claude/
-/.github/
-/.superpowers/
-/CLAUDE.md
-/GEMINI.md
-/AGENTS.md
-/android/CLAUDE.md
+# pub 打包不遵守 .gitignore——本地工具与构建产物必须在此显式排除，
+# 否则 dry-run/发布会把它们打进包（曾导致压缩后体积虚高至 300MB+）。
+# 注意：pub 只默认排除包根的 .dart_tool，example/ 子目录下的需单独列出。
+.gitnexus/
+.dart_tool/
+build/
+example/.dart_tool/
+example/build/
+example/windows/flutter/ephemeral/

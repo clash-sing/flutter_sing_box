@@ -81,7 +81,7 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 ### Bundled Assets
 
 - `assets/configs/singbox_config_template.json` — 内置 sing-box 配置模板（全平台打包）。`SingBoxConfigProvider` 加载它作为基准，补全/修复用户原生 JSON 配置中缺失的字段（见 `_fixSingBoxConfig`），路径常量是 `FlutterSingBoxConstants.templateConfig`。
-- `assets/windows/` — `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe`（见 Windows Side）；pubspec 中通过 `platforms: [windows]` 过滤，仅 Windows 构建时打包。
+- `assets/windows/` — 双架构二进制目录：`amd64/` 与 `arm64/` 各含 `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe`，父目录仅 `LICENSE`（见 Windows Side）；pubspec 中父目录与两个架构子目录均需显式声明（目录资产非递归）并通过 `platforms: [windows]` 过滤，仅 Windows 构建时打包。运行时由 `WindowsArch`（`src/windows/windows_arch.dart`，基于 GetNativeSystemInfo 取真机架构）选择其一释放——x64 App 在 ARM64 机器上模拟运行时也正确选出 arm64。
 
 ### Native Side (Android)
 
@@ -91,10 +91,10 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 ### Windows Side
 
 - The `windows/` native dir is only a CMake + C-API registration stub (`FlutterSingBoxPluginCApi`); all Windows logic lives in Dart.
-- `init()` copies three bundled assets (`assets/windows/`: `sing-box.exe`, `libcronet.dll`, `clash_sing_helper.exe`) next to the app executable, then clears a stale system proxy left over from a previous crash.
+- `init()` copies three bundled assets (`assets/windows/<amd64|arm64>/`: `sing-box.exe`, `libcronet.dll`, `clash_sing_helper.exe`, selected by native machine architecture — see `WindowsArch`) next to the app executable, then clears a stale system proxy left over from a previous crash.
 - Runtime flow: `HelperCli` drives the `clash_sing_service` Windows system service (installed via a UAC-elevated helper), which runs sing-box as LocalSystem and exposes an HTTP API. Two proxy modes via `ProxyMode`: `tun` (default, system-wide) and `systemProxy` (registry-based, default mixed port 8890).
 - Since 2.0.0, Windows `start()` / `restart()` **no longer throw on failure** — the failure reason is emitted on `proxyStateStream` as `ProxyStopped(errMessage: ...)` (also resetting the state machine from `starting`), making the state stream the single source of truth for startup failures; callers awaiting these futures cannot catch failures from the returned future. Aligned with the Android native alert path.
-- The bundled `sing-box.exe` / `libcronet.dll` are core version **1.14.0** — keep them in sync with the Android libbox version when upgrading sing-box.
+- The bundled `sing-box.exe` / `libcronet.dll` are core version **1.14.1**, both `amd64` and `arm64` taken from the official release zips — keep them in sync with the Android libbox version when upgrading sing-box.
 - `clash_sing_helper.exe` is built by the sibling Go repo `clash_sing_service` — after changing it, rebuild and overwrite `assets/windows/clash_sing_helper.exe` here, or apps keep using the old version (full cross-repo chain described in the workspace-level `../CLAUDE.md`).
 
 ## Conventions

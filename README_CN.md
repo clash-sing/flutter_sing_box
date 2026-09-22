@@ -5,7 +5,7 @@
 
 [English](https://github.com/clash-sing/flutter_sing_box/blob/main/README.md) | 中文简体
 
-一个基于 [sing-box](https://github.com/SagerNet/sing-box) 的强大 Flutter 插件，sing-box 是一个通用的代理平台。本插件在 Android 与 Windows 平台内置 sing-box `1.14.1` 内核。
+一个基于 [sing-box](https://github.com/SagerNet/sing-box) 的强大 Flutter 插件，sing-box 是一个通用的代理平台。本插件在 Android（arm64-v8a、armeabi-v7a、x86_64）与 Windows（amd64 与 arm64）平台内置 sing-box `1.14.1` 内核。
 
 ## 🚀 使用此插件的项目
 
@@ -28,8 +28,8 @@
 
 | 平台 | 支持 | 状态 |
 | :--- |:-------:| :--- |
-| Android |    ✅    | 生产就绪 |
-| Windows |    ✅    | 生产就绪 |
+| Android |    ✅    | 生产就绪（arm64-v8a / armeabi-v7a / x86_64） |
+| Windows |    ✅    | 生产就绪（amd64 / arm64） |
 | iOS |    ☐    | 计划中 |
 | macOS |   ☐️    | 计划中 |
 | Linux |    ☐    | 计划中 |
@@ -113,6 +113,7 @@ FlutterSingBox().proxyStateStream.listen((state) {
 - `startVpn()` / `stopVpn()` 在 Windows 上映射为系统服务的启动 / 停止。
 - 自 2.0.0 起，`startVpn()` / `serviceReload()` 失败不再抛出异常；失败原因以 `ProxyStopped(errMessage: ...)` 形式经 `proxyStateStream` 发出。
 - 通过 `ProxyMode` 提供两种代理模式：`tun`（默认，虚拟网卡整机透明代理）与 `systemProxy`（基于注册表的系统代理，默认混合端口 `8890`）。
+- **双架构二进制（amd64 / arm64）**：插件同时打包两种架构的 `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe`；`init()` 启动时探测机器的**原生**架构（基于 `GetNativeSystemInfo`）并只释放匹配的一套。应用侧保持 amd64 构建、零改动即可——在 arm64 设备（如骁龙笔记本）上，应用 UI 由 Windows 内置的 x64 模拟层运行，而内核与系统服务以原生 arm64 运行。注意双架构打包会相应增大发布体积。
 
 ### Android 32 位（armeabi-v7a）构建
 

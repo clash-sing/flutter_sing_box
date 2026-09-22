@@ -5,7 +5,7 @@
 
 English | [中文简体](https://github.com/clash-sing/flutter_sing_box/blob/main/README_CN.md)
 
-A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform, bundling the sing-box `1.14.1` core on Android and Windows.
+A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), the universal proxy platform, bundling the sing-box `1.14.1` core on Android (arm64-v8a, armeabi-v7a & x86_64) and Windows (amd64 & arm64).
 
 ## 🚀 Projects Using This Plugin
 
@@ -28,8 +28,8 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 
 | Platform | Support | Status |
 | :--- |:-------:| :--- |
-| Android |    ✅    | Production Ready |
-| Windows |    ✅    | Production Ready |
+| Android |    ✅    | Production Ready (arm64-v8a / armeabi-v7a / x86_64) |
+| Windows |    ✅    | Production Ready (amd64 / arm64) |
 | iOS |    ☐    | Planned |
 | macOS |   ☐️    | Planned |
 | Linux |    ☐    | Planned |
@@ -113,6 +113,7 @@ On Windows, sing-box runs as a system service (`clash_sing_service`) instead of 
 - `startVpn()` / `stopVpn()` map to starting and stopping the service.
 - Since 2.0.0, `startVpn()` / `serviceReload()` failures no longer throw; the reason is emitted as `ProxyStopped(errMessage: ...)` on `proxyStateStream`.
 - Two proxy modes are available via `ProxyMode`: `tun` (default, system-wide transparent proxying) and `systemProxy` (registry-based system proxy, default mixed port `8890`).
+- **Dual-architecture binaries (amd64 / arm64)**: the plugin bundles `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe` for both architectures; at startup `init()` detects the machine's **native** architecture (via `GetNativeSystemInfo`) and extracts only the matching set. Your app keeps building as amd64 with zero changes — on arm64 devices (e.g. Snapdragon laptops) the app UI runs under Windows' built-in x64 emulation while the core and the system service run natively as arm64. Note that bundling both architectures increases the packaged size accordingly.
 
 ### Android 32-bit (armeabi-v7a) Builds
 
