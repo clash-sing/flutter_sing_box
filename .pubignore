@@ -1,9 +1,29 @@
 # pub 打包不遵守 .gitignore——本地工具与构建产物必须在此显式排除，
 # 否则 dry-run/发布会把它们打进包（曾导致压缩后体积虚高至 300MB+）。
-# 注意：pub 只默认排除包根的 .dart_tool，example/ 子目录下的需单独列出。
-.gitnexus/
+# 维护口径：与 .gitignore 对齐——被 git 忽略且磁盘上存在的路径都要列在这里
+# （可用 `git status --ignored --porcelain` 对照检查有无遗漏）。
+.claude/
 .dart_tool/
+.github/
+.gitnexus/
+.idea/
+.superpowers/
 build/
-example/.dart_tool/
-example/build/
-example/windows/flutter/ephemeral/
+doc/
+test/
+.gitignore
+AGENTS.md
+
+# Android 构建
+android/.gradle/
+android/local.properties
+
+# 示例工程整体不入包：消费者无需，且一行覆盖其内部现在与未来的
+# 全部生成物（.dart_tool / gradle 缓存 / iOS 生成物等），无需逐项枚举。
+# 示例仍可从 GitHub 仓库查看；git 仓库与 CI 不受 .pubignore 影响。
+# 代价：pub.dev 页面的 Example 标签页不再展示示例代码。
+example/
+
+# IDE 工程文件与根锁文件。
+*.iml
+pubspec.lock

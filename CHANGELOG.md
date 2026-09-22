@@ -1,3 +1,9 @@
+## 2.1.0
+
+### Features
+* Windows arm64 support: the bundled binaries are now dual-architecture — `assets/windows/` is restructured into `amd64/` and `arm64/` subdirectories, each containing `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe` (core version stays `1.14.1`; both architectures are taken from the official sing-box release zips)
+* `init()` now detects the machine's **native** architecture (via `GetNativeSystemInfo`) and extracts only the matching set: on arm64 devices (e.g. Snapdragon laptops) the app UI keeps running under Windows' built-in x64 emulation while the core and the helper service run natively as arm64 — no app-side or CI changes required; on amd64 machines behavior is unchanged (extracted file names stay the same, upgrades go through the existing sha256 + rename-fallback path)
+
 ## 2.0.5
 
 * Relax the mmkv version constraint to `>=1.3.17 <3.0.0`: apps can now downgrade mmkv to 1.3.x for 32-bit Android (armeabi-v7a).
