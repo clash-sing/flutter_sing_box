@@ -128,7 +128,9 @@ extension ClashProxyExt on ClashProxy {
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
         ),
-        transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
+        transport: network == 'tcp'
+            ? Transport(type: 'http')
+            : (network?.isNotEmpty == true ? Transport(type: network!) : null),
       ),
       ClashProxyType.tuic => Outbound(
         type: OutboundType.tuic,
