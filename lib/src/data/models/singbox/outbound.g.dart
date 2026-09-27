@@ -68,6 +68,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   clientMetadata: json['client_metadata'] as String?,
   globalPadding: json['global_padding'] as bool?,
   authenticatedLength: json['authenticated_length'] as bool?,
+  flow: json['flow'] as String?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -118,6 +119,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'client_metadata': ?instance.clientMetadata,
   'global_padding': ?instance.globalPadding,
   'authenticated_length': ?instance.authenticatedLength,
+  'flow': ?instance.flow,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(

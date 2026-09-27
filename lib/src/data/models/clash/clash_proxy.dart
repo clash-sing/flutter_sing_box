@@ -85,6 +85,7 @@ class ClashProxy {
   bool? authenticatedLength;
   @JsonKey(name: "packet-encoding")
   String? packetEncoding;
+  String? flow;
 
   ClashProxy({
     required this.name,
@@ -127,6 +128,7 @@ class ClashProxy {
     this.alterId,
     this.globalPadding,
     this.authenticatedLength,
+    this.flow,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);

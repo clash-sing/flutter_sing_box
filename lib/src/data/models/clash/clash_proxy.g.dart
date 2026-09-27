@@ -48,6 +48,7 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   alterId: (json['alterId'] as num?)?.toInt(),
   globalPadding: json['global-padding'] as bool?,
   authenticatedLength: json['authenticated-length'] as bool?,
+  flow: json['flow'] as String?,
 )..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -93,4 +94,5 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'global-padding': ?instance.globalPadding,
       'authenticated-length': ?instance.authenticatedLength,
       'packet-encoding': ?instance.packetEncoding,
+      'flow': ?instance.flow,
     };

@@ -100,6 +100,7 @@ class Outbound {
   bool? globalPadding;
   @JsonKey(name: "authenticated_length")
   bool? authenticatedLength;
+  String? flow;
 
   Outbound({
     required this.tag,
@@ -149,6 +150,7 @@ class Outbound {
     this.clientMetadata,
     this.globalPadding,
     this.authenticatedLength,
+    this.flow,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -178,7 +180,6 @@ class Transport {
   String? earlyDataHeaderName;
   @JsonKey(name: "permit_without_stream")
   bool? permitWithoutStream;
-  
 
   Transport({
     required this.type,

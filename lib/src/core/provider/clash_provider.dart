@@ -34,6 +34,7 @@ class ClashProvider {
 }
 
 /// Extensions for converting a [ClashProxy] into an [Outbound].
+/// TODO: 待实现 snell、Shadowsocks
 extension ClashProxyExt on ClashProxy {
   /// Converts this Clash proxy into a sing-box [Outbound], or `null`
   /// if the proxy type is unsupported.
@@ -54,7 +55,7 @@ extension ClashProxyExt on ClashProxy {
           enabled: true,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
-          serverName: sni ?? "",
+          serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
@@ -83,7 +84,7 @@ extension ClashProxyExt on ClashProxy {
           enabled: true,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
-          serverName: sni ?? "",
+          serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
@@ -106,7 +107,7 @@ extension ClashProxyExt on ClashProxy {
           enabled: true,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
-          serverName: sni ?? "",
+          serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
@@ -123,7 +124,7 @@ extension ClashProxyExt on ClashProxy {
           enabled: true,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
-          serverName: sni ?? "",
+          serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
@@ -168,7 +169,29 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn,
           enabled: tls,
           insecure: skipCertVerify,
-          disableSni: disableSni,
+          disableSni: !(sni?.isNotEmpty == true),
+          serverName: sni,
+          utls: clientFingerprint?.isNotEmpty == true
+              ? Utls(enabled: true, fingerprint: clientFingerprint!)
+              : null,
+        ),
+        transport: network == 'tcp'
+            ? Transport(type: 'http')
+            : (network?.isNotEmpty == true ? Transport(type: network!) : null),
+      ),
+      ClashProxyType.vless => Outbound(
+        type: OutboundType.vless,
+        tag: name,
+        server: server,
+        serverPort: port,
+        uuid: uuid,
+        flow: flow,
+        packetEncoding: packetEncoding,
+        tls: Tls(
+          alpn: alpn,
+          enabled: tls,
+          insecure: skipCertVerify,
+          disableSni: !(sni?.isNotEmpty == true),
           serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
