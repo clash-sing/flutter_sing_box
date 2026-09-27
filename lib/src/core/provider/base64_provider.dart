@@ -84,7 +84,7 @@ class Base64Provider {
             ? Obfs(type: queryParams['obfs']!, password: queryParams['obfs-password'])
             : null,
         tls: Tls(
-          alpn: queryParams['alpn']?.isNotEmpty == true ? [queryParams['alpn']!] : ['h3'],
+          alpn: _splitAlpnQuery(queryParams['alpn']) ?? ['h3'],
           enabled: true,
           insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
           disableSni: sni.isEmpty,
@@ -110,7 +110,7 @@ class Base64Provider {
         serverPorts: toSingBoxServerPorts(queryParams['mport']),
         authStr: queryParams['auth'],
         tls: Tls(
-          alpn: queryParams['alpn']?.isNotEmpty == true ? [queryParams['alpn']!] : ['h3'],
+          alpn: _splitAlpnQuery(queryParams['alpn']) ?? ['hysteria'],
           enabled: true,
           insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
           disableSni: sni.isEmpty,
@@ -123,6 +123,13 @@ class Base64Provider {
     } catch (e) {
       return null;
     }
+  }
+
+  /// alpn 查询参数为逗号分隔列表（官方 URI 规范），过滤空段；无有效值返回 null，
+  /// 由调用方按协议给默认值（hysteria v1 为 hysteria，hysteria2 为 h3）。
+  static List<String>? _splitAlpnQuery(String? raw) {
+    final list = raw?.split(',').where((e) => e.isNotEmpty).toList();
+    return (list == null || list.isEmpty) ? null : list;
   }
 
   static Outbound? _parseAnytls(Uri uri) {

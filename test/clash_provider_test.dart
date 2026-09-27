@@ -150,6 +150,31 @@ void main() {
     });
   });
 
+  group('ClashProxy.toOutbound - hysteria 默认 alpn', () {
+    test('hysteria 无 alpn 默认 hysteria（v1 协议要求，对齐 mihomo）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy1a',
+        'type': 'hysteria',
+        'server': 's.com',
+        'port': 443,
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.alpn, ['hysteria']);
+    });
+
+    test('hysteria2 无 alpn 默认 h3（既有行为不回归）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2a',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.alpn, ['h3']);
+    });
+  });
+
   group('ClashProxy.toOutbound - SNI 解析（sni/servername/server 回退）', () {
     test('vmess：servername 生效（mihomo TLS 字段）', () {
       final proxy = ClashProxy.fromJson({

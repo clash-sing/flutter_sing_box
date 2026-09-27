@@ -352,4 +352,45 @@ void main() {
       expect(o2.tls?.disableSni, isFalse);
     });
   });
+
+  group('Base64Provider.provide - hysteria/hysteria2 alpn', () {
+    test('hysteria 多值 alpn 逗号拆分（官方 URI 规范）', () {
+      const link =
+          'hysteria://auth@hy.com:443?peer=hy.com&alpn=h3,hysteria&upmbps=100&downmbps=1000#h';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.alpn, ['h3', 'hysteria']);
+    });
+
+    test('hysteria alpn 空段被过滤', () {
+      const link =
+          'hysteria://auth@hye.com:443?peer=hye.com&alpn=h3,,&upmbps=100&downmbps=1000#hye';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.alpn, ['h3']);
+    });
+
+    test('hysteria 无 alpn 默认 hysteria（v1 协议要求，对齐 mihomo）', () {
+      const link =
+          'hysteria://auth@hyn.com:443?peer=hyn.com&upmbps=100&downmbps=1000#hyn';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.alpn, ['hysteria']);
+    });
+
+    test('hysteria2 多值 alpn 逗号拆分', () {
+      const link = 'hysteria2://pwd@hy2.com:443?sni=hy2.com&alpn=h3,hysteria#hy2';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.alpn, ['h3', 'hysteria']);
+    });
+
+    test('hysteria2 alpn 空段被过滤', () {
+      const link = 'hysteria2://pwd@hy2e.com:443?sni=hy2e.com&alpn=,h3,#hy2e';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.alpn, ['h3']);
+    });
+
+    test('hysteria2 无 alpn 默认 h3（既有行为不回归）', () {
+      const link = 'hysteria2://pwd@hy2n.com:443?sni=hy2n.com#hy2n';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.alpn, ['h3']);
+    });
+  });
 }

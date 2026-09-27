@@ -47,8 +47,7 @@ class ClashProvider {
 /// （"bad port range"），须展开为 `port:port`。
 List<String>? toSingBoxServerPorts(String? ports) {
   if (ports == null || ports.isEmpty) return null;
-  final segments =
-      ports.split(RegExp('[/,]')).map((e) => e.trim()).where((e) => e.isNotEmpty);
+  final segments = ports.split(RegExp('[/,]')).map((e) => e.trim()).where((e) => e.isNotEmpty);
   final result = [
     for (final segment in segments)
       segment.contains('-') ? segment.replaceAll('-', ':') : '$segment:$segment',
@@ -115,7 +114,7 @@ extension ClashProxyExt on ClashProxy {
         disableMtuDiscovery: disableMtuDiscovery ?? true,
         obfs: obfs?.isNotEmpty == true ? Obfs(type: obfs!) : null,
         tls: Tls(
-          alpn: alpn ?? ['h3'],
+          alpn: alpn ?? ['hysteria'],
           enabled: true,
           insecure: skipCertVerify,
           disableSni: sni.isEmpty,
