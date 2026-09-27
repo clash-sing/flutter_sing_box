@@ -18,7 +18,8 @@ class ClashProxy {
   bool? tfo;
   String? sni;
 
-  /// 启用的网络协议，tcp 或 udp。
+  /// 代理隧道自身用什么传输层连到服务器。
+  /// tcp（默认）、ws、grpc、h2、http、xhttp（vless）、mkcp 等。
   String? network;
   int? up;
   int? down;
@@ -75,6 +76,15 @@ class ClashProxy {
   /// 发送保持连接活动的心跳包的间隔时间，单位为毫秒
   @JsonKey(name: "heartbeat-interval")
   int? heartbeatInterval;
+  bool? tls;
+  String? cipher;
+  int? alterId;
+  @JsonKey(name: "global-padding")
+  bool? globalPadding;
+  @JsonKey(name: "authenticated-length")
+  bool? authenticatedLength;
+  @JsonKey(name: "packet-encoding")
+  String? packetEncoding;
 
   ClashProxy({
     required this.name,
@@ -112,6 +122,11 @@ class ClashProxy {
     this.clientMetadata,
     this.disableSni,
     this.heartbeatInterval,
+    this.tls,
+    this.cipher,
+    this.alterId,
+    this.globalPadding,
+    this.authenticatedLength,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);

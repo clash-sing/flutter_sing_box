@@ -96,6 +96,10 @@ class Outbound {
   int? minIdleSession;
   @JsonKey(name: "client_metadata")
   String? clientMetadata;
+  @JsonKey(name: "global_padding")
+  bool? globalPadding;
+  @JsonKey(name: "authenticated_length")
+  bool? authenticatedLength;
 
   Outbound({
     required this.tag,
@@ -143,6 +147,8 @@ class Outbound {
     this.idleSessionTimeout,
     this.minIdleSession,
     this.clientMetadata,
+    this.globalPadding,
+    this.authenticatedLength,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -150,22 +156,42 @@ class Outbound {
   Map<String, dynamic> toJson() => _$OutboundToJson(this);
 }
 
+/// V2Ray 传输层
+/// V2Ray Transport 是 v2ray 发明的一组私有协议，并污染了其他协议的名称，如 clash 中的 trojan-grpc。
 @JsonSerializable(explicitToJson: true)
 class Transport {
+  /// 可用的传输协议：HTTP（http）、WebSocket（ws）、gRPC（grpc）、QUIC（quic）、HTTPUpgrade（httpupgrade）。
   String type;
+  Object? host;
+  @JsonKey(name: "service_name")
+  String? serviceName;
   String? path;
+  String? method;
   Map<String, dynamic>? headers;
+  @JsonKey(name: "idle_timeout")
+  String? idleTimeout;
+  @JsonKey(name: "ping_timeout")
+  String? pingTimeout;
   @JsonKey(name: "max_early_data")
   int? maxEarlyData;
   @JsonKey(name: "early_data_header_name")
   String? earlyDataHeaderName;
+  @JsonKey(name: "permit_without_stream")
+  bool? permitWithoutStream;
+  
 
   Transport({
     required this.type,
+    this.host,
+    this.serviceName,
     this.path,
+    this.method,
     this.headers,
+    this.idleTimeout,
+    this.pingTimeout,
     this.maxEarlyData,
     this.earlyDataHeaderName,
+    this.permitWithoutStream,
   });
 
   factory Transport.fromJson(Map<String, dynamic> json) => _$TransportFromJson(json);

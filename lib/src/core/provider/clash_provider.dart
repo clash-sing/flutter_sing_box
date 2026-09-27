@@ -151,6 +151,31 @@ extension ClashProxyExt on ClashProxy {
         ),
         transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
       ),
+      ClashProxyType.vmess => Outbound(
+        type: OutboundType.vmess,
+        tag: name,
+        server: server,
+        serverPort: port,
+        uuid: uuid,
+        security: cipher,
+        alterId: alterId,
+        globalPadding: globalPadding,
+        authenticatedLength: authenticatedLength,
+        packetEncoding: packetEncoding,
+        tls: Tls(
+          alpn: alpn,
+          enabled: tls,
+          insecure: skipCertVerify,
+          disableSni: disableSni,
+          serverName: sni,
+          utls: clientFingerprint?.isNotEmpty == true
+              ? Utls(enabled: true, fingerprint: clientFingerprint!)
+              : null,
+        ),
+        transport: network == 'tcp'
+            ? Transport(type: 'http')
+            : (network?.isNotEmpty == true ? Transport(type: network!) : null),
+      ),
       _ => null,
     };
     return outbound;

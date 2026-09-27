@@ -66,6 +66,8 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   idleSessionTimeout: json['idle_session_timeout'] as String?,
   minIdleSession: (json['min_idle_session'] as num?)?.toInt(),
   clientMetadata: json['client_metadata'] as String?,
+  globalPadding: json['global_padding'] as bool?,
+  authenticatedLength: json['authenticated_length'] as bool?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -114,22 +116,36 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'idle_session_timeout': ?instance.idleSessionTimeout,
   'min_idle_session': ?instance.minIdleSession,
   'client_metadata': ?instance.clientMetadata,
+  'global_padding': ?instance.globalPadding,
+  'authenticated_length': ?instance.authenticatedLength,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(
   type: json['type'] as String,
+  host: json['host'],
+  serviceName: json['service_name'] as String?,
   path: json['path'] as String?,
+  method: json['method'] as String?,
   headers: json['headers'] as Map<String, dynamic>?,
+  idleTimeout: json['idle_timeout'] as String?,
+  pingTimeout: json['ping_timeout'] as String?,
   maxEarlyData: (json['max_early_data'] as num?)?.toInt(),
   earlyDataHeaderName: json['early_data_header_name'] as String?,
+  permitWithoutStream: json['permit_without_stream'] as bool?,
 );
 
 Map<String, dynamic> _$TransportToJson(Transport instance) => <String, dynamic>{
   'type': instance.type,
+  'host': ?instance.host,
+  'service_name': ?instance.serviceName,
   'path': ?instance.path,
+  'method': ?instance.method,
   'headers': ?instance.headers,
+  'idle_timeout': ?instance.idleTimeout,
+  'ping_timeout': ?instance.pingTimeout,
   'max_early_data': ?instance.maxEarlyData,
   'early_data_header_name': ?instance.earlyDataHeaderName,
+  'permit_without_stream': ?instance.permitWithoutStream,
 };
 
 Multiplex _$MultiplexFromJson(Map<String, dynamic> json) =>

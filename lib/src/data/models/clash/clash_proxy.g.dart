@@ -42,7 +42,13 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   minIdleSession: (json['min-idle-session'] as num?)?.toInt(),
   clientMetadata: json['client-metadata'] as String?,
   disableSni: json['disable-sni'] as bool?,
-);
+  heartbeatInterval: (json['heartbeat-interval'] as num?)?.toInt(),
+  tls: json['tls'] as bool?,
+  cipher: json['cipher'] as String?,
+  alterId: (json['alterId'] as num?)?.toInt(),
+  globalPadding: json['global-padding'] as bool?,
+  authenticatedLength: json['authenticated-length'] as bool?,
+)..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
     <String, dynamic>{
@@ -80,4 +86,11 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'min-idle-session': ?instance.minIdleSession,
       'client-metadata': ?instance.clientMetadata,
       'disable-sni': ?instance.disableSni,
+      'heartbeat-interval': ?instance.heartbeatInterval,
+      'tls': ?instance.tls,
+      'cipher': ?instance.cipher,
+      'alterId': ?instance.alterId,
+      'global-padding': ?instance.globalPadding,
+      'authenticated-length': ?instance.authenticatedLength,
+      'packet-encoding': ?instance.packetEncoding,
     };

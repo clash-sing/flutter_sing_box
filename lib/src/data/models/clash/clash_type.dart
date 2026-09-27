@@ -4,6 +4,8 @@ class ClashProxyType {
   static const String anytls = "anytls";
   static const String trojan = "trojan";
   static const String tuic = "tuic";
+  static const String vmess = "vmess";
+  static const String vless = "vless";
 }
 
 class ClashGroupType {
