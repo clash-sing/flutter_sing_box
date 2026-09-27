@@ -219,8 +219,8 @@ extension ClashProxyExt on ClashProxy {
         serverPort: port,
         password: password,
         method: cipher,
-        plugin: plugin,
-        pluginOpts: pluginOpts,
+        plugin: _toSingBoxPlugin,
+        pluginOpts: _toSingBoxPluginOpts,
         udpOverTcp: udpOverTcp != null
             ? UdpOverTcp(enabled: udpOverTcp, version: udpOverTcpVersion ?? 1)
             : null,
@@ -234,6 +234,25 @@ extension ClashProxyExt on ClashProxy {
   Transport? get _toSingBoxTransport => network == 'tcp'
       ? Transport(type: 'http')
       : (network?.isNotEmpty == true ? Transport(type: network!) : null);
+
+  String? get _toSingBoxPlugin {
+    if (plugin == 'obfs') {
+      return 'obfs-local';
+    } else if (plugin == 'v2ray-plugin') {
+      return plugin;
+    }
+    return null;
+  }
+
+  String? get _toSingBoxPluginOpts {
+    if (pluginOpts == null) return null;
+    if (plugin == 'obfs') {
+      return 'obfs=http;obfs-host=${pluginOpts!.host ?? ''}';
+    } else if (plugin == 'v2ray-plugin') {
+      return 'obfs=websocket;obfs-host=${pluginOpts!.host ?? ''}';
+    }
+    return null;
+  }
 }
 
 /// Extensions for converting a [ClashGroup] into an [Outbound].

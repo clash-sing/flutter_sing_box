@@ -102,7 +102,12 @@ class Outbound {
   @JsonKey(name: "authenticated_length")
   bool? authenticatedLength;
   String? flow;
+
+  /// Shadowsocks SIP003 插件，由内部实现。
+  /// 仅支持 obfs-local 和 v2ray-plugin。
   String? plugin;
+
+  /// Shadowsocks SIP003 插件参数。
   @JsonKey(name: "plugin_opts")
   String? pluginOpts;
 

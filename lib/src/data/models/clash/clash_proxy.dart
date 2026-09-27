@@ -87,15 +87,16 @@ class ClashProxy {
   String? packetEncoding;
   String? flow;
   String? plugin;
+
+  /// sing-box 仅支持 obfs-local 和 v2ray-plugin。
   @JsonKey(name: "plugin-opts")
-  String? pluginOpts;
+  PluginOpts? pluginOpts;
   @JsonKey(name: "udp-over-tcp")
   bool? udpOverTcp;
 
   /// 协议版本，1 或 2，默认为 1。
   @JsonKey(name: "udp-over-tcp-version")
   int? udpOverTcpVersion;
-
   @JsonKey(name: "realm-opts")
   RealmOpts? realmOpts;
 
@@ -151,6 +152,18 @@ class ClashProxy {
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);
 
   Map<String, dynamic> toJson() => _$ClashProxyToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+final class PluginOpts {
+  final String? mode;
+  final String? host;
+
+  PluginOpts({this.mode, this.host});
+
+  factory PluginOpts.fromJson(Map<String, dynamic> json) => _$PluginOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PluginOptsToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
