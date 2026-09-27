@@ -99,6 +99,8 @@ class ClashProxy {
   int? udpOverTcpVersion;
   @JsonKey(name: "realm-opts")
   RealmOpts? realmOpts;
+  @JsonKey(name: "reality-opts")
+  RealityOpts? realityOpts;
 
   ClashProxy({
     required this.name,
@@ -147,6 +149,7 @@ class ClashProxy {
     this.udpOverTcp,
     this.udpOverTcpVersion,
     this.realmOpts,
+    this.realityOpts,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);
@@ -182,4 +185,18 @@ final class RealmOpts {
   factory RealmOpts.fromJson(Map<String, dynamic> json) => _$RealmOptsFromJson(json);
 
   Map<String, dynamic> toJson() => _$RealmOptsToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+final class RealityOpts {
+  @JsonKey(name: "public-key")
+  final String? publicKey;
+  @JsonKey(name: "short-id")
+  final String? shortId;
+
+  RealityOpts({this.publicKey, this.shortId});
+
+  factory RealityOpts.fromJson(Map<String, dynamic> json) => _$RealityOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RealityOptsToJson(this);
 }

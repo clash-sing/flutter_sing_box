@@ -50,6 +50,9 @@ class Base64Provider {
           case ClashProxyType.shadowsocks:
             outbound = _parseShadowsocks(uri);
             break;
+          case ClashProxyType.vless:
+            outbound = _parseVless(uri);
+            break;
           default:
             break;
         }
@@ -217,6 +220,87 @@ class Base64Provider {
       return (decoded.substring(0, i), decoded.substring(i + 1));
     } on FormatException {
       return null;
+    }
+  }
+
+  /// 解析 vless:// 分享链接（格式定义见 Xray-core Discussion #716）。
+  static Outbound? _parseVless(Uri uri) {
+    try {
+      final q = uri.queryParameters;
+      final sni = q['sni'];
+      final fingerprint = q['fp'];
+      final utls = fingerprint?.isNotEmpty == true
+          ? Utls(enabled: true, fingerprint: fingerprint!)
+          : null;
+
+      Tls? tls;
+      switch (q['security']) {
+        case 'reality':
+          tls = Tls(
+            enabled: true,
+            disableSni: !(sni?.isNotEmpty == true),
+            serverName: sni,
+            utls: utls,
+            reality: Reality(
+              enabled: true,
+              publicKey: q['pbk'],
+              shortId: q['sid'] ?? '',
+            ),
+          );
+        case 'tls' || 'xtls': // xtls 为旧值，按纯 TLS 处理
+          tls = Tls(
+            alpn: q['alpn']?.split(','),
+            enabled: true,
+            insecure: q['insecure'] == '1' || q['allowInsecure'] == '1',
+            disableSni: !(sni?.isNotEmpty == true),
+            serverName: sni,
+            utls: utls,
+          );
+        default: // none 或缺省：无 TLS
+          break;
+      }
+
+      return Outbound(
+        type: OutboundType.vless,
+        tag: Uri.decodeComponent(uri.fragment),
+        server: uri.host,
+        serverPort: uri.port,
+        uuid: uri.userInfo,
+        flow: q['flow'],
+        packetEncoding: q['packetEncoding'],
+        tls: tls,
+        transport: _toVlessTransport(q),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 按 type 参数映射 vless 的 V2Ray 传输层；tcp（或缺省）返回 null。
+  static Transport? _toVlessTransport(Map<String, String> q) {
+    switch (q['type'] ?? 'tcp') {
+      case 'ws':
+        return Transport(
+          type: OutboundTransportType.webSocket,
+          path: q['path'],
+          headers: q['host']?.isNotEmpty == true ? {'Host': q['host']} : null,
+        );
+      case 'grpc':
+        // 规范参数为 serviceName，部分客户端只写 path，做兼容
+        return Transport(
+          type: OutboundTransportType.gRPC,
+          serviceName: q['serviceName'] ?? q['path'],
+        );
+      case 'httpupgrade':
+        return Transport(
+          type: OutboundTransportType.httpUpgrade,
+          path: q['path'],
+          host: q['host'],
+        );
+      case 'http':
+        return Transport(type: OutboundTransportType.http, host: q['host']);
+      default:
+        return null;
     }
   }
 }

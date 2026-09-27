@@ -58,6 +58,9 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   realmOpts: json['realm-opts'] == null
       ? null
       : RealmOpts.fromJson(json['realm-opts'] as Map<String, dynamic>),
+  realityOpts: json['reality-opts'] == null
+      ? null
+      : RealityOpts.fromJson(json['reality-opts'] as Map<String, dynamic>),
 )..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -109,6 +112,7 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'udp-over-tcp': ?instance.udpOverTcp,
       'udp-over-tcp-version': ?instance.udpOverTcpVersion,
       'realm-opts': ?instance.realmOpts?.toJson(),
+      'reality-opts': ?instance.realityOpts?.toJson(),
     };
 
 PluginOpts _$PluginOptsFromJson(Map<String, dynamic> json) =>
@@ -134,3 +138,14 @@ Map<String, dynamic> _$RealmOptsToJson(RealmOpts instance) => <String, dynamic>{
   'realm-id': ?instance.realmId,
   'stun-servers': ?instance.stunServers,
 };
+
+RealityOpts _$RealityOptsFromJson(Map<String, dynamic> json) => RealityOpts(
+  publicKey: json['public-key'] as String?,
+  shortId: json['short-id'] as String?,
+);
+
+Map<String, dynamic> _$RealityOptsToJson(RealityOpts instance) =>
+    <String, dynamic>{
+      'public-key': ?instance.publicKey,
+      'short-id': ?instance.shortId,
+    };

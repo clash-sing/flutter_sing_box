@@ -201,10 +201,14 @@ extension ClashProxyExt on ClashProxy {
         packetEncoding: packetEncoding,
         tls: Tls(
           alpn: alpn,
-          enabled: tls,
+          // reality 隐含 TLS：YAML 未写 tls: true 时也要启用
+          enabled: (tls ?? false) || realityOpts != null,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni,
+          reality: realityOpts?.publicKey != null
+              ? Reality(enabled: true, publicKey: realityOpts!.publicKey, shortId: realityOpts?.shortId)
+              : null,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
