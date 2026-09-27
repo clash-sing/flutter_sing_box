@@ -82,4 +82,126 @@ void main() {
       expect(outbounds.first.tag, 'ok');
     });
   });
+
+  group('Base64Provider.provide - vmess', () {
+    // 按 v2rayN 字段名构造 vmess JSON 并编码为分享链接
+    String vmessLink(Map<String, dynamic> json) =>
+        'vmess://${base64.encode(utf8.encode(jsonEncode(json)))}';
+
+    test('ws + tls：解析 uuid/security/alterId/transport/tls', () {
+      final link = vmessLink({
+        'v': '2',
+        'ps': '节点A',
+        'add': 'a.com',
+        'port': 443,
+        'id': 'b831381d-6324-4d53-ad4f-8cda48b30811',
+        'aid': 0,
+        'scy': 'auto',
+        'net': 'ws',
+        'host': 'cdn.a.com',
+        'path': '/ws',
+        'tls': 'tls',
+        'sni': 'a.com',
+        'alpn': 'h2,http/1.1',
+        'fp': 'chrome',
+      });
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.type, OutboundType.vmess);
+      expect(o.tag, '节点A');
+      expect(o.server, 'a.com');
+      expect(o.serverPort, 443);
+      expect(o.uuid, 'b831381d-6324-4d53-ad4f-8cda48b30811');
+      expect(o.security, 'auto');
+      expect(o.alterId, 0);
+      expect(o.tls?.enabled, isTrue);
+      expect(o.tls?.serverName, 'a.com');
+      expect(o.tls?.alpn, ['h2', 'http/1.1']);
+      expect(o.tls?.utls?.fingerprint, 'chrome');
+      expect(o.transport?.type, OutboundTransportType.webSocket);
+      expect(o.transport?.path, '/ws');
+      expect(o.transport?.headers?['Host'], 'cdn.a.com');
+    });
+
+    test('tcp 无 tls：transport 与 tls 均为 null', () {
+      final link = vmessLink({
+        'v': '2',
+        'ps': 'plain',
+        'add': 'b.com',
+        'port': 80,
+        'id': 'u1',
+        'aid': '64',
+        'net': 'tcp',
+        'tls': '',
+      });
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.security, 'auto'); // scy 缺省
+      expect(o.alterId, 64); // 字符串型 aid
+      expect(o.tls, isNull);
+      expect(o.transport, isNull);
+    });
+
+    test('grpc：path 映射为 serviceName', () {
+      final link = vmessLink({
+        'v': '2',
+        'ps': 'g',
+        'add': 'c.com',
+        'port': '443', // 字符串型 port
+        'id': 'u2',
+        'net': 'grpc',
+        'path': 'GunSrv',
+        'tls': 'tls',
+      });
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.serverPort, 443);
+      expect(o.transport?.type, OutboundTransportType.gRPC);
+      expect(o.transport?.serviceName, 'GunSrv');
+      expect(o.tls?.enabled, isTrue);
+    });
+
+    test('URL-safe base64 无 padding 的链接可解析', () {
+      final json = {
+        'v': '2',
+        'ps': 'us',
+        'add': 'd.com',
+        'port': 443,
+        'id': 'u3',
+        'net': 'tcp',
+      };
+      final std = base64.encode(utf8.encode(jsonEncode(json)));
+      final urlSafe = std.replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+      final o = Base64Provider.provide(encodeSub(['vmess://$urlSafe'])).first;
+      expect(o.tag, 'us');
+      expect(o.server, 'd.com');
+    });
+
+    test('kcp 传输（sing-box 不支持）整行跳过', () {
+      final link = vmessLink({
+        'v': '2',
+        'ps': 'kcp-node',
+        'add': 'e.com',
+        'port': 443,
+        'id': 'u4',
+        'net': 'kcp',
+      });
+      final outbounds = Base64Provider.provide(encodeSub([link]));
+      expect(outbounds, isEmpty);
+    });
+
+    test('旧字段名 security 与 allowInsecure 兼容', () {
+      final link = vmessLink({
+        'v': '2',
+        'ps': 'legacy',
+        'add': 'f.com',
+        'port': 443,
+        'id': 'u5',
+        'security': 'aes-128-gcm',
+        'net': 'ws',
+        'tls': 'tls',
+        'allowInsecure': '1',
+      });
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.security, 'aes-128-gcm');
+      expect(o.tls?.insecure, isTrue);
+    });
+  });
 }

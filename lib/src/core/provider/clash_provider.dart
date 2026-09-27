@@ -49,7 +49,7 @@ extension ClashProxyExt on ClashProxy {
         tag: name,
         server: server,
         serverPort: port,
-        serverPorts: ports?.isNotEmpty == true ? [ports!.replaceAll('-', ':')] : null,
+        serverPorts: ports?.contains('-') == true ? [ports!.replaceAll('-', ':')] : null,
         password: password,
         bbrProfile: bbrProfile,
         upMbps: up,
@@ -86,7 +86,7 @@ extension ClashProxyExt on ClashProxy {
         tag: name,
         server: server,
         serverPort: port,
-        serverPorts: ports?.isNotEmpty == true ? [ports!.replaceAll('-', ':')] : null,
+        serverPorts: ports?.contains('-') == true ? [ports!.replaceAll('-', ':')] : null,
         authStr: authStr,
         upMbps: up,
         downMbps: down,
@@ -207,7 +207,11 @@ extension ClashProxyExt on ClashProxy {
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni,
           reality: realityOpts?.publicKey != null
-              ? Reality(enabled: true, publicKey: realityOpts!.publicKey, shortId: realityOpts?.shortId)
+              ? Reality(
+                  enabled: true,
+                  publicKey: realityOpts!.publicKey,
+                  shortId: realityOpts?.shortId,
+                )
               : null,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)

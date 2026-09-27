@@ -53,6 +53,10 @@ class Base64Provider {
           case ClashProxyType.vless:
             outbound = _parseVless(uri);
             break;
+          case ClashProxyType.vmess:
+            // vmess://base64(JSON) 不是标准 URI（无 @host:port 结构），传原始行整行解码
+            outbound = _parseVmess(line);
+            break;
           default:
             break;
         }
@@ -241,11 +245,7 @@ class Base64Provider {
             disableSni: !(sni?.isNotEmpty == true),
             serverName: sni,
             utls: utls,
-            reality: Reality(
-              enabled: true,
-              publicKey: q['pbk'],
-              shortId: q['sid'] ?? '',
-            ),
+            reality: Reality(enabled: true, publicKey: q['pbk'], shortId: q['sid'] ?? ''),
           );
         case 'tls' || 'xtls': // xtls 为旧值，按纯 TLS 处理
           tls = Tls(
@@ -292,15 +292,103 @@ class Base64Provider {
           serviceName: q['serviceName'] ?? q['path'],
         );
       case 'httpupgrade':
-        return Transport(
-          type: OutboundTransportType.httpUpgrade,
-          path: q['path'],
-          host: q['host'],
-        );
+        return Transport(type: OutboundTransportType.httpUpgrade, path: q['path'], host: q['host']);
       case 'http':
         return Transport(type: OutboundTransportType.http, host: q['host']);
       default:
         return null;
+    }
+  }
+
+  /// 解析 vmess:// 分享链接（vmess://base64(JSON)，无官方规范，字段名以 v2rayN 为事实标准）。
+  /// 注意链接不是标准 URI，需传入拆行后的原始行。
+  static Outbound? _parseVmess(String line) {
+    try {
+      final raw = line.substring('vmess://'.length);
+      // URL-safe 字母表归一化 + 补 padding（v2rayN 为标准 base64，部分客户端无 padding）
+      final s = raw.replaceAll('-', '+').replaceAll('_', '/');
+      final padded = s + '=' * ((4 - s.length % 4) % 4);
+      final decoded = jsonDecode(utf8.decode(base64.decode(padded)));
+      if (decoded is! Map) return null;
+      final map = Map<String, dynamic>.from(decoded);
+
+      final add = map['add'] as String?;
+      final id = map['id'] as String?;
+      if (add?.isNotEmpty != true || id?.isNotEmpty != true) return null;
+
+      // port/aid 在各客户端里类型不一（数字或字符串），统一转 int
+      final port = switch (map['port']) {
+        num n => n.toInt(),
+        String s => int.tryParse(s),
+        _ => null,
+      };
+      if (port == null) return null;
+      final alterId = switch (map['aid']) {
+        num n => n.toInt(),
+        String s => int.tryParse(s) ?? 0,
+        _ => 0,
+      };
+
+      final net = (map['net'] as String?) ?? 'tcp';
+      if (net == 'kcp' || net == 'quic') {
+        // V2Ray 私有传输，sing-box 不支持，跳过该节点
+        return null;
+      }
+      final Transport? transport = switch (net) {
+        'ws' => Transport(
+            type: OutboundTransportType.webSocket,
+            path: map['path'] as String?,
+            headers: (map['host'] as String?)?.isNotEmpty == true ? {'Host': map['host']} : null,
+          ),
+        'grpc' => Transport(type: OutboundTransportType.gRPC, serviceName: map['path'] as String?),
+        'h2' || 'http' => Transport(
+            type: OutboundTransportType.http,
+            host: map['host'],
+            path: map['path'],
+          ),
+        'httpupgrade' => Transport(
+            type: OutboundTransportType.httpUpgrade,
+            path: map['path'] as String?,
+            host: map['host'],
+          ),
+        // tcp 且 type=http 时为 http 伪装传输，否则无传输层
+        _ => map['type'] == 'http' ? Transport(type: OutboundTransportType.http, host: map['host']) : null,
+      };
+
+      // vmess JSON 的 tls 字段为字符串："tls" 启用，""/none 未启用
+      final Tls? tls;
+      if (map['tls'] == 'tls') {
+        final sni = (map['sni'] as String?)?.isNotEmpty == true ? map['sni'] as String? : map['host'] as String?;
+        final alpn = map['alpn'] as String?;
+        final fp = map['fp'] as String?;
+        final allowInsecure = map['allowInsecure'];
+        tls = Tls(
+          alpn: alpn != null && alpn.isNotEmpty ? alpn.split(',') : null,
+          enabled: true,
+          insecure: allowInsecure == true || allowInsecure == '1' || allowInsecure == 'true',
+          disableSni: !(sni?.isNotEmpty == true),
+          serverName: sni,
+          utls: fp?.isNotEmpty == true ? Utls(enabled: true, fingerprint: fp!) : null,
+        );
+      } else {
+        tls = null;
+      }
+
+      final ps = map['ps'] as String?;
+      return Outbound(
+        type: OutboundType.vmess,
+        tag: ps?.isNotEmpty == true ? ps! : id!,
+        server: add,
+        serverPort: port,
+        uuid: id,
+        // 加密字段新名 scy、旧名 security，缺省 auto
+        security: ((map['scy'] ?? map['security']) as String?) ?? 'auto',
+        alterId: alterId,
+        tls: tls,
+        transport: transport,
+      );
+    } catch (e) {
+      return null;
     }
   }
 }
