@@ -162,10 +162,10 @@ Map<String, dynamic> _$MultiplexToJson(Multiplex instance) => <String, dynamic>{
 };
 
 Realm _$RealmFromJson(Map<String, dynamic> json) => Realm(
-  serverUrl: json['server_url'] as String,
+  serverUrl: json['server_url'] as String?,
   token: json['token'] as String?,
-  realmId: json['realm_id'] as String,
-  stunServers: json['stun_servers'] as Object,
+  realmId: json['realm_id'] as String?,
+  stunServers: json['stun_servers'],
   ipVersion: (json['ip_version'] as num?)?.toInt(),
   portMapping: json['port_mapping'] == null
       ? null
@@ -174,10 +174,10 @@ Realm _$RealmFromJson(Map<String, dynamic> json) => Realm(
 );
 
 Map<String, dynamic> _$RealmToJson(Realm instance) => <String, dynamic>{
-  'server_url': instance.serverUrl,
+  'server_url': ?instance.serverUrl,
   'token': ?instance.token,
-  'realm_id': instance.realmId,
-  'stun_servers': instance.stunServers,
+  'realm_id': ?instance.realmId,
+  'stun_servers': ?instance.stunServers,
   'ip_version': ?instance.ipVersion,
   'port_mapping': ?instance.portMapping?.toJson(),
   'http_client': ?instance.httpClient,

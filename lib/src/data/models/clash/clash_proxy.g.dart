@@ -53,6 +53,9 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   pluginOpts: json['plugin-opts'] as String?,
   udpOverTcp: json['udp-over-tcp'] as bool?,
   udpOverTcpVersion: (json['udp-over-tcp-version'] as num?)?.toInt(),
+  realmOpts: json['realm-opts'] == null
+      ? null
+      : RealmOpts.fromJson(json['realm-opts'] as Map<String, dynamic>),
 )..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -103,4 +106,23 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'plugin-opts': ?instance.pluginOpts,
       'udp-over-tcp': ?instance.udpOverTcp,
       'udp-over-tcp-version': ?instance.udpOverTcpVersion,
+      'realm-opts': ?instance.realmOpts?.toJson(),
     };
+
+RealmOpts _$RealmOptsFromJson(Map<String, dynamic> json) => RealmOpts(
+  enable: json['enable'] as bool?,
+  serverUrl: json['server-url'] as String?,
+  token: json['token'] as String?,
+  realmId: json['realm-id'] as String?,
+  stunServers: (json['stun-servers'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+);
+
+Map<String, dynamic> _$RealmOptsToJson(RealmOpts instance) => <String, dynamic>{
+  'enable': ?instance.enable,
+  'server-url': ?instance.serverUrl,
+  'token': ?instance.token,
+  'realm-id': ?instance.realmId,
+  'stun-servers': ?instance.stunServers,
+};

@@ -72,6 +72,14 @@ extension ClashProxyExt on ClashProxy {
                 maxPacketSize: obfsMaxPacketSize,
               )
             : null,
+        realm: realmOpts?.enable == true
+            ? Realm(
+                serverUrl: realmOpts!.serverUrl,
+                token: realmOpts!.token,
+                realmId: realmOpts!.realmId,
+                stunServers: realmOpts!.stunServers,
+              )
+            : null,
       ),
       ClashProxyType.hysteria => Outbound(
         type: OutboundType.hysteria,

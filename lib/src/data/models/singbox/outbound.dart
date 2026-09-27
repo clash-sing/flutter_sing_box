@@ -222,16 +222,16 @@ class Multiplex {
 @JsonSerializable(explicitToJson: true)
 final class Realm {
   @JsonKey(name: "server_url")
-  String serverUrl;
+  String? serverUrl;
   String? token;
   @JsonKey(name: "realm_id")
-  String realmId;
+  String? realmId;
 
   /// 用于发现本客户端公网地址的 STUN 服务器列表（host 或 host:port）。
   /// 域名通过 拨号字段 中的 domain_resolver 解析。
   /// 类型可以是 String 或 List&lt;String&gt;。
   @JsonKey(name: "stun_servers")
-  Object stunServers;
+  Object? stunServers;
   @JsonKey(name: "ip_version")
   int? ipVersion;
   @JsonKey(name: "port_mapping")
@@ -240,10 +240,10 @@ final class Realm {
   Object? httpClient;
 
   Realm({
-    required this.serverUrl,
+    this.serverUrl,
     this.token,
-    required this.realmId,
-    required this.stunServers,
+    this.realmId,
+    this.stunServers,
     this.ipVersion,
     this.portMapping,
     this.httpClient,

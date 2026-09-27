@@ -91,10 +91,13 @@ class ClashProxy {
   String? pluginOpts;
   @JsonKey(name: "udp-over-tcp")
   bool? udpOverTcp;
+
   /// 协议版本，1 或 2，默认为 1。
   @JsonKey(name: "udp-over-tcp-version")
   int? udpOverTcpVersion;
-  
+
+  @JsonKey(name: "realm-opts")
+  RealmOpts? realmOpts;
 
   ClashProxy({
     required this.name,
@@ -142,9 +145,28 @@ class ClashProxy {
     this.pluginOpts,
     this.udpOverTcp,
     this.udpOverTcpVersion,
+    this.realmOpts,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);
 
   Map<String, dynamic> toJson() => _$ClashProxyToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+final class RealmOpts {
+  final bool? enable;
+  @JsonKey(name: "server-url")
+  final String? serverUrl;
+  final String? token;
+  @JsonKey(name: "realm-id")
+  final String? realmId;
+  @JsonKey(name: "stun-servers")
+  final List<String>? stunServers;
+
+  RealmOpts({this.enable, this.serverUrl, this.token, this.realmId, this.stunServers});
+
+  factory RealmOpts.fromJson(Map<String, dynamic> json) => _$RealmOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RealmOptsToJson(this);
 }
