@@ -38,7 +38,7 @@ class ClashProvider {
 }
 
 /// Extensions for converting a [ClashProxy] into an [Outbound].
-/// TODO: 待实现 snell、Shadowsocks
+/// TODO: 待实现 snell
 extension ClashProxyExt on ClashProxy {
   /// Converts this Clash proxy into a sing-box [Outbound], or `null`
   /// if the proxy type is unsupported.
@@ -98,6 +98,7 @@ extension ClashProxyExt on ClashProxy {
       ClashProxyType.anytls => Outbound(
         type: OutboundType.anytls,
         tag: name,
+        network: _toSingBoxNetwork,
         server: server,
         serverPort: port,
         password: password,
@@ -121,6 +122,7 @@ extension ClashProxyExt on ClashProxy {
       ClashProxyType.trojan => Outbound(
         type: OutboundType.trojan,
         tag: name,
+        network: _toSingBoxNetwork,
         server: server,
         serverPort: port,
         password: password,
@@ -134,9 +136,7 @@ extension ClashProxyExt on ClashProxy {
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
         ),
-        transport: network == 'tcp'
-            ? Transport(type: 'http')
-            : (network?.isNotEmpty == true ? Transport(type: network!) : null),
+        transport: _toSingBoxTransport,
       ),
       ClashProxyType.tuic => Outbound(
         type: OutboundType.tuic,
@@ -157,11 +157,11 @@ extension ClashProxyExt on ClashProxy {
           disableSni: disableSni,
           serverName: sni,
         ),
-        transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
       ),
       ClashProxyType.vmess => Outbound(
         type: OutboundType.vmess,
         tag: name,
+        network: _toSingBoxNetwork,
         server: server,
         serverPort: port,
         uuid: uuid,
@@ -180,13 +180,12 @@ extension ClashProxyExt on ClashProxy {
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
         ),
-        transport: network == 'tcp'
-            ? Transport(type: 'http')
-            : (network?.isNotEmpty == true ? Transport(type: network!) : null),
+        transport: _toSingBoxTransport,
       ),
       ClashProxyType.vless => Outbound(
         type: OutboundType.vless,
         tag: name,
+        network: _toSingBoxNetwork,
         server: server,
         serverPort: port,
         uuid: uuid,
@@ -202,14 +201,12 @@ extension ClashProxyExt on ClashProxy {
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
               : null,
         ),
-        transport: network == 'tcp'
-            ? Transport(type: 'http')
-            : (network?.isNotEmpty == true ? Transport(type: network!) : null),
+        transport: _toSingBoxTransport,
       ),
       ClashProxyType.shadowsocks => Outbound(
         type: OutboundType.shadowsocks,
         tag: name,
-        network: udp == true ? ['tcp', 'udp'] : 'tcp',
+        network: _toSingBoxNetwork,
         server: server,
         serverPort: port,
         password: password,
@@ -224,6 +221,11 @@ extension ClashProxyExt on ClashProxy {
     };
     return outbound;
   }
+
+  Object? get _toSingBoxNetwork => udp == true ? ['tcp', 'udp'] : 'tcp';
+  Transport? get _toSingBoxTransport => network == 'tcp'
+      ? Transport(type: 'http')
+      : (network?.isNotEmpty == true ? Transport(type: network!) : null);
 }
 
 /// Extensions for converting a [ClashGroup] into an [Outbound].
