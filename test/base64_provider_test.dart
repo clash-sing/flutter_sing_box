@@ -204,4 +204,46 @@ void main() {
       expect(o.tls?.insecure, isTrue);
     });
   });
+
+  group('Base64Provider.provide - hysteria2 mport 端口跳跃', () {
+    test('官方示例格式：范围与单端口逗号混用', () {
+      const link = 'hysteria2://pwd@hy2.com:443?sni=hy2.com&mport=20000-30000,443#hy2';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.serverPorts, ['20000:30000', '443:443']);
+    });
+
+    test('单个端口范围（既有行为不回归）', () {
+      const link = 'hysteria2://pwd@hy2r.com:443?sni=hy2r.com&mport=20000-30000#hy2r';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.serverPorts, ['20000:30000']);
+    });
+
+    test('单个端口号转为 start:end（sing-box 拒绝纯数字）', () {
+      const link = 'hysteria2://pwd@hy2s.com:443?sni=hy2s.com&mport=443#hy2s';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.serverPorts, ['443:443']);
+    });
+
+    test('无 mport 时 server_ports 为 null（既有行为不回归）', () {
+      const link = 'hysteria2://pwd@hy2n.com:443?sni=hy2n.com#hy2n';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.serverPorts, isNull);
+    });
+  });
+
+  group('Base64Provider.provide - hysteria mport 端口跳跃', () {
+    test('范围与单端口逗号混用', () {
+      const link =
+          'hysteria://auth@hy1.com:443?peer=hy1.com&upmbps=100&downmbps=1000&mport=200-300,443#hy1';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.serverPorts, ['200:300', '443:443']);
+    });
+
+    test('无 mport 时节点不丢弃，server_ports 为 null', () {
+      const link = 'hysteria://auth@hy1n.com:443?peer=hy1n.com&upmbps=100&downmbps=1000#hy1n';
+      final outbounds = Base64Provider.provide(encodeSub([link]));
+      expect(outbounds, hasLength(1));
+      expect(outbounds.first.serverPorts, isNull);
+    });
+  });
 }

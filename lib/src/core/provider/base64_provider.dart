@@ -36,6 +36,7 @@ class Base64Provider {
         Outbound? outbound;
         switch (uri.scheme) {
           case ClashProxyType.hysteria2:
+          case 'hy2':
             outbound = _parseHysteria2(uri);
             break;
           case ClashProxyType.hysteria:
@@ -76,9 +77,7 @@ class Base64Provider {
         tag: Uri.decodeComponent(uri.fragment),
         server: uri.host,
         serverPort: uri.port,
-        serverPorts: queryParams['mport']?.isNotEmpty == true
-            ? [queryParams['mport']!.replaceAll('-', ':')]
-            : null,
+        serverPorts: toSingBoxServerPorts(queryParams['mport']),
         password: uri.userInfo,
         obfs: queryParams['obfs']?.isNotEmpty == true
             ? Obfs(type: queryParams['obfs']!, password: queryParams['obfs-password'])
@@ -105,7 +104,7 @@ class Base64Provider {
         network: queryParams['protocol'] == 'udp' ? ['tcp', 'udp'] : 'tcp',
         server: uri.host,
         serverPort: uri.port,
-        serverPorts: [queryParams['mport']!.replaceAll('-', ':')],
+        serverPorts: toSingBoxServerPorts(queryParams['mport']),
         authStr: queryParams['auth'],
         tls: Tls(
           alpn: queryParams['alpn']?.isNotEmpty == true ? [queryParams['alpn']!] : ['h3'],
@@ -336,29 +335,31 @@ class Base64Provider {
       }
       final Transport? transport = switch (net) {
         'ws' => Transport(
-            type: OutboundTransportType.webSocket,
-            path: map['path'] as String?,
-            headers: (map['host'] as String?)?.isNotEmpty == true ? {'Host': map['host']} : null,
-          ),
+          type: OutboundTransportType.webSocket,
+          path: map['path'] as String?,
+          headers: (map['host'] as String?)?.isNotEmpty == true ? {'Host': map['host']} : null,
+        ),
         'grpc' => Transport(type: OutboundTransportType.gRPC, serviceName: map['path'] as String?),
-        'h2' || 'http' => Transport(
-            type: OutboundTransportType.http,
-            host: map['host'],
-            path: map['path'],
-          ),
+        'h2' ||
+        'http' => Transport(type: OutboundTransportType.http, host: map['host'], path: map['path']),
         'httpupgrade' => Transport(
-            type: OutboundTransportType.httpUpgrade,
-            path: map['path'] as String?,
-            host: map['host'],
-          ),
+          type: OutboundTransportType.httpUpgrade,
+          path: map['path'] as String?,
+          host: map['host'],
+        ),
         // tcp 且 type=http 时为 http 伪装传输，否则无传输层
-        _ => map['type'] == 'http' ? Transport(type: OutboundTransportType.http, host: map['host']) : null,
+        _ =>
+          map['type'] == 'http'
+              ? Transport(type: OutboundTransportType.http, host: map['host'])
+              : null,
       };
 
       // vmess JSON 的 tls 字段为字符串："tls" 启用，""/none 未启用
       final Tls? tls;
       if (map['tls'] == 'tls') {
-        final sni = (map['sni'] as String?)?.isNotEmpty == true ? map['sni'] as String? : map['host'] as String?;
+        final sni = (map['sni'] as String?)?.isNotEmpty == true
+            ? map['sni'] as String?
+            : map['host'] as String?;
         final alpn = map['alpn'] as String?;
         final fp = map['fp'] as String?;
         final allowInsecure = map['allowInsecure'];

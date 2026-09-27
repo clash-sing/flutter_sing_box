@@ -37,6 +37,25 @@ class ClashProvider {
   }
 }
 
+/// 端口跳跃语法转 sing-box server_ports 列表。
+///
+/// 输入语法（mihomo 的 `ports` 字段与 hysteria2/hysteria 分享链接的
+/// `mport` 参数一致）：`-` 表范围、`/` 或 `,` 分隔多段、纯数字表单端口，
+/// 如 `114-514/810-1919,65530`。
+/// sing-box 的 server_ports 每个元素必须是 `start:end`：多段须拆成
+/// 多个数组元素（内核不认 `,`/`/`），纯数字单端口会被内核拒绝
+/// （"bad port range"），须展开为 `port:port`。
+List<String>? toSingBoxServerPorts(String? ports) {
+  if (ports == null || ports.isEmpty) return null;
+  final segments =
+      ports.split(RegExp('[/,]')).map((e) => e.trim()).where((e) => e.isNotEmpty);
+  final result = [
+    for (final segment in segments)
+      segment.contains('-') ? segment.replaceAll('-', ':') : '$segment:$segment',
+  ];
+  return result.isEmpty ? null : result;
+}
+
 /// Extensions for converting a [ClashProxy] into an [Outbound].
 /// TODO: 待实现 snell
 extension ClashProxyExt on ClashProxy {
@@ -49,7 +68,7 @@ extension ClashProxyExt on ClashProxy {
         tag: name,
         server: server,
         serverPort: port,
-        serverPorts: _toSingBoxServerPorts,
+        serverPorts: toSingBoxServerPorts(ports),
         password: password,
         bbrProfile: bbrProfile,
         upMbps: up,
@@ -86,7 +105,7 @@ extension ClashProxyExt on ClashProxy {
         tag: name,
         server: server,
         serverPort: port,
-        serverPorts: _toSingBoxServerPorts,
+        serverPorts: toSingBoxServerPorts(ports),
         authStr: authStr,
         upMbps: up,
         downMbps: down,
@@ -236,22 +255,6 @@ extension ClashProxyExt on ClashProxy {
       _ => null,
     };
     return outbound;
-  }
-
-  /// mihomo 端口跳跃语法转 sing-box server_ports：
-  /// mihomo 用 `-` 表范围、`/` 或 `,` 分隔多段、纯数字表单端口
-  /// （如 `114-514/810-1919,65530`）；sing-box 的 server_ports
-  /// 每个元素必须是 `start:end`，纯数字单端口会被内核拒绝
-  /// （"bad port range"），需展开为 `port:port`。
-  List<String>? get _toSingBoxServerPorts {
-    if (ports == null || ports!.isEmpty) return null;
-    final segments =
-        ports!.split(RegExp('[/,]')).map((e) => e.trim()).where((e) => e.isNotEmpty);
-    final result = [
-      for (final segment in segments)
-        segment.contains('-') ? segment.replaceAll('-', ':') : '$segment:$segment',
-    ];
-    return result.isEmpty ? null : result;
   }
 
   Object? get _toSingBoxNetwork => udp == true ? ['tcp', 'udp'] : 'tcp';
