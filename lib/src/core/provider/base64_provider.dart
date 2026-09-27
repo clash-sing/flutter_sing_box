@@ -72,6 +72,7 @@ class Base64Provider {
   static Outbound? _parseHysteria2(Uri uri) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
+      final sni = queryParams['sni'] ?? uri.host;
       return Outbound(
         type: OutboundType.hysteria2,
         tag: Uri.decodeComponent(uri.fragment),
@@ -86,8 +87,8 @@ class Base64Provider {
           alpn: queryParams['alpn']?.isNotEmpty == true ? [queryParams['alpn']!] : ['h3'],
           enabled: true,
           insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
-          disableSni: !(queryParams['sni']?.isNotEmpty == true),
-          serverName: queryParams['sni'] ?? '',
+          disableSni: sni.isEmpty,
+          serverName: sni,
         ),
       );
     } catch (e) {
@@ -98,6 +99,8 @@ class Base64Provider {
   static Outbound? _parseHysteria(Uri uri) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
+      // peer 为 hysteria v1 官方参数名，兼容 sni 写法，缺省回退 host
+      final sni = queryParams['peer'] ?? queryParams['sni'] ?? uri.host;
       return Outbound(
         type: OutboundType.hysteria,
         tag: Uri.decodeComponent(uri.fragment),
@@ -109,9 +112,9 @@ class Base64Provider {
         tls: Tls(
           alpn: queryParams['alpn']?.isNotEmpty == true ? [queryParams['alpn']!] : ['h3'],
           enabled: true,
-          insecure: queryParams['allowInsecure'] == '1',
-          disableSni: !(queryParams['peer']?.isNotEmpty == true),
-          serverName: queryParams['peer'] ?? '',
+          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
+          disableSni: sni.isEmpty,
+          serverName: sni,
         ),
         upMbps: int.tryParse(queryParams['upmbps'] ?? '50') ?? 50,
         downMbps: int.tryParse(queryParams['downmbps'] ?? '100') ?? 100,
@@ -125,6 +128,8 @@ class Base64Provider {
   static Outbound? _parseAnytls(Uri uri) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
+      // 官方 URI Scheme 参数为 sni（anytls-go docs/uri_scheme.md），缺省回退 host
+      final sni = queryParams['sni'] ?? uri.host;
       return Outbound(
         type: OutboundType.anytls,
         tag: Uri.decodeComponent(uri.fragment),
@@ -133,9 +138,9 @@ class Base64Provider {
         password: uri.userInfo,
         tls: Tls(
           enabled: true,
-          insecure: queryParams['allowInsecure'] == '1',
-          disableSni: !(queryParams['peer']?.isNotEmpty == true),
-          serverName: queryParams['peer'] ?? '',
+          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
+          disableSni: sni.isEmpty,
+          serverName: sni,
         ),
       );
     } catch (e) {
@@ -146,6 +151,8 @@ class Base64Provider {
   static Outbound? _parseTrojan(Uri uri) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
+      // 主认 sni（v2rayN/官方标准），兼容 peer（trojan-go / Shadowrocket 旧写法），缺省回退 host
+      final sni = queryParams['sni'] ?? queryParams['peer'] ?? uri.host;
       return Outbound(
         type: OutboundType.trojan,
         tag: Uri.decodeComponent(uri.fragment),
@@ -154,9 +161,9 @@ class Base64Provider {
         password: uri.userInfo,
         tls: Tls(
           enabled: true,
-          insecure: queryParams['allowInsecure'] == '1',
-          disableSni: !(queryParams['peer']?.isNotEmpty == true),
-          serverName: queryParams['peer'] ?? '',
+          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
+          disableSni: sni.isEmpty,
+          serverName: sni,
         ),
         transport: queryParams['obfs'] == 'websocket'
             ? Transport(type: OutboundTransportType.webSocket)
@@ -230,7 +237,8 @@ class Base64Provider {
   static Outbound? _parseVless(Uri uri) {
     try {
       final q = uri.queryParameters;
-      final sni = q['sni'];
+      // 缺省回退 host：域名为 host 时作为 SNI；host 为 IP 时内核不发送 SNI
+      final sni = q['sni'] ?? uri.host;
       final fingerprint = q['fp'];
       final utls = fingerprint?.isNotEmpty == true
           ? Utls(enabled: true, fingerprint: fingerprint!)
@@ -241,7 +249,7 @@ class Base64Provider {
         case 'reality':
           tls = Tls(
             enabled: true,
-            disableSni: !(sni?.isNotEmpty == true),
+            disableSni: sni.isEmpty,
             serverName: sni,
             utls: utls,
             reality: Reality(enabled: true, publicKey: q['pbk'], shortId: q['sid'] ?? ''),
@@ -251,7 +259,7 @@ class Base64Provider {
             alpn: q['alpn']?.split(','),
             enabled: true,
             insecure: q['insecure'] == '1' || q['allowInsecure'] == '1',
-            disableSni: !(sni?.isNotEmpty == true),
+            disableSni: sni.isEmpty,
             serverName: sni,
             utls: utls,
           );
@@ -357,9 +365,15 @@ class Base64Provider {
       // vmess JSON 的 tls 字段为字符串："tls" 启用，""/none 未启用
       final Tls? tls;
       if (map['tls'] == 'tls') {
-        final sni = (map['sni'] as String?)?.isNotEmpty == true
-            ? map['sni'] as String?
-            : map['host'] as String?;
+        // sni → host（伪装域名）→ add（服务器地址）逐级回退
+        final String sni;
+        if ((map['sni'] as String?)?.isNotEmpty == true) {
+          sni = map['sni'] as String;
+        } else if ((map['host'] as String?)?.isNotEmpty == true) {
+          sni = map['host'] as String;
+        } else {
+          sni = add!; // 前置校验已保证 add 非空
+        }
         final alpn = map['alpn'] as String?;
         final fp = map['fp'] as String?;
         final allowInsecure = map['allowInsecure'];
@@ -367,7 +381,7 @@ class Base64Provider {
           alpn: alpn != null && alpn.isNotEmpty ? alpn.split(',') : null,
           enabled: true,
           insecure: allowInsecure == true || allowInsecure == '1' || allowInsecure == 'true',
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           utls: fp?.isNotEmpty == true ? Utls(enabled: true, fingerprint: fp!) : null,
         );

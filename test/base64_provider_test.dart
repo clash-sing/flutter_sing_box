@@ -75,6 +75,13 @@ void main() {
       expect(o.packetEncoding, 'packetaddr');
     });
 
+    test('无 sni 的 TLS 链接回退 host 作 serverName', () {
+      const link = 'vless://u@g.com:443?security=tls#no-sni';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 'g.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
     test('未知 scheme 行被跳过，不影响其他行', () {
       const lines = ['wireguard://x@y:1', 'vless://u@f.com:443?security=tls#ok'];
       final outbounds = Base64Provider.provide(encodeSub(lines));
@@ -203,6 +210,21 @@ void main() {
       expect(o.security, 'aes-128-gcm');
       expect(o.tls?.insecure, isTrue);
     });
+
+    test('sni 与 host 均缺省时 serverName 回退 add', () {
+      final link = vmessLink({
+        'v': '2',
+        'ps': 'nosni',
+        'add': 'nosni.com',
+        'port': 443,
+        'id': 'u6',
+        'net': 'tcp',
+        'tls': 'tls',
+      });
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 'nosni.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
   });
 
   group('Base64Provider.provide - hysteria2 mport 端口跳跃', () {
@@ -229,6 +251,20 @@ void main() {
       final o = Base64Provider.provide(encodeSub([link])).first;
       expect(o.serverPorts, isNull);
     });
+
+    test('无 sni 时回退 host 作 serverName', () {
+      const link = 'hysteria2://pwd@hy2f.com:443#hy2f';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 'hy2f.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('sni 显式空串时不发送 SNI', () {
+      const link = 'hysteria2://pwd@hy2e.com:443?sni=#hy2e';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, '');
+      expect(o.tls?.disableSni, isTrue);
+    });
   });
 
   group('Base64Provider.provide - hysteria mport 端口跳跃', () {
@@ -244,6 +280,76 @@ void main() {
       final outbounds = Base64Provider.provide(encodeSub([link]));
       expect(outbounds, hasLength(1));
       expect(outbounds.first.serverPorts, isNull);
+    });
+  });
+
+  group('Base64Provider.provide - trojan sni/insecure', () {
+    test('sni 参数生效（v2rayN 标准），insecure=1 跳过证书校验', () {
+      const link = 'trojan://pwd@1.2.3.4:443?sni=cdn.example.com&insecure=1#t';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.type, OutboundType.trojan);
+      expect(o.tls?.serverName, 'cdn.example.com');
+      expect(o.tls?.disableSni, isFalse);
+      expect(o.tls?.insecure, isTrue);
+    });
+
+    test('无 sni 时回退 host 作 serverName', () {
+      const link = 'trojan://pwd@t.com:443#t2';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 't.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('peer 参数兼容（trojan-go / Shadowrocket 旧写法）', () {
+      const link = 'trojan://pwd@1.2.3.4:443?peer=p.com#t3';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 'p.com');
+    });
+
+    test('allowInsecure=1 亦生效', () {
+      const link = 'trojan://pwd@t4.com:443?allowInsecure=1#t4';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.insecure, isTrue);
+    });
+  });
+
+  group('Base64Provider.provide - anytls sni/insecure', () {
+    test('官方格式：sni 与 insecure 均生效', () {
+      const link = 'anytls://pwd@a.com:443?sni=real.example.com&insecure=1#at';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.type, OutboundType.anytls);
+      expect(o.tls?.serverName, 'real.example.com');
+      expect(o.tls?.disableSni, isFalse);
+      expect(o.tls?.insecure, isTrue);
+    });
+
+    test('无 sni 时回退 host 作 serverName', () {
+      const link = 'anytls://pwd@b.com:443#at2';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 'b.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+  });
+
+  group('Base64Provider.provide - hysteria sni/insecure', () {
+    test('peer 为官方主参数名，insecure=1 生效', () {
+      const link =
+          'hysteria://auth@hy.com:443?peer=hy.example.com&insecure=1&upmbps=100&downmbps=1000#h';
+      final o = Base64Provider.provide(encodeSub([link])).first;
+      expect(o.tls?.serverName, 'hy.example.com');
+      expect(o.tls?.disableSni, isFalse);
+      expect(o.tls?.insecure, isTrue);
+    });
+
+    test('无 peer 时先兼容 sni，再回退 host', () {
+      const link1 = 'hysteria://auth@h1.com:443?sni=s1.com&upmbps=100&downmbps=1000#h1';
+      final o1 = Base64Provider.provide(encodeSub([link1])).first;
+      expect(o1.tls?.serverName, 's1.com');
+
+      const link2 = 'hysteria://auth@h2.com:443?upmbps=100&downmbps=1000#h2';
+      final o2 = Base64Provider.provide(encodeSub([link2])).first;
+      expect(o2.tls?.serverName, 'h2.com');
+      expect(o2.tls?.disableSni, isFalse);
     });
   });
 }
