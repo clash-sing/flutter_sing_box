@@ -46,7 +46,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   udpOverStream: json['udp_over_stream'] as bool?,
   heartbeat: json['heartbeat'] as String?,
   method: json['method'] as String?,
-  network: json['network'] as String?,
+  network: json['network'],
   quic: json['quic'] as bool?,
   quicCongestionControl: json['quic_congestion_control'] as String?,
   udpOverTcp: json['udp_over_tcp'],
@@ -59,6 +59,13 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   realm: json['realm'] == null
       ? null
       : Realm.fromJson(json['realm'] as Map<String, dynamic>),
+  obfs: json['obfs'] == null
+      ? null
+      : Obfs.fromJson(json['obfs'] as Map<String, dynamic>),
+  idleSessionCheckInterval: json['idle_session_check_interval'] as String?,
+  idleSessionTimeout: json['idle_session_timeout'] as String?,
+  minIdleSession: (json['min_idle_session'] as num?)?.toInt(),
+  clientMetadata: json['client_metadata'] as String?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -102,6 +109,11 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'bbr_profile': ?instance.bbrProfile,
   'disable_chrome_parrot': ?instance.disableChromeParrot,
   'realm': ?instance.realm?.toJson(),
+  'obfs': ?instance.obfs?.toJson(),
+  'idle_session_check_interval': ?instance.idleSessionCheckInterval,
+  'idle_session_timeout': ?instance.idleSessionTimeout,
+  'min_idle_session': ?instance.minIdleSession,
+  'client_metadata': ?instance.clientMetadata,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(
@@ -162,3 +174,17 @@ Map<String, dynamic> _$RealmPortMappingToJson(RealmPortMapping instance) =>
       'timeout': ?instance.timeout,
       'lifetime': ?instance.lifetime,
     };
+
+Obfs _$ObfsFromJson(Map<String, dynamic> json) => Obfs(
+  type: json['type'] as String,
+  password: json['password'] as String?,
+  minPacketSize: (json['min_packet_size'] as num?)?.toInt(),
+  maxPacketSize: (json['max_packet_size'] as num?)?.toInt(),
+);
+
+Map<String, dynamic> _$ObfsToJson(Obfs instance) => <String, dynamic>{
+  'type': instance.type,
+  'password': ?instance.password,
+  'min_packet_size': ?instance.minPacketSize,
+  'max_packet_size': ?instance.maxPacketSize,
+};

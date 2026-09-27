@@ -7,7 +7,7 @@ part of 'tls.dart';
 // **************************************************************************
 
 Tls _$TlsFromJson(Map<String, dynamic> json) => Tls(
-  alpn: (json['alpn'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  alpn: json['alpn'],
   enabled: json['enabled'] as bool?,
   disableSni: json['disable_sni'] as bool?,
   insecure: json['insecure'] as bool?,

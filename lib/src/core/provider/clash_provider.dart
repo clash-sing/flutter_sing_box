@@ -55,7 +55,18 @@ extension ClashProxyExt on ClashProxy {
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni ?? "",
+          utls: clientFingerprint?.isNotEmpty == true
+              ? Utls(enabled: true, fingerprint: clientFingerprint!)
+              : null,
         ),
+        obfs: obfs?.isNotEmpty == true
+            ? Obfs(
+                type: obfs!,
+                password: obfsPassword,
+                minPacketSize: obfsMinPacketSize,
+                maxPacketSize: obfsMaxPacketSize,
+              )
+            : null,
       ),
       ClashProxyType.hysteria => Outbound(
         type: OutboundType.hysteria,
@@ -73,6 +84,9 @@ extension ClashProxyExt on ClashProxy {
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni ?? "",
+          utls: clientFingerprint?.isNotEmpty == true
+              ? Utls(enabled: true, fingerprint: clientFingerprint!)
+              : null,
         ),
       ),
       ClashProxyType.anytls => Outbound(
@@ -81,12 +95,21 @@ extension ClashProxyExt on ClashProxy {
         server: server,
         serverPort: port,
         password: password,
+        idleSessionCheckInterval: idleSessionCheckInterval != null
+            ? '${idleSessionCheckInterval}s'
+            : null,
+        idleSessionTimeout: idleSessionTimeout != null ? '${idleSessionTimeout}s' : null,
+        minIdleSession: minIdleSession,
+        clientMetadata: clientMetadata,
         tls: Tls(
+          alpn: alpn,
           enabled: true,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni ?? "",
-          utls: Utls(enabled: true, fingerprint: "chrome"),
+          utls: clientFingerprint?.isNotEmpty == true
+              ? Utls(enabled: true, fingerprint: clientFingerprint!)
+              : null,
         ),
       ),
       ClashProxyType.trojan => Outbound(
@@ -96,10 +119,14 @@ extension ClashProxyExt on ClashProxy {
         serverPort: port,
         password: password,
         tls: Tls(
+          alpn: alpn,
           enabled: true,
           insecure: skipCertVerify,
           disableSni: !(sni?.isNotEmpty == true),
           serverName: sni ?? "",
+          utls: clientFingerprint?.isNotEmpty == true
+              ? Utls(enabled: true, fingerprint: clientFingerprint!)
+              : null,
         ),
         transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
       ),
@@ -110,15 +137,17 @@ extension ClashProxyExt on ClashProxy {
         serverPort: port,
         uuid: uuid,
         password: password,
+        bbrProfile: bbrProfile,
         zeroRttHandshake: reduceRtt,
-        congestionControl: congestionControl,
+        congestionControl: congestionController,
         udpRelayMode: udpRelayMode,
+        heartbeat: heartbeatInterval != null ? '${(heartbeatInterval! / 1000)}s' : null,
         tls: Tls(
           alpn: alpn ?? ['h3'],
           enabled: true,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
-          serverName: sni ?? "",
+          disableSni: disableSni,
+          serverName: sni,
         ),
         transport: network?.isNotEmpty == true ? Transport(type: network!) : null,
       ),

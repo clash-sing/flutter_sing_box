@@ -4,7 +4,7 @@ part 'tls.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Tls {
-  List<String>? alpn;
+  Object? alpn;
   bool? enabled;
   @JsonKey(name: "disable_sni")
   bool? disableSni;

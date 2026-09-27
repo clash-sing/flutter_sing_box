@@ -63,12 +63,16 @@ class Outbound {
   String? method;
 
   /// 启用的网络协议 ，tcp 或 udp。
-  String? network;
+  /// 类型可以是 String 或 List&lt;String&gt;。
+  Object? network;
   bool? quic;
   @JsonKey(name: "quic_congestion_control")
   String? quicCongestionControl;
+
+  /// UDP over TCP 配置。
+  /// 类型可以是 bool 或 一个对象。
   @JsonKey(name: "udp_over_tcp")
-  dynamic udpOverTcp;
+  Object? udpOverTcp;
   @JsonKey(name: "interrupt_exist_connections")
   bool? interruptExistConnections;
   @JsonKey(name: "domain_resolver")
@@ -83,6 +87,15 @@ class Outbound {
   @JsonKey(name: "disable_chrome_parrot")
   bool? disableChromeParrot;
   Realm? realm;
+  Obfs? obfs;
+  @JsonKey(name: "idle_session_check_interval")
+  String? idleSessionCheckInterval;
+  @JsonKey(name: "idle_session_timeout")
+  String? idleSessionTimeout;
+  @JsonKey(name: "min_idle_session")
+  int? minIdleSession;
+  @JsonKey(name: "client_metadata")
+  String? clientMetadata;
 
   Outbound({
     required this.tag,
@@ -125,6 +138,11 @@ class Outbound {
     this.bbrProfile,
     this.disableChromeParrot,
     this.realm,
+    this.obfs,
+    this.idleSessionCheckInterval,
+    this.idleSessionTimeout,
+    this.minIdleSession,
+    this.clientMetadata,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -186,7 +204,7 @@ final class Realm {
   @JsonKey(name: "port_mapping")
   RealmPortMapping? portMapping;
   @JsonKey(name: "http_client")
-  dynamic httpClient;
+  Object? httpClient;
 
   Realm({
     required this.serverUrl,
@@ -214,4 +232,21 @@ final class RealmPortMapping {
   factory RealmPortMapping.fromJson(Map<String, dynamic> json) => _$RealmPortMappingFromJson(json);
 
   Map<String, dynamic> toJson() => _$RealmPortMappingToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+final class Obfs {
+  /// QUIC 流量混淆器类型，可选 salamander gecko。如果为空则禁用。
+  String type;
+  String? password;
+  @JsonKey(name: "min_packet_size")
+  int? minPacketSize;
+  @JsonKey(name: "max_packet_size")
+  int? maxPacketSize;
+
+  Obfs({required this.type, this.password, this.minPacketSize, this.maxPacketSize});
+
+  factory Obfs.fromJson(Map<String, dynamic> json) => _$ObfsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ObfsToJson(this);
 }

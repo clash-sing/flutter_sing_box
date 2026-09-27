@@ -6,17 +6,19 @@ part 'clash_proxy.g.dart';
 class ClashProxy {
   String name;
   String type;
-  String server;
-  int port;
+  String? server;
+  int? port;
   String? ports;
   String? password;
   @JsonKey(name: "skip-cert-verify")
-  bool skipCertVerify;
+  bool? skipCertVerify;
   @JsonKey(name: "client-fingerprint")
   String? clientFingerprint;
   bool? udp;
   bool? tfo;
   String? sni;
+
+  /// 启用的网络协议，tcp 或 udp。
   String? network;
   int? up;
   int? down;
@@ -37,8 +39,8 @@ class ClashProxy {
   bool? reduceRtt;
 
   /// QUIC 拥塞控制算法，可选项为 cubic/new_reno/bbr
-  @JsonKey(name: "congestion-control")
-  String? congestionControl;
+  @JsonKey(name: "congestion-controller")
+  String? congestionController;
 
   /// UDP数据包中继模式，可以是 native/quic
   @JsonKey(name: "udp-relay-mode")
@@ -46,14 +48,42 @@ class ClashProxy {
   @JsonKey(name: "bbr-profile")
   String? bbrProfile;
 
+  /// QUIC 流量混淆器类型，可选 salamander gecko。如果为空则禁用。
+  String? obfs;
+  @JsonKey(name: "obfs-password")
+  String? obfsPassword;
+  @JsonKey(name: "obfs-min-packet-size")
+  int? obfsMinPacketSize;
+  @JsonKey(name: "obfs-max-packet-size")
+  int? obfsMaxPacketSize;
+  String? fingerprint;
+
+  /// 检查空闲会话的时间间隔。默认值：30 秒。
+  @JsonKey(name: "idle-session-check-interval")
+  int? idleSessionCheckInterval;
+
+  /// 在检查中，关闭闲置时间超过此值的会话。默认值：30 秒。
+  @JsonKey(name: "idle-session-timeout")
+  int? idleSessionTimeout;
+  @JsonKey(name: "min-idle-session")
+  int? minIdleSession;
+  @JsonKey(name: "client-metadata")
+  String? clientMetadata;
+  @JsonKey(name: "disable-sni")
+  bool? disableSni;
+
+  /// 发送保持连接活动的心跳包的间隔时间，单位为毫秒
+  @JsonKey(name: "heartbeat-interval")
+  int? heartbeatInterval;
+
   ClashProxy({
     required this.name,
     required this.type,
-    required this.server,
-    required this.port,
+    this.server,
+    this.port,
     this.ports,
     this.password,
-    required this.skipCertVerify,
+    this.skipCertVerify,
     this.clientFingerprint,
     this.udp,
     this.tfo,
@@ -68,9 +98,20 @@ class ClashProxy {
     this.disableMtuDiscovery,
     this.uuid,
     this.reduceRtt,
-    this.congestionControl,
+    this.congestionController,
     this.udpRelayMode,
     this.bbrProfile,
+    this.obfs,
+    this.obfsPassword,
+    this.obfsMinPacketSize,
+    this.obfsMaxPacketSize,
+    this.fingerprint,
+    this.idleSessionCheckInterval,
+    this.idleSessionTimeout,
+    this.minIdleSession,
+    this.clientMetadata,
+    this.disableSni,
+    this.heartbeatInterval,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);
