@@ -58,4 +58,95 @@ void main() {
       expect(o.tls?.reality, isNull);
     });
   });
+
+  group('ClashProxy.toOutbound - hysteria2 ports 端口跳跃', () {
+    test('wiki 完整示例：斜杠与逗号分隔的多段范围加单端口', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+        'ports': '114-514/810-1919,65530',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, ['114:514', '810:1919', '65530:65530']);
+    });
+
+    test('仅逗号分隔的多段', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2c',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+        'ports': '114-514,810-1919',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, ['114:514', '810:1919']);
+    });
+
+    test('单个端口范围（既有行为不回归）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2r',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+        'ports': '114-514',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, ['114:514']);
+    });
+
+    test('单个端口号转为 start:end（sing-box 拒绝纯数字）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2s',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+        'ports': '65530',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, ['65530:65530']);
+    });
+
+    test('空段被忽略', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2e',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+        'ports': '114-514,,65530/',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, ['114:514', '65530:65530']);
+    });
+
+    test('未配置 ports 时 server_ports 为 null（既有行为不回归）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2n',
+        'type': 'hysteria2',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, isNull);
+    });
+
+    test('hysteria 分支沿用同一转换', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy1',
+        'type': 'hysteria',
+        'server': 's.com',
+        'port': 443,
+        'ports': '114-514/810-1919,65530',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.serverPorts, ['114:514', '810:1919', '65530:65530']);
+    });
+  });
 }
