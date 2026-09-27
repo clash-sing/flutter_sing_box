@@ -56,7 +56,9 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   hopIntervalMax: json['hop_interval_max'] as String?,
   bbrProfile: json['bbr_profile'] as String?,
   disableChromeParrot: json['disable_chrome_parrot'] as bool?,
-  realm: json['realm'],
+  realm: json['realm'] == null
+      ? null
+      : Realm.fromJson(json['realm'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -99,7 +101,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'hop_interval_max': ?instance.hopIntervalMax,
   'bbr_profile': ?instance.bbrProfile,
   'disable_chrome_parrot': ?instance.disableChromeParrot,
-  'realm': ?instance.realm,
+  'realm': ?instance.realm?.toJson(),
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(
@@ -124,3 +126,39 @@ Multiplex _$MultiplexFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$MultiplexToJson(Multiplex instance) => <String, dynamic>{
   'enabled': ?instance.enabled,
 };
+
+Realm _$RealmFromJson(Map<String, dynamic> json) => Realm(
+  serverUrl: json['server_url'] as String,
+  token: json['token'] as String?,
+  realmId: json['realm_id'] as String,
+  stunServers: json['stun_servers'] as Object,
+  ipVersion: (json['ip_version'] as num?)?.toInt(),
+  portMapping: json['port_mapping'] == null
+      ? null
+      : RealmPortMapping.fromJson(json['port_mapping'] as Map<String, dynamic>),
+  httpClient: json['http_client'],
+);
+
+Map<String, dynamic> _$RealmToJson(Realm instance) => <String, dynamic>{
+  'server_url': instance.serverUrl,
+  'token': ?instance.token,
+  'realm_id': instance.realmId,
+  'stun_servers': instance.stunServers,
+  'ip_version': ?instance.ipVersion,
+  'port_mapping': ?instance.portMapping?.toJson(),
+  'http_client': ?instance.httpClient,
+};
+
+RealmPortMapping _$RealmPortMappingFromJson(Map<String, dynamic> json) =>
+    RealmPortMapping(
+      enabled: json['enabled'] as bool?,
+      timeout: json['timeout'] as String?,
+      lifetime: json['lifetime'] as String?,
+    );
+
+Map<String, dynamic> _$RealmPortMappingToJson(RealmPortMapping instance) =>
+    <String, dynamic>{
+      'enabled': ?instance.enabled,
+      'timeout': ?instance.timeout,
+      'lifetime': ?instance.lifetime,
+    };

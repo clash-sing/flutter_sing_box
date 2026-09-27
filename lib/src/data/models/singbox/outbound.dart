@@ -82,8 +82,7 @@ class Outbound {
   String? bbrProfile;
   @JsonKey(name: "disable_chrome_parrot")
   bool? disableChromeParrot;
-  //TODO: 自 sing-box 1.14.0 起，Hysteria2 引入 realm 字段
-  dynamic realm;
+  Realm? realm;
 
   Outbound({
     required this.tag,
@@ -165,4 +164,54 @@ class Multiplex {
   factory Multiplex.fromJson(Map<String, dynamic> json) => _$MultiplexFromJson(json);
 
   Map<String, dynamic> toJson() => _$MultiplexToJson(this);
+}
+
+/// 自 sing-box 1.14.0 起
+/// 通过 Hysteria Realm 会合服务连接 Hysteria2 服务器。
+@JsonSerializable(explicitToJson: true)
+final class Realm {
+  @JsonKey(name: "server_url")
+  String serverUrl;
+  String? token;
+  @JsonKey(name: "realm_id")
+  String realmId;
+
+  /// 用于发现本客户端公网地址的 STUN 服务器列表（host 或 host:port）。
+  /// 域名通过 拨号字段 中的 domain_resolver 解析。
+  /// 类型可以是 String 或 List&lt;String&gt;。
+  @JsonKey(name: "stun_servers")
+  Object stunServers;
+  @JsonKey(name: "ip_version")
+  int? ipVersion;
+  @JsonKey(name: "port_mapping")
+  RealmPortMapping? portMapping;
+  @JsonKey(name: "http_client")
+  dynamic httpClient;
+
+  Realm({
+    required this.serverUrl,
+    this.token,
+    required this.realmId,
+    required this.stunServers,
+    this.ipVersion,
+    this.portMapping,
+    this.httpClient,
+  });
+
+  factory Realm.fromJson(Map<String, dynamic> json) => _$RealmFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RealmToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+final class RealmPortMapping {
+  bool? enabled;
+  String? timeout;
+  String? lifetime;
+
+  RealmPortMapping({this.enabled, this.timeout, this.lifetime});
+
+  factory RealmPortMapping.fromJson(Map<String, dynamic> json) => _$RealmPortMappingFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RealmPortMappingToJson(this);
 }
