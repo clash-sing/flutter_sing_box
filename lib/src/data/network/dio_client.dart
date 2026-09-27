@@ -9,10 +9,12 @@ import 'package:flutter/foundation.dart';
 class DioClient {
   DioClient._internal();
   static final DioClient _instance = DioClient._internal();
+
   /// Creates the singleton [DioClient] instance.
   factory DioClient() => _instance;
 
   late final Dio _dio = _initDio();
+
   /// The configured [Dio] instance.
   Dio get dio => _dio;
 
@@ -26,8 +28,9 @@ class DioClient {
   Dio _initDio() {
     final myDio = Dio(
       BaseOptions(
-        // connectTimeout: Duration(seconds: 5),
-        // receiveTimeout: Duration(seconds: 3),
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 20),
+        sendTimeout: const Duration(seconds: 10),
         headers: {
           // 'User-Agent': 'SFA/1.12.10 mihomo/1.19.13 ClashMeta clash-verge v2ray',
           // 'User-Agent': 'mihomo/1.19.13 ClashMeta clash-verge v2ray',
