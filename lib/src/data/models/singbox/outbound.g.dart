@@ -69,6 +69,8 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   globalPadding: json['global_padding'] as bool?,
   authenticatedLength: json['authenticated_length'] as bool?,
   flow: json['flow'] as String?,
+  plugin: json['plugin'] as String?,
+  pluginOpts: json['plugin_opts'] as String?,
 );
 
 Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
@@ -120,6 +122,8 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'global_padding': ?instance.globalPadding,
   'authenticated_length': ?instance.authenticatedLength,
   'flow': ?instance.flow,
+  'plugin': ?instance.plugin,
+  'plugin_opts': ?instance.pluginOpts,
 };
 
 Transport _$TransportFromJson(Map<String, dynamic> json) => Transport(
@@ -206,3 +210,14 @@ Map<String, dynamic> _$ObfsToJson(Obfs instance) => <String, dynamic>{
   'min_packet_size': ?instance.minPacketSize,
   'max_packet_size': ?instance.maxPacketSize,
 };
+
+UdpOverTcp _$UdpOverTcpFromJson(Map<String, dynamic> json) => UdpOverTcp(
+  enabled: json['enabled'] as bool?,
+  version: (json['version'] as num?)?.toInt(),
+);
+
+Map<String, dynamic> _$UdpOverTcpToJson(UdpOverTcp instance) =>
+    <String, dynamic>{
+      'enabled': ?instance.enabled,
+      'version': ?instance.version,
+    };

@@ -14,11 +14,15 @@ class ClashProvider {
     final clash = Clash.fromJson(clashMap);
     final List<Outbound> outbounds = [];
     for (var element in clash.proxies) {
-      final outbound = element.toOutbound();
-      if (outbound != null) {
-        outbounds.add(outbound);
-      } else {
-        debugPrint('${element.name} is not support');
+      try {
+        final outbound = element.toOutbound();
+        if (outbound != null) {
+          outbounds.add(outbound);
+        } else {
+          debugPrint('${element.name} is not support');
+        }
+      } catch (e) {
+        debugPrint('Failed to convert ${element.name} to outbound: $e');
       }
     }
     for (var element in clash.proxyGroups.reversed) {
@@ -79,6 +83,7 @@ extension ClashProxyExt on ClashProxy {
         upMbps: up,
         downMbps: down,
         disableMtuDiscovery: disableMtuDiscovery ?? true,
+        obfs: obfs?.isNotEmpty == true ? Obfs(type: obfs!) : null,
         tls: Tls(
           alpn: alpn ?? ['h3'],
           enabled: true,
@@ -200,6 +205,20 @@ extension ClashProxyExt on ClashProxy {
         transport: network == 'tcp'
             ? Transport(type: 'http')
             : (network?.isNotEmpty == true ? Transport(type: network!) : null),
+      ),
+      ClashProxyType.shadowsocks => Outbound(
+        type: OutboundType.shadowsocks,
+        tag: name,
+        network: udp == true ? ['tcp', 'udp'] : 'tcp',
+        server: server,
+        serverPort: port,
+        password: password,
+        method: cipher,
+        plugin: plugin,
+        pluginOpts: pluginOpts,
+        udpOverTcp: udpOverTcp != null
+            ? UdpOverTcp(enabled: udpOverTcp, version: udpOverTcpVersion ?? 1)
+            : null,
       ),
       _ => null,
     };

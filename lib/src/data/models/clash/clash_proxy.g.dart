@@ -49,6 +49,10 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   globalPadding: json['global-padding'] as bool?,
   authenticatedLength: json['authenticated-length'] as bool?,
   flow: json['flow'] as String?,
+  plugin: json['plugin'] as String?,
+  pluginOpts: json['plugin-opts'] as String?,
+  udpOverTcp: json['udp-over-tcp'] as bool?,
+  udpOverTcpVersion: (json['udp-over-tcp-version'] as num?)?.toInt(),
 )..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -95,4 +99,8 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'authenticated-length': ?instance.authenticatedLength,
       'packet-encoding': ?instance.packetEncoding,
       'flow': ?instance.flow,
+      'plugin': ?instance.plugin,
+      'plugin-opts': ?instance.pluginOpts,
+      'udp-over-tcp': ?instance.udpOverTcp,
+      'udp-over-tcp-version': ?instance.udpOverTcpVersion,
     };

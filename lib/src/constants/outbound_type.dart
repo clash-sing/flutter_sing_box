@@ -27,6 +27,9 @@ class OutboundType {
   /// VLESS outbound.
   static const String vless = "vless";
 
+  /// Shadowsocks outbound.
+  static const String shadowsocks = "shadowsocks";
+
   /// TUIC outbound.
   static const String tuic = "tuic";
   static const String naive = "naive";

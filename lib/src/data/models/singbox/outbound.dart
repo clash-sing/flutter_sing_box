@@ -64,13 +64,14 @@ class Outbound {
 
   /// 启用的网络协议 ，tcp 或 udp。
   /// 类型可以是 String 或 List&lt;String&gt;。
+  /// 默认：所有（tcp 和 udp）。
   Object? network;
   bool? quic;
   @JsonKey(name: "quic_congestion_control")
   String? quicCongestionControl;
 
   /// UDP over TCP 配置。
-  /// 类型可以是 bool 或 一个对象。
+  /// 类型可以是 bool 或 [UdpOverTcp]。
   @JsonKey(name: "udp_over_tcp")
   Object? udpOverTcp;
   @JsonKey(name: "interrupt_exist_connections")
@@ -101,6 +102,9 @@ class Outbound {
   @JsonKey(name: "authenticated_length")
   bool? authenticatedLength;
   String? flow;
+  String? plugin;
+  @JsonKey(name: "plugin_opts")
+  String? pluginOpts;
 
   Outbound({
     required this.tag,
@@ -151,6 +155,8 @@ class Outbound {
     this.globalPadding,
     this.authenticatedLength,
     this.flow,
+    this.plugin,
+    this.pluginOpts,
   });
 
   factory Outbound.fromJson(Map<String, dynamic> json) => _$OutboundFromJson(json);
@@ -276,4 +282,18 @@ final class Obfs {
   factory Obfs.fromJson(Map<String, dynamic> json) => _$ObfsFromJson(json);
 
   Map<String, dynamic> toJson() => _$ObfsToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+final class UdpOverTcp {
+  bool? enabled;
+
+  /// 协议版本，1 或 2，默认为 2。
+  int? version;
+
+  UdpOverTcp({this.enabled, this.version});
+
+  factory UdpOverTcp.fromJson(Map<String, dynamic> json) => _$UdpOverTcpFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UdpOverTcpToJson(this);
 }

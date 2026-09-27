@@ -86,6 +86,15 @@ class ClashProxy {
   @JsonKey(name: "packet-encoding")
   String? packetEncoding;
   String? flow;
+  String? plugin;
+  @JsonKey(name: "plugin-opts")
+  String? pluginOpts;
+  @JsonKey(name: "udp-over-tcp")
+  bool? udpOverTcp;
+  /// 协议版本，1 或 2，默认为 1。
+  @JsonKey(name: "udp-over-tcp-version")
+  int? udpOverTcpVersion;
+  
 
   ClashProxy({
     required this.name,
@@ -129,6 +138,10 @@ class ClashProxy {
     this.globalPadding,
     this.authenticatedLength,
     this.flow,
+    this.plugin,
+    this.pluginOpts,
+    this.udpOverTcp,
+    this.udpOverTcpVersion,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);

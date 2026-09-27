@@ -6,6 +6,7 @@ class ClashProxyType {
   static const String tuic = "tuic";
   static const String vmess = "vmess";
   static const String vless = "vless";
+  static const String shadowsocks = "ss";
 }
 
 class ClashGroupType {
