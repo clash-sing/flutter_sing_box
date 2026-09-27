@@ -18,6 +18,9 @@ class ClashProxy {
   bool? tfo;
   String? sni;
 
+  /// TLS SNI：mihomo 中 vmess/vless 的字段名为 servername，其余协议为 sni；互为兼容别名
+  String? servername;
+
   /// 代理隧道自身用什么传输层连到服务器。
   /// tcp（默认）、ws、grpc、h2、http、xhttp（vless）、mkcp 等。
   String? network;
@@ -114,6 +117,7 @@ class ClashProxy {
     this.udp,
     this.tfo,
     this.sni,
+    this.servername,
     this.network,
     this.up,
     this.down,

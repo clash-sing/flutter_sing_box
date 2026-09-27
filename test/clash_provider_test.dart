@@ -149,4 +149,144 @@ void main() {
       expect(o!.serverPorts, ['114:514', '810:1919', '65530:65530']);
     });
   });
+
+  group('ClashProxy.toOutbound - SNI 解析（sni/servername/server 回退）', () {
+    test('vmess：servername 生效（mihomo TLS 字段）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'vm',
+        'type': 'vmess',
+        'server': '1.2.3.4',
+        'port': 443,
+        'uuid': 'u1',
+        'tls': true,
+        'servername': 'cdn.example.com',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'cdn.example.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('vless：servername 生效', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'vl',
+        'type': 'vless',
+        'server': '1.2.3.4',
+        'port': 443,
+        'uuid': 'u2',
+        'tls': true,
+        'servername': 'cdn.example.com',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'cdn.example.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('trojan：servername 兼容（老 Clash 生态写法）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'tj',
+        'type': 'trojan',
+        'server': '1.2.3.4',
+        'port': 443,
+        'password': 'pwd',
+        'servername': 'cdn.example.com',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'cdn.example.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('sni 与 servername 并存时 sni 优先（mihomo 一般协议字段）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'both',
+        'type': 'vmess',
+        'server': '1.2.3.4',
+        'port': 443,
+        'uuid': 'u3',
+        'tls': true,
+        'sni': 'from-sni.com',
+        'servername': 'from-servername.com',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'from-sni.com');
+    });
+
+    test('vmess 无 SNI 时回退 server', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'vmn',
+        'type': 'vmess',
+        'server': 'vm.com',
+        'port': 443,
+        'uuid': 'u4',
+        'tls': true,
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'vm.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('trojan 无 SNI 时回退 server', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'tjn',
+        'type': 'trojan',
+        'server': 'tj.com',
+        'port': 443,
+        'password': 'pwd',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'tj.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('hysteria2 无 SNI 时回退 server', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hy2s',
+        'type': 'hysteria2',
+        'server': 'hy2.com',
+        'port': 443,
+        'password': 'pwd',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, 'hy2.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('tuic：显式 disable-sni 保留，无 SNI 时 serverName 回退 server', () {
+      final disabled = ClashProxy.fromJson({
+        'name': 'tc1',
+        'type': 'tuic',
+        'server': 'tc.com',
+        'port': 443,
+        'uuid': 'u5',
+        'password': 'pwd',
+        'disable-sni': true,
+      });
+      expect(disabled.toOutbound()!.tls?.disableSni, isTrue);
+
+      final fallback = ClashProxy.fromJson({
+        'name': 'tc2',
+        'type': 'tuic',
+        'server': 'tc.com',
+        'port': 443,
+        'uuid': 'u6',
+        'password': 'pwd',
+      });
+      final o = fallback.toOutbound();
+      expect(o!.tls?.serverName, 'tc.com');
+      expect(o.tls?.disableSni, isFalse);
+    });
+
+    test('sni 显式空串时不发送 SNI', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'empty',
+        'type': 'trojan',
+        'server': 'e.com',
+        'port': 443,
+        'password': 'pwd',
+        'sni': '',
+      });
+      final o = proxy.toOutbound();
+      expect(o!.tls?.serverName, '');
+      expect(o.tls?.disableSni, isTrue);
+    });
+  });
 }

@@ -62,6 +62,9 @@ extension ClashProxyExt on ClashProxy {
   /// Converts this Clash proxy into a sing-box [Outbound], or `null`
   /// if the proxy type is unsupported.
   Outbound? toOutbound() {
+    // SNI：vmess/vless 在 Clash YAML 中为 servername，其余协议为 sni（mihomo TLS 字段定义）；
+    // 二者互为兼容别名，缺省回退 server（对齐 mihomo 行为；server 为 IP 时内核不发送 SNI）
+    final String sni = this.sni ?? servername ?? server ?? '';
     final outbound = switch (type) {
       ClashProxyType.hysteria2 => Outbound(
         type: OutboundType.hysteria2,
@@ -77,7 +80,7 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn ?? ['h3'],
           enabled: true,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
@@ -115,7 +118,7 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn ?? ['h3'],
           enabled: true,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
@@ -139,7 +142,7 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn,
           enabled: true,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
@@ -157,7 +160,7 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn,
           enabled: true,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
@@ -181,7 +184,8 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn ?? ['h3'],
           enabled: true,
           insecure: skipCertVerify,
-          disableSni: disableSni,
+          // tuic 支持显式 disable-sni 字段，未写时默认 false（与其他分支的显式布尔一致）
+          disableSni: disableSni ?? false,
           serverName: sni,
         ),
       ),
@@ -201,7 +205,7 @@ extension ClashProxyExt on ClashProxy {
           alpn: alpn,
           enabled: tls,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           utls: clientFingerprint?.isNotEmpty == true
               ? Utls(enabled: true, fingerprint: clientFingerprint!)
@@ -223,7 +227,7 @@ extension ClashProxyExt on ClashProxy {
           // reality 隐含 TLS：YAML 未写 tls: true 时也要启用
           enabled: (tls ?? false) || realityOpts != null,
           insecure: skipCertVerify,
-          disableSni: !(sni?.isNotEmpty == true),
+          disableSni: sni.isEmpty,
           serverName: sni,
           reality: realityOpts?.publicKey != null
               ? Reality(
