@@ -115,14 +115,49 @@ class SingBoxConfigProvider {
       debugPrint(e.toString());
     }
     if (singBox != null) {
+      // 导入即校验：三路格式（JSON/YAML/Base64）在此汇合，放行式记日志
+      await validateOrLog(singBox);
       return singBox;
     } else {
       singBox = throw exception ?? Exception("Invalid content");
     }
   }
 
-  static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {
-    final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
+  /// 导入订阅后对生成的配置做 schema 校验，问题只记日志、不阻断导入。
+  ///
+  /// 故意放行而非报错：schema 的 additionalProperties 很严格，订阅携带
+  /// 新版内核字段或订阅商私有扩展字段时会被判不合法，而内核本身宽容
+  /// 忽略这些字段——校验的价值在于暴露结构问题，不应挡住现在能用的
+  /// 订阅。校验器自身故障（asset 加载失败等）同样只记日志跳过。
+  ///
+  /// [validatorSource] 仅供测试注入校验器构建方式。
+  @visibleForTesting
+  static Future<void> validateOrLog(
+    SingBox singBox, {
+    Future<SingBoxSchemaValidator> Function()? validatorSource,
+  }) async {
+    try {
+      final validator =
+          await (validatorSource?.call() ?? SingBoxSchemaValidator.instance());
+      final errors = validator.validateSync(singBox.toJson());
+      if (errors.isNotEmpty) {
+        // 节点多的订阅错误可能成片，截断输出避免刷屏
+        const maxShown = 10;
+        debugPrint('订阅配置未通过 sing-box schema 校验'
+            '（共 ${errors.length} 处，仅记录不阻断）:');
+        for (final error in errors.take(maxShown)) {
+          debugPrint('  ${error.toErrorString()}');
+        }
+        if (errors.length > maxShown) {
+          debugPrint('  ...其余 ${errors.length - maxShown} 处略');
+        }
+      }
+    } catch (e) {
+      debugPrint('schema 校验器不可用，跳过校验: $e');
+    }
+  }
+
+  static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {    final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
     final jsonConfig = jsonDecode(defaultConfig);
     final defaultSingBox = SingBox.fromJson(jsonConfig);
     final List<String> errorTags = [];

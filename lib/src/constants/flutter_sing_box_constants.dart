@@ -4,6 +4,14 @@ abstract class FlutterSingBoxConstants {
   static const templateConfig =
       'packages/flutter_sing_box/assets/configs/singbox_config_template.json';
 
+  /// The asset path of the sing-box JSON Schema (draft 2020-12) bundled with
+  /// the plugin, used to validate configs on subscription import.
+  ///
+  /// schema 与 sing-box 内核版本强绑定，升级内核时需同步替换本文件
+  /// （test/ 下的校验测试是替换后的回归闸门）。
+  static const schemaConfig =
+      'packages/flutter_sing_box/assets/schemas/singbox_schema.json';
+
   /// 标记本地文件订阅的 URI 前缀（全平台统一）。
   ///
   /// 本地文件路径一律经 [Uri.file] 归一化为 file:///... 形式后存储，

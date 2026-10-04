@@ -205,7 +205,6 @@
             ],
             "mtu": 1500,
             "dns_mode": "hijack",
-            "stack": "system",
             "auto_route": true,
             "strict_route": true,
             "platform": {
