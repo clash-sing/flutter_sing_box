@@ -7,10 +7,6 @@ class ClashProvider {
   /// Builds a list of [Outbound]s from the Clash-format [yamlMap].
   static List<Outbound> provide(YamlMap yamlMap) {
     final Map<String, dynamic> clashMap = yamlMap.toMap();
-    // remove mieru proxy, sing-box 不支持 mieru
-    (clashMap['proxies'] as List<dynamic>).removeWhere(
-      (element) => element['type'].toString().toLowerCase() == 'mieru',
-    );
     final clash = Clash.fromJson(clashMap);
     final List<Outbound> outbounds = [];
     for (var element in clash.proxies) {
@@ -32,6 +28,9 @@ class ClashProvider {
       } else {
         debugPrint('${element.name} is not support');
       }
+    }
+    if (clash.dns?.nameserverPolicy != null) {
+      debugPrint('Clash DNS nameserver policy: ${clash.dns!.nameserverPolicy}');
     }
     return outbounds;
   }

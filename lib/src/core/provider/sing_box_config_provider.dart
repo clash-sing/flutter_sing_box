@@ -137,15 +137,16 @@ class SingBoxConfigProvider {
     Future<SingBoxSchemaValidator> Function()? validatorSource,
   }) async {
     try {
-      final validator =
-          await (validatorSource?.call() ?? SingBoxSchemaValidator.instance());
+      final validator = await (validatorSource?.call() ?? SingBoxSchemaValidator.instance());
       final config = singBox.toJson();
       final errors = validator.validateSync(config);
       if (errors.isNotEmpty) {
         // 节点多的订阅错误可能成片，截断输出避免刷屏
         const maxShown = 10;
-        debugPrint('订阅配置未通过 sing-box schema 校验'
-            '（共 ${errors.length} 处，仅记录不阻断）:');
+        debugPrint(
+          '订阅配置未通过 sing-box schema 校验'
+          '（共 ${errors.length} 处，仅记录不阻断）:',
+        );
         for (final error in errors.take(maxShown)) {
           debugPrint('  ${error.toErrorString()}');
           // oneOf/anyOf 汇总错误只有一句 "matched 0"，附二次诊断展开原因
@@ -162,7 +163,8 @@ class SingBoxConfigProvider {
     }
   }
 
-  static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {    final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
+  static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {
+    final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
     final jsonConfig = jsonDecode(defaultConfig);
     final defaultSingBox = SingBox.fromJson(jsonConfig);
     final List<String> errorTags = [];
