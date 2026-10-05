@@ -88,7 +88,7 @@ class Outbound {
   @JsonKey(name: "disable_chrome_parrot")
   bool? disableChromeParrot;
   Realm? realm;
-  Obfs? obfs;
+  Object? obfs;
   @JsonKey(name: "idle_session_check_interval")
   String? idleSessionCheckInterval;
   @JsonKey(name: "idle_session_timeout")

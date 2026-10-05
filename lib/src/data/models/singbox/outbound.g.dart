@@ -59,9 +59,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   realm: json['realm'] == null
       ? null
       : Realm.fromJson(json['realm'] as Map<String, dynamic>),
-  obfs: json['obfs'] == null
-      ? null
-      : Obfs.fromJson(json['obfs'] as Map<String, dynamic>),
+  obfs: json['obfs'],
   idleSessionCheckInterval: json['idle_session_check_interval'] as String?,
   idleSessionTimeout: json['idle_session_timeout'] as String?,
   minIdleSession: (json['min_idle_session'] as num?)?.toInt(),
@@ -114,7 +112,7 @@ Map<String, dynamic> _$OutboundToJson(Outbound instance) => <String, dynamic>{
   'bbr_profile': ?instance.bbrProfile,
   'disable_chrome_parrot': ?instance.disableChromeParrot,
   'realm': ?instance.realm?.toJson(),
-  'obfs': ?instance.obfs?.toJson(),
+  'obfs': ?instance.obfs,
   'idle_session_check_interval': ?instance.idleSessionCheckInterval,
   'idle_session_timeout': ?instance.idleSessionTimeout,
   'min_idle_session': ?instance.minIdleSession,

@@ -209,7 +209,7 @@ extension ClashProxyExt on ClashProxy {
         upMbps: up,
         downMbps: down,
         disableMtuDiscovery: disableMtuDiscovery ?? true,
-        obfs: obfs?.isNotEmpty == true ? Obfs(type: obfs!) : null,
+        obfs: obfs,
         tls: Tls(
           alpn: alpn ?? ['hysteria'],
           enabled: true,
