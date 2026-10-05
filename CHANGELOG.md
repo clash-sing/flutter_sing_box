@@ -1,3 +1,26 @@
+## 2.1.1
+
+### Features
+
+**Base64 subscription (share-link) parsing**
+* New share-link protocols: `ss://` (including the SIP003 `plugin` parameter), `vless://` and `vmess://` (base64-JSON body) — joining the existing hysteria / hysteria2 / anytls / trojan links
+* Link parameters now honored: `sni` / `peer` (`peer` is hysteria v1's official name, `sni` accepted as an alias), `servername`, and comma-separated `alpn`; the hysteria / hysteria2 `mport` multi-port syntax maps to sing-box `server_ports`
+
+**Clash config conversion**
+* `ClashProxy` → `Outbound` conversion now covers vmess, vless (incl. Reality / `flow`), Shadowsocks (with plugin options), hysteria2 and Realm (`realm` / `realm_opts` port mappings)
+* New fields on `ClashProxy` / `Outbound`: `flow`, `obfs`, idle-session options, `servername`; transport handling extended to `ws` / `grpc` / `httpupgrade` / `http` and raw TCP
+
+**Clash DNS conversion**
+* Clash `dns.nameserver-policy` is now converted into sing-box DNS servers plus matching `evaluate` → `respond` → `route` rule chains; outbounds whose server matches a policy domain get `domain_resolver` assigned accordingly
+* DNS rules carried by the subscription are inserted at the **front** of the generated rule list (was appended), so they take priority over the template defaults
+
+**JSON Schema validation**
+* The plugin now bundles the sing-box JSON Schema (draft 2020-12) and validates every generated config on subscription import — all three source formats (JSON / YAML / Base64) converge at this checkpoint
+* Validation is diagnostic-only by design: failures are logged with path-annotated error details but never block the import, since the schema's strict `additionalProperties` would otherwise reject newer-core or provider-specific fields that the core itself tolerates
+
+### Dependencies
+* Upgrade sing-box core to `1.14.2` (Windows `amd64` / `arm64` binaries updated in sync, upstream LICENSE files added alongside)
+
 ## 2.1.0
 
 ### Features
