@@ -136,7 +136,8 @@ class SingBoxConfigProvider {
             .map((e) => Server.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
-      defaultSingBox.dns.rules.addAll(
+      defaultSingBox.dns.rules.insertAll(
+        0,
         (data['dns']['rules'] as List<dynamic>)
             .map((e) => DnsRule.fromJson(e as Map<String, dynamic>))
             .toList(),
