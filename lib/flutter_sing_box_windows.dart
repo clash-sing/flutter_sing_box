@@ -196,6 +196,9 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   @override
+  Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {}
+
+  @override
   Future<void> urlTest({required String groupTag}) async {
     await ClashHttpClient().testGroup(groupTag);
   }
