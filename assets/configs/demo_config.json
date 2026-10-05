@@ -1,0 +1,2114 @@
+{
+    "dns": {
+        "servers": [
+            {
+                "tag": "system",
+                "type": "local"
+            },
+            {
+                "tag": "alidoh",
+                "type": "https",
+                "server": "223.5.5.5",
+                "path": "/dns-query",
+                "tls": {
+                    "enabled": true,
+                    "insecure": true
+                }
+            },
+            {
+                "tag": "udp-bytedance",
+                "type": "udp",
+                "server": "180.184.2.2"
+            },
+            {
+                "tag": "remote",
+                "type": "fakeip",
+                "inet4_range": "198.18.0.0/15",
+                "inet6_range": "fc00::/18"
+            }
+        ],
+        "rules": [
+            {
+                "action": "predefined",
+                "query_type": [
+                    "HTTPS",
+                    "SVCB"
+                ],
+                "rcode": "NOERROR"
+            },
+            {
+                "action": "predefined",
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {
+                        "ip_version": 6
+                    },
+                    {
+                        "domain_suffix": [
+                            "lan",
+                            "local"
+                        ],
+                        "invert": true
+                    },
+                    {
+                        "default_interface_address": [
+                            "2000::/3"
+                        ],
+                        "invert": true
+                    }
+                ],
+                "rcode": "NOERROR"
+            },
+            {
+                "action": "route",
+                "server": "system",
+                "domain_suffix": [
+                    "lan",
+                    "local"
+                ]
+            },
+            {
+                "action": "route",
+                "server": "remote",
+                "clash_mode": "global",
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ]
+            },
+            {
+                "action": "evaluate",
+                "server": "system",
+                "timeout": "1s",
+                "clash_mode": "direct",
+                "tag": "plaintext-direct-system"
+            },
+            {
+                "action": "evaluate",
+                "server": "udp-bytedance",
+                "timeout": "1s",
+                "clash_mode": "direct",
+                "tag": "plaintext-direct-bytedance"
+            },
+            {
+                "action": "respond",
+                "match_response": "plaintext-direct-system",
+                "response_rcode": "NOERROR",
+                "race": true
+            },
+            {
+                "action": "respond",
+                "match_response": "plaintext-direct-bytedance",
+                "response_rcode": "NOERROR",
+                "race": true
+            },
+            {
+                "action": "route",
+                "server": "system",
+                "clash_mode": "direct"
+            },
+            {
+                "action": "route",
+                "server": "remote",
+                "domain_suffix": [
+                    "play.google.com",
+                    "accounts.google.com",
+                    "android.clients.google.com",
+                    "android.apis.google.com",
+                    "dl.google.com",
+                    "dl-ssl.google.com",
+                    "m.google.com",
+                    "www.google.com",
+                    "googleapis.com",
+                    "googleapis.cn",
+                    "gvt1.com",
+                    "gvt2.com",
+                    "gvt3.com",
+                    "ggpht.com",
+                    "googleusercontent.com",
+                    "gstatic.com",
+                    "android.com",
+                    "googleplay.com",
+                    "xn--ngstr-lra8j.com",
+                    "google-analytics.com"
+                ]
+            },
+            {
+                "action": "evaluate",
+                "server": "system",
+                "timeout": "1s",
+                "rule_set": [
+                    "dns-plaintext",
+                    "geosite-cn"
+                ],
+                "tag": "plaintext-system"
+            },
+            {
+                "action": "evaluate",
+                "server": "udp-bytedance",
+                "timeout": "1s",
+                "rule_set": [
+                    "dns-plaintext",
+                    "geosite-cn"
+                ],
+                "tag": "plaintext-bytedance"
+            },
+            {
+                "action": "respond",
+                "match_response": "plaintext-system",
+                "response_rcode": "NOERROR",
+                "race": true
+            },
+            {
+                "action": "respond",
+                "match_response": "plaintext-bytedance",
+                "response_rcode": "NOERROR",
+                "race": true
+            },
+            {
+                "action": "route",
+                "server": "system",
+                "rule_set": [
+                    "dns-plaintext",
+                    "geosite-cn"
+                ]
+            },
+            {
+                "action": "route",
+                "server": "remote",
+                "query_type": [
+                    "A",
+                    "AAAA"
+                ]
+            },
+            {
+                "action": "route",
+                "server": "system"
+            }
+        ],
+        "strategy": "prefer_ipv4"
+    },
+    "inbounds": [
+        {
+            "tag": "tun",
+            "type": "tun",
+            "interface_name": "Clash-Sing-Tun",
+            "address": [
+                "172.19.0.1/30",
+                "fdfe:dcba:9876::1/126"
+            ],
+            "mtu": 1500,
+            "auto_route": true,
+            "strict_route": true,
+            "platform": {
+                "http_proxy": {
+                    "enabled": false,
+                    "server": "127.0.0.1",
+                    "server_port": 8895
+                }
+            }
+        },
+        {
+            "tag": "mixed",
+            "type": "mixed",
+            "listen": "127.0.0.1",
+            "listen_port": 8890
+        }
+    ],
+    "route": {
+        "rules": [
+            {
+                "action": "reject",
+                "no_drop": true,
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {
+                        "ip_version": 6
+                    },
+                    {
+                        "rule_set": [
+                            "geoip-cn"
+                        ]
+                    },
+                    {
+                        "default_interface_address": [
+                            "2000::/3"
+                        ],
+                        "invert": true
+                    }
+                ]
+            },
+            {
+                "action": "sniff",
+                "timeout": "300ms"
+            },
+            {
+                "action": "hijack-dns",
+                "protocol": "dns"
+            },
+            {
+                "action": "route",
+                "outbound": "direct",
+                "clash_mode": "direct"
+            },
+            {
+                "action": "route",
+                "outbound": "狗狗加速.com",
+                "clash_mode": "global"
+            },
+            {
+                "action": "route",
+                "outbound": "direct",
+                "ip_is_private": true
+            },
+            {
+                "action": "route",
+                "outbound": "狗狗加速.com",
+                "domain_suffix": [
+                    "play.google.com",
+                    "accounts.google.com",
+                    "android.clients.google.com",
+                    "android.apis.google.com",
+                    "dl.google.com",
+                    "dl-ssl.google.com",
+                    "m.google.com",
+                    "www.google.com",
+                    "googleapis.com",
+                    "googleapis.cn",
+                    "gvt1.com",
+                    "gvt2.com",
+                    "gvt3.com",
+                    "ggpht.com",
+                    "googleusercontent.com",
+                    "gstatic.com",
+                    "android.com",
+                    "googleplay.com",
+                    "xn--ngstr-lra8j.com",
+                    "google-analytics.com"
+                ]
+            },
+            {
+                "action": "route",
+                "outbound": "direct",
+                "domain_suffix": [
+                    "baidu.com",
+                    "bdstatic.com",
+                    "bdimg.com",
+                    "baidubce.com",
+                    "deepseek.com",
+                    "doubao.com",
+                    "douyin.com",
+                    "byteimg.com",
+                    "bytedance.com",
+                    "feishu.cn",
+                    "xiaohongshu.com",
+                    "xhscdn.com",
+                    "163.com",
+                    "126.net",
+                    "taobao.com",
+                    "tmall.com",
+                    "alipay.com",
+                    "mmstat.com",
+                    "msn.cn",
+                    "qq.com",
+                    "qpic.cn",
+                    "gtimg.com",
+                    "tencent.com",
+                    "tencent-cloud.net",
+                    "myqcloud.com",
+                    "wechat.com",
+                    "weixin.qq.com"
+                ]
+            },
+            {
+                "action": "route",
+                "outbound": "direct",
+                "rule_set": [
+                    "geoip-cn",
+                    "geosite-cn"
+                ]
+            },
+            {
+                "action": "reject",
+                "protocol": [
+                    "quic"
+                ]
+            }
+        ],
+        "auto_detect_interface": true,
+        "default_domain_resolver": "system",
+        "final": "狗狗加速.com",
+        "rule_set": [
+            {
+                "tag": "dns-plaintext",
+                "type": "inline",
+                "rules": [
+                    {
+                        "domain": [
+                            "time.windows.com",
+                            "time.nist.gov",
+                            "time.apple.com",
+                            "time.asia.apple.com",
+                            "time1.cloud.tencent.com",
+                            "time.ustc.edu.cn",
+                            "pool.ntp.org",
+                            "ntp.ubuntu.com"
+                        ],
+                        "domain_suffix": [
+                            "baidu.com",
+                            "bdstatic.com",
+                            "bdimg.com",
+                            "baidubce.com",
+                            "deepseek.com",
+                            "doubao.com",
+                            "douyin.com",
+                            "byteimg.com",
+                            "bytedance.com",
+                            "feishu.cn",
+                            "xiaohongshu.com",
+                            "xhscdn.com",
+                            "163.com",
+                            "126.net",
+                            "taobao.com",
+                            "tmall.com",
+                            "alipay.com",
+                            "mmstat.com",
+                            "msn.cn",
+                            "qq.com",
+                            "qpic.cn",
+                            "gtimg.com",
+                            "tencent.com",
+                            "tencent-cloud.net",
+                            "myqcloud.com",
+                            "wechat.com",
+                            "weixin.qq.com",
+                            "cdn-go.cn",
+                            "ntp.org.cn",
+                            "time.edu.cn",
+                            "aliyun.com"
+                        ]
+                    },
+                    {
+                        "domain_regex": [
+                            "^stun[.-].+"
+                        ]
+                    }
+                ]
+            },
+            {
+                "tag": "geoip-cn",
+                "type": "remote",
+                "format": "binary",
+                "url": "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-cn.srs"
+            },
+            {
+                "tag": "geosite-cn",
+                "type": "remote",
+                "format": "binary",
+                "url": "https://testingcf.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-cn.srs"
+            }
+        ],
+        "default_http_client": "default"
+    },
+    "outbounds": [
+        {
+            "tag": "狗狗加速.com",
+            "type": "selector",
+            "outbounds": [
+                "♻️自动选择",
+                "hy2",
+                "🔥ChatGPT",
+                "AnyTLS",
+                "专线",
+                "🌏自动最优线路(hy2)-网址: new.dg6.me",
+                "🌏自动最优线路(AnyTLS)-网址: www.dg6.me",
+                "🇺🇸11美国西集群-全网优化(hy2)",
+                "🇺🇸11美国西集群-专线(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(hy2)",
+                "🇺🇸12美国旧金山-专线(AnyTLS)",
+                "🇯🇵7日本-专线(AnyTLS)",
+                "🇸🇬15新加坡-全网优化(hy2)",
+                "🇸🇬15新加坡-专线(AnyTLS)",
+                "🇯🇵8日本-专线(AnyTLS)",
+                "🇸🇬24新加坡-专线(AnyTLS)",
+                "🇦🇺19澳洲-专线(AnyTLS)",
+                "🇭🇰1香港-专线(AnyTLS)",
+                "🇭🇰2香港-专线(AnyTLS)",
+                "🇭🇰3香港-专线(AnyTLS)",
+                "4台湾-专线(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(hy2)",
+                "🇺🇸39美国华盛顿-全网优化(hy2)",
+                "44美国维加斯-全网优化(hy2)",
+                "🇨🇦26加拿大-全网优化(hy2)",
+                "🇸🇬6新加坡-联通/移动(hy2)",
+                "🇩🇪16德国-电信/联通(hy2)",
+                "🇬🇧17英国-全网优化(hy2)",
+                "🇫🇷23法国-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(hy2)",
+                "🇯🇵9日本-全网优化(hy2)",
+                "🇦🇪13迪拜-全网优化(hy2)",
+                "🇮🇳14印度-移动/南方联通(hy2)",
+                "🇨🇦18加拿大-全网优化(hy2)",
+                "🇦🇺19澳洲-移动优化(hy2)",
+                "🇧🇷20巴西-全网优化(hy2)",
+                "🇨🇱21智利-全网优化(hy2)",
+                "🇹🇷22土耳其-全网优化(hy2)",
+                "🇲🇽27墨西哥-全网优化(hy2)",
+                "🇳🇱28荷兰-全网优化(hy2)",
+                "🇷🇺32俄罗斯-全网优化(hy2)",
+                "🇮🇩34印尼-电信优化(hy2)",
+                "🇵🇭36菲律宾-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(AnyTLS)",
+                "🇰🇷8韩国集群-全网优化(AnyTLS)",
+                "🇰🇷25韩国-全网优化(AnyTLS)",
+                "🇰🇷9日本-全网优化(AnyTLS)",
+                "🇺🇸11美国西集群-全网优化(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸39美国华盛顿-全网优化(AnyTLS)",
+                "44美国维加斯-全网优化(AnyTLS)",
+                "🇨🇦26加拿大-全网优化(AnyTLS)",
+                "🇩🇪16德国-电信/联通(AnyTLS)",
+                "🇬🇧17英国-全网优化(AnyTLS)",
+                "🇫🇷23法国-全网优化(AnyTLS)",
+                "🇦🇪13迪拜-电信/移动/南方联通(AnyTLS)",
+                "🇮🇳14印度-移动/南方联通(AnyTLS)",
+                "🇸🇬6新加坡-联通/移动(AnyTLS)",
+                "🇧🇷20巴西-全网优化(AnyTLS)",
+                "🇹🇷22土耳其-全网优化(AnyTLS)",
+                "🇲🇽27墨西哥-全网优化(AnyTLS)",
+                "🇳🇱28荷兰-全网优化(AnyTLS)",
+                "🇷🇺32俄罗斯-全网优化(AnyTLS)",
+                "🇻🇳33越南-联通/移动(AnyTLS)",
+                "🇵🇭36菲律宾-全网优化(AnyTLS)",
+                "🇹🇭37泰国-联通/移动(AnyTLS)",
+                "🇭🇰2香港集群-全网优化(AnyTLS)",
+                "🇭🇰3香港集群-全网优化(AnyTLS)",
+                "4台湾-联通优化(AnyTLS)",
+                "5台湾-联通/移动(AnyTLS)",
+                "42台湾-全网优化(AnyTLS)"
+            ]
+        },
+        {
+            "tag": "♻️自动选择",
+            "type": "urltest",
+            "outbounds": [
+                "🌏自动最优线路(hy2)-网址: new.dg6.me",
+                "🌏自动最优线路(AnyTLS)-网址: www.dg6.me",
+                "🇺🇸11美国西集群-全网优化(hy2)",
+                "🇺🇸11美国西集群-专线(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(hy2)",
+                "🇺🇸12美国旧金山-专线(AnyTLS)",
+                "🇯🇵7日本-专线(AnyTLS)",
+                "🇸🇬15新加坡-全网优化(hy2)",
+                "🇸🇬15新加坡-专线(AnyTLS)",
+                "🇯🇵8日本-专线(AnyTLS)",
+                "🇸🇬24新加坡-专线(AnyTLS)",
+                "🇦🇺19澳洲-专线(AnyTLS)",
+                "🇭🇰1香港-专线(AnyTLS)",
+                "🇭🇰2香港-专线(AnyTLS)",
+                "🇭🇰3香港-专线(AnyTLS)",
+                "4台湾-专线(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(hy2)",
+                "🇺🇸39美国华盛顿-全网优化(hy2)",
+                "44美国维加斯-全网优化(hy2)",
+                "🇨🇦26加拿大-全网优化(hy2)",
+                "🇸🇬6新加坡-联通/移动(hy2)",
+                "🇩🇪16德国-电信/联通(hy2)",
+                "🇬🇧17英国-全网优化(hy2)",
+                "🇫🇷23法国-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(hy2)",
+                "🇯🇵9日本-全网优化(hy2)",
+                "🇦🇪13迪拜-全网优化(hy2)",
+                "🇮🇳14印度-移动/南方联通(hy2)",
+                "🇨🇦18加拿大-全网优化(hy2)",
+                "🇦🇺19澳洲-移动优化(hy2)",
+                "🇧🇷20巴西-全网优化(hy2)",
+                "🇨🇱21智利-全网优化(hy2)",
+                "🇹🇷22土耳其-全网优化(hy2)",
+                "🇲🇽27墨西哥-全网优化(hy2)",
+                "🇳🇱28荷兰-全网优化(hy2)",
+                "🇷🇺32俄罗斯-全网优化(hy2)",
+                "🇮🇩34印尼-电信优化(hy2)",
+                "🇵🇭36菲律宾-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(AnyTLS)",
+                "🇰🇷8韩国集群-全网优化(AnyTLS)",
+                "🇰🇷25韩国-全网优化(AnyTLS)",
+                "🇰🇷9日本-全网优化(AnyTLS)",
+                "🇺🇸11美国西集群-全网优化(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸39美国华盛顿-全网优化(AnyTLS)",
+                "44美国维加斯-全网优化(AnyTLS)",
+                "🇨🇦26加拿大-全网优化(AnyTLS)",
+                "🇩🇪16德国-电信/联通(AnyTLS)",
+                "🇬🇧17英国-全网优化(AnyTLS)",
+                "🇫🇷23法国-全网优化(AnyTLS)",
+                "🇦🇪13迪拜-电信/移动/南方联通(AnyTLS)",
+                "🇮🇳14印度-移动/南方联通(AnyTLS)",
+                "🇸🇬6新加坡-联通/移动(AnyTLS)",
+                "🇧🇷20巴西-全网优化(AnyTLS)",
+                "🇹🇷22土耳其-全网优化(AnyTLS)",
+                "🇲🇽27墨西哥-全网优化(AnyTLS)",
+                "🇳🇱28荷兰-全网优化(AnyTLS)",
+                "🇷🇺32俄罗斯-全网优化(AnyTLS)",
+                "🇻🇳33越南-联通/移动(AnyTLS)",
+                "🇵🇭36菲律宾-全网优化(AnyTLS)",
+                "🇹🇭37泰国-联通/移动(AnyTLS)",
+                "🇭🇰2香港集群-全网优化(AnyTLS)",
+                "🇭🇰3香港集群-全网优化(AnyTLS)",
+                "4台湾-联通优化(AnyTLS)",
+                "5台湾-联通/移动(AnyTLS)",
+                "42台湾-全网优化(AnyTLS)"
+            ],
+            "url": "https://www.gstatic.com/generate_204",
+            "interval": "30m",
+            "tolerance": 50,
+            "interrupt_exist_connections": true
+        },
+        {
+            "tag": "hy2",
+            "type": "selector",
+            "outbounds": [
+                "🌏自动最优线路(hy2)-网址: new.dg6.me",
+                "🇺🇸11美国西集群-全网优化(hy2)",
+                "🇺🇸12美国旧金山-全网优化(hy2)",
+                "🇸🇬15新加坡-全网优化(hy2)",
+                "🇺🇸29美国旧金山-全网优化(hy2)",
+                "🇺🇸39美国华盛顿-全网优化(hy2)",
+                "44美国维加斯-全网优化(hy2)",
+                "🇨🇦26加拿大-全网优化(hy2)",
+                "🇸🇬6新加坡-联通/移动(hy2)",
+                "🇩🇪16德国-电信/联通(hy2)",
+                "🇬🇧17英国-全网优化(hy2)",
+                "🇫🇷23法国-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(hy2)",
+                "🇯🇵9日本-全网优化(hy2)",
+                "🇦🇪13迪拜-全网优化(hy2)",
+                "🇮🇳14印度-移动/南方联通(hy2)",
+                "🇨🇦18加拿大-全网优化(hy2)",
+                "🇦🇺19澳洲-移动优化(hy2)",
+                "🇧🇷20巴西-全网优化(hy2)",
+                "🇨🇱21智利-全网优化(hy2)",
+                "🇹🇷22土耳其-全网优化(hy2)",
+                "🇲🇽27墨西哥-全网优化(hy2)",
+                "🇳🇱28荷兰-全网优化(hy2)",
+                "🇷🇺32俄罗斯-全网优化(hy2)",
+                "🇮🇩34印尼-电信优化(hy2)",
+                "🇵🇭36菲律宾-全网优化(hy2)"
+            ]
+        },
+        {
+            "tag": "🔥ChatGPT",
+            "type": "selector",
+            "outbounds": [
+                "🌏自动最优线路(hy2)-网址: new.dg6.me",
+                "🌏自动最优线路(AnyTLS)-网址: www.dg6.me",
+                "🇺🇸11美国西集群-全网优化(hy2)",
+                "🇺🇸11美国西集群-专线(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(hy2)",
+                "🇺🇸12美国旧金山-专线(AnyTLS)",
+                "🇯🇵7日本-专线(AnyTLS)",
+                "🇸🇬15新加坡-全网优化(hy2)",
+                "🇸🇬15新加坡-专线(AnyTLS)",
+                "🇯🇵8日本-专线(AnyTLS)",
+                "🇸🇬24新加坡-专线(AnyTLS)",
+                "🇦🇺19澳洲-专线(AnyTLS)",
+                "4台湾-专线(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(hy2)",
+                "🇺🇸39美国华盛顿-全网优化(hy2)",
+                "44美国维加斯-全网优化(hy2)",
+                "🇨🇦26加拿大-全网优化(hy2)",
+                "🇸🇬6新加坡-联通/移动(hy2)",
+                "🇩🇪16德国-电信/联通(hy2)",
+                "🇬🇧17英国-全网优化(hy2)",
+                "🇫🇷23法国-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(hy2)",
+                "🇯🇵9日本-全网优化(hy2)",
+                "🇦🇪13迪拜-全网优化(hy2)",
+                "🇮🇳14印度-移动/南方联通(hy2)",
+                "🇨🇦18加拿大-全网优化(hy2)",
+                "🇦🇺19澳洲-移动优化(hy2)",
+                "🇧🇷20巴西-全网优化(hy2)",
+                "🇨🇱21智利-全网优化(hy2)",
+                "🇹🇷22土耳其-全网优化(hy2)",
+                "🇲🇽27墨西哥-全网优化(hy2)",
+                "🇳🇱28荷兰-全网优化(hy2)",
+                "🇮🇩34印尼-电信优化(hy2)",
+                "🇵🇭36菲律宾-全网优化(hy2)",
+                "🇯🇵7日本-联通/移动(AnyTLS)",
+                "🇰🇷8韩国集群-全网优化(AnyTLS)",
+                "🇰🇷25韩国-全网优化(AnyTLS)",
+                "🇰🇷9日本-全网优化(AnyTLS)",
+                "🇺🇸11美国西集群-全网优化(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸39美国华盛顿-全网优化(AnyTLS)",
+                "44美国维加斯-全网优化(AnyTLS)",
+                "🇨🇦26加拿大-全网优化(AnyTLS)",
+                "🇩🇪16德国-电信/联通(AnyTLS)",
+                "🇬🇧17英国-全网优化(AnyTLS)",
+                "🇫🇷23法国-全网优化(AnyTLS)",
+                "🇦🇪13迪拜-电信/移动/南方联通(AnyTLS)",
+                "🇮🇳14印度-移动/南方联通(AnyTLS)",
+                "🇸🇬6新加坡-联通/移动(AnyTLS)",
+                "🇧🇷20巴西-全网优化(AnyTLS)",
+                "🇹🇷22土耳其-全网优化(AnyTLS)",
+                "🇲🇽27墨西哥-全网优化(AnyTLS)",
+                "🇳🇱28荷兰-全网优化(AnyTLS)",
+                "🇻🇳33越南-联通/移动(AnyTLS)",
+                "🇵🇭36菲律宾-全网优化(AnyTLS)",
+                "🇹🇭37泰国-联通/移动(AnyTLS)",
+                "4台湾-联通优化(AnyTLS)",
+                "5台湾-联通/移动(AnyTLS)",
+                "42台湾-全网优化(AnyTLS)"
+            ]
+        },
+        {
+            "tag": "AnyTLS",
+            "type": "selector",
+            "outbounds": [
+                "🌏自动最优线路(AnyTLS)-网址: www.dg6.me",
+                "🇺🇸11美国西集群-专线(AnyTLS)",
+                "🇺🇸12美国旧金山-专线(AnyTLS)",
+                "🇯🇵7日本-专线(AnyTLS)",
+                "🇸🇬15新加坡-专线(AnyTLS)",
+                "🇯🇵8日本-专线(AnyTLS)",
+                "🇸🇬24新加坡-专线(AnyTLS)",
+                "🇦🇺19澳洲-专线(AnyTLS)",
+                "🇭🇰1香港-专线(AnyTLS)",
+                "🇭🇰2香港-专线(AnyTLS)",
+                "🇭🇰3香港-专线(AnyTLS)",
+                "4台湾-专线(AnyTLS)",
+                "🇯🇵7日本-联通/移动(AnyTLS)",
+                "🇰🇷8韩国集群-全网优化(AnyTLS)",
+                "🇰🇷25韩国-全网优化(AnyTLS)",
+                "🇰🇷9日本-全网优化(AnyTLS)",
+                "🇺🇸11美国西集群-全网优化(AnyTLS)",
+                "🇺🇸12美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸29美国旧金山-全网优化(AnyTLS)",
+                "🇺🇸39美国华盛顿-全网优化(AnyTLS)",
+                "44美国维加斯-全网优化(AnyTLS)",
+                "🇨🇦26加拿大-全网优化(AnyTLS)",
+                "🇩🇪16德国-电信/联通(AnyTLS)",
+                "🇬🇧17英国-全网优化(AnyTLS)",
+                "🇫🇷23法国-全网优化(AnyTLS)",
+                "🇦🇪13迪拜-电信/移动/南方联通(AnyTLS)",
+                "🇮🇳14印度-移动/南方联通(AnyTLS)",
+                "🇸🇬6新加坡-联通/移动(AnyTLS)",
+                "🇧🇷20巴西-全网优化(AnyTLS)",
+                "🇹🇷22土耳其-全网优化(AnyTLS)",
+                "🇲🇽27墨西哥-全网优化(AnyTLS)",
+                "🇳🇱28荷兰-全网优化(AnyTLS)",
+                "🇷🇺32俄罗斯-全网优化(AnyTLS)",
+                "🇻🇳33越南-联通/移动(AnyTLS)",
+                "🇵🇭36菲律宾-全网优化(AnyTLS)",
+                "🇹🇭37泰国-联通/移动(AnyTLS)",
+                "🇭🇰2香港集群-全网优化(AnyTLS)",
+                "🇭🇰3香港集群-全网优化(AnyTLS)",
+                "4台湾-联通优化(AnyTLS)",
+                "5台湾-联通/移动(AnyTLS)",
+                "42台湾-全网优化(AnyTLS)"
+            ]
+        },
+        {
+            "tag": "专线",
+            "type": "selector",
+            "outbounds": [
+                "🇺🇸11美国西集群-专线(AnyTLS)",
+                "🇺🇸12美国旧金山-专线(AnyTLS)",
+                "🇯🇵7日本-专线(AnyTLS)",
+                "🇸🇬15新加坡-专线(AnyTLS)",
+                "🇯🇵8日本-专线(AnyTLS)",
+                "🇸🇬24新加坡-专线(AnyTLS)",
+                "🇦🇺19澳洲-专线(AnyTLS)",
+                "🇭🇰1香港-专线(AnyTLS)",
+                "🇭🇰2香港-专线(AnyTLS)",
+                "🇭🇰3香港-专线(AnyTLS)",
+                "4台湾-专线(AnyTLS)"
+            ]
+        },
+        {
+            "tag": "direct",
+            "type": "direct"
+        },
+        {
+            "tag": "🌏自动最优线路(hy2)-网址: new.dg6.me",
+            "type": "hysteria2",
+            "server": "cluster.quandao.com",
+            "server_port": 46329,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "cluster.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🌏自动最优线路(AnyTLS)-网址: www.dg6.me",
+            "type": "anytls",
+            "server": "cluster.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸11美国西集群-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "11us.quandao.com",
+            "server_port": 43703,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "11us.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇺🇸11美国西集群-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12011,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸12美国旧金山-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "12us.quandao.com",
+            "server_port": 43411,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "12us.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇺🇸12美国旧金山-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12012,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇯🇵7日本-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12007,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇸🇬15新加坡-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "15sg.quandao.com",
+            "server_port": 44670,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "15sg.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇸🇬15新加坡-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12015,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇯🇵8日本-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12008,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇸🇬24新加坡-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12024,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇦🇺19澳洲-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12019,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇭🇰1香港-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12001,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇭🇰2香港-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12002,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇭🇰3香港-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12003,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "4台湾-专线(AnyTLS)",
+            "type": "anytls",
+            "server": "cdn.jiandaoyun.com",
+            "server_port": 12004,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸29美国旧金山-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "29us.quandao.com",
+            "server_port": 42488,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "29us.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇺🇸39美国华盛顿-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "39us.quandao.com",
+            "server_port": 42972,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "39us.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "44美国维加斯-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "44us.quandao.com",
+            "server_port": 48499,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "44us.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇨🇦26加拿大-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "26ca.quandao.com",
+            "server_port": 44101,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "26ca.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇸🇬6新加坡-联通/移动(hy2)",
+            "type": "hysteria2",
+            "server": "6sg.quandao.com",
+            "server_port": 41023,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "6sg.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇩🇪16德国-电信/联通(hy2)",
+            "type": "hysteria2",
+            "server": "16de.quandao.com",
+            "server_port": 49633,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "16de.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇬🇧17英国-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "17uk.quandao.com",
+            "server_port": 42967,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "17uk.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇫🇷23法国-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "23fr.quandao.com",
+            "server_port": 46033,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "23fr.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇯🇵7日本-联通/移动(hy2)",
+            "type": "hysteria2",
+            "server": "7jp.quandao.com",
+            "server_port": 42156,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "7jp.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇯🇵9日本-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "9jp.quandao.com",
+            "server_port": 49827,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "9jp.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇦🇪13迪拜-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "13dxb.quandao.com",
+            "server_port": 48563,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "13dxb.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇮🇳14印度-移动/南方联通(hy2)",
+            "type": "hysteria2",
+            "server": "14in.quandao.com",
+            "server_port": 43643,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "14in.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇨🇦18加拿大-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "18ca.quandao.com",
+            "server_port": 43448,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "18ca.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇦🇺19澳洲-移动优化(hy2)",
+            "type": "hysteria2",
+            "server": "19sdy.quandao.com",
+            "server_port": 40123,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "19sdy.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇧🇷20巴西-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "20br.quandao.com",
+            "server_port": 47102,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "20br.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇨🇱21智利-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "21chi.quandao.com",
+            "server_port": 46760,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "21chi.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇹🇷22土耳其-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "22tr.quandao.com",
+            "server_port": 43014,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "22tr.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇲🇽27墨西哥-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "27mx.quandao.com",
+            "server_port": 49017,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "27mx.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇳🇱28荷兰-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "28nl.quandao.com",
+            "server_port": 44003,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "28nl.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇷🇺32俄罗斯-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "32ru.quandao.com",
+            "server_port": 43909,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "32ru.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇮🇩34印尼-电信优化(hy2)",
+            "type": "hysteria2",
+            "server": "34id.quandao.com",
+            "server_port": 47209,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "34id.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇵🇭36菲律宾-全网优化(hy2)",
+            "type": "hysteria2",
+            "server": "36ph.quandao.com",
+            "server_port": 44406,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "alpn": [
+                    "h3"
+                ],
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "36ph.quandao.com"
+            },
+            "server_ports": [
+                "40000:50000"
+            ]
+        },
+        {
+            "tag": "🇯🇵7日本-联通/移动(AnyTLS)",
+            "type": "anytls",
+            "server": "7jp.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇰🇷8韩国集群-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "8kr.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇰🇷25韩国-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "25kr.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇰🇷9日本-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "9jp.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸11美国西集群-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "11us.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸12美国旧金山-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "12us.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸29美国旧金山-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "29us.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇺🇸39美国华盛顿-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "39us.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "44美国维加斯-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "44us.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇨🇦26加拿大-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "26ca.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇩🇪16德国-电信/联通(AnyTLS)",
+            "type": "anytls",
+            "server": "16de.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇬🇧17英国-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "17uk.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇫🇷23法国-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "23fr.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇦🇪13迪拜-电信/移动/南方联通(AnyTLS)",
+            "type": "anytls",
+            "server": "13dxb.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇮🇳14印度-移动/南方联通(AnyTLS)",
+            "type": "anytls",
+            "server": "14in.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇸🇬6新加坡-联通/移动(AnyTLS)",
+            "type": "anytls",
+            "server": "6sg.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇧🇷20巴西-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "20br.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇹🇷22土耳其-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "22tr.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇲🇽27墨西哥-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "27mx.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇳🇱28荷兰-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "28nl.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇷🇺32俄罗斯-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "32ru.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇻🇳33越南-联通/移动(AnyTLS)",
+            "type": "anytls",
+            "server": "33vn.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇵🇭36菲律宾-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "36ph.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇹🇭37泰国-联通/移动(AnyTLS)",
+            "type": "anytls",
+            "server": "37th.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇭🇰2香港集群-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "2hk.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "🇭🇰3香港集群-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "3hk.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "4台湾-联通优化(AnyTLS)",
+            "type": "anytls",
+            "server": "4tw.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "5台湾-联通/移动(AnyTLS)",
+            "type": "anytls",
+            "server": "5tw.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        },
+        {
+            "tag": "42台湾-全网优化(AnyTLS)",
+            "type": "anytls",
+            "server": "42tw.quandao.com",
+            "server_port": 4430,
+            "password": "2a669bdc-1988-4c4d-9a57-e3adff3bae69",
+            "tls": {
+                "enabled": true,
+                "disable_sni": false,
+                "insecure": true,
+                "server_name": "psstatic.cdn.bcebos.com",
+                "utls": {
+                    "enabled": true,
+                    "fingerprint": "random"
+                }
+            },
+            "network": [
+                "tcp",
+                "udp"
+            ]
+        }
+    ],
+    "experimental": {
+        "cache_file": {
+            "enabled": true,
+            "store_fakeip": true
+        },
+        "clash_api": {
+            "external_controller": "127.0.0.1:9090",
+            "external_ui": "ui",
+            "external_ui_download_url": "https://github.com/MetaCubeX/Yacd-meta/archive/gh-pages.zip"
+        }
+    },
+    "log": {
+        "disabled": false,
+        "level": "info",
+        "timestamp": true
+    },
+    "http_clients": [
+        {
+            "tag": "default"
+        }
+    ]
+}

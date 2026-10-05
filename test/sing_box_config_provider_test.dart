@@ -38,6 +38,39 @@ void main() {
       // 不抛异常即通过：结构非法的配置只记日志，导入流程继续
       await SingBoxConfigProvider.validateOrLog(broken);
     });
+
+    test('oneOf 汇总错误附带二次诊断行（type 判别 + 字段级原因）', () async {
+      final captured = <String>[];
+      final original = debugPrint;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message != null) captured.add(message);
+      };
+      try {
+        final broken = Map<String, dynamic>.from(templateMap);
+        (broken['outbounds'] as List).add({
+          'tag': 'test-anytls',
+          'type': 'anytls',
+          'server': 'example.com',
+          'server_port': 443,
+          'password': 'x',
+          'tls': {'enabled': true},
+          'network': ['tcp', 'udp'],
+        });
+
+        await SingBoxConfigProvider.validateOrLog(
+          SingBox.fromJson(broken),
+        );
+
+        final log = captured.join('\n');
+        // 汇总错误本体仍在
+        expect(log, contains('matched 0'));
+        // 诊断行展开到字段级，指出非法字段 network
+        expect(log, contains('type="anytls"'));
+        expect(log, contains('network'));
+      } finally {
+        debugPrint = original;
+      }
+    });
   });
 
   group('SingBoxConfigProvider.provide 集成', () {

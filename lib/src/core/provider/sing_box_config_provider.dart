@@ -139,7 +139,8 @@ class SingBoxConfigProvider {
     try {
       final validator =
           await (validatorSource?.call() ?? SingBoxSchemaValidator.instance());
-      final errors = validator.validateSync(singBox.toJson());
+      final config = singBox.toJson();
+      final errors = validator.validateSync(config);
       if (errors.isNotEmpty) {
         // 节点多的订阅错误可能成片，截断输出避免刷屏
         const maxShown = 10;
@@ -147,6 +148,10 @@ class SingBoxConfigProvider {
             '（共 ${errors.length} 处，仅记录不阻断）:');
         for (final error in errors.take(maxShown)) {
           debugPrint('  ${error.toErrorString()}');
+          // oneOf/anyOf 汇总错误只有一句 "matched 0"，附二次诊断展开原因
+          for (final line in validator.diagnoseCombinatorError(config, error)) {
+            debugPrint('      ↳ $line');
+          }
         }
         if (errors.length > maxShown) {
           debugPrint('  ...其余 ${errors.length - maxShown} 处略');

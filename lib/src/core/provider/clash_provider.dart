@@ -127,7 +127,6 @@ extension ClashProxyExt on ClashProxy {
       ClashProxyType.anytls => Outbound(
         type: OutboundType.anytls,
         tag: name,
-        network: _toSingBoxNetwork,
         server: server,
         serverPort: port,
         password: password,
