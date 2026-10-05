@@ -36,11 +36,15 @@ class SingBoxConfigProvider {
         } else if (content.split(RegExp(r'\r?\n')).first.contains(':')) {
           // 可能是 yaml 格式
           final YamlMap yamlMap = loadYaml(data);
-          final outbounds = ClashProvider.provide(yamlMap);
-          final List<Map<String, dynamic>> listMap = outbounds
+          final (outbounds, dns) = ClashProvider.provide(yamlMap);
+          final List<Map<String, dynamic>> outboundsMap = outbounds
               .map((element) => element.toJson())
               .toList();
-          singBox = await _fixSingBoxConfig({"outbounds": listMap});
+          final Map<String, dynamic> singBoxMap = {
+            "outbounds": outboundsMap,
+            if (dns != null) "dns": dns.toJson(),
+          };
+          singBox = await _fixSingBoxConfig(singBoxMap);
         } else {
           // 可能是 base64 格式
           final outbounds = Base64Provider.provide(data);
@@ -68,47 +72,6 @@ class SingBoxConfigProvider {
               .toList();
           singBox = await _fixSingBoxConfig({"outbounds": listMap});
         }
-
-        // try {
-        //   final config = jsonDecode(data);
-        //   singBox = SingBox.fromJson(config);
-        // } catch (e) {
-        //   exception = e is Error ? Exception('Error: $e') : e as Exception;
-        //   try {
-        //     final YamlMap yamlMap = loadYaml(data);
-        //     final outbounds = ClashProvider.provide(yamlMap);
-        //     final List<Map<String, dynamic>> listMap = outbounds
-        //         .map((element) => element.toJson())
-        //         .toList();
-        //     singBox = await _fixSingBoxConfig({"outbounds": listMap});
-        //   } catch (e) {
-        //     exception = e is Error ? Exception('Error: $e') : e as Exception;
-        //     final outbounds = Base64Provider.provide(data);
-        //     if (outbounds.isEmpty) {
-        //       throw Exception("Invalid base64 string");
-        //     }
-        //     outbounds.insert(
-        //       0,
-        //       Outbound(
-        //         tag: 'Auto',
-        //         type: OutboundType.urltest,
-        //         outbounds: outbounds.map((element) => element.tag).toList(),
-        //       ),
-        //     );
-        //     outbounds.insert(
-        //       0,
-        //       Outbound(
-        //         tag: FlutterSingBoxConstants.defaultGroup,
-        //         type: OutboundType.selector,
-        //         outbounds: outbounds.map((element) => element.tag).toList(),
-        //       ),
-        //     );
-        //     final List<Map<String, dynamic>> listMap = outbounds
-        //         .map((element) => element.toJson())
-        //         .toList();
-        //     singBox = await _fixSingBoxConfig({"outbounds": listMap});
-        //   }
-        // }
       }
     } catch (e) {
       exception = e is Error ? Exception('Error: $e') : e as Exception;
@@ -167,6 +130,19 @@ class SingBoxConfigProvider {
     final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
     final jsonConfig = jsonDecode(defaultConfig);
     final defaultSingBox = SingBox.fromJson(jsonConfig);
+    if (data.containsKey("dns")) {
+      defaultSingBox.dns.servers.addAll(
+        (data['dns']['servers'] as List<dynamic>)
+            .map((e) => Server.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+      defaultSingBox.dns.rules.addAll(
+        (data['dns']['rules'] as List<dynamic>)
+            .map((e) => DnsRule.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+    }
+
     final List<String> errorTags = [];
     List<dynamic> outbounds = data['outbounds'];
     for (var outbound in outbounds) {

@@ -77,7 +77,7 @@ class Outbound {
   @JsonKey(name: "interrupt_exist_connections")
   bool? interruptExistConnections;
   @JsonKey(name: "domain_resolver")
-  String? domainResolver;
+  Object? domainResolver;
 
   @JsonKey(name: "hop_interval")
   String? hopInterval;

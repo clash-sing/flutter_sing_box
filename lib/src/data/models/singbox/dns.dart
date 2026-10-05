@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'tls.dart';
@@ -48,29 +49,29 @@ class Dns {
 }
 
 @JsonSerializable(explicitToJson: true)
-class Server {
-  String tag;
-  String type;
-  String? server;
+class Server extends Equatable {
+  final String tag;
+  final String type;
+  final String? server;
   @JsonKey(name: "inet4_range")
-  String? inet4Range;
+  final String? inet4Range;
   @JsonKey(name: "inet6_range")
-  String? inet6Range;
+  final String? inet6Range;
   @JsonKey(name: "prefer_go")
-  bool? preferGo;
+  final bool? preferGo;
   @JsonKey(name: "neighbor_domain")
-  List<String>? neighborDomain;
-  String? path;
+  final List<String>? neighborDomain;
+  final String? path;
   @JsonKey(name: "server_port")
-  int? serverPort;
-  String? service;
+  final int? serverPort;
+  final String? service;
   @JsonKey(name: "accept_default_resolvers")
-  bool? acceptDefaultResolvers;
+  final bool? acceptDefaultResolvers;
   @JsonKey(name: "domain_resolver")
-  String? domainResolver;
-  Tls? tls;
+  final String? domainResolver;
+  final Tls? tls;
 
-  Server({
+  const Server({
     required this.tag,
     required this.type,
     this.server,
@@ -89,6 +90,21 @@ class Server {
   factory Server.fromJson(Map<String, dynamic> json) => _$ServerFromJson(json);
 
   Map<String, dynamic> toJson() => _$ServerToJson(this);
+
+  @override
+  List<Object?> get props => [
+    type,
+    server,
+    inet4Range,
+    inet6Range,
+    preferGo,
+    neighborDomain,
+    path,
+    serverPort,
+    service,
+    acceptDefaultResolvers,
+    domainResolver,
+  ];
 }
 
 @JsonSerializable(explicitToJson: true)

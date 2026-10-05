@@ -1,3 +1,4 @@
+import 'package:flutter_sing_box/src/data/models/clash/clash_dns.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:yaml/yaml.dart';
@@ -5,14 +6,33 @@ import 'package:yaml/yaml.dart';
 /// Converts a Clash-format subscription into a list of [Outbound]s.
 class ClashProvider {
   /// Builds a list of [Outbound]s from the Clash-format [yamlMap].
-  static List<Outbound> provide(YamlMap yamlMap) {
+  static (List<Outbound>, Dns?) provide(YamlMap yamlMap) {
     final Map<String, dynamic> clashMap = yamlMap.toMap();
     final clash = Clash.fromJson(clashMap);
+    Dns? dns;
+    if (clash.dns?.nameserverPolicy != null) {
+      dns = Dns(servers: [], rules: []);
+      _fixDns(clash.dns!, dns);
+    }
+
     final List<Outbound> outbounds = [];
     for (var element in clash.proxies) {
       try {
         final outbound = element.toOutbound();
         if (outbound != null) {
+          if (dns?.rules != null) {
+            for (var rule in dns?.rules.where((rule) => rule.action == 'evaluate').toList() ?? []) {
+              if (rule.domainSuffix?.isNotEmpty == true) {
+                for (var domain in rule.domainSuffix!) {
+                  if (outbound.server?.contains(domain) == true) {
+                    outbound.domainResolver = rule.server;
+                    break;
+                  }
+                }
+              }
+              if (outbound.domainResolver != null) break;
+            }
+          }
           outbounds.add(outbound);
         } else {
           debugPrint('${element.name} is not support');
@@ -29,10 +49,88 @@ class ClashProvider {
         debugPrint('${element.name} is not support');
       }
     }
-    if (clash.dns?.nameserverPolicy != null) {
-      debugPrint('Clash DNS nameserver policy: ${clash.dns!.nameserverPolicy}');
+    return (outbounds, dns);
+  }
+
+  static void _fixDns(ClashDns clashDns, Dns? dns) {
+    Map<Server, List<String>> dnsServerToDomain = {};
+    int i = 0;
+    for (var entry in clashDns.nameserverPolicy!.entries) {
+      ++i;
+      final uri = Uri.parse(entry.value.first);
+      Server dnsServer = Server(
+        tag: 'policy_dns_$i',
+        type: uri.scheme,
+        server: uri.host,
+        serverPort: uri.port,
+        path: uri.path,
+        domainResolver: 'alidoh',
+        tls: Tls(enabled: true, insecure: true),
+      );
+      if (dnsServerToDomain.containsKey(dnsServer)) {
+        dnsServerToDomain[dnsServer]!.add(entry.key);
+      } else {
+        dnsServerToDomain[dnsServer] = [entry.key];
+      }
     }
-    return outbounds;
+    for (var entry in dnsServerToDomain.entries) {
+      final dnsRuleEvaluate = DnsRule(
+        action: 'evaluate',
+        tag: '${entry.key.tag}_rule',
+        server: entry.key.tag,
+        timeout: '3s',
+        queryType: ['A', 'AAAA'],
+      );
+      for (var domain in entry.value) {
+        _setDomain(dnsRuleEvaluate, domain);
+      }
+      final dnsRuleRespond = DnsRule(
+        action: 'respond',
+        matchResponse: dnsRuleEvaluate.tag,
+        ipAcceptAny: true,
+        responseRcode: 'NOERROR',
+        race: true,
+      );
+      final dnsRuleRoute = DnsRule(action: 'route', server: entry.key.tag);
+      for (var domain in entry.value) {
+        _setDomain(dnsRuleRoute, domain);
+      }
+      dns?.servers.add(entry.key);
+      dns?.rules.addAll([dnsRuleEvaluate, dnsRuleRespond, dnsRuleRoute]);
+    }
+  }
+
+  static void _setDomain(DnsRule dnsRule, String domain) {
+    if (domain.startsWith('+.')) {
+      dnsRule.domainSuffix ??= [];
+      dnsRule.domainSuffix!.add(domain.replaceFirst('+.', ''));
+      return;
+    }
+    if (domain.startsWith('*.')) {
+      dnsRule.domainSuffix ??= [];
+      dnsRule.domainSuffix!.add(domain.replaceFirst('*.', ''));
+      return;
+    }
+    if (domain.startsWith('.')) {
+      dnsRule.domainSuffix ??= [];
+      dnsRule.domainSuffix!.add(domain.replaceFirst('.', ''));
+      return;
+    }
+    if (domain.startsWith('^')) {
+      dnsRule.domainRegex ??= [];
+      dnsRule.domainRegex!.add(domain);
+      return;
+    }
+    final domainRegex = RegExp(r'^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$');
+    if (domainRegex.hasMatch(domain)) {
+      dnsRule.domain ??= [];
+      dnsRule.domain!.add(domain);
+      return;
+    } else {
+      dnsRule.domainKeyword ??= [];
+      dnsRule.domainKeyword!.add(domain);
+      return;
+    }
   }
 }
 

@@ -51,7 +51,7 @@ Outbound _$OutboundFromJson(Map<String, dynamic> json) => Outbound(
   quicCongestionControl: json['quic_congestion_control'] as String?,
   udpOverTcp: json['udp_over_tcp'],
   interruptExistConnections: json['interrupt_exist_connections'] as bool?,
-  domainResolver: json['domain_resolver'] as String?,
+  domainResolver: json['domain_resolver'],
   hopInterval: json['hop_interval'] as String?,
   hopIntervalMax: json['hop_interval_max'] as String?,
   bbrProfile: json['bbr_profile'] as String?,
