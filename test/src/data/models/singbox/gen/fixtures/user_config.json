@@ -1,0 +1,32 @@
+{
+  "log": { "level": "info", "timestamp": true },
+  "dns": {
+    "servers": [
+      { "tag": "local-dns", "type": "local" },
+      { "tag": "remote", "type": "udp", "server": "8.8.8.8", "server_port": 53 }
+    ],
+    "final": "remote"
+  },
+  "ntp": { "server": "time.apple.com", "server_port": 123 },
+  "inbounds": [
+    { "type": "tun", "tag": "tun-in", "address": ["172.19.0.1/30"], "auto_route": true }
+  ],
+  "outbounds": [
+    { "type": "urltest", "tag": "auto", "outbounds": ["h2-node", "ssh-node"],
+      "url": "https://g.cn", "interval": "3m", "tolerance": 50 },
+    { "type": "hysteria2", "tag": "h2-node", "server": "a.cn", "server_port": 443,
+      "password": "pw", "network": "tcp", "tls": { "enabled": true, "server_name": "a.cn" } },
+    { "type": "snell", "tag": "sn", "server": "b.cn", "server_port": 6160,
+      "version": 4, "psk": "k", "obfs_mode": "http" },
+    { "type": "ssh", "tag": "ssh-node", "server": "c.cn", "server_port": 22,
+      "user": "root", "private_key": "AAA" }
+  ],
+  "route": {
+    "rules": [
+      { "protocol": "dns", "action": "hijack-dns" },
+      { "ip_is_private": true, "action": "route", "outbound": "direct" }
+    ],
+    "final": "auto",
+    "auto_detect_interface": true
+  }
+}

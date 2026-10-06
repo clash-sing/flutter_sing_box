@@ -34,15 +34,18 @@ const Set<String> _dartKeywords = {
   'base', 'on', 'when',
 };
 
-/// 字段名净化：lowerCamel 后撞上 Dart 关键字则加 `_` 后缀；
-/// schema 原生 PascalCase 键（User 的 Username/Password）降为小写开头。
-/// 两种情况下 JSON 原名均经 @JsonKey(name:) 保真读写。
+/// 字段名净化：lowerCamel 后先降首字母小写，再查 Dart 关键字表，撞上则加
+/// `_` 后缀；schema 原生 PascalCase 键（User 的 Username/Password）降为
+/// 小写开头。两种情况下 JSON 原名均经 @JsonKey(name:) 保真读写。
+///
+/// 降小写必须在关键字检查**之前**：PascalCase 键如 'Final' 先降成 'final'
+/// 才撞保留字，顺序反了会漏检并生成非法字段名。
 String safeFieldName(String snake) {
   var camel = lowerCamel(snake);
-  if (_dartKeywords.contains(camel)) return '${camel}_';
   if (camel.isNotEmpty && camel[0] == camel[0].toUpperCase()) {
     camel = camel[0].toLowerCase() + camel.substring(1);
   }
+  if (_dartKeywords.contains(camel)) return '${camel}_';
   return camel;
 }
 

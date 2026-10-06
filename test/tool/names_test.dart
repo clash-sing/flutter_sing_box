@@ -16,6 +16,9 @@ void main() {
       expect(safeFieldName('final'), 'final_');
       expect(safeFieldName('default'), 'default_');
       expect(safeFieldName('in'), 'in_');
+      // PascalCase 键先降首字母小写再查关键字：'Final' 降成 'final' 后
+      // 撞保留字，须加下划线（降小写在关键字检查之前，反了会漏检）
+      expect(safeFieldName('Final'), 'final_');
       // schema 原生 PascalCase 键（User 的 Username/Password）降为小写开头，
       // 否则触发 non_constant_identifier_names
       expect(safeFieldName('Username'), 'username');
