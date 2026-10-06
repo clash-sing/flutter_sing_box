@@ -32,5 +32,23 @@ class OutboundType {
 
   /// TUIC outbound.
   static const String tuic = "tuic";
+
+  /// Naive outbound.
   static const String naive = "naive";
+
+  /// SOCKS outbound.
+  static const String socks = "socks";
+
+  /// HTTP outbound.
+  static const String http = "http";
+
+  /// ShadowTLS outbound.
+  static const String shadowTLS = "shadowtls";
+
+  /// Snell outbound.
+  static const String snell = "snell";
+
+  @Deprecated("Block outbound is deprecated. Use [Rule.action = 'reject'] instead.")
+  /// Block outbound.
+  static const String block = "block";
 }
