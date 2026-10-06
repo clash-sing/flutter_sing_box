@@ -1,7 +1,7 @@
 # sing-box 模型生成器设计（schema → sealed Dart 模型）
 
 - 日期：2026-10-06
-- 状态：待审阅
+- 状态：已批准（2026-10-06 用户确认：白名单判定原则、插件版本 3.0.0）
 - 工程仓库：flutter_sing_box（生成器与生成物均在本插件内）
 
 ## 背景与目标
@@ -60,7 +60,9 @@ flutter_sing_box/
 
 ### 白名单
 
-白名单 = `OutboundType` 常量表全集，硬编码在生成器配置区：
+**判定原则**：白名单 = `OutboundType` / `InboundType` 常量表当前全集；
+两个常量表中未定义的类型一律不做模型，经 `UnknownOutbound` /
+`UnknownInbound` 透传。白名单硬编码在生成器配置区：
 
 - 逻辑出站（4）：direct / selector / urltest / block（block 用于低版本
   内核：其规则语法无 `action: reject`，拒绝需经 `outbound: block` 表达，
@@ -186,8 +188,9 @@ sealed 基类暴露 `String get tag` 与 `String get type`，现有
    - **schema 反向校验闭环**：生成物 `toJson()` →
      `SingBoxSchemaValidator.validateSync` 零错误（用官方 schema 反向
      验证生成器，闭环自证）。
-3. **白名单对齐测试**：断言 `OutboundType` 常量全集 == 生成子类
-   typeName 注册表全集——任一侧手动增删，测试立即拦截并提示重跑生成器。
+3. **白名单对齐测试**：断言 `OutboundType` / `InboundType` 常量全集 ==
+   生成子类 typeName 注册表全集——任一侧手动增删，测试立即拦截并提示
+   重跑生成器。
 4. **迁移回归**：现有 `test/` 全绿；提交前 GitNexus
    `detect_changes(scope: compare, base_ref: main)` 复核影响面。
 
@@ -200,7 +203,7 @@ diff → `dart run build_runner build` → 全量测试 → 提交。
 ## 版本与发布
 
 - 阶段二为公开 API 破坏性变更（`Outbound` 由可实例化的拍平类改为
-  sealed 层级），按语义化版本插件应升 **3.0.0**（当前 2.0.4）。
+  sealed 层级），插件升 **3.0.0**（当前 2.0.4，已确认）。
 - App 侧 `pubspec.yaml` 依赖相应提升；发布顺序沿用既有流程（插件发版 →
   App 升级依赖）。
 
