@@ -105,4 +105,22 @@ void main() {
         dns.ownFields.singleWhere((f) => f.jsonName == 'servers').dartType,
         'List<DNSServer>?');
   });
+
+  test('纯开放映射 def（HTTPHeader 形状）产出 kind: openMap 的无字段类', () {
+    final ir = buildFixtureIr();
+    // hysteria2 分支 headers 字段 $ref 递归可达收集到 HTTPHeader
+    final header = ir.classes.singleWhere((c) => c.className == 'HTTPHeader');
+    expect(header.kind, 'openMap');
+    expect(header.typeName, isNull);
+    expect(header.ownFields, isEmpty);
+    // 引用方字段类型仍映射为 def 名类名
+    final h2 = ir.classes.singleWhere((c) => c.className == 'Hysteria2Outbound');
+    expect(
+      h2.ownFields.singleWhere((f) => f.jsonName == 'headers').dartType,
+      'HTTPHeader?',
+    );
+    // 有 properties 的 strict 对象不受影响（仍走 plain 拍平路径）
+    final tls = ir.classes.singleWhere((c) => c.className == 'OutboundTLSOptions');
+    expect(tls.kind, 'plain');
+  });
 }

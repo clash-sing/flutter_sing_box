@@ -1,15 +1,14 @@
 // 本文件由 tool/gen_models.dart 生成，勿手改。
-import 'package:json_annotation/json_annotation.dart';
 
-part 'http_header.g.dart';
-
-@JsonSerializable(explicitToJson: true, includeIfNull: false)
+/// 开放映射（schema：object + additionalProperties）：任意键值表，
+/// 读入全收、输出全出（round-trip 保真）。
 class HTTPHeader {
+  final Map<String, dynamic> entries;
 
-  HTTPHeader();
+  HTTPHeader([this.entries = const {}]);
 
   factory HTTPHeader.fromJson(Map<String, dynamic> json) =>
-      _$HTTPHeaderFromJson(json);
+      HTTPHeader(Map<String, dynamic>.from(json));
 
-  Map<String, dynamic> toJson() => _$HTTPHeaderToJson(this);
+  Map<String, dynamic> toJson() => Map<String, dynamic>.from(entries);
 }

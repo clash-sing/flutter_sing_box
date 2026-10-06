@@ -61,6 +61,12 @@
       },
       "required": ["enabled"]
     },
+    "HTTPHeader": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
+      }
+    },
     "Outbound": {
       "oneOf": [
         {
@@ -71,6 +77,7 @@
             "server": { "type": "string" },
             "server_port": { "type": "integer" },
             "tls": { "$ref": "#/$defs/OutboundTLSOptions" },
+            "headers": { "$ref": "#/$defs/HTTPHeader" },
             "detour": { "type": "string" },
             "connect_timeout": { "$ref": "#/$defs/Duration" }
           },

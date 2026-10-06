@@ -396,4 +396,55 @@ void main() {
       expect(o.tls?.alpn, ['h3']);
     });
   });
+
+  group('Base64Provider.provide - ws Host 头往返（HIGH 回归锁定）', () {
+    // 复现 provide() 的真实链路：produce -> toJson()（落盘形态）-> Outbound.fromJson
+    // （_fixSingBoxConfig 重建出站的路径）。HTTPHeader 若不能承载任意键，
+    // Host 头在此往返中丢失，CDN 节点连接路由错误。
+    Outbound roundTrip(Outbound o) => Outbound.fromJson(
+          jsonDecode(jsonEncode(o.toJson())) as Map<String, dynamic>,
+        );
+
+    test('vless ws 的 Host 头经 toJson -> fromJson 往返不丢', () {
+      const link = 'vless://u@rt1.com:443?security=tls&type=ws'
+          '&host=cdn-rt.example.com&path=%2Fws#rt1';
+      final o = Base64Provider.provide(encodeSub([link])).first as VlessOutbound;
+      expect(o.transport?.headers?.toJson()['Host'], 'cdn-rt.example.com');
+
+      final rt = roundTrip(o) as VlessOutbound;
+      expect(rt.transport?.headers, isNotNull);
+      expect(rt.transport?.headers?.toJson()['Host'], 'cdn-rt.example.com');
+    });
+
+    test('vmess ws 的 Host 头经 toJson -> fromJson 往返不丢', () {
+      // vmessLink 是 vmess 组的闭包助手，此处内联同构构造
+      final link =
+          'vmess://${base64.encode(utf8.encode(jsonEncode({
+                'v': '2',
+                'ps': 'rt2',
+                'add': 'rt2.com',
+                'port': 443,
+                'id': 'u-rt',
+                'net': 'ws',
+                'host': 'cdn-rt2.example.com',
+                'path': '/ws',
+                'tls': 'tls',
+              })))}';
+      final o = Base64Provider.provide(encodeSub([link])).first as VmessOutbound;
+      expect(o.transport?.headers?.toJson()['Host'], 'cdn-rt2.example.com');
+
+      final rt = roundTrip(o) as VmessOutbound;
+      expect(rt.transport?.headers, isNotNull);
+      expect(rt.transport?.headers?.toJson()['Host'], 'cdn-rt2.example.com');
+    });
+
+    test('无 Host 的 ws 往返后 headers 保持 null', () {
+      const link = 'vless://u@rt3.com:443?security=tls&type=ws&path=%2Fws#rt3';
+      final o = Base64Provider.provide(encodeSub([link])).first as VlessOutbound;
+      expect(o.transport?.headers, isNull);
+
+      final rt = roundTrip(o) as VlessOutbound;
+      expect(rt.transport?.headers, isNull);
+    });
+  });
 }

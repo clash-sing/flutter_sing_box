@@ -285,7 +285,7 @@ class Base64Provider {
       case 'ws':
         return V2RayTransport(type: OutboundTransportType.webSocket)
           ..path = q['path']
-          ..headers = q['host']?.isNotEmpty == true ? _headerMap({'Host': q['host']}) : null;
+          ..headers = q['host']?.isNotEmpty == true ? HTTPHeader({'Host': q['host']}) : null;
       case 'grpc':
         // 规范参数为 serviceName，部分客户端只写 path，做兼容
         return V2RayTransport(type: OutboundTransportType.gRPC)
@@ -339,7 +339,7 @@ class Base64Provider {
         'ws' => V2RayTransport(type: OutboundTransportType.webSocket)
           ..path = map['path'] as String?
           ..headers = (map['host'] as String?)?.isNotEmpty == true
-              ? _headerMap({'Host': map['host']})
+              ? HTTPHeader({'Host': map['host']})
               : null,
         'grpc' => V2RayTransport(type: OutboundTransportType.gRPC)
           ..serviceName = map['path'] as String?,
@@ -400,16 +400,3 @@ class Base64Provider {
     }
   }
 }
-
-/// 生成模型未建模传输层 headers 开放映射（HTTPHeader 为空壳，对应 schema 的
-/// additionalProperties 任意键），以子类携带键值、覆写 toJson 保真输出。
-class _HeaderMap extends HTTPHeader {
-  final Map<String, dynamic> _map;
-
-  _HeaderMap(this._map);
-
-  @override
-  Map<String, dynamic> toJson() => _map;
-}
-
-HTTPHeader _headerMap(Map<String, dynamic> map) => _HeaderMap(map);

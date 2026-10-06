@@ -17,6 +17,10 @@
 //     properties 键交集 − {tag, type}；mixin 字段一律可空；判别类字段 =
 //     分支字段 − mixin 已含字段 − type，tag 留在本类。
 // 10. type 不进判别类字段（Task 3 由 typeName + getter 表达）。
+// 11. 纯开放映射 def（type=object、无 properties/allOf/oneOf/anyOf 且
+//     additionalProperties 为 schema 节点，如 HTTPHeader）→ kind: 'openMap'、
+//     无字段：整对象即任意键值表，由 Task 3 输出键透传类（读入全收、输出全出）；
+//     additionalProperties:false 属 strict 对象语义，不在此列。
 import 'names.dart';
 
 /// schema 字段规格
@@ -64,7 +68,7 @@ class ClassSpec {
   /// 混入的共享块名（'DialerFields' / 'ListenFields'），仅含实际吸收了字段的
   final List<String> mixins;
 
-  /// 'outbound' / 'inbound' / 'plain'
+  /// 'outbound' / 'inbound' / 'plain' / 'openMap'（键透传类，无字段）
   final String kind;
 }
 
@@ -346,9 +350,20 @@ _Merged _flattenDef(String name, Map<String, dynamic> defs) {
   return _mergeBranches(branches, defs, strict: false);
 }
 
-/// 拍平产物 -> kind: plain 的 ClassSpec，并把字段 $ref 目标入队
+/// 拍平产物 -> kind: plain 的 ClassSpec，并把字段 $ref 目标入队；
+/// 纯开放映射 def（规则 11）改产出 kind: 'openMap' 的无字段 ClassSpec
 ClassSpec _flattenClass(
     String name, Map<String, dynamic> defs, List<String> refQueue) {
+  final def = _asMap(defs[name]);
+  if (_isOpenMapDef(def)) {
+    return ClassSpec(
+      className: name,
+      typeName: null,
+      ownFields: const [],
+      mixins: const [],
+      kind: 'openMap',
+    );
+  }
   final merged = _flattenDef(name, defs);
   _collectRefTargets(merged.props, defs, refQueue);
   return ClassSpec(
@@ -358,6 +373,20 @@ ClassSpec _flattenClass(
     mixins: const [],
     kind: 'plain',
   );
+}
+
+/// 纯开放映射 def（规则 11）：type=object、无 properties 与组合器、
+/// additionalProperties 为 schema 节点（标量或标量 union，如 HTTPHeader）。
+/// additionalProperties 缺省（无值约束）或为 false（strict 语义）均不在此列。
+bool _isOpenMapDef(Map<String, dynamic> def) {
+  if (def['type'] != 'object') return false;
+  if (_asMap(def['properties']).isNotEmpty) return false;
+  if (_asList(def['allOf']).isNotEmpty ||
+      _asList(def['oneOf']).isNotEmpty ||
+      _asList(def['anyOf']).isNotEmpty) {
+    return false;
+  }
+  return def['additionalProperties'] is Map;
 }
 
 // ---------------------------------------------------------------------------

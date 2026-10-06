@@ -140,9 +140,10 @@ Map<String, String> emitDart(Ir ir) {
     files['${fam.dir}/${fileNameFor(fam.unknown)}'] = _emitUnknownPart(fam);
   }
 
-  // ---- 普通类（根目录，独立库自带 part）----
+  // ---- 普通类（根目录，独立库自带 part）；开放映射改产键透传类 ----
   for (final c in ir.classes.where((c) => familyOf(c) == null)) {
-    files[fileNameFor(c.className)] = _emitPlainClass(c, pathOf);
+    files[fileNameFor(c.className)] =
+        c.kind == 'openMap' ? _emitOpenMapClass(c) : _emitPlainClass(c, pathOf);
   }
 
   // ---- 顶层 SingBox（未知段透传）----
@@ -338,8 +339,34 @@ String _emitUnknownPart(_FamilySpec fam) {
 }
 
 // ---------------------------------------------------------------------------
-// 普通类（根目录）
+// 开放映射类 / 普通类（根目录）
 // ---------------------------------------------------------------------------
+
+/// 键透传类（IR 规则 11）：schema 为 object + 标量 additionalProperties 的
+/// 纯开放映射（如 HTTPHeader），整对象即任意键值表。不走 build_runner
+/// （无 @JsonSerializable / part），fromJson 全收、toJson 全出，round-trip 保真；
+/// 引用方的 .g.dart 经其公开 fromJson 工厂与 toJson 方法正常接线。
+String _emitOpenMapClass(ClassSpec spec) {
+  final b = StringBuffer();
+  b.writeln(_header);
+  b.writeln();
+  b.writeln('/// 开放映射（schema：object + additionalProperties）：任意键值表，');
+  b.writeln('/// 读入全收、输出全出（round-trip 保真）。');
+  b.writeln('class ${spec.className} {');
+  b.writeln('  final Map<String, dynamic> entries;');
+  b.writeln();
+  b.writeln('  ${spec.className}([this.entries = const {}]);');
+  b.writeln();
+  b.writeln(
+      '  factory ${spec.className}.fromJson(Map<String, dynamic> json) =>');
+  b.writeln(
+      '      ${spec.className}(Map<String, dynamic>.from(json));');
+  b.writeln();
+  b.writeln(
+      '  Map<String, dynamic> toJson() => Map<String, dynamic>.from(entries);');
+  b.writeln('}');
+  return b.toString();
+}
 
 String _emitPlainClass(ClassSpec spec, Map<String, String> pathOf) {
   final selfPath = fileNameFor(spec.className);

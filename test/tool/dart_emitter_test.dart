@@ -120,6 +120,23 @@ void main() {
     expect(files['rule.dart'], contains('String? action'));
   });
 
+  test('开放映射 def 生成键透传类（HTTPHeader 形状）', () {
+    final h = files['http_header.dart']!;
+    expect(h, contains('class HTTPHeader'));
+    // 键透传载体：entries 全收全出（round-trip 保真）
+    expect(h, contains('final Map<String, dynamic> entries;'));
+    expect(h, contains('factory HTTPHeader.fromJson'));
+    expect(h, contains('Map<String, dynamic> toJson()'));
+    // 不走 build_runner：无 @JsonSerializable 注解、无 part 声明
+    expect(h, isNot(contains('@JsonSerializable')));
+    expect(h, isNot(contains("part '")));
+    // 引用方（hysteria2 分支 headers 字段）由库根 import 该类
+    expect(
+      files['outbound/outbound.dart'],
+      contains("import '../http_header.dart';"),
+    );
+  });
+
   test('全部文件带勿手改头注释', () {
     for (final content in files.values) {
       expect(content, startsWith('// 本文件由 tool/gen_models.dart 生成，勿手改。'));
