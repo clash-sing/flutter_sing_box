@@ -62,7 +62,9 @@ flutter_sing_box/
 
 白名单 = `OutboundType` 常量表全集，硬编码在生成器配置区：
 
-- 逻辑出站（3）：direct / selector / urltest
+- 逻辑出站（4）：direct / selector / urltest / block（block 用于低版本
+  内核：其规则语法无 `action: reject`，拒绝需经 `outbound: block` 表达，
+  对应 `OutboundType.block` 已标注 `@Deprecated`）
 - 网络出站（13）：hysteria2 / hysteria / anytls / trojan / vmess / vless /
   shadowsocks / tuic / naive / socks / http / shadowtls / snell
 - 入站（2）：tun / mixed
@@ -70,8 +72,8 @@ flutter_sing_box/
   Experimental / Log 及其经 `$ref` 递归可达的 `$defs`（生成器自动收集，
   无需逐一枚举）
 
-block / dns 出站、endpoints / services / ntp 等不在白名单内，经透传机制
-兜底（见下文）。将来需要时加入白名单重跑生成器即可。
+dns 出站、endpoints / services / ntp 等不在白名单内，经透传机制兜底
+（见下文）。将来需要时加入白名单重跑生成器即可。
 
 **防漂移**：白名单与 schema 对不齐（类型不存在、判别结构变化）→ 生成器
 报错退出；`OutboundType` 常量表与生成子类的对齐由单元测试拦截（见测试
@@ -124,6 +126,7 @@ gen/
 │   ├── direct_outbound.dart
 │   ├── selector_outbound.dart
 │   ├── urltest_outbound.dart
+│   ├── block_outbound.dart
 │   └── ...（13 个网络协议，snell 单类合并 v4/v6）
 ├── inbound/
 │   ├── inbound.dart    # sealed Inbound + 工厂 + UnknownInbound
