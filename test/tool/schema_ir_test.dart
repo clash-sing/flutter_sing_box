@@ -86,4 +86,23 @@ void main() {
     expect(rule.ownFields.map((f) => f.jsonName),
         containsAll(['outbound', 'network', 'protocol', 'action']));
   });
+
+  test('DNSServer 判别类：tag 强制 required 非空 String（与出站/入站同景同判）', () {
+    final ir = buildFixtureIr();
+    // fixture 分支 required 仅 [type]，schema 宽松；IR 层对判别类统一收紧 tag
+    final local = ir.classes.singleWhere((c) => c.className == 'LocalDNSServer');
+    expect(local.kind, 'plain');
+    expect(local.typeName, 'local');
+    final tag = local.ownFields.singleWhere((f) => f.jsonName == 'tag');
+    expect(tag.required, isTrue);
+    expect(tag.dartType, 'String');
+    final udp = ir.classes.singleWhere((c) => c.className == 'UdpDNSServer');
+    expect(udp.ownFields.map((f) => f.jsonName), containsAll(['tag', 'server']));
+    // DNS 经顶层入口收集，servers 的 $ref 映射为 def 名类名
+    final dns = ir.classes.singleWhere((c) => c.className == 'DNS');
+    expect(dns.kind, 'plain');
+    expect(
+        dns.ownFields.singleWhere((f) => f.jsonName == 'servers').dartType,
+        'List<DNSServer>?');
+  });
 }

@@ -3,6 +3,7 @@
   "type": "object",
   "properties": {
     "log": { "$ref": "#/$defs/LogOptions" },
+    "dns": { "$ref": "#/$defs/DNS" },
     "outbounds": { "type": "array", "items": { "$ref": "#/$defs/Outbound" } },
     "ntp": { "type": "object" },
     "rules": { "type": "array", "items": { "$ref": "#/$defs/Rule" } }
@@ -17,6 +18,33 @@
       "required": ["level"]
     },
     "Duration": { "oneOf": [{ "type": "string" }, { "type": "integer" }] },
+    "DNS": {
+      "type": "object",
+      "properties": {
+        "servers": { "type": "array", "items": { "$ref": "#/$defs/DNSServer" } }
+      }
+    },
+    "DNSServer": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "local" },
+            "tag": { "type": "string" }
+          },
+          "required": ["type"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "udp" },
+            "tag": { "type": "string" },
+            "server": { "type": "string" }
+          },
+          "required": ["type"]
+        }
+      ]
+    },
     "DialerOptions": {
       "type": "object",
       "properties": {

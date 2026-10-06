@@ -185,7 +185,7 @@ Ir buildIr(
     const [],
     const {},
     refQueue,
-    forceTagRequired: false, // DNSServer 类 tag 跟随 schema required
+    forceTagRequired: true, // 与出站/入站同景同判：tag 语义必填，schema 宽松由 IR 收紧
   ));
 
   // ---- 无判别 oneOf 拍平（规则 6）：Rule / DNSRule ----
@@ -391,7 +391,8 @@ void _validateWhitelist(Set<String> whitelist,
 
 /// 判别类生成：白名单（null 为全量）过滤 -> 合并 -> 去掉 type 字段 ->
 /// 依序吸收 mixin 字段（仅记录实际吸收了字段的 mixin 名）。
-/// forceTagRequired：tag 强制必填非空（规则 9，出站/入站类；DNSServer 类跟随 schema）
+/// forceTagRequired：tag 强制必填非空（规则 9；出站/入站/DNSServer 判别类统一适用，
+/// schema 分支 required 普遍仅 [type]，IR 层收紧是既定模式）
 List<ClassSpec> _discriminatedClasses(
     Map<String, List<_BranchFields>> groups,
     Set<String>? whitelist,
