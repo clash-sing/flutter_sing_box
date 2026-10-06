@@ -6,7 +6,6 @@ class UrltestOutbound extends Outbound {
   static const typeName = 'urltest';
 
   @override
-  @JsonKey()
   String tag;
   List<String>? outbounds;
   String? url;

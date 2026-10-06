@@ -6,7 +6,6 @@ class MixedInbound extends Inbound with ListenFields, DialerFields {
   static const typeName = 'mixed';
 
   @override
-  @JsonKey()
   String tag;
   Object? listen;
   @JsonKey(name: 'listen_port')

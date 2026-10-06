@@ -6,7 +6,6 @@ class ShadowtlsOutbound extends Outbound with DialerFields {
   static const typeName = 'shadowtls';
 
   @override
-  @JsonKey()
   String tag;
   String? server;
   @JsonKey(name: 'server_port')

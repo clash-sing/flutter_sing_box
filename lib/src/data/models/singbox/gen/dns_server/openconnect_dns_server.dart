@@ -6,7 +6,6 @@ class OpenconnectDNSServer extends DNSServer {
   static const typeName = 'openconnect';
 
   @override
-  @JsonKey()
   String tag;
   String? endpoint;
   @JsonKey(name: 'accept_default_resolvers')

@@ -6,7 +6,6 @@ class TunInbound extends Inbound with ListenFields, DialerFields {
   static const typeName = 'tun';
 
   @override
-  @JsonKey()
   String tag;
   @JsonKey(name: 'interface_name')
   String? interfaceName;

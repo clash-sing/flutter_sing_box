@@ -6,7 +6,6 @@ class Hysteria2Outbound extends Outbound with DialerFields {
   static const typeName = 'hysteria2';
 
   @override
-  @JsonKey()
   String tag;
   String? server;
   @JsonKey(name: 'server_port')

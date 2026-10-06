@@ -6,7 +6,6 @@ class ShadowsocksOutbound extends Outbound with DialerFields {
   static const typeName = 'shadowsocks';
 
   @override
-  @JsonKey()
   String tag;
   String? server;
   @JsonKey(name: 'server_port')

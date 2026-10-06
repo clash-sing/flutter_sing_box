@@ -6,7 +6,6 @@ class TuicOutbound extends Outbound with DialerFields {
   static const typeName = 'tuic';
 
   @override
-  @JsonKey()
   String tag;
   String? server;
   @JsonKey(name: 'server_port')

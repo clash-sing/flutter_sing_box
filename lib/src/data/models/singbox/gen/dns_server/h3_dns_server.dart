@@ -6,7 +6,6 @@ class H3DNSServer extends DNSServer {
   static const typeName = 'h3';
 
   @override
-  @JsonKey()
   String tag;
   String? detour;
   @JsonKey(name: 'bind_interface')

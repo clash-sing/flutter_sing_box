@@ -6,7 +6,6 @@ class FakeipDNSServer extends DNSServer {
   static const typeName = 'fakeip';
 
   @override
-  @JsonKey()
   String tag;
   @JsonKey(name: 'inet4_range')
   Object? inet4Range;

@@ -6,7 +6,6 @@ class SelectorOutbound extends Outbound {
   static const typeName = 'selector';
 
   @override
-  @JsonKey()
   String tag;
   List<String>? outbounds;
   @JsonKey(name: 'default')

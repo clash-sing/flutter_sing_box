@@ -6,7 +6,6 @@ class LocalDNSServer extends DNSServer {
   static const typeName = 'local';
 
   @override
-  @JsonKey()
   String tag;
   String? detour;
   @JsonKey(name: 'bind_interface')

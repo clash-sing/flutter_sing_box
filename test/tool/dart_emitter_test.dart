@@ -72,6 +72,8 @@ void main() {
     expect(h2, contains('extends Outbound with DialerFields'));
     // 同库 part 文件（sealed 同库限制）；toJson 覆写回写 type 判别键保 round-trip
     expect(h2, contains("part of 'outbound.dart';"));
+    // 无参 @JsonKey() 是冗余注解（公开字段默认序列化），一律不生成
+    expect(h2, isNot(contains('@JsonKey()')));
     expect(
       h2,
       contains("{'type': typeName, ..._\$Hysteria2OutboundToJson(this)}"),

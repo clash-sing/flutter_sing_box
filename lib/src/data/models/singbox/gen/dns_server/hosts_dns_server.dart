@@ -6,7 +6,6 @@ class HostsDNSServer extends DNSServer {
   static const typeName = 'hosts';
 
   @override
-  @JsonKey()
   String tag;
   Object? path;
   Object? predefined;

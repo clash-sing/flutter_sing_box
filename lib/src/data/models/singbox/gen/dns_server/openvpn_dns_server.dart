@@ -6,7 +6,6 @@ class OpenvpnDNSServer extends DNSServer {
   static const typeName = 'openvpn';
 
   @override
-  @JsonKey()
   String tag;
   String? endpoint;
   @JsonKey(name: 'accept_default_resolvers')

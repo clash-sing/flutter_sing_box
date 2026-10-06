@@ -6,7 +6,6 @@ class SnellOutbound extends Outbound with DialerFields {
   static const typeName = 'snell';
 
   @override
-  @JsonKey()
   String tag;
   int version;
   String? server;

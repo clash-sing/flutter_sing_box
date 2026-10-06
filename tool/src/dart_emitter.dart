@@ -285,10 +285,10 @@ String _emitSubclassPart(ClassSpec spec, _FamilySpec fam) {
   b.writeln("  static const typeName = '${spec.typeName}';");
   b.writeln();
   for (final f in spec.ownFields) {
+    // 无参 @JsonKey() 与不写等价（公开字段默认序列化），一律不生成；
+    // tag 仅需 @override（覆写基类抽象 getter）
     if (f.jsonName == 'tag') {
-      // tag 覆写基类抽象 getter，且显式 @JsonKey() 保证注解读取稳定
       b.writeln('  @override');
-      b.writeln('  @JsonKey()');
     } else if (f.jsonName != f.dartName) {
       b.writeln("  @JsonKey(name: '${f.jsonName}')");
     }

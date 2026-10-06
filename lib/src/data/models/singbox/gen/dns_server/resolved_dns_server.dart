@@ -6,7 +6,6 @@ class ResolvedDNSServer extends DNSServer {
   static const typeName = 'resolved';
 
   @override
-  @JsonKey()
   String tag;
   String? service;
   @JsonKey(name: 'accept_default_resolvers')

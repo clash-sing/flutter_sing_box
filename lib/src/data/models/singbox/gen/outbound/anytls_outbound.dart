@@ -6,7 +6,6 @@ class AnytlsOutbound extends Outbound with DialerFields {
   static const typeName = 'anytls';
 
   @override
-  @JsonKey()
   String tag;
   String? server;
   @JsonKey(name: 'server_port')

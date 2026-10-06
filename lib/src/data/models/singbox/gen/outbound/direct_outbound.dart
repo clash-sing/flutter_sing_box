@@ -6,7 +6,6 @@ class DirectOutbound extends Outbound with DialerFields {
   static const typeName = 'direct';
 
   @override
-  @JsonKey()
   String tag;
 
   DirectOutbound({

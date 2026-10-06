@@ -6,7 +6,6 @@ class NaiveOutbound extends Outbound with DialerFields {
   static const typeName = 'naive';
 
   @override
-  @JsonKey()
   String tag;
   String? server;
   @JsonKey(name: 'server_port')

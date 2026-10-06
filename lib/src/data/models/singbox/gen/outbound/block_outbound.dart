@@ -6,7 +6,6 @@ class BlockOutbound extends Outbound {
   static const typeName = 'block';
 
   @override
-  @JsonKey()
   String tag;
 
   BlockOutbound({

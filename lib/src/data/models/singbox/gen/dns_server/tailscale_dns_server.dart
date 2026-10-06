@@ -6,7 +6,6 @@ class TailscaleDNSServer extends DNSServer {
   static const typeName = 'tailscale';
 
   @override
-  @JsonKey()
   String tag;
   String? endpoint;
   @JsonKey(name: 'accept_default_resolvers')

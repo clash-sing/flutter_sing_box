@@ -6,7 +6,6 @@ class UdpDNSServer extends DNSServer {
   static const typeName = 'udp';
 
   @override
-  @JsonKey()
   String tag;
   String? detour;
   @JsonKey(name: 'bind_interface')
