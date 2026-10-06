@@ -1,0 +1,124 @@
+{
+  "$id": "https://example.com/mini.json",
+  "type": "object",
+  "properties": {
+    "log": { "$ref": "#/$defs/LogOptions" },
+    "outbounds": { "type": "array", "items": { "$ref": "#/$defs/Outbound" } },
+    "ntp": { "type": "object" },
+    "rules": { "type": "array", "items": { "$ref": "#/$defs/Rule" } }
+  },
+  "$defs": {
+    "LogOptions": {
+      "type": "object",
+      "properties": {
+        "disabled": { "type": "boolean" },
+        "level": { "type": "string", "enum": ["trace", "debug", "info"] }
+      },
+      "required": ["level"]
+    },
+    "Duration": { "oneOf": [{ "type": "string" }, { "type": "integer" }] },
+    "DialerOptions": {
+      "type": "object",
+      "properties": {
+        "detour": { "type": "string" },
+        "routing_mark": { "anyOf": [{ "type": "integer" }, { "type": "string" }] },
+        "connect_timeout": { "$ref": "#/$defs/Duration" }
+      }
+    },
+    "OutboundTLSOptions": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "server_name": { "type": "string" }
+      },
+      "required": ["enabled"]
+    },
+    "Outbound": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "hysteria2" },
+            "tag": { "type": "string" },
+            "server": { "type": "string" },
+            "server_port": { "type": "integer" },
+            "tls": { "$ref": "#/$defs/OutboundTLSOptions" },
+            "detour": { "type": "string" },
+            "connect_timeout": { "$ref": "#/$defs/Duration" }
+          },
+          "required": ["type", "tag", "server", "server_port"]
+        },
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "type": { "const": "snell" },
+                "tag": { "type": "string" },
+                "version": { "const": 4 },
+                "psk": { "type": "string" },
+                "obfs_mode": { "type": "string" }
+              },
+              "required": ["type", "version"]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": { "const": "snell" },
+                "tag": { "type": "string" },
+                "version": { "const": 6 },
+                "psk": { "type": "string" },
+                "mode": { "type": "string" }
+              },
+              "required": ["type", "version"]
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "wireguard" },
+            "tag": { "type": "string" },
+            "local_address": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["type"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "urltest" },
+            "tag": { "type": "string" },
+            "outbounds": { "type": "array", "items": { "type": "string" } },
+            "url": { "type": "string" }
+          },
+          "required": ["type", "tag"]
+        }
+      ]
+    },
+    "Rule": {
+      "oneOf": [
+        {
+          "type": "object",
+          "allOf": [
+            {
+              "properties": {
+                "outbound": { "type": "string" },
+                "network": {
+                  "anyOf": [{ "type": "string", "enum": ["tcp", "udp"] }, { "type": "array" }]
+                }
+              }
+            },
+            { "properties": { "protocol": { "type": "string" } } }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "action": { "const": "reject" },
+            "network": { "type": "string" }
+          }
+        }
+      ]
+    }
+  }
+}
