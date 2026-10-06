@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 
-import 'package:flutter_sing_box/flutter_sing_box.dart';
+// 旧拍平模型（Outbound/SingBox 等重名导出）已被 gen 生成物取代，hide 后从 gen 导入
+import 'package:flutter_sing_box/flutter_sing_box.dart'
+    hide Inbound, Outbound, RuleSet, SingBox;
+import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
 
 
 /// Example:
@@ -57,8 +60,18 @@ class ProfileService {
       id: profileId,
       order: profileId,
       name: profileName,
+      // 组出站（selector/urltest）的 outbounds 字段未收敛到判别基类，经 switch 收窄；
+      // 非组出站按原语义（outbounds 为空/缺省）计入节点数
       outboundsCount: singBox.outbounds
-          .where((e) => e.outbounds?.isNotEmpty != true && e.type != OutboundType.direct)
+          .where(
+            (e) =>
+                e.type != OutboundType.direct &&
+                switch (e) {
+                  SelectorOutbound(:final outbounds) => outbounds?.isNotEmpty != true,
+                  UrltestOutbound(:final outbounds) => outbounds?.isNotEmpty != true,
+                  _ => true,
+                },
+          )
           .length,
       typed: typedProfile,
       userInfo: userInfo,

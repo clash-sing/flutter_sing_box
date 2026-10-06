@@ -2,11 +2,31 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_sing_box/flutter_sing_box.dart';
+// 旧拍平模型（Outbound/Inbound/SingBox/RuleSet）已不再使用，
+// hide 掉与 gen 生成物重名的导出，避免与下方 gen 导入冲突
+import 'package:flutter_sing_box/flutter_sing_box.dart'
+    hide Inbound, Outbound, RuleSet, SingBox;
+import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
 import 'package:yaml/yaml.dart';
 
 /// Builds a normalized [SingBox] config from raw subscription content.
 class SingBoxConfigProvider {
+  /// 解析订阅时保留的出站类型白名单（与旧版 switch 分支一一对应，
+  /// 白名单外类型静默丢弃）。
+  static const Set<String> _supportedOutboundTypes = {
+    OutboundType.selector,
+    OutboundType.urltest,
+    OutboundType.direct,
+    OutboundType.hysteria2,
+    OutboundType.hysteria,
+    OutboundType.trojan,
+    OutboundType.anytls,
+    OutboundType.vmess,
+    OutboundType.vless,
+    OutboundType.tuic,
+    OutboundType.naive,
+  };
+
   /// Parses [data] into a [SingBox] config.
   ///
   /// [data] may be a [Map], a JSON string, a YAML string, or a Base64 string.
@@ -53,19 +73,13 @@ class SingBoxConfigProvider {
           }
           outbounds.insert(
             0,
-            Outbound(
-              tag: 'Auto',
-              type: OutboundType.urltest,
-              outbounds: outbounds.map((element) => element.tag).toList(),
-            ),
+            UrltestOutbound(tag: 'Auto')
+              ..outbounds = outbounds.map((element) => element.tag).toList(),
           );
           outbounds.insert(
             0,
-            Outbound(
-              tag: FlutterSingBoxConstants.defaultGroup,
-              type: OutboundType.selector,
-              outbounds: outbounds.map((element) => element.tag).toList(),
-            ),
+            SelectorOutbound(tag: FlutterSingBoxConstants.defaultGroup)
+              ..outbounds = outbounds.map((element) => element.tag).toList(),
           );
           final List<Map<String, dynamic>> listMap = outbounds
               .map((element) => element.toJson())
@@ -131,15 +145,15 @@ class SingBoxConfigProvider {
     final jsonConfig = jsonDecode(defaultConfig);
     final defaultSingBox = SingBox.fromJson(jsonConfig);
     if (data.containsKey("dns")) {
-      defaultSingBox.dns.servers.addAll(
+      (defaultSingBox.dns.servers ??= []).addAll(
         (data['dns']['servers'] as List<dynamic>)
-            .map((e) => Server.fromJson(e as Map<String, dynamic>))
+            .map((e) => DNSServer.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
-      defaultSingBox.dns.rules.insertAll(
+      (defaultSingBox.dns.rules ??= []).insertAll(
         0,
         (data['dns']['rules'] as List<dynamic>)
-            .map((e) => DnsRule.fromJson(e as Map<String, dynamic>))
+            .map((e) => DNSRule.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
     }
@@ -149,42 +163,10 @@ class SingBoxConfigProvider {
     for (var outbound in outbounds) {
       Outbound? sbOutbound;
       try {
-        switch (outbound['type']) {
-          case OutboundType.selector:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.urltest:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.direct:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.hysteria2:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.hysteria:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.trojan:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.anytls:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.vmess:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.vless:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.tuic:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          case OutboundType.naive:
-            sbOutbound = Outbound.fromJson(outbound);
-            break;
-          default:
-            break;
+        // gen 的 Outbound.fromJson 按 type 判别分发（未知类型进 UnknownOutbound），
+        // 此处保留旧版白名单以维持「白名单外类型静默丢弃」的行为
+        if (_supportedOutboundTypes.contains(outbound['type'])) {
+          sbOutbound = Outbound.fromJson(outbound);
         }
       } catch (e) {
         errorTags.add(outbound["tag"]);
@@ -194,18 +176,20 @@ class SingBoxConfigProvider {
       }
     }
     final allTags = defaultSingBox.outbounds.map((outbound) => outbound.tag).toList();
-    final groups = defaultSingBox.outbounds
-        .takeWhile((outbound) => outbound.outbounds?.isNotEmpty == true)
-        .toList();
+    final groups = defaultSingBox.outbounds.takeWhile(_isGroupOutbound).toList();
     final List<String> emptyGroups = [];
     for (var group in groups) {
-      if (group.defaultTag?.isNotEmpty == true && errorTags.contains(group.defaultTag)) {
-        // 移除错误的 默认 tag
-        group.defaultTag = null;
+      if (group is SelectorOutbound) {
+        final defaultTag = group.default_;
+        if (defaultTag?.isNotEmpty == true && errorTags.contains(defaultTag)) {
+          // 移除错误的 默认 tag
+          group.default_ = null;
+        }
       }
-      group.outbounds?.removeWhere((tag) => !allTags.contains(tag));
+      final members = _groupMembers(group);
+      members?.removeWhere((tag) => !allTags.contains(tag));
       // sing-box 不支持只有一个出站的代理组 ！！
-      if (group.outbounds?.isEmpty == true || group.outbounds?.length == 1) {
+      if (members?.isEmpty == true || members?.length == 1) {
         emptyGroups.add(group.tag);
       }
     }
@@ -216,10 +200,8 @@ class SingBoxConfigProvider {
     if (defaultSingBox.outbounds.indexWhere((outbound) => outbound.type == OutboundType.direct) ==
         -1) {
       // 查找最后一个 group 的索引
-      final index = defaultSingBox.outbounds.lastIndexWhere(
-        (outbound) => outbound.outbounds?.isNotEmpty == true,
-      );
-      final directOutbound = Outbound(tag: OutboundType.direct, type: OutboundType.direct);
+      final index = defaultSingBox.outbounds.lastIndexWhere(_isGroupOutbound);
+      final directOutbound = DirectOutbound(tag: OutboundType.direct);
       defaultSingBox.outbounds.insert(index + 1, directOutbound);
     }
     _fixOutboundInRoute(defaultSingBox);
@@ -236,9 +218,10 @@ class SingBoxConfigProvider {
     allGroups.removeWhere((group) => emptyGroups.contains(group.tag));
     singBox.outbounds.removeWhere((group) => emptyGroups.contains(group.tag));
     for (var group in allGroups) {
-      group.outbounds?.removeWhere((tag) => emptyGroups.contains(tag));
+      final members = _groupMembers(group);
+      members?.removeWhere((tag) => emptyGroups.contains(tag));
       // sing-box 不支持只有一个出站的代理组 ！！
-      if (group.outbounds?.isEmpty == true || group.outbounds?.length == 1) {
+      if (members?.isEmpty == true || members?.length == 1) {
         tempEmptyGroups.add(group.tag);
       }
     }
@@ -253,19 +236,31 @@ class SingBoxConfigProvider {
   /// 修复路由中的默认出站
   static void _fixOutboundInRoute(SingBox singBox) {
     List<String> tags = singBox.outbounds.map((element) => element.tag).toList();
-    if (!tags.contains(singBox.route.routeFinal)) {
+    if (!tags.contains(singBox.route.final_)) {
       final firstOutbound = singBox.outbounds.firstWhere(
         (element) => element.type == OutboundType.selector,
       );
-      singBox.route.routeFinal = firstOutbound.tag;
+      singBox.route.final_ = firstOutbound.tag;
     }
-    for (var routeRule in singBox.route.rules) {
+    for (var routeRule in singBox.route.rules ?? []) {
       if (routeRule.outbound?.isNotEmpty ?? false) {
         if (routeRule.outbound != OutboundType.direct &&
-            routeRule.outbound != singBox.route.routeFinal) {
-          routeRule.outbound = singBox.route.routeFinal;
+            routeRule.outbound != singBox.route.final_) {
+          routeRule.outbound = singBox.route.final_;
         }
       }
     }
   }
+
+  /// 组出站（selector/urltest）的成员列表；判别基类未收敛 outbounds 字段，
+  /// 经模式收窄读取，非组出站返回 null。
+  static List<String>? _groupMembers(Outbound outbound) => switch (outbound) {
+        SelectorOutbound(:final outbounds) => outbounds,
+        UrltestOutbound(:final outbounds) => outbounds,
+        _ => null,
+      };
+
+  /// 是否为带非空成员列表的组出站。
+  static bool _isGroupOutbound(Outbound outbound) =>
+      _groupMembers(outbound)?.isNotEmpty == true;
 }

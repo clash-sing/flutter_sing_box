@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show debugPrint;
-import 'package:flutter_sing_box/flutter_sing_box.dart';
+// 旧拍平模型（SingBox 等重名导出）已不再使用，hide 后从 gen 导入
+import 'package:flutter_sing_box/flutter_sing_box.dart'
+    hide Inbound, Outbound, RuleSet, SingBox;
+import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -32,8 +35,11 @@ void main() {
     });
 
     test('发现校验错误也放行（只记日志不抛异常）', () async {
-      final broken = SingBox.fromJson(templateMap);
-      broken.inbounds.first.type = 'not-a-real-type';
+      // 生成模型的 type 为判别字段（构造后不可变），改为先改 map 再反序列化，
+      // 未知类型经 UnknownInbound 原样透传，校验仍会失败
+      final brokenMap = _deepCopy(templateMap);
+      (brokenMap['inbounds'] as List).first['type'] = 'not-a-real-type';
+      final broken = SingBox.fromJson(brokenMap);
 
       // 不抛异常即通过：结构非法的配置只记日志，导入流程继续
       await SingBoxConfigProvider.validateOrLog(broken);
@@ -46,7 +52,7 @@ void main() {
         if (message != null) captured.add(message);
       };
       try {
-        final broken = Map<String, dynamic>.from(templateMap);
+        final broken = _deepCopy(templateMap);
         (broken['outbounds'] as List).add({
           'tag': 'test-anytls',
           'type': 'anytls',
@@ -54,7 +60,9 @@ void main() {
           'server_port': 443,
           'password': 'x',
           'tls': {'enabled': true},
-          'network': ['tcp', 'udp'],
+          // 拨号字段 routing_mark 带 schema 下界外的值（生成模型 Object? 拍平透传，
+          // 旧用例的非法字段 network 会被生成模型丢弃，故换此字段保留字段级诊断意图）
+          'routing_mark': -1,
         });
 
         await SingBoxConfigProvider.validateOrLog(
@@ -64,9 +72,9 @@ void main() {
         final log = captured.join('\n');
         // 汇总错误本体仍在
         expect(log, contains('matched 0'));
-        // 诊断行展开到字段级，指出非法字段 network
+        // 诊断行展开到字段级，指出非法字段 routing_mark
         expect(log, contains('type="anytls"'));
-        expect(log, contains('network'));
+        expect(log, contains('routing_mark'));
       } finally {
         debugPrint = original;
       }
@@ -81,12 +89,12 @@ void main() {
         if (message != null) captured.add(message);
       };
       try {
-        final broken = Map<String, dynamic>.from(templateMap);
+        final broken = _deepCopy(templateMap);
         (broken['inbounds'] as List).first['type'] = 'not-a-real-type';
 
         final singBox = await SingBoxConfigProvider.provide(jsonEncode(broken));
 
-        // 放行：对象返回且非法值原样保留
+        // 放行：对象返回且非法值原样保留（UnknownInbound 透传原始 type）
         expect(singBox.inbounds.first.type, 'not-a-real-type');
         // 校验确实发生：日志中出现校验失败记录
         expect(
@@ -100,3 +108,7 @@ void main() {
     });
   });
 }
+
+/// 深拷贝：jsonEncode/Decode 走一遭，避免用例间共享 templateMap 的嵌套引用。
+Map<String, dynamic> _deepCopy(Map<String, dynamic> source) =>
+    jsonDecode(jsonEncode(source)) as Map<String, dynamic>;

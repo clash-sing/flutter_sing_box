@@ -1,4 +1,7 @@
-import 'package:flutter_sing_box/flutter_sing_box.dart';
+// 旧拍平模型（Outbound 等重名导出）已不再使用，hide 后从 gen 导入判别子类
+import 'package:flutter_sing_box/flutter_sing_box.dart'
+    hide Inbound, Outbound, RuleSet, SingBox;
+import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -16,7 +19,7 @@ void main() {
         'client-fingerprint': 'chrome',
         'reality-opts': {'public-key': 'pbk1', 'short-id': 'sid1'},
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VlessOutbound?;
       expect(o, isNotNull);
       expect(o!.tls?.enabled, isTrue);
       expect(o.tls?.reality?.enabled, isTrue);
@@ -37,7 +40,7 @@ void main() {
         'sni': 'www.apple.com',
         'reality-opts': {'public-key': 'pbk2'},
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VlessOutbound?;
       expect(o!.tls?.enabled, isTrue);
       expect(o.tls?.reality?.enabled, isTrue);
       expect(o.tls?.reality?.publicKey, 'pbk2');
@@ -53,7 +56,7 @@ void main() {
         'port': 80,
         'uuid': 'u3',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VlessOutbound?;
       expect(o!.tls?.enabled, isFalse);
       expect(o.tls?.reality, isNull);
     });
@@ -69,7 +72,7 @@ void main() {
         'password': 'pwd',
         'ports': '114-514/810-1919,65530',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.serverPorts, ['114:514', '810:1919', '65530:65530']);
     });
 
@@ -82,7 +85,7 @@ void main() {
         'password': 'pwd',
         'ports': '114-514,810-1919',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.serverPorts, ['114:514', '810:1919']);
     });
 
@@ -95,7 +98,7 @@ void main() {
         'password': 'pwd',
         'ports': '114-514',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.serverPorts, ['114:514']);
     });
 
@@ -108,7 +111,7 @@ void main() {
         'password': 'pwd',
         'ports': '65530',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.serverPorts, ['65530:65530']);
     });
 
@@ -121,7 +124,7 @@ void main() {
         'password': 'pwd',
         'ports': '114-514,,65530/',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.serverPorts, ['114:514', '65530:65530']);
     });
 
@@ -133,7 +136,7 @@ void main() {
         'port': 443,
         'password': 'pwd',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.serverPorts, isNull);
     });
 
@@ -145,7 +148,7 @@ void main() {
         'port': 443,
         'ports': '114-514/810-1919,65530',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as HysteriaOutbound?;
       expect(o!.serverPorts, ['114:514', '810:1919', '65530:65530']);
     });
   });
@@ -158,7 +161,7 @@ void main() {
         'server': 's.com',
         'port': 443,
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as HysteriaOutbound?;
       expect(o!.tls?.alpn, ['hysteria']);
     });
 
@@ -170,7 +173,7 @@ void main() {
         'port': 443,
         'password': 'pwd',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.tls?.alpn, ['h3']);
     });
   });
@@ -186,7 +189,7 @@ void main() {
         'tls': true,
         'servername': 'cdn.example.com',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VmessOutbound?;
       expect(o!.tls?.serverName, 'cdn.example.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -201,7 +204,7 @@ void main() {
         'tls': true,
         'servername': 'cdn.example.com',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VlessOutbound?;
       expect(o!.tls?.serverName, 'cdn.example.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -215,7 +218,7 @@ void main() {
         'password': 'pwd',
         'servername': 'cdn.example.com',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as TrojanOutbound?;
       expect(o!.tls?.serverName, 'cdn.example.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -231,7 +234,7 @@ void main() {
         'sni': 'from-sni.com',
         'servername': 'from-servername.com',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VmessOutbound?;
       expect(o!.tls?.serverName, 'from-sni.com');
     });
 
@@ -244,7 +247,7 @@ void main() {
         'uuid': 'u4',
         'tls': true,
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as VmessOutbound?;
       expect(o!.tls?.serverName, 'vm.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -257,7 +260,7 @@ void main() {
         'port': 443,
         'password': 'pwd',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as TrojanOutbound?;
       expect(o!.tls?.serverName, 'tj.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -270,7 +273,7 @@ void main() {
         'port': 443,
         'password': 'pwd',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as Hysteria2Outbound?;
       expect(o!.tls?.serverName, 'hy2.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -285,7 +288,7 @@ void main() {
         'password': 'pwd',
         'disable-sni': true,
       });
-      expect(disabled.toOutbound()!.tls?.disableSni, isTrue);
+      expect((disabled.toOutbound() as TuicOutbound?)!.tls?.disableSni, isTrue);
 
       final fallback = ClashProxy.fromJson({
         'name': 'tc2',
@@ -295,7 +298,7 @@ void main() {
         'uuid': 'u6',
         'password': 'pwd',
       });
-      final o = fallback.toOutbound();
+      final o = fallback.toOutbound() as TuicOutbound?;
       expect(o!.tls?.serverName, 'tc.com');
       expect(o.tls?.disableSni, isFalse);
     });
@@ -309,7 +312,7 @@ void main() {
         'password': 'pwd',
         'sni': '',
       });
-      final o = proxy.toOutbound();
+      final o = proxy.toOutbound() as TrojanOutbound?;
       expect(o!.tls?.serverName, '');
       expect(o.tls?.disableSni, isTrue);
     });

@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'package:path/path.dart' as p;
 
-import 'package:flutter_sing_box/flutter_sing_box.dart';
+// 旧拍平 SingBox 已被 gen 生成物取代，hide 后从 gen 导入同名类
+import 'package:flutter_sing_box/flutter_sing_box.dart' hide SingBox;
+import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart'
+    show SingBox;
 import 'package:path_provider/path_provider.dart';
 
 class ProfileStorage {

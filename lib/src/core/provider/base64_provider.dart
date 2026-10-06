@@ -1,7 +1,11 @@
 import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
-import 'package:flutter_sing_box/flutter_sing_box.dart';
+// 旧拍平模型（Outbound/Inbound/SingBox/RuleSet）已不再使用，
+// hide 掉与 gen 生成物重名的导出，避免与下方 gen 导入冲突
+import 'package:flutter_sing_box/flutter_sing_box.dart'
+    hide Inbound, Outbound, RuleSet, SingBox;
+import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
 
 /// Decodes a Base64-encoded subscription into a list of [Outbound]s.
 class Base64Provider {
@@ -73,24 +77,24 @@ class Base64Provider {
     try {
       Map<String, String> queryParams = uri.queryParameters;
       final sni = queryParams['sni'] ?? uri.host;
-      return Outbound(
-        type: OutboundType.hysteria2,
-        tag: Uri.decodeComponent(uri.fragment),
-        server: uri.host,
-        serverPort: uri.port,
-        serverPorts: toSingBoxServerPorts(queryParams['mport']),
-        password: uri.userInfo,
-        obfs: queryParams['obfs']?.isNotEmpty == true
-            ? Obfs(type: queryParams['obfs']!, password: queryParams['obfs-password'])
-            : null,
-        tls: Tls(
-          alpn: _splitAlpnQuery(queryParams['alpn']) ?? ['h3'],
-          enabled: true,
-          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
-          disableSni: sni.isEmpty,
-          serverName: sni,
-        ),
-      );
+      // 生成子类构造仅收 tag，其余字段语义对应旧拍平构造参数，构造后级联赋值
+      return Hysteria2Outbound(tag: Uri.decodeComponent(uri.fragment))
+        ..server = uri.host
+        ..serverPort = uri.port
+        ..serverPorts = toSingBoxServerPorts(queryParams['mport'])
+        ..password = uri.userInfo
+        ..obfs = queryParams['obfs']?.isNotEmpty == true
+            ? {
+                'type': queryParams['obfs']!,
+                'password': ?queryParams['obfs-password'],
+              }
+            : null
+        ..tls = (OutboundTLSOptions()
+          ..alpn = _splitAlpnQuery(queryParams['alpn']) ?? ['h3']
+          ..enabled = true
+          ..insecure = queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1'
+          ..disableSni = sni.isEmpty
+          ..serverName = sni);
     } catch (e) {
       return null;
     }
@@ -101,25 +105,21 @@ class Base64Provider {
       Map<String, String> queryParams = uri.queryParameters;
       // peer 为 hysteria v1 官方参数名，兼容 sni 写法，缺省回退 host
       final sni = queryParams['peer'] ?? queryParams['sni'] ?? uri.host;
-      return Outbound(
-        type: OutboundType.hysteria,
-        tag: Uri.decodeComponent(uri.fragment),
-        network: queryParams['protocol'] == 'udp' ? ['tcp', 'udp'] : 'tcp',
-        server: uri.host,
-        serverPort: uri.port,
-        serverPorts: toSingBoxServerPorts(queryParams['mport']),
-        authStr: queryParams['auth'],
-        tls: Tls(
-          alpn: _splitAlpnQuery(queryParams['alpn']) ?? ['hysteria'],
-          enabled: true,
-          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
-          disableSni: sni.isEmpty,
-          serverName: sni,
-        ),
-        upMbps: int.tryParse(queryParams['upmbps'] ?? '50') ?? 50,
-        downMbps: int.tryParse(queryParams['downmbps'] ?? '100') ?? 100,
-        disableMtuDiscovery: true,
-      );
+      return HysteriaOutbound(tag: Uri.decodeComponent(uri.fragment))
+        ..network = queryParams['protocol'] == 'udp' ? ['tcp', 'udp'] : 'tcp'
+        ..server = uri.host
+        ..serverPort = uri.port
+        ..serverPorts = toSingBoxServerPorts(queryParams['mport'])
+        ..authStr = queryParams['auth']
+        // 旧模型的 disable_mtu_discovery 已从现版 schema 移除，不再输出
+        ..tls = (OutboundTLSOptions()
+          ..alpn = _splitAlpnQuery(queryParams['alpn']) ?? ['hysteria']
+          ..enabled = true
+          ..insecure = queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1'
+          ..disableSni = sni.isEmpty
+          ..serverName = sni)
+        ..upMbps = int.tryParse(queryParams['upmbps'] ?? '50') ?? 50
+        ..downMbps = int.tryParse(queryParams['downmbps'] ?? '100') ?? 100;
     } catch (e) {
       return null;
     }
@@ -137,19 +137,15 @@ class Base64Provider {
       Map<String, String> queryParams = uri.queryParameters;
       // 官方 URI Scheme 参数为 sni（anytls-go docs/uri_scheme.md），缺省回退 host
       final sni = queryParams['sni'] ?? uri.host;
-      return Outbound(
-        type: OutboundType.anytls,
-        tag: Uri.decodeComponent(uri.fragment),
-        server: uri.host,
-        serverPort: uri.port,
-        password: uri.userInfo,
-        tls: Tls(
-          enabled: true,
-          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
-          disableSni: sni.isEmpty,
-          serverName: sni,
-        ),
-      );
+      return AnytlsOutbound(tag: Uri.decodeComponent(uri.fragment))
+        ..server = uri.host
+        ..serverPort = uri.port
+        ..password = uri.userInfo
+        ..tls = (OutboundTLSOptions()
+          ..enabled = true
+          ..insecure = queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1'
+          ..disableSni = sni.isEmpty
+          ..serverName = sni);
     } catch (e) {
       return null;
     }
@@ -160,22 +156,18 @@ class Base64Provider {
       Map<String, String> queryParams = uri.queryParameters;
       // 主认 sni（v2rayN/官方标准），兼容 peer（trojan-go / Shadowrocket 旧写法），缺省回退 host
       final sni = queryParams['sni'] ?? queryParams['peer'] ?? uri.host;
-      return Outbound(
-        type: OutboundType.trojan,
-        tag: Uri.decodeComponent(uri.fragment),
-        server: uri.host,
-        serverPort: uri.port,
-        password: uri.userInfo,
-        tls: Tls(
-          enabled: true,
-          insecure: queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1',
-          disableSni: sni.isEmpty,
-          serverName: sni,
-        ),
-        transport: queryParams['obfs'] == 'websocket'
-            ? Transport(type: OutboundTransportType.webSocket)
-            : null,
-      );
+      return TrojanOutbound(tag: Uri.decodeComponent(uri.fragment))
+        ..server = uri.host
+        ..serverPort = uri.port
+        ..password = uri.userInfo
+        ..tls = (OutboundTLSOptions()
+          ..enabled = true
+          ..insecure = queryParams['insecure'] == '1' || queryParams['allowInsecure'] == '1'
+          ..disableSni = sni.isEmpty
+          ..serverName = sni)
+        ..transport = queryParams['obfs'] == 'websocket'
+            ? V2RayTransport(type: OutboundTransportType.webSocket)
+            : null;
     } catch (e) {
       return null;
     }
@@ -194,16 +186,13 @@ class Base64Provider {
           ? plugin.substring(plugin.indexOf(';') + 1)
           : null;
 
-      return Outbound(
-        type: OutboundType.shadowsocks,
-        tag: Uri.decodeComponent(uri.fragment),
-        server: uri.host,
-        serverPort: uri.port,
-        method: method,
-        password: password,
-        plugin: pluginName,
-        pluginOpts: pluginOpts,
-      );
+      return ShadowsocksOutbound(tag: Uri.decodeComponent(uri.fragment))
+        ..server = uri.host
+        ..serverPort = uri.port
+        ..method = method
+        ..password = password
+        ..plugin = pluginName
+        ..pluginOpts = pluginOpts;
     } catch (e) {
       return null;
     }
@@ -248,67 +237,65 @@ class Base64Provider {
       final sni = q['sni'] ?? uri.host;
       final fingerprint = q['fp'];
       final utls = fingerprint?.isNotEmpty == true
-          ? Utls(enabled: true, fingerprint: fingerprint!)
+          ? (OutboundUTLSOptions()
+            ..enabled = true
+            ..fingerprint = fingerprint!)
           : null;
 
-      Tls? tls;
+      OutboundTLSOptions? tls;
       switch (q['security']) {
         case 'reality':
-          tls = Tls(
-            enabled: true,
-            disableSni: sni.isEmpty,
-            serverName: sni,
-            utls: utls,
-            reality: Reality(enabled: true, publicKey: q['pbk'], shortId: q['sid'] ?? ''),
-          );
+          tls = OutboundTLSOptions()
+            ..enabled = true
+            ..disableSni = sni.isEmpty
+            ..serverName = sni
+            ..utls = utls
+            ..reality = (OutboundRealityOptions()
+              ..enabled = true
+              ..publicKey = q['pbk']
+              ..shortId = q['sid'] ?? '');
         case 'tls' || 'xtls': // xtls 为旧值，按纯 TLS 处理
-          tls = Tls(
-            alpn: q['alpn']?.split(','),
-            enabled: true,
-            insecure: q['insecure'] == '1' || q['allowInsecure'] == '1',
-            disableSni: sni.isEmpty,
-            serverName: sni,
-            utls: utls,
-          );
+          tls = OutboundTLSOptions()
+            ..alpn = q['alpn']?.split(',')
+            ..enabled = true
+            ..insecure = q['insecure'] == '1' || q['allowInsecure'] == '1'
+            ..disableSni = sni.isEmpty
+            ..serverName = sni
+            ..utls = utls;
         default: // none 或缺省：无 TLS
           break;
       }
 
-      return Outbound(
-        type: OutboundType.vless,
-        tag: Uri.decodeComponent(uri.fragment),
-        server: uri.host,
-        serverPort: uri.port,
-        uuid: uri.userInfo,
-        flow: q['flow'],
-        packetEncoding: q['packetEncoding'],
-        tls: tls,
-        transport: _toVlessTransport(q),
-      );
+      return VlessOutbound(tag: Uri.decodeComponent(uri.fragment))
+        ..server = uri.host
+        ..serverPort = uri.port
+        ..uuid = uri.userInfo
+        ..flow = q['flow']
+        ..packetEncoding = q['packetEncoding']
+        ..tls = tls
+        ..transport = _toVlessTransport(q);
     } catch (e) {
       return null;
     }
   }
 
   /// 按 type 参数映射 vless 的 V2Ray 传输层；tcp（或缺省）返回 null。
-  static Transport? _toVlessTransport(Map<String, String> q) {
+  static V2RayTransport? _toVlessTransport(Map<String, String> q) {
     switch (q['type'] ?? 'tcp') {
       case 'ws':
-        return Transport(
-          type: OutboundTransportType.webSocket,
-          path: q['path'],
-          headers: q['host']?.isNotEmpty == true ? {'Host': q['host']} : null,
-        );
+        return V2RayTransport(type: OutboundTransportType.webSocket)
+          ..path = q['path']
+          ..headers = q['host']?.isNotEmpty == true ? _headerMap({'Host': q['host']}) : null;
       case 'grpc':
         // 规范参数为 serviceName，部分客户端只写 path，做兼容
-        return Transport(
-          type: OutboundTransportType.gRPC,
-          serviceName: q['serviceName'] ?? q['path'],
-        );
+        return V2RayTransport(type: OutboundTransportType.gRPC)
+          ..serviceName = q['serviceName'] ?? q['path'];
       case 'httpupgrade':
-        return Transport(type: OutboundTransportType.httpUpgrade, path: q['path'], host: q['host']);
+        return V2RayTransport(type: OutboundTransportType.httpUpgrade)
+          ..path = q['path']
+          ..host = q['host'];
       case 'http':
-        return Transport(type: OutboundTransportType.http, host: q['host']);
+        return V2RayTransport(type: OutboundTransportType.http)..host = q['host'];
       default:
         return null;
     }
@@ -348,29 +335,28 @@ class Base64Provider {
         // V2Ray 私有传输，sing-box 不支持，跳过该节点
         return null;
       }
-      final Transport? transport = switch (net) {
-        'ws' => Transport(
-          type: OutboundTransportType.webSocket,
-          path: map['path'] as String?,
-          headers: (map['host'] as String?)?.isNotEmpty == true ? {'Host': map['host']} : null,
-        ),
-        'grpc' => Transport(type: OutboundTransportType.gRPC, serviceName: map['path'] as String?),
-        'h2' ||
-        'http' => Transport(type: OutboundTransportType.http, host: map['host'], path: map['path']),
-        'httpupgrade' => Transport(
-          type: OutboundTransportType.httpUpgrade,
-          path: map['path'] as String?,
-          host: map['host'],
-        ),
-        // tcp 且 type=http 时为 http 伪装传输，否则无传输层
-        _ =>
-          map['type'] == 'http'
-              ? Transport(type: OutboundTransportType.http, host: map['host'])
+      final V2RayTransport? transport = switch (net) {
+        'ws' => V2RayTransport(type: OutboundTransportType.webSocket)
+          ..path = map['path'] as String?
+          ..headers = (map['host'] as String?)?.isNotEmpty == true
+              ? _headerMap({'Host': map['host']})
               : null,
+        'grpc' => V2RayTransport(type: OutboundTransportType.gRPC)
+          ..serviceName = map['path'] as String?,
+        'h2' || 'http' => V2RayTransport(type: OutboundTransportType.http)
+          ..host = map['host']
+          ..path = map['path'],
+        'httpupgrade' => V2RayTransport(type: OutboundTransportType.httpUpgrade)
+          ..path = map['path'] as String?
+          ..host = map['host'],
+        // tcp 且 type=http 时为 http 伪装传输，否则无传输层
+        _ => map['type'] == 'http'
+            ? (V2RayTransport(type: OutboundTransportType.http)..host = map['host'])
+            : null,
       };
 
       // vmess JSON 的 tls 字段为字符串："tls" 启用，""/none 未启用
-      final Tls? tls;
+      final OutboundTLSOptions? tls;
       if (map['tls'] == 'tls') {
         // sni → host（伪装域名）→ add（服务器地址）逐级回退
         final String sni;
@@ -384,33 +370,46 @@ class Base64Provider {
         final alpn = map['alpn'] as String?;
         final fp = map['fp'] as String?;
         final allowInsecure = map['allowInsecure'];
-        tls = Tls(
-          alpn: alpn != null && alpn.isNotEmpty ? alpn.split(',') : null,
-          enabled: true,
-          insecure: allowInsecure == true || allowInsecure == '1' || allowInsecure == 'true',
-          disableSni: sni.isEmpty,
-          serverName: sni,
-          utls: fp?.isNotEmpty == true ? Utls(enabled: true, fingerprint: fp!) : null,
-        );
+        tls = OutboundTLSOptions()
+          ..alpn = alpn != null && alpn.isNotEmpty ? alpn.split(',') : null
+          ..enabled = true
+          ..insecure = allowInsecure == true || allowInsecure == '1' || allowInsecure == 'true'
+          ..disableSni = sni.isEmpty
+          ..serverName = sni
+          ..utls = fp?.isNotEmpty == true
+              ? (OutboundUTLSOptions()
+                ..enabled = true
+                ..fingerprint = fp!)
+              : null;
       } else {
         tls = null;
       }
 
       final ps = map['ps'] as String?;
-      return Outbound(
-        type: OutboundType.vmess,
-        tag: ps?.isNotEmpty == true ? ps! : id!,
-        server: add,
-        serverPort: port,
-        uuid: id,
+      return VmessOutbound(tag: ps?.isNotEmpty == true ? ps! : id!)
+        ..server = add
+        ..serverPort = port
+        ..uuid = id
         // 加密字段新名 scy、旧名 security，缺省 auto
-        security: ((map['scy'] ?? map['security']) as String?) ?? 'auto',
-        alterId: alterId,
-        tls: tls,
-        transport: transport,
-      );
+        ..security = ((map['scy'] ?? map['security']) as String?) ?? 'auto'
+        ..alterId = alterId
+        ..tls = tls
+        ..transport = transport;
     } catch (e) {
       return null;
     }
   }
 }
+
+/// 生成模型未建模传输层 headers 开放映射（HTTPHeader 为空壳，对应 schema 的
+/// additionalProperties 任意键），以子类携带键值、覆写 toJson 保真输出。
+class _HeaderMap extends HTTPHeader {
+  final Map<String, dynamic> _map;
+
+  _HeaderMap(this._map);
+
+  @override
+  Map<String, dynamic> toJson() => _map;
+}
+
+HTTPHeader _headerMap(Map<String, dynamic> map) => _HeaderMap(map);
