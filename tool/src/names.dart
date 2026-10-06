@@ -16,6 +16,36 @@ String pascalCase(String s) => s
     .map((part) => part.isEmpty ? part : '${part[0].toUpperCase()}${part.substring(1)}')
     .join();
 
+/// Dart 保留字 + 内建标识符 + 声明位置易歧义词（get/set/operator 等）。
+/// 宁可过度避让：撞名只损失字段名美观，漏避让则是语法错误；
+/// JSON 原名由 @JsonKey(name: ...) 保真，序列化不受影响。
+const Set<String> _dartKeywords = {
+  // 保留字（绝不能作标识符）
+  'assert', 'break', 'case', 'catch', 'class', 'const', 'continue', 'default',
+  'do', 'else', 'enum', 'extends', 'false', 'final', 'finally', 'for', 'if',
+  'in', 'is', 'new', 'null', 'rethrow', 'return', 'super', 'switch', 'this',
+  'throw', 'true', 'try', 'void', 'while', 'with',
+  // 内建标识符（不作类型名；成员声明位置易歧义的也一并避让）
+  'abstract', 'as', 'async', 'await', 'covariant', 'deferred', 'dynamic',
+  'export', 'extension', 'external', 'factory', 'Function', 'get',
+  'implements', 'import', 'interface', 'late', 'library', 'mixin', 'operator',
+  'part', 'required', 'sealed', 'set', 'static', 'sync', 'typedef', 'yield',
+  // Dart 3 修饰词与上下文关键字
+  'base', 'on', 'when',
+};
+
+/// 字段名净化：lowerCamel 后撞上 Dart 关键字则加 `_` 后缀；
+/// schema 原生 PascalCase 键（User 的 Username/Password）降为小写开头。
+/// 两种情况下 JSON 原名均经 @JsonKey(name:) 保真读写。
+String safeFieldName(String snake) {
+  var camel = lowerCamel(snake);
+  if (_dartKeywords.contains(camel)) return '${camel}_';
+  if (camel.isNotEmpty && camel[0] == camel[0].toUpperCase()) {
+    camel = camel[0].toLowerCase() + camel.substring(1);
+  }
+  return camel;
+}
+
 String classNameForOutbound(String type) => '${pascalCase(type)}Outbound';
 String classNameForInbound(String type) => '${pascalCase(type)}Inbound';
 

@@ -80,7 +80,13 @@ void main() {
     );
     expect(result.exitCode, 2);
     expect(result.stderr as String, contains('不在 schema 中'));
-    expect(File('${tmpOut.path}/outbound').existsSync(), isFalse, reason: '失败时不留半成品');
-    expect(File('${tmpOut.path}/sing_box.dart').existsSync(), isFalse, reason: '失败时不写任何文件');
+    // 失败时不写任何文件：tmpOut 下除输入的 broken_schema.json 外无任何文件/目录。
+    //（注意用 Directory 判断目录存在——File 对目录恒 false，旧断言是恒真断言）
+    expect(
+      tmpOut.listSync().map((e) => e.uri.pathSegments.last).toList(),
+      ['broken_schema.json'],
+      reason: '失败时不留半成品',
+    );
+    expect(Directory('${tmpOut.path}/outbound').existsSync(), isFalse);
   });
 }

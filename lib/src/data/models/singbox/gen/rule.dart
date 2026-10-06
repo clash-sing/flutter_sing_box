@@ -1,0 +1,170 @@
+// 本文件由 tool/gen_models.dart 生成，勿手改。
+import 'package:json_annotation/json_annotation.dart';
+
+import 'nested_rule.dart';
+
+part 'rule.g.dart';
+
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
+class Rule {
+  String? type;
+  Object? inbound;
+  @JsonKey(name: 'ip_version')
+  int? ipVersion;
+  Object? network;
+  @JsonKey(name: 'auth_user')
+  Object? authUser;
+  Object? protocol;
+  Object? client;
+  Object? domain;
+  @JsonKey(name: 'domain_suffix')
+  Object? domainSuffix;
+  @JsonKey(name: 'domain_keyword')
+  Object? domainKeyword;
+  @JsonKey(name: 'domain_regex')
+  Object? domainRegex;
+  @JsonKey(name: 'source_ip_cidr')
+  Object? sourceIpCidr;
+  @JsonKey(name: 'source_ip_is_private')
+  bool? sourceIpIsPrivate;
+  @JsonKey(name: 'ip_cidr')
+  Object? ipCidr;
+  @JsonKey(name: 'ip_is_private')
+  bool? ipIsPrivate;
+  @JsonKey(name: 'source_port')
+  Object? sourcePort;
+  @JsonKey(name: 'source_port_range')
+  Object? sourcePortRange;
+  Object? port;
+  @JsonKey(name: 'port_range')
+  Object? portRange;
+  @JsonKey(name: 'process_name')
+  Object? processName;
+  @JsonKey(name: 'process_path')
+  Object? processPath;
+  @JsonKey(name: 'process_path_regex')
+  Object? processPathRegex;
+  @JsonKey(name: 'package_name')
+  Object? packageName;
+  @JsonKey(name: 'package_name_regex')
+  Object? packageNameRegex;
+  Object? user;
+  @JsonKey(name: 'user_id')
+  Object? userId;
+  @JsonKey(name: 'clash_mode')
+  String? clashMode;
+  @JsonKey(name: 'network_type')
+  Object? networkType;
+  @JsonKey(name: 'network_is_expensive')
+  bool? networkIsExpensive;
+  @JsonKey(name: 'network_is_constrained')
+  bool? networkIsConstrained;
+  @JsonKey(name: 'wifi_ssid')
+  Object? wifiSsid;
+  @JsonKey(name: 'wifi_bssid')
+  Object? wifiBssid;
+  @JsonKey(name: 'interface_address')
+  Object? interfaceAddress;
+  @JsonKey(name: 'network_interface_address')
+  Object? networkInterfaceAddress;
+  @JsonKey(name: 'default_interface_address')
+  Object? defaultInterfaceAddress;
+  @JsonKey(name: 'source_mac_address')
+  Object? sourceMacAddress;
+  @JsonKey(name: 'source_hostname')
+  Object? sourceHostname;
+  @JsonKey(name: 'preferred_by')
+  Object? preferredBy;
+  @JsonKey(name: 'dns_server_address')
+  Object? dnsServerAddress;
+  @JsonKey(name: 'dns_search_domain')
+  Object? dnsSearchDomain;
+  @JsonKey(name: 'rule_set')
+  Object? ruleSet;
+  @JsonKey(name: 'rule_set_ip_cidr_match_source')
+  bool? ruleSetIpCidrMatchSource;
+  bool? invert;
+  String? action;
+  String? outbound;
+  @JsonKey(name: 'override_address')
+  String? overrideAddress;
+  @JsonKey(name: 'override_port')
+  int? overridePort;
+  @JsonKey(name: 'network_strategy')
+  String? networkStrategy;
+  @JsonKey(name: 'fallback_delay')
+  int? fallbackDelay;
+  @JsonKey(name: 'udp_disable_domain_unmapping')
+  bool? udpDisableDomainUnmapping;
+  @JsonKey(name: 'udp_connect')
+  bool? udpConnect;
+  @JsonKey(name: 'udp_timeout')
+  String? udpTimeout;
+  @JsonKey(name: 'tls_fragment')
+  bool? tlsFragment;
+  @JsonKey(name: 'tls_fragment_fallback_delay')
+  String? tlsFragmentFallbackDelay;
+  @JsonKey(name: 'tls_record_fragment')
+  bool? tlsRecordFragment;
+  @JsonKey(name: 'tls_spoof')
+  String? tlsSpoof;
+  @JsonKey(name: 'tls_spoof_method')
+  String? tlsSpoofMethod;
+  @JsonKey(name: 'bind_interface')
+  String? bindInterface;
+  @JsonKey(name: 'inet4_bind_address')
+  Object? inet4BindAddress;
+  @JsonKey(name: 'inet6_bind_address')
+  Object? inet6BindAddress;
+  @JsonKey(name: 'bind_address_no_port')
+  bool? bindAddressNoPort;
+  @JsonKey(name: 'protect_path')
+  String? protectPath;
+  @JsonKey(name: 'routing_mark')
+  Object? routingMark;
+  @JsonKey(name: 'reuse_addr')
+  bool? reuseAddr;
+  String? netns;
+  @JsonKey(name: 'connect_timeout')
+  String? connectTimeout;
+  @JsonKey(name: 'tcp_fast_open')
+  bool? tcpFastOpen;
+  @JsonKey(name: 'tcp_multi_path')
+  bool? tcpMultiPath;
+  @JsonKey(name: 'disable_tcp_keep_alive')
+  bool? disableTcpKeepAlive;
+  @JsonKey(name: 'tcp_keep_alive')
+  String? tcpKeepAlive;
+  @JsonKey(name: 'tcp_keep_alive_interval')
+  String? tcpKeepAliveInterval;
+  @JsonKey(name: 'udp_fragment')
+  bool? udpFragment;
+  @JsonKey(name: 'domain_resolver')
+  Object? domainResolver;
+  @JsonKey(name: 'fallback_network_type')
+  Object? fallbackNetworkType;
+  String? method;
+  @JsonKey(name: 'no_drop')
+  bool? noDrop;
+  Object? sniffer;
+  String? timeout;
+  String? server;
+  Object? strategy;
+  @JsonKey(name: 'disable_cache')
+  bool? disableCache;
+  @JsonKey(name: 'disable_optimistic_cache')
+  bool? disableOptimisticCache;
+  @JsonKey(name: 'rewrite_ttl')
+  int? rewriteTtl;
+  @JsonKey(name: 'client_subnet')
+  Object? clientSubnet;
+  String? mode;
+  List<NestedRule>? rules;
+
+  Rule();
+
+  factory Rule.fromJson(Map<String, dynamic> json) =>
+      _$RuleFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RuleToJson(this);
+}

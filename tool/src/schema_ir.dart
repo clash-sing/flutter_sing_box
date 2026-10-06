@@ -142,7 +142,7 @@ Ir buildIr(
         for (final entry in listenProps.entries)
           FieldSpec(
             jsonName: entry.key,
-            dartName: lowerCamel(entry.key),
+            dartName: safeFieldName(entry.key),
             dartType: _nullable(_mapType(entry.value, defs, isListItem: false)),
             required: false, // 一律可空
           ),
@@ -451,7 +451,7 @@ FieldSpec _fieldSpec(_Merged merged, String name,
   final req = forceRequired || (!forceNullable && merged.required.contains(name));
   return FieldSpec(
     jsonName: name,
-    dartName: lowerCamel(name),
+    dartName: safeFieldName(name),
     dartType: req ? base : _nullable(base),
     required: req,
   );
