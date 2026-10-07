@@ -8,6 +8,27 @@
 * Unknown-type tolerance: unrecognized `outbound` / `inbound` types deserialize into `UnknownOutbound` / `UnknownInbound` which pass their raw JSON through untouched (round-trip safe); unmodeled **top-level sections** of `SingBox` (e.g. `ntp`) are likewise preserved on read and merged back on write
 * Renames aligned with the schema: `Dns` → `DNS`, `Route` → `RouteOptions`, `Log` → `LogOptions`, `Experimental` → `ExperimentalOptions`; `Tls` / `Utls` / `Reality` / `Transport` / `Multiplex` are replaced by the granular generated options classes (`OutboundTLSOptions`, `OutboundUTLSOptions`, `V2RayTransport`, …)
 
+**Transport-type constant renames**
+* `OutboundTransportType`: `webSocket` → `ws`, `gRPC` → `grpc`, `httpUpgrade` → `httpupgrade` — the constant **values** are unchanged, only the Dart identifiers
+
+### Features
+
+**Clash subscription transport options**
+* `ClashProxy` now parses `ws-opts` / `grpc-opts` / `http-opts` / `h2-opts`, and the Clash → sing-box conversion maps them to transport settings: ws path / headers / early data (`max-early-data` + `early-data-header-name`) / `v2ray-http-upgrade` (httpupgrade form), gRPC service name, HTTP method / path / headers (mihomo rotates the path list per connection — the first entry is used), and h2 host / path lists
+
+**Default subscription User-Agent**
+* `SubscribeUserAgent` — the default User-Agent builder for subscription requests — is now exported as part of the package's public API
+* The built string is simplified to the core identifiers `sing-box/<version> mihomo/1.19.32 v2ray/5.22.0`; the previously spoofed third-party client identifiers (clash-verge / ClashMetaForAndroid / ClashForWindows) are dropped
+
+**Model layer fidelity & subscription parsing**
+* Open-map types from the schema (e.g. `HTTPHeader`) are modeled as key-passthrough classes — every entry survives `fromJson` / `toJson` round-trips, so WebSocket `Host` headers on vless / vmess CDN nodes are preserved
+* Outbound acceptance when parsing subscriptions now derives from the generated model registry instead of a hand-maintained 11-type allow-list: every modeled type passes (block stays excluded — deprecated by sing-box), unmodeled types are still silently dropped
+* `OutboundType` gains `socks` / `http` / `shadowTLS` / `snell` / `block` constants
+
+### Dependencies
+* Remove the unused `equatable` dependency
+* The upstream core LICENSE files bundled under `assets/windows/` are dropped from the package (the package's own top-level LICENSE stays)
+
 ## 2.1.1
 
 ### Features
