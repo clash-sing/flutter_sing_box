@@ -61,7 +61,7 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 | `core/provider/` | Config format converters: `SingBoxConfigProvider` (native JSON), `ClashProvider` (YAML→sing-box), `Base64Provider` (Base64 subscription→sing-box) |
 | `core/services/` | `ProfileService` (profile CRUD), `NetworkService` (HTTP for remote profiles) |
 | `storage/` | `KeyValueStorage` abstraction with two impls — `MmkvStorage` (production) and `MemoryStorage` (unit tests, no native dependency); `ProfileStorage` / `CsSettingsStorage` sit on top |
-| `data/models/singbox/` | sing-box config models (`SingBox`, `Outbound`, `Route`, `DNS`, `Inbound`, `Log`, `Experimental`) |
+| `data/models/singbox/` | sing-box config models: `gen/` — schema-generated sealed models (see below) + `schema_validator.dart` (`SingBoxSchemaValidator`, offline validation against the official JSON schema) |
 | `data/models/clash/` | Clash-compatible models (`Clash`, `ClashGroup`, `ClashProxy`) |
 | `data/models/client/` | UI-facing models (`ClientStatus`, `ClientGroup`, `ClientClashMode`) — streamed to the app side |
 | `data/models/database/` | Persistence models (`Profile`, `TypedProfile`, `UserInfo`) |
@@ -69,6 +69,8 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 | `data/network/` | `DioClient` (HTTP), `ApiResult` (response wrapper) |
 | `windows/` | Windows-only service layer: `HelperCli` (spawns `clash_sing_helper.exe` CLI subcommands), `HelperHttpClient` (service HTTP API), `ClashHttpClient` (Clash API), `SystemProxyService` (registry-based system proxy) |
 | `utils/` | Extensions for YAML, profiles, and config merging (`UsingConfig`) |
+
+**sing-box 生成模型**（`data/models/singbox/gen/`）：由 `tool/gen_models.dart` 从 `assets/schemas/singbox_schema.json` 生成——Outbound / Inbound / DnsServer 三个 sealed 判别族（按 `type` 判别，未知类型落到 `Unknown*` 透传变体）、`gen/shared/` 的 mixin 共享字段块（`DialerFields` / `ListenFields` 等）、`SingBox` 把未建模顶层段收进 `unknownSections` 原样保真（读入收存、输出合并）。生成物勿手改。schema 升级流程：替换 `assets/schemas/singbox_schema.json` → `dart run tool/gen_models.dart` → `dart run build_runner build` → 跑测试。
 
 ### Key Design Patterns
 
