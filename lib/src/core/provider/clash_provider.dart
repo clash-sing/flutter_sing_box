@@ -306,10 +306,10 @@ extension ClashProxyExt on ClashProxy {
               : null
           ..realm = realmOpts?.enable == true
               ? (Hysteria2Realm()
-                ..serverUrl = realmOpts!.serverUrl
-                ..token = realmOpts!.token
-                ..realmId = realmOpts!.realmId
-                ..stunServers = realmOpts!.stunServers)
+                  ..serverUrl = realmOpts!.serverUrl
+                  ..token = realmOpts!.token
+                  ..realmId = realmOpts!.realmId
+                  ..stunServers = realmOpts!.stunServers)
               : null;
       case ClashProxyType.hysteria:
         outbound = HysteriaOutbound(tag: name)
@@ -420,9 +420,9 @@ extension ClashProxyExt on ClashProxy {
             serverName: sni,
             reality: realityOpts?.publicKey != null
                 ? (OutboundRealityOptions()
-                  ..enabled = true
-                  ..publicKey = realityOpts!.publicKey
-                  ..shortId = realityOpts?.shortId)
+                    ..enabled = true
+                    ..publicKey = realityOpts!.publicKey
+                    ..shortId = realityOpts?.shortId)
                 : null,
             utls: _toSingBoxUtls,
           )
@@ -440,6 +440,17 @@ extension ClashProxyExt on ClashProxy {
           ..udpOverTcp = udpOverTcp != null
               ? {'enabled': udpOverTcp, 'version': udpOverTcpVersion ?? 1}
               : null;
+      case ClashProxyType.socks5:
+        // mihomo socks5 支持 tls: true，但 sing-box socks outbound 无 TLS 能力
+        // （dial fields 不含 tls），无法等价表达：跳过节点，避免产出必然连不上的出站
+        if (tls == true) return null;
+        outbound = SocksOutbound(tag: name)
+          ..server = server
+          ..serverPort = port
+          ..username = username
+          ..password = password
+          // version 不写：sing-box 默认 '5'，Clash 类型恒为 socks5
+          ..network = _toSingBoxNetwork;
       default:
         break;
     }
@@ -455,23 +466,21 @@ extension ClashProxyExt on ClashProxy {
     String? serverName,
     OutboundUTLSOptions? utls,
     OutboundRealityOptions? reality,
-  }) =>
-      OutboundTLSOptions()
-        ..alpn = alpn
-        ..enabled = enabled
-        ..insecure = insecure
-        ..disableSni = disableSni
-        ..serverName = serverName
-        ..utls = utls
-        ..reality = reality;
+  }) => OutboundTLSOptions()
+    ..alpn = alpn
+    ..enabled = enabled
+    ..insecure = insecure
+    ..disableSni = disableSni
+    ..serverName = serverName
+    ..utls = utls
+    ..reality = reality;
 
   /// uTLS 指纹（client-fingerprint 非空时启用）。
-  OutboundUTLSOptions? get _toSingBoxUtls =>
-      clientFingerprint?.isNotEmpty == true
-          ? (OutboundUTLSOptions()
-            ..enabled = true
-            ..fingerprint = clientFingerprint!)
-          : null;
+  OutboundUTLSOptions? get _toSingBoxUtls => clientFingerprint?.isNotEmpty == true
+      ? (OutboundUTLSOptions()
+          ..enabled = true
+          ..fingerprint = clientFingerprint!)
+      : null;
 
   Object? get _toSingBoxNetwork => udp == true ? ['tcp', 'udp'] : 'tcp';
 

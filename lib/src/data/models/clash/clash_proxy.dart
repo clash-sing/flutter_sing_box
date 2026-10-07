@@ -9,6 +9,7 @@ class ClashProxy {
   String? server;
   int? port;
   String? ports;
+  String? username;
   String? password;
   @JsonKey(name: "skip-cert-verify")
   bool? skipCertVerify;
@@ -127,6 +128,7 @@ class ClashProxy {
     this.server,
     this.port,
     this.ports,
+    this.username,
     this.password,
     this.skipCertVerify,
     this.clientFingerprint,

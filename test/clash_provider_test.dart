@@ -494,4 +494,76 @@ void main() {
       expect(o.transport?.path, '/tw');
     });
   });
+
+  group('ClashProxy.toOutbound - socks5', () {
+    test('基本映射：username/password 透传，version 缺省不写，udp 缺省仅 tcp', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'sk',
+        'type': 'socks5',
+        'server': 's.com',
+        'port': 1080,
+        'username': 'user1',
+        'password': 'pass1',
+      });
+      final o = proxy.toOutbound() as SocksOutbound?;
+      expect(o, isNotNull);
+      expect(o!.tag, 'sk');
+      expect(o.server, 's.com');
+      expect(o.serverPort, 1080);
+      expect(o.username, 'user1');
+      expect(o.password, 'pass1');
+      // sing-box version 默认 '5'，Clash 类型恒为 socks5，不显式写
+      expect(o.version, isNull);
+      // mihomo socks5 的 udp 默认 false → network 仅 tcp
+      expect(o.network, 'tcp');
+    });
+
+    test('udp: true → network tcp+udp', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'sk-u',
+        'type': 'socks5',
+        'server': 's.com',
+        'port': 1080,
+        'udp': true,
+      });
+      final o = proxy.toOutbound() as SocksOutbound?;
+      expect(o, isNotNull);
+      expect(o!.network, ['tcp', 'udp']);
+    });
+
+    test('tls: true → 跳过节点；tls 缺省不跳过（对照证明跳过源于 tls 而非类型不支持）', () {
+      final tlsProxy = ClashProxy.fromJson({
+        'name': 'sk-tls',
+        'type': 'socks5',
+        'server': 's.com',
+        'port': 1080,
+        'tls': true,
+      });
+      // sing-box socks outbound 无 TLS 能力（dial fields 不含 tls），无法等价表达
+      expect(tlsProxy.toOutbound(), isNull);
+      final plainProxy = ClashProxy.fromJson({
+        'name': 'sk-plain',
+        'type': 'socks5',
+        'server': 's.com',
+        'port': 1080,
+      });
+      expect(plainProxy.toOutbound(), isNotNull);
+    });
+
+    test('无认证时 username/password 为 null 且序列化省略', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'sk-anon',
+        'type': 'socks5',
+        'server': 's.com',
+        'port': 1080,
+      });
+      final o = proxy.toOutbound() as SocksOutbound?;
+      expect(o, isNotNull);
+      expect(o!.username, isNull);
+      expect(o.password, isNull);
+      final json = o.toJson();
+      expect(json.containsKey('username'), isFalse);
+      expect(json.containsKey('password'), isFalse);
+    });
+  });
 }
