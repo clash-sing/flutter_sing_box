@@ -1,7 +1,5 @@
-// 旧拍平模型（Outbound 等重名导出）已不再使用，hide 后从 gen 导入判别子类
-import 'package:flutter_sing_box/flutter_sing_box.dart'
-    hide Inbound, Outbound, RuleSet, SingBox;
-import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
+// 旧拍平模型已删除，gen 生成模型经包级 barrel 导出，直接引入即可
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

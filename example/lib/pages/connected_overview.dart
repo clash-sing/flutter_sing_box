@@ -18,6 +18,16 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   SingBox? _singBox;
   final List<GroupItem> _groupItems = [];
 
+  /// 组类型出站（selector/urltest）的成员标签列表；非组出站返回 null。
+  /// 旧拍平模型把 outbounds 放在基类上，gen 密封类层级下须按子类取。
+  static List<String>? _groupOutbounds(Outbound outbound) {
+    return switch (outbound) {
+      SelectorOutbound(:final outbounds) => outbounds,
+      UrltestOutbound(:final outbounds) => outbounds,
+      _ => null,
+    };
+  }
+
   @override
   initState() {
     super.initState();
@@ -35,7 +45,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
       _singBox = SingBox.fromJson(map);
       _groupItems.addAll(
         _singBox!.outbounds
-            .where((outbound) => outbound.outbounds?.isNotEmpty == true)
+            .where((outbound) => _groupOutbounds(outbound)?.isNotEmpty == true)
             .map((outbound) => GroupItem(outbound: outbound, isExpanded: false)),
       );
 
@@ -185,7 +195,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
                             ref.read(flutterSingBoxProvider).urlTest(groupTag: item.outbound.tag);
                           },
                         ),
-                        Text((item.outbound.outbounds?.length ?? 0).toString()),
+                        Text((_groupOutbounds(item.outbound)?.length ?? 0).toString()),
                       ],
                     ),
                     Row(
@@ -209,7 +219,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
 
   Widget _buildOutboundItem(GroupItem groupItem) {
     final List<Outbound> outbounds = [];
-    groupItem.outbound.outbounds?.forEach((outboundTag) {
+    _groupOutbounds(groupItem.outbound)?.forEach((outboundTag) {
       final index = _singBox?.outbounds.indexWhere((outbound) {
         return outbound.tag == outboundTag;
       });

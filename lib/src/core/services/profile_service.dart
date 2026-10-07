@@ -3,10 +3,8 @@ import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 
-// 旧拍平模型（Outbound/SingBox 等重名导出）已被 gen 生成物取代，hide 后从 gen 导入
-import 'package:flutter_sing_box/flutter_sing_box.dart'
-    hide Inbound, Outbound, RuleSet, SingBox;
-import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
+// 旧拍平模型已删除，gen 生成模型经包级 barrel 导出，直接引入即可
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 
 /// Example:

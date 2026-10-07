@@ -1,3 +1,13 @@
+## 3.0.0
+
+### ⚠️ Breaking change
+
+**Model layer regenerated from the official sing-box JSON Schema**
+* The hand-written flat sing-box models (`outbound.dart` / `inbound.dart` / `dns.dart` / `route.dart` / `tls.dart` / `log.dart` / `experimental.dart` / `sing_box.dart` under `lib/src/data/models/singbox/`) have been **removed**. The public API now comes exclusively from the schema-generated model layer (`gen/`), re-exported through the package barrel — class names `Outbound` / `Inbound` / `SingBox` / `DNS` / `RouteOptions` / `Rule` etc. stay the same, so existing `import 'package:flutter_sing_box/flutter_sing_box.dart'` keeps working
+* `Outbound` and `Inbound` are now **sealed class hierarchies** discriminated by `type` (`SelectorOutbound`, `VlessOutbound`, `Hysteria2Inbound`, …). Code that accessed flat fields on the base class (e.g. a group's `outbounds` list) must switch on the concrete subtype instead; `fromJson` picks the subtype by its `type` discriminator
+* Unknown-type tolerance: unrecognized `outbound` / `inbound` types deserialize into `UnknownOutbound` / `UnknownInbound` which pass their raw JSON through untouched (round-trip safe); unmodeled **top-level sections** of `SingBox` (e.g. `ntp`) are likewise preserved on read and merged back on write
+* Renames aligned with the schema: `Dns` → `DNS`, `Route` → `RouteOptions`, `Log` → `LogOptions`, `Experimental` → `ExperimentalOptions`; `Tls` / `Utls` / `Reality` / `Transport` / `Multiplex` are replaced by the granular generated options classes (`OutboundTLSOptions`, `OutboundUTLSOptions`, `V2RayTransport`, …)
+
 ## 2.1.1
 
 ### Features

@@ -1,11 +1,8 @@
 import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
-// 旧拍平模型（Outbound/Inbound/SingBox/RuleSet）已不再使用，
-// hide 掉与 gen 生成物重名的导出，避免与下方 gen 导入冲突
-import 'package:flutter_sing_box/flutter_sing_box.dart'
-    hide Inbound, Outbound, RuleSet, SingBox;
-import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
+// 旧拍平模型已删除，gen 生成模型经包级 barrel 导出，直接引入即可
+import 'package:flutter_sing_box/flutter_sing_box.dart';
 
 /// Decodes a Base64-encoded subscription into a list of [Outbound]s.
 class Base64Provider {
