@@ -20,6 +20,10 @@
 * `ClashProxy` now parses `psk` / `version` / `reuse` / `obfs-opts` (snell fields), and the Clash → sing-box conversion emits `SnellOutbound` — mapping `obfs-opts.mode` / `obfs-opts.host` to `obfs_mode` / `obfs_host`, `udp` to `network`, and passing `reuse` through
 * Snell version 5 downgrades to version 4 (same as mihomo: v5 servers are backward-compatible with v4 clients, the downgrade happens before the reuse/UDP checks); a missing `version` (mihomo defaults to the legacy v1 protocol) and versions 1-3 have no schema counterpart and are skipped (same policy as socks5-over-TLS); `version` accepts both int and string YAML spellings; the Clash `ports` hop syntax has no sing-box equivalent (`server_ports` is not in the snell schema branch) and is ignored
 
+**Clash socks5 & http proxies**
+* `ClashProxy` → `Outbound` conversion now covers `socks5` (`username` / `password` pass-through, `udp` → `network`) and `http` (plain HTTP proxy, or an HTTPS proxy via `tls: true` with `sni` / `skip-cert-verify` / `alpn`)
+* A socks5 node with `tls: true` is skipped: the sing-box socks outbound has no TLS capability, so such a node could never connect (same policy as unmapped protocol versions)
+
 **Default subscription User-Agent**
 * `SubscribeUserAgent` — the default User-Agent builder for subscription requests — is now exported as part of the package's public API
 * The built string is simplified to the core identifiers `sing-box/<version> mihomo/1.19.32 v2ray/5.22.0`; the previously spoofed third-party client identifiers (clash-verge / ClashMetaForAndroid / ClashForWindows) are dropped
