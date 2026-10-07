@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show debugPrint;
 // 旧拍平模型（SingBox 等重名导出）已不再使用，hide 后从 gen 导入
@@ -12,6 +13,18 @@ void main() {
   late final Map<String, dynamic> templateMap;
 
   setUpAll(() async {
+    // _fixSingBoxConfig 经 rootBundle 加载内置模板；纯 dart 测试环境走
+    // 'flutter/assets' 通道 mock，按 asset key 直接读插件仓库内真实文件
+    // （key 形如 packages/flutter_sing_box/assets/...，映射回仓库相对路径）
+    TestWidgetsFlutterBinding.ensureInitialized();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMessageHandler('flutter/assets', (ByteData? message) async {
+      final key = utf8.decode(message!.buffer.asUint8List());
+      final file = File(key.replaceFirst(RegExp(r'^packages/[^/]+/'), ''));
+      if (!file.existsSync()) return null;
+      final bytes = utf8.encode(file.readAsStringSync());
+      return ByteData.view(Uint8List.fromList(bytes).buffer);
+    });
     SingBoxSchemaValidator.resetCache();
     // 预热实例缓存：注入文件读取，避免纯 dart 测试走 rootBundle
     await SingBoxSchemaValidator.instance(
@@ -107,7 +120,67 @@ void main() {
       }
     });
   });
+
+  group('SingBoxConfigProvider.provide 出站类型放行', () {
+    test('Base64 订阅的 shadowsocks 节点保留（旧白名单曾静默丢弃）', () async {
+      final sub = _encodeSub([
+        'ss://aes-128-gcm:pass1@1.2.3.4:8388#ss1',
+        'ss://aes-128-gcm:pass2@5.6.7.8:8388#ss2',
+      ]);
+
+      final singBox = await SingBoxConfigProvider.provide(sub);
+
+      final tags = singBox.outbounds.map((o) => o.tag).toSet();
+      expect(tags, containsAll(['ss1', 'ss2']));
+      final ssNodes = singBox.outbounds.whereType<ShadowsocksOutbound>().toList();
+      expect(ssNodes, hasLength(2));
+      expect(ssNodes.map((e) => e.method), everyElement('aes-128-gcm'));
+    });
+
+    test('未建模类型与已废弃 block 静默丢弃，已建模类型保留', () async {
+      // route 段结构非法 → SingBox.fromJson 抛异常 → 走 _fixSingBoxConfig
+      // （白名单过滤只作用于该汇合路径，直解成功不经过）
+      final broken = _deepCopy(templateMap);
+      broken['route'] = 'not-a-map';
+      broken['outbounds'] = [
+        {'tag': 'g', 'type': 'selector', 'outbounds': ['vm1', 'vm2']},
+        {
+          'tag': 'vm1',
+          'type': 'vmess',
+          'server': 'a.com',
+          'server_port': 1,
+          'uuid': 'u1',
+        },
+        {
+          'tag': 'vm2',
+          'type': 'vmess',
+          'server': 'b.com',
+          'server_port': 2,
+          'uuid': 'u2',
+        },
+        {
+          'tag': 'wg',
+          'type': 'wireguard',
+          'server': 'c.com',
+          'server_port': 3,
+          'private_key': 'k',
+        },
+        {'tag': 'bk', 'type': 'block'},
+      ];
+
+      final singBox = await SingBoxConfigProvider.provide(jsonEncode(broken));
+
+      final tags = singBox.outbounds.map((o) => o.tag).toSet();
+      expect(tags, containsAll(['g', 'vm1', 'vm2']));
+      expect(tags, isNot(contains('wg')), reason: '未建模类型不得透传进配置');
+      expect(tags, isNot(contains('bk')), reason: '已废弃的 block 不得进新配置');
+    });
+  });
 }
+
+/// 将若干分享链接行编码为 base64 订阅体。
+String _encodeSub(List<String> lines) =>
+    base64.encode(utf8.encode(lines.join('\n')));
 
 /// 深拷贝：jsonEncode/Decode 走一遭，避免用例间共享 templateMap 的嵌套引用。
 Map<String, dynamic> _deepCopy(Map<String, dynamic> source) =>

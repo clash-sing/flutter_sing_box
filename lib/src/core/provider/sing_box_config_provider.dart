@@ -8,21 +8,6 @@ import 'package:yaml/yaml.dart';
 
 /// Builds a normalized [SingBox] config from raw subscription content.
 class SingBoxConfigProvider {
-  /// 解析订阅时保留的出站类型白名单（与旧版 switch 分支一一对应，
-  /// 白名单外类型静默丢弃）。
-  static const Set<String> _supportedOutboundTypes = {
-    OutboundType.selector,
-    OutboundType.urltest,
-    OutboundType.direct,
-    OutboundType.hysteria2,
-    OutboundType.hysteria,
-    OutboundType.trojan,
-    OutboundType.anytls,
-    OutboundType.vmess,
-    OutboundType.vless,
-    OutboundType.tuic,
-    OutboundType.naive,
-  };
 
   /// Parses [data] into a [SingBox] config.
   ///
@@ -160,9 +145,13 @@ class SingBoxConfigProvider {
     for (var outbound in outbounds) {
       Outbound? sbOutbound;
       try {
-        // gen 的 Outbound.fromJson 按 type 判别分发（未知类型进 UnknownOutbound），
-        // 此处保留旧版白名单以维持「白名单外类型静默丢弃」的行为
-        if (_supportedOutboundTypes.contains(outbound['type'])) {
+        // 以 gen 注册表 kOutboundTypeNames（与 OutboundType 常量表经对齐测试
+        // 锁定同步）为放行依据：已建模类型全量放行，未建模类型仍静默丢弃
+        // （不透传 UnknownOutbound 进配置）；block 已被 sing-box 废弃，显式排除
+        final type = outbound['type'];
+        if (type is String &&
+            type != OutboundType.block &&
+            kOutboundTypeNames.contains(type)) {
           sbOutbound = Outbound.fromJson(outbound);
         }
       } catch (e) {
@@ -252,12 +241,11 @@ class SingBoxConfigProvider {
   /// 组出站（selector/urltest）的成员列表；判别基类未收敛 outbounds 字段，
   /// 经模式收窄读取，非组出站返回 null。
   static List<String>? _groupMembers(Outbound outbound) => switch (outbound) {
-        SelectorOutbound(:final outbounds) => outbounds,
-        UrltestOutbound(:final outbounds) => outbounds,
-        _ => null,
-      };
+    SelectorOutbound(:final outbounds) => outbounds,
+    UrltestOutbound(:final outbounds) => outbounds,
+    _ => null,
+  };
 
   /// 是否为带非空成员列表的组出站。
-  static bool _isGroupOutbound(Outbound outbound) =>
-      _groupMembers(outbound)?.isNotEmpty == true;
+  static bool _isGroupOutbound(Outbound outbound) => _groupMembers(outbound)?.isNotEmpty == true;
 }
