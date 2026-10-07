@@ -10,6 +10,7 @@
 .superpowers/
 build/
 doc/
+docs/
 test/
 .gitignore
 AGENTS.md
