@@ -3,11 +3,11 @@ class OutboundTransportType {
   /// HTTP transport.
   static const String http = "http";
   /// WebSocket transport.
-  static const String webSocket = "ws";
+  static const String ws = "ws";
   /// QUIC transport.
   static const String quic = "quic";
   /// gRPC transport.
-  static const String gRPC = "grpc";
+  static const String grpc = "grpc";
   /// HTTP Upgrade transport.
-  static const String httpUpgrade = "httpupgrade";
+  static const String httpupgrade = "httpupgrade";
 }

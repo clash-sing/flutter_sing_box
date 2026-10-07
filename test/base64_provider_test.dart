@@ -39,7 +39,7 @@ void main() {
       final o = Base64Provider.provide(encodeSub([link])).first as VlessOutbound;
       expect(o.tls?.alpn, ['h2', 'http/1.1']);
       expect(o.tls?.enabled, isTrue);
-      expect(o.transport?.type, OutboundTransportType.webSocket);
+      expect(o.transport?.type, OutboundTransportType.ws);
       expect(o.transport?.path, '/ws');
       expect(o.transport?.headers?.toJson()['Host'], 'cdn.a.com');
     });
@@ -47,7 +47,7 @@ void main() {
     test('grpc：serviceName 优先于 path 兼容', () {
       const link = 'vless://uuid-2@b.com:443?security=tls&type=grpc&serviceName=GunSrv#grpc';
       final o = Base64Provider.provide(encodeSub([link])).first as VlessOutbound;
-      expect(o.transport?.type, OutboundTransportType.gRPC);
+      expect(o.transport?.type, OutboundTransportType.grpc);
       expect(o.transport?.serviceName, 'GunSrv');
     });
 
@@ -127,7 +127,7 @@ void main() {
       expect(o.tls?.serverName, 'a.com');
       expect(o.tls?.alpn, ['h2', 'http/1.1']);
       expect(o.tls?.utls?.fingerprint, 'chrome');
-      expect(o.transport?.type, OutboundTransportType.webSocket);
+      expect(o.transport?.type, OutboundTransportType.ws);
       expect(o.transport?.path, '/ws');
       expect(o.transport?.headers?.toJson()['Host'], 'cdn.a.com');
     });
@@ -163,7 +163,7 @@ void main() {
       });
       final o = Base64Provider.provide(encodeSub([link])).first as VmessOutbound;
       expect(o.serverPort, 443);
-      expect(o.transport?.type, OutboundTransportType.gRPC);
+      expect(o.transport?.type, OutboundTransportType.grpc);
       expect(o.transport?.serviceName, 'GunSrv');
       expect(o.tls?.enabled, isTrue);
     });

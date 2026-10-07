@@ -208,12 +208,70 @@ List<String>? toSingBoxServerPorts(String? ports) {
   return result.isEmpty ? null : result;
 }
 
+/// header 值归一为 `List<String>`：mihomo YAML 常见标量写法 → 单元素列表。
+List<String> _headerValues(Object? value) => switch (value) {
+  List l => l.whereType<String>().where((s) => s.isNotEmpty).toList(),
+  String s when s.isNotEmpty => [s],
+  _ => const [],
+};
+
+/// 构造 sing-box [HTTPHeader]（值为 `List<String>` 的规范形态）；
+/// excludeHost 时剔除 Host（http transport 的 Host 走独立 host 字段）。
+HTTPHeader? _toSingBoxHeaders(Map<String, Object?>? headers, {bool excludeHost = false}) {
+  final map = <String, Object?>{};
+  headers?.forEach((key, value) {
+    if (excludeHost && key.toLowerCase() == 'host') return;
+    final values = _headerValues(value);
+    if (values.isNotEmpty) map[key] = values;
+  });
+  return map.isEmpty ? null : HTTPHeader(map);
+}
+
+/// http transport 的 host：取 headers 的 Host（大小写不敏感）归一列表。
+List<String>? _httpHost(Map<String, Object?>? headers) {
+  Object? host;
+  headers?.forEach((key, value) {
+    if (host == null && key.toLowerCase() == 'host') host = value;
+  });
+  final values = _headerValues(host);
+  return values.isEmpty ? null : values;
+}
+
+/// 多路径列表取首个非空（mihomo 每连接随机轮换，转换取确定值）。
+String? _firstNonEmpty(List<String>? list) {
+  for (final s in list ?? const <String>[]) {
+    if (s.isNotEmpty) return s;
+  }
+  return null;
+}
+
+/// 拆出 ws path 内嵌的 `?ed=<n>` early-data 参数（v2ray 生态惯例，机场订阅常见；
+/// mihomo 会拆而 sing-box 原样使用，须在转换层拆出）。
+/// 返回 (干净 path, max_early_data)；无 ed 参数时 path 原样、值为 null。
+(String?, int?) _splitEarlyData(String? path) {
+  if (path == null) return (null, null);
+  final qIndex = path.indexOf('?');
+  if (qIndex < 0) return (path, null);
+  final params = Uri.splitQueryString(path.substring(qIndex + 1));
+  final ed = params.remove('ed');
+  // 无 ed 参数：path 原样保留，避免重建 query 引入编码差异
+  if (ed == null) return (path, null);
+  final base = path.substring(0, qIndex);
+  final rest = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+  return (rest.isEmpty ? base : '$base?$rest', int.tryParse(ed));
+}
+
 /// Extensions for converting a [ClashProxy] into an [Outbound].
 /// TODO: 待实现 snell
 extension ClashProxyExt on ClashProxy {
   /// Converts this Clash proxy into a sing-box [Outbound], or `null`
   /// if the proxy type is unsupported.
   Outbound? toOutbound() {
+    // mKCP/mekya/xhttp 等 V2Ray 私有传输 sing-box 无对应：透传非法 type
+    // 会让内核拒绝整份配置，此类节点整体跳过（走 not support 日志）
+    if (const ['mkcp', 'kcp', 'mekya', 'xhttp'].contains(network)) {
+      return null;
+    }
     // SNI：vmess/vless 在 Clash YAML 中为 servername，其余协议为 sni（mihomo TLS 字段定义）；
     // 二者互为兼容别名，缺省回退 server（对齐 mihomo 行为；server 为 IP 时内核不发送 SNI）
     final String sni = this.sni ?? servername ?? server ?? '';
@@ -337,7 +395,8 @@ extension ClashProxyExt on ClashProxy {
           ..packetEncoding = packetEncoding
           ..tls = _toSingBoxTls(
             alpn: alpn,
-            enabled: tls,
+            // h2 依赖 TLS：映射 http transport 后由 ALPN 协商 h2
+            enabled: (tls ?? false) || _h2RequiresTls,
             insecure: skipCertVerify,
             disableSni: sni.isEmpty,
             serverName: sni,
@@ -354,8 +413,8 @@ extension ClashProxyExt on ClashProxy {
           ..packetEncoding = packetEncoding
           ..tls = _toSingBoxTls(
             alpn: alpn,
-            // reality 隐含 TLS：YAML 未写 tls: true 时也要启用
-            enabled: (tls ?? false) || realityOpts != null,
+            // reality 隐含 TLS：YAML 未写 tls: true 时也要启用；h2 同理依赖 TLS
+            enabled: (tls ?? false) || realityOpts != null || _h2RequiresTls,
             insecure: skipCertVerify,
             disableSni: sni.isEmpty,
             serverName: sni,
@@ -415,9 +474,56 @@ extension ClashProxyExt on ClashProxy {
           : null;
 
   Object? get _toSingBoxNetwork => udp == true ? ['tcp', 'udp'] : 'tcp';
-  V2RayTransport? get _toSingBoxTransport => network == 'tcp'
-      ? V2RayTransport(type: 'http')
-      : (network?.isNotEmpty == true ? V2RayTransport(type: network!) : null);
+
+  /// h2 传输依赖 TLS（sing-box 以 http transport + TLS 表达 h2，ALPN 缺省自动协商）
+  bool get _h2RequiresTls => network == 'h2';
+
+  /// network → V2Ray 传输层映射（值域与转换依据 mihomo 文档 + sing-box 源码）：
+  /// - tcp / 省略 / 未知值：mihomo 语义一律按裸 TCP，transport 不写
+  /// - ws：ws-opts.v2ray-http-upgrade: true 时为 httpupgrade 独立类型；
+  ///   path 内嵌 `?ed=` 与显式 max-early-data 是同配置两形态，归一为后者
+  ///   并缺省补 Sec-WebSocket-Protocol 头（mihomo 同款默认）
+  /// - h2：sing-box 无独立类型，映射 http transport + 强制 TLS
+  /// - mkcp/kcp/mekya/xhttp：无对应传输，节点已在 toOutbound 整体跳过
+  V2RayTransport? get _toSingBoxTransport {
+    switch (network) {
+      case 'ws':
+        final ws = wsOpts;
+        if (ws?.v2rayHttpUpgrade == true) {
+          return V2RayTransport(type: OutboundTransportType.httpupgrade)
+            // httpupgrade 不支持 early data：仅从 path 剥离 ed 参数
+            ..path = _splitEarlyData(ws?.path).$1
+            ..host = _firstNonEmpty(_headerValues(ws?.headers?['Host']));
+        }
+        final (path, ed) = _splitEarlyData(ws?.path);
+        // path 内嵌 ed 优先于显式 max-early-data（同配置两形态归一）
+        final maxEarlyData = ed ?? ws?.maxEarlyData;
+        return V2RayTransport(type: OutboundTransportType.ws)
+          ..path = path
+          ..headers = _toSingBoxHeaders(ws?.headers)
+          ..maxEarlyData = maxEarlyData
+          ..earlyDataHeaderName = maxEarlyData != null && maxEarlyData > 0
+              ? (ws?.earlyDataHeaderName ?? 'Sec-WebSocket-Protocol')
+              : null;
+      case 'grpc':
+        return V2RayTransport(type: OutboundTransportType.grpc)
+          ..serviceName = grpcOpts?.grpcServiceName;
+      case 'h2':
+        final h2 = h2Opts;
+        return V2RayTransport(type: OutboundTransportType.http)
+          ..host = h2?.host?.isNotEmpty == true ? h2!.host : null
+          ..path = _firstNonEmpty(h2?.path);
+      case 'http':
+        final http = httpOpts;
+        return V2RayTransport(type: OutboundTransportType.http)
+          ..method = http?.method
+          ..path = _firstNonEmpty(http?.path)
+          ..host = _httpHost(http?.headers)
+          ..headers = _toSingBoxHeaders(http?.headers, excludeHost: true);
+      default:
+        return null;
+    }
+  }
 
   String? get _toSingBoxPlugin {
     if (plugin == 'obfs') {

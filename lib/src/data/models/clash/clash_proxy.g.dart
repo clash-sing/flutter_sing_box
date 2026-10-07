@@ -62,6 +62,18 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   realityOpts: json['reality-opts'] == null
       ? null
       : RealityOpts.fromJson(json['reality-opts'] as Map<String, dynamic>),
+  wsOpts: json['ws-opts'] == null
+      ? null
+      : WsOpts.fromJson(json['ws-opts'] as Map<String, dynamic>),
+  grpcOpts: json['grpc-opts'] == null
+      ? null
+      : GrpcOpts.fromJson(json['grpc-opts'] as Map<String, dynamic>),
+  httpOpts: json['http-opts'] == null
+      ? null
+      : HttpOpts.fromJson(json['http-opts'] as Map<String, dynamic>),
+  h2Opts: json['h2-opts'] == null
+      ? null
+      : H2Opts.fromJson(json['h2-opts'] as Map<String, dynamic>),
 )..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -115,6 +127,10 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'udp-over-tcp-version': ?instance.udpOverTcpVersion,
       'realm-opts': ?instance.realmOpts?.toJson(),
       'reality-opts': ?instance.realityOpts?.toJson(),
+      'ws-opts': ?instance.wsOpts?.toJson(),
+      'grpc-opts': ?instance.grpcOpts?.toJson(),
+      'http-opts': ?instance.httpOpts?.toJson(),
+      'h2-opts': ?instance.h2Opts?.toJson(),
     };
 
 PluginOpts _$PluginOptsFromJson(Map<String, dynamic> json) =>
@@ -151,3 +167,48 @@ Map<String, dynamic> _$RealityOptsToJson(RealityOpts instance) =>
       'public-key': ?instance.publicKey,
       'short-id': ?instance.shortId,
     };
+
+WsOpts _$WsOptsFromJson(Map<String, dynamic> json) => WsOpts(
+  path: json['path'] as String?,
+  headers: json['headers'] as Map<String, dynamic>?,
+  maxEarlyData: (json['max-early-data'] as num?)?.toInt(),
+  earlyDataHeaderName: json['early-data-header-name'] as String?,
+  v2rayHttpUpgrade: json['v2ray-http-upgrade'] as bool?,
+);
+
+Map<String, dynamic> _$WsOptsToJson(WsOpts instance) => <String, dynamic>{
+  'path': ?instance.path,
+  'headers': ?instance.headers,
+  'max-early-data': ?instance.maxEarlyData,
+  'early-data-header-name': ?instance.earlyDataHeaderName,
+  'v2ray-http-upgrade': ?instance.v2rayHttpUpgrade,
+};
+
+GrpcOpts _$GrpcOptsFromJson(Map<String, dynamic> json) =>
+    GrpcOpts(grpcServiceName: json['grpc-service-name'] as String?);
+
+Map<String, dynamic> _$GrpcOptsToJson(GrpcOpts instance) => <String, dynamic>{
+  'grpc-service-name': ?instance.grpcServiceName,
+};
+
+HttpOpts _$HttpOptsFromJson(Map<String, dynamic> json) => HttpOpts(
+  method: json['method'] as String?,
+  path: (json['path'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  headers: json['headers'] as Map<String, dynamic>?,
+);
+
+Map<String, dynamic> _$HttpOptsToJson(HttpOpts instance) => <String, dynamic>{
+  'method': ?instance.method,
+  'path': ?instance.path,
+  'headers': ?instance.headers,
+};
+
+H2Opts _$H2OptsFromJson(Map<String, dynamic> json) => H2Opts(
+  host: (json['host'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  path: (json['path'] as List<dynamic>?)?.map((e) => e as String).toList(),
+);
+
+Map<String, dynamic> _$H2OptsToJson(H2Opts instance) => <String, dynamic>{
+  'host': ?instance.host,
+  'path': ?instance.path,
+};

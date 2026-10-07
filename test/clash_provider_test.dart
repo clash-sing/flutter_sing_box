@@ -315,4 +315,183 @@ void main() {
       expect(o.tls?.disableSni, isTrue);
     });
   });
+
+  group('ClashProxy.toOutbound - network → transport 映射', () {
+    /// vmess 节点模板：可覆盖 network 与各 *-opts
+    Map<String, dynamic> vmessNode(Map<String, dynamic> overrides) => {
+      'name': 'n',
+      'type': 'vmess',
+      'server': 's.com',
+      'port': 443,
+      'uuid': 'u',
+      ...overrides,
+    };
+
+    test('network 省略 → 裸 TCP，transport 不写（原误映射 http）', () {
+      final o = ClashProxy.fromJson(vmessNode({})).toOutbound() as VmessOutbound?;
+      expect(o!.transport, isNull);
+    });
+
+    test("network: 'tcp' → transport 不写", () {
+      final o = ClashProxy.fromJson(vmessNode({'network': 'tcp'})).toOutbound()
+          as VmessOutbound?;
+      expect(o!.transport, isNull);
+    });
+
+    test("network: 'h2' → type http + host 数组直传 + path 取首个非空", () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'h2',
+        'h2-opts': {'host': ['h1.com', 'h2.com'], 'path': ['/p1', '/p2']},
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.type, 'http');
+      expect(o.transport?.host, ['h1.com', 'h2.com']);
+      expect(o.transport?.path, '/p1');
+    });
+
+    test("network: 'h2' 未写 tls → 强制启用 TLS（h2 依赖 TLS 协商）", () {
+      final o = ClashProxy.fromJson(vmessNode({'network': 'h2'})).toOutbound()
+          as VmessOutbound?;
+      expect(o!.tls?.enabled, isTrue);
+    });
+
+    test("network: 'h2' 显式 tls: false → 仍强制启用", () {
+      final o = ClashProxy.fromJson(vmessNode({'network': 'h2', 'tls': false}))
+          .toOutbound() as VmessOutbound?;
+      expect(o!.tls?.enabled, isTrue);
+    });
+
+    test("network: 'ws' → type ws + path + Host 头归一列表", () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {
+          'path': '/ws',
+          'headers': {'Host': 'cdn.com'},
+        },
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.type, 'ws');
+      expect(o.transport?.path, '/ws');
+      expect(o.transport?.headers?.entries['Host'], ['cdn.com']);
+    });
+
+    test('ws path 内嵌 ?ed=2048 → 拆出 max_early_data + 默认头 + 干净 path', () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {'path': '/ws?ed=2048'},
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.path, '/ws');
+      expect(o.transport?.maxEarlyData, 2048);
+      expect(o.transport?.earlyDataHeaderName, 'Sec-WebSocket-Protocol');
+    });
+
+    test('ws path 内嵌 ed 覆盖显式 max-early-data（同配置两形态归一）', () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {'path': '/a?ed=1024', 'max-early-data': 4096},
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.path, '/a');
+      expect(o.transport?.maxEarlyData, 1024);
+    });
+
+    test('ws 显式 max-early-data 未写头 → 补默认 Sec-WebSocket-Protocol', () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {'path': '/w', 'max-early-data': 2048},
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.maxEarlyData, 2048);
+      expect(o.transport?.earlyDataHeaderName, 'Sec-WebSocket-Protocol');
+    });
+
+    test('ws 显式 early-data-header-name 时保留用户值', () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {
+          'path': '/w',
+          'max-early-data': 2048,
+          'early-data-header-name': 'X-Ed',
+        },
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.earlyDataHeaderName, 'X-Ed');
+    });
+
+    test('ws path 无 ed 参数时原样保留（含其他 query）', () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {'path': '/w?foo=1'},
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.path, '/w?foo=1');
+      expect(o.transport?.maxEarlyData, isNull);
+    });
+
+    test('ws + v2ray-http-upgrade: true → httpupgrade 独立类型', () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'ws',
+        'ws-opts': {
+          'path': '/up',
+          'v2ray-http-upgrade': true,
+          'headers': {'Host': 'h.com'},
+        },
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.type, 'httpupgrade');
+      expect(o.transport?.path, '/up');
+      expect(o.transport?.host, 'h.com');
+    });
+
+    test("network: 'grpc' → service_name", () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'grpc',
+        'grpc-opts': {'grpc-service-name': 'svc'},
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.type, 'grpc');
+      expect(o.transport?.serviceName, 'svc');
+    });
+
+    test("network: 'http' → method + path 取首值 + Host → host + 其余头保留", () {
+      final o = ClashProxy.fromJson(vmessNode({
+        'network': 'http',
+        'http-opts': {
+          'method': 'GET',
+          'path': ['/a', '/b'],
+          'headers': {
+            'Host': ['hh.com'],
+            'X-Foo': ['v'],
+          },
+        },
+      })).toOutbound() as VmessOutbound?;
+      expect(o!.transport?.type, 'http');
+      expect(o.transport?.method, 'GET');
+      expect(o.transport?.path, '/a');
+      expect(o.transport?.host, ['hh.com']);
+      expect(o.transport?.headers?.entries['X-Foo'], ['v']);
+      expect(o.transport?.headers?.entries.containsKey('Host'), isFalse);
+    });
+
+    test('mkcp / kcp / mekya / xhttp → 节点跳过（sing-box 无对应传输）', () {
+      for (final net in ['mkcp', 'kcp', 'mekya', 'xhttp']) {
+        final proxy = ClashProxy.fromJson(vmessNode({'network': net}));
+        expect(proxy.toOutbound(), isNull, reason: 'network: $net');
+      }
+    });
+
+    test('未知 network 值按 tcp 处理（mihomo 语义），节点保留', () {
+      final o = ClashProxy.fromJson(vmessNode({'network': 'quic'})).toOutbound()
+          as VmessOutbound?;
+      expect(o, isNotNull);
+      expect(o!.transport, isNull);
+    });
+
+    test('trojan ws 共用同一转换', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'tj',
+        'type': 'trojan',
+        'server': 's.com',
+        'port': 443,
+        'password': 'pwd',
+        'network': 'ws',
+        'ws-opts': {'path': '/tw'},
+      });
+      final o = proxy.toOutbound() as TrojanOutbound?;
+      expect(o!.transport?.type, 'ws');
+      expect(o.transport?.path, '/tw');
+    });
+  });
 }

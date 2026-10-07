@@ -105,6 +105,22 @@ class ClashProxy {
   @JsonKey(name: "reality-opts")
   RealityOpts? realityOpts;
 
+  /// network: ws 的传输参数（v2ray-http-upgrade 组合出 httpupgrade 形态）
+  @JsonKey(name: "ws-opts")
+  WsOpts? wsOpts;
+
+  /// network: grpc 的传输参数
+  @JsonKey(name: "grpc-opts")
+  GrpcOpts? grpcOpts;
+
+  /// network: http 的传输参数
+  @JsonKey(name: "http-opts")
+  HttpOpts? httpOpts;
+
+  /// network: h2 的传输参数
+  @JsonKey(name: "h2-opts")
+  H2Opts? h2Opts;
+
   ClashProxy({
     required this.name,
     required this.type,
@@ -154,6 +170,10 @@ class ClashProxy {
     this.udpOverTcpVersion,
     this.realmOpts,
     this.realityOpts,
+    this.wsOpts,
+    this.grpcOpts,
+    this.httpOpts,
+    this.h2Opts,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);
@@ -203,4 +223,71 @@ final class RealityOpts {
   factory RealityOpts.fromJson(Map<String, dynamic> json) => _$RealityOptsFromJson(json);
 
   Map<String, dynamic> toJson() => _$RealityOptsToJson(this);
+}
+
+/// ws-opts：network: ws 的传输参数。headers 值 mihomo 常见标量写法，
+/// 转换层归一为 `List<String>`。
+@JsonSerializable(explicitToJson: true)
+final class WsOpts {
+  final String? path;
+  final Map<String, Object?>? headers;
+  @JsonKey(name: "max-early-data")
+  final int? maxEarlyData;
+  @JsonKey(name: "early-data-header-name")
+  final String? earlyDataHeaderName;
+  @JsonKey(name: "v2ray-http-upgrade")
+  final bool? v2rayHttpUpgrade;
+
+  WsOpts({
+    this.path,
+    this.headers,
+    this.maxEarlyData,
+    this.earlyDataHeaderName,
+    this.v2rayHttpUpgrade,
+  });
+
+  factory WsOpts.fromJson(Map<String, dynamic> json) => _$WsOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$WsOptsToJson(this);
+}
+
+/// grpc-opts：network: grpc 的传输参数。
+@JsonSerializable(explicitToJson: true)
+final class GrpcOpts {
+  @JsonKey(name: "grpc-service-name")
+  final String? grpcServiceName;
+
+  GrpcOpts({this.grpcServiceName});
+
+  factory GrpcOpts.fromJson(Map<String, dynamic> json) => _$GrpcOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GrpcOptsToJson(this);
+}
+
+/// http-opts：network: http 的传输参数。path 为多路径列表
+/// （mihomo 每连接随机轮换，转换取首个非空）。
+@JsonSerializable(explicitToJson: true)
+final class HttpOpts {
+  final String? method;
+  final List<String>? path;
+  final Map<String, Object?>? headers;
+
+  HttpOpts({this.method, this.path, this.headers});
+
+  factory HttpOpts.fromJson(Map<String, dynamic> json) => _$HttpOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$HttpOptsToJson(this);
+}
+
+/// h2-opts：network: h2 的传输参数；host 与 path 均为数组。
+@JsonSerializable(explicitToJson: true)
+final class H2Opts {
+  final List<String>? host;
+  final List<String>? path;
+
+  H2Opts({this.host, this.path});
+
+  factory H2Opts.fromJson(Map<String, dynamic> json) => _$H2OptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$H2OptsToJson(this);
 }

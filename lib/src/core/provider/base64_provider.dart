@@ -163,7 +163,7 @@ class Base64Provider {
           ..disableSni = sni.isEmpty
           ..serverName = sni)
         ..transport = queryParams['obfs'] == 'websocket'
-            ? V2RayTransport(type: OutboundTransportType.webSocket)
+            ? V2RayTransport(type: OutboundTransportType.ws)
             : null;
     } catch (e) {
       return null;
@@ -280,15 +280,15 @@ class Base64Provider {
   static V2RayTransport? _toVlessTransport(Map<String, String> q) {
     switch (q['type'] ?? 'tcp') {
       case 'ws':
-        return V2RayTransport(type: OutboundTransportType.webSocket)
+        return V2RayTransport(type: OutboundTransportType.ws)
           ..path = q['path']
           ..headers = q['host']?.isNotEmpty == true ? HTTPHeader({'Host': q['host']}) : null;
       case 'grpc':
         // 规范参数为 serviceName，部分客户端只写 path，做兼容
-        return V2RayTransport(type: OutboundTransportType.gRPC)
+        return V2RayTransport(type: OutboundTransportType.grpc)
           ..serviceName = q['serviceName'] ?? q['path'];
       case 'httpupgrade':
-        return V2RayTransport(type: OutboundTransportType.httpUpgrade)
+        return V2RayTransport(type: OutboundTransportType.httpupgrade)
           ..path = q['path']
           ..host = q['host'];
       case 'http':
@@ -333,17 +333,17 @@ class Base64Provider {
         return null;
       }
       final V2RayTransport? transport = switch (net) {
-        'ws' => V2RayTransport(type: OutboundTransportType.webSocket)
+        'ws' => V2RayTransport(type: OutboundTransportType.ws)
           ..path = map['path'] as String?
           ..headers = (map['host'] as String?)?.isNotEmpty == true
               ? HTTPHeader({'Host': map['host']})
               : null,
-        'grpc' => V2RayTransport(type: OutboundTransportType.gRPC)
+        'grpc' => V2RayTransport(type: OutboundTransportType.grpc)
           ..serviceName = map['path'] as String?,
         'h2' || 'http' => V2RayTransport(type: OutboundTransportType.http)
           ..host = map['host']
           ..path = map['path'],
-        'httpupgrade' => V2RayTransport(type: OutboundTransportType.httpUpgrade)
+        'httpupgrade' => V2RayTransport(type: OutboundTransportType.httpupgrade)
           ..path = map['path'] as String?
           ..host = map['host'],
         // tcp 且 type=http 时为 http 伪装传输，否则无传输层
