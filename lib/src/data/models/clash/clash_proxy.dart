@@ -122,6 +122,21 @@ class ClashProxy {
   @JsonKey(name: "h2-opts")
   H2Opts? h2Opts;
 
+  /// snell 预共享密钥（mihomo 文档：必填）。
+  String? psk;
+
+  /// 协议版本（snell 为 1-5，tuic 亦有此字段）。YAML 中 int 与字符串两种
+  /// 写法并存，建模为 Object? 由转换层归一，避免某一写法反序列化失败丢节点。
+  @JsonKey(name: "version")
+  Object? version;
+
+  /// snell 连接复用（仅 v4/5 支持，默认 false）。
+  bool? reuse;
+
+  /// obfs-opts：snell 混淆参数。
+  @JsonKey(name: "obfs-opts")
+  ObfsOpts? obfsOpts;
+
   ClashProxy({
     required this.name,
     required this.type,
@@ -176,6 +191,10 @@ class ClashProxy {
     this.grpcOpts,
     this.httpOpts,
     this.h2Opts,
+    this.psk,
+    this.version,
+    this.reuse,
+    this.obfsOpts,
   });
 
   factory ClashProxy.fromJson(Map<String, dynamic> json) => _$ClashProxyFromJson(json);
@@ -193,6 +212,19 @@ final class PluginOpts {
   factory PluginOpts.fromJson(Map<String, dynamic> json) => _$PluginOptsFromJson(json);
 
   Map<String, dynamic> toJson() => _$PluginOptsToJson(this);
+}
+
+/// obfs-opts：snell 混淆参数（mihomo 文档：mode 支持 http/tls）。
+@JsonSerializable(explicitToJson: true)
+final class ObfsOpts {
+  final String? mode;
+  final String? host;
+
+  ObfsOpts({this.mode, this.host});
+
+  factory ObfsOpts.fromJson(Map<String, dynamic> json) => _$ObfsOptsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ObfsOptsToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

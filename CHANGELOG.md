@@ -16,6 +16,10 @@
 **Clash subscription transport options**
 * `ClashProxy` now parses `ws-opts` / `grpc-opts` / `http-opts` / `h2-opts`, and the Clash → sing-box conversion maps them to transport settings: ws path / headers / early data (`max-early-data` + `early-data-header-name`) / `v2ray-http-upgrade` (httpupgrade form), gRPC service name, HTTP method / path / headers (mihomo rotates the path list per connection — the first entry is used), and h2 host / path lists
 
+**Clash snell proxies**
+* `ClashProxy` now parses `psk` / `version` / `reuse` / `obfs-opts` (snell fields), and the Clash → sing-box conversion emits `SnellOutbound` — mapping `obfs-opts.mode` / `obfs-opts.host` to `obfs_mode` / `obfs_host`, `udp` to `network`, and passing `reuse` through
+* Only snell version 4 maps: the schema's outbound snell accepts v4/v6 while mihomo covers v1-v5, and any other version would produce a node that can never complete its handshake, so those are skipped (same policy as socks5-over-TLS); `version` accepts both int and string YAML spellings; the Clash `ports` hop syntax has no sing-box equivalent (`server_ports` is not in the snell schema branch) and is ignored
+
 **Default subscription User-Agent**
 * `SubscribeUserAgent` — the default User-Agent builder for subscription requests — is now exported as part of the package's public API
 * The built string is simplified to the core identifiers `sing-box/<version> mihomo/1.19.32 v2ray/5.22.0`; the previously spoofed third-party client identifiers (clash-verge / ClashMetaForAndroid / ClashForWindows) are dropped

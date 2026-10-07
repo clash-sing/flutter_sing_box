@@ -75,6 +75,12 @@ ClashProxy _$ClashProxyFromJson(Map<String, dynamic> json) => ClashProxy(
   h2Opts: json['h2-opts'] == null
       ? null
       : H2Opts.fromJson(json['h2-opts'] as Map<String, dynamic>),
+  psk: json['psk'] as String?,
+  version: json['version'],
+  reuse: json['reuse'] as bool?,
+  obfsOpts: json['obfs-opts'] == null
+      ? null
+      : ObfsOpts.fromJson(json['obfs-opts'] as Map<String, dynamic>),
 )..packetEncoding = json['packet-encoding'] as String?;
 
 Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
@@ -133,6 +139,10 @@ Map<String, dynamic> _$ClashProxyToJson(ClashProxy instance) =>
       'grpc-opts': ?instance.grpcOpts?.toJson(),
       'http-opts': ?instance.httpOpts?.toJson(),
       'h2-opts': ?instance.h2Opts?.toJson(),
+      'psk': ?instance.psk,
+      'version': ?instance.version,
+      'reuse': ?instance.reuse,
+      'obfs-opts': ?instance.obfsOpts?.toJson(),
     };
 
 PluginOpts _$PluginOptsFromJson(Map<String, dynamic> json) =>
@@ -140,6 +150,14 @@ PluginOpts _$PluginOptsFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$PluginOptsToJson(PluginOpts instance) =>
     <String, dynamic>{'mode': ?instance.mode, 'host': ?instance.host};
+
+ObfsOpts _$ObfsOptsFromJson(Map<String, dynamic> json) =>
+    ObfsOpts(mode: json['mode'] as String?, host: json['host'] as String?);
+
+Map<String, dynamic> _$ObfsOptsToJson(ObfsOpts instance) => <String, dynamic>{
+  'mode': ?instance.mode,
+  'host': ?instance.host,
+};
 
 RealmOpts _$RealmOptsFromJson(Map<String, dynamic> json) => RealmOpts(
   enable: json['enable'] as bool?,

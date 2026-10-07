@@ -8,6 +8,8 @@ class ClashProxyType {
   static const String vless = "vless";
   static const String shadowsocks = "ss";
   static const String socks5 = "socks5";
+  static const String http = "http";
+  static const String snell = "snell";
 }
 
 class ClashGroupType {

@@ -262,7 +262,6 @@ String? _firstNonEmpty(List<String>? list) {
 }
 
 /// Extensions for converting a [ClashProxy] into an [Outbound].
-/// TODO: 待实现 snell
 extension ClashProxyExt on ClashProxy {
   /// Converts this Clash proxy into a sing-box [Outbound], or `null`
   /// if the proxy type is unsupported.
@@ -440,6 +439,22 @@ extension ClashProxyExt on ClashProxy {
           ..udpOverTcp = udpOverTcp != null
               ? {'enabled': udpOverTcp, 'version': udpOverTcpVersion ?? 1}
               : null;
+      case ClashProxyType.snell:
+        // 版本交集：sing-box outbound 仅 v4/v6（schema oneOf），mihomo 支持
+        // v1-v5，唯一忠实交集 v4——v6 需 userkey/mode 流量整形（mihomo 侧无
+        // 来源），v1-v3 老协议无对应分支，强行映射握手必失败，跳过
+        if (int.tryParse(version?.toString() ?? '') != 4) return null;
+        outbound = SnellOutbound(tag: name, version: 4)
+          ..server = server
+          ..serverPort = port
+          ..psk = psk
+          ..reuse = reuse
+          // mihomo snell 仅 v3/4/5 支持 udp，默认 false → network 仅 tcp；
+          // Clash 侧 ports 端口跳跃无对应（snell schema 分支无 server_ports，
+          // 写出会被内核拒绝），不映射
+          ..network = _toSingBoxNetwork
+          ..obfsMode = obfsOpts?.mode
+          ..obfsHost = obfsOpts?.host;
       case ClashProxyType.socks5:
         // mihomo socks5 支持 tls: true，但 sing-box socks outbound 无 TLS 能力
         // （dial fields 不含 tls），无法等价表达：跳过节点，避免产出必然连不上的出站
@@ -451,6 +466,21 @@ extension ClashProxyExt on ClashProxy {
           ..password = password
           // version 不写：sing-box 默认 '5'，Clash 类型恒为 socks5
           ..network = _toSingBoxNetwork;
+      case ClashProxyType.http:
+        // sing-box http outbound 支持 TLS（HTTPS 代理）与纯 HTTP 两种形态，
+        // 按 mihomo 的 tls 开关如实映射；mihomo http 无 client-fingerprint，不配 utls
+        outbound = HttpOutbound(tag: name)
+          ..server = server
+          ..serverPort = port
+          ..username = username
+          ..password = password
+          ..tls = _toSingBoxTls(
+            alpn: alpn,
+            enabled: tls ?? false,
+            insecure: skipCertVerify,
+            disableSni: sni.isEmpty,
+            serverName: sni,
+          );
       default:
         break;
     }

@@ -566,4 +566,139 @@ void main() {
       expect(json.containsKey('password'), isFalse);
     });
   });
+
+  group('ClashProxy.toOutbound - http', () {
+    test('基本映射：username/password 透传，tls 缺省不启用（纯 HTTP 代理）', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hp',
+        'type': 'http',
+        'server': 's.com',
+        'port': 8080,
+        'username': 'user1',
+        'password': 'pass1',
+      });
+      final o = proxy.toOutbound() as HttpOutbound?;
+      expect(o, isNotNull);
+      expect(o!.tag, 'hp');
+      expect(o.server, 's.com');
+      expect(o.serverPort, 8080);
+      expect(o.username, 'user1');
+      expect(o.password, 'pass1');
+      // mihomo http 的 tls 可选：未写 → 纯 HTTP 代理，sing-box http outbound 同样支持
+      expect(o.tls?.enabled, isFalse);
+    });
+
+    test('tls: true → HTTPS 代理：sni/skip-cert-verify/alpn 映射', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hps',
+        'type': 'http',
+        'server': 's.com',
+        'port': 443,
+        'tls': true,
+        'sni': 'www.apple.com',
+        'skip-cert-verify': true,
+        'alpn': ['h2', 'http/1.1'],
+      });
+      final o = proxy.toOutbound() as HttpOutbound?;
+      expect(o, isNotNull);
+      expect(o!.tls?.enabled, isTrue);
+      expect(o.tls?.serverName, 'www.apple.com');
+      expect(o.tls?.insecure, isTrue);
+      expect(o.tls?.alpn, ['h2', 'http/1.1']);
+    });
+
+    test('无认证时 username/password 为 null 且序列化省略', () {
+      final proxy = ClashProxy.fromJson({
+        'name': 'hp-anon',
+        'type': 'http',
+        'server': 's.com',
+        'port': 8080,
+      });
+      final o = proxy.toOutbound() as HttpOutbound?;
+      expect(o, isNotNull);
+      expect(o!.username, isNull);
+      expect(o.password, isNull);
+      final json = o.toJson();
+      expect(json.containsKey('username'), isFalse);
+      expect(json.containsKey('password'), isFalse);
+    });
+  });
+
+  group('ClashProxy.toOutbound - snell', () {
+    /// mihomo wiki 的 snell 完整示例节点（可选字段全开）
+    Map<String, dynamic> snellNode(Map<String, dynamic> overrides) => {
+      'name': 'snell',
+      'type': 'snell',
+      'server': 'server',
+      'port': 44046,
+      'psk': 'yourpsk',
+      'version': 4,
+      ...overrides,
+    };
+
+    test('mihomo 文档示例：psk/version/reuse/obfs-opts/udp 全字段映射', () {
+      final proxy = ClashProxy.fromJson(snellNode({
+        'udp': true,
+        'reuse': true,
+        'obfs-opts': {'mode': 'http', 'host': 'bing.com'},
+      }));
+      final o = proxy.toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      expect(o!.tag, 'snell');
+      expect(o.server, 'server');
+      expect(o.serverPort, 44046);
+      expect(o.version, 4);
+      expect(o.psk, 'yourpsk');
+      expect(o.reuse, isTrue);
+      expect(o.obfsMode, 'http');
+      expect(o.obfsHost, 'bing.com');
+      // mihomo 仅 v3/4/5 支持 udp；udp: true → tcp+udp
+      expect(o.network, ['tcp', 'udp']);
+      final json = o.toJson();
+      expect(json['type'], 'snell');
+      expect(json['version'], 4);
+      expect(json['psk'], 'yourpsk');
+      expect(json['obfs_mode'], 'http');
+      expect(json['obfs_host'], 'bing.com');
+    });
+
+    test('version 字符串 "4" 同样接受（订阅中 int/字符串两种写法都常见）', () {
+      final proxy = ClashProxy.fromJson(snellNode({'version': '4'}));
+      final o = proxy.toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      expect(o!.version, 4);
+    });
+
+    test('version 1/2/3/5 与缺省 → 跳过（sing-box outbound 仅 v4/v6，唯一交集 v4）', () {
+      for (final v in [null, 1, 2, 3, 5]) {
+        // v 为 null 时以 null 覆盖模板默认，模拟配置缺失 version
+        final node = snellNode({'version': v});
+        final o = ClashProxy.fromJson(node).toOutbound();
+        expect(o, isNull, reason: 'version: $v');
+      }
+    });
+
+    test('udp 缺省 → network 仅 tcp（mihomo 默认 false）', () {
+      final o = ClashProxy.fromJson(snellNode({})).toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      expect(o!.network, 'tcp');
+    });
+
+    test('obfs-opts 缺省 → 混淆字段 null 且序列化省略', () {
+      final o = ClashProxy.fromJson(snellNode({})).toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      expect(o!.obfsMode, isNull);
+      expect(o.obfsHost, isNull);
+      final json = o.toJson();
+      expect(json.containsKey('obfs_mode'), isFalse);
+      expect(json.containsKey('obfs_host'), isFalse);
+    });
+
+    test('ports 无法映射（snell schema 无 server_ports），节点保留且不输出', () {
+      final o = ClashProxy.fromJson(snellNode({'ports': '114-514'}))
+          .toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      expect(o!.toJson().containsKey('server_ports'), isFalse);
+    });
+  });
 }
