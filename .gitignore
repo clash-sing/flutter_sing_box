@@ -41,4 +41,3 @@ migrate_working_dir/
 .gitnexus
 /.claude/settings.local.json
 /doc/
-/docs/
