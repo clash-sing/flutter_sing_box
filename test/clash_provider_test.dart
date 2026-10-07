@@ -669,8 +669,30 @@ void main() {
       expect(o!.version, 4);
     });
 
-    test('version 1/2/3/5 与缺省 → 跳过（sing-box outbound 仅 v4/v6，唯一交集 v4）', () {
-      for (final v in [null, 1, 2, 3, 5]) {
+    test('version 5 → 降级映射为 v4（mihomo 同款：v5 服务端兼容 v4 客户端）', () {
+      final o = ClashProxy.fromJson(snellNode({
+        'version': 5,
+        'reuse': true,
+        'udp': true,
+      })).toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      // 降级后 reuse/udp 按 v4 语义照常生效（mihomo 降级发生在两者判定之前）
+      expect(o!.version, 4);
+      expect(o.reuse, isTrue);
+      expect(o.network, ['tcp', 'udp']);
+    });
+
+    test('obfs-opts.mode: tls 透传（官方文档仅列 none/http，但内核 ParseObfsMode 完整支持 tls）', () {
+      final o = ClashProxy.fromJson(snellNode({
+        'obfs-opts': {'mode': 'tls', 'host': 'cdn.example.com'},
+      })).toOutbound() as SnellOutbound?;
+      expect(o, isNotNull);
+      expect(o!.obfsMode, 'tls');
+      expect(o.obfsHost, 'cdn.example.com');
+    });
+
+    test('version 1/2/3 与缺省 → 跳过（sing-box outbound 仅 v4/v6；缺省 mihomo 按 v1 老协议跑）', () {
+      for (final v in [null, 1, 2, 3]) {
         // v 为 null 时以 null 覆盖模板默认，模拟配置缺失 version
         final node = snellNode({'version': v});
         final o = ClashProxy.fromJson(node).toOutbound();

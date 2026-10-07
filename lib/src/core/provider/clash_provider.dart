@@ -441,9 +441,12 @@ extension ClashProxyExt on ClashProxy {
               : null;
       case ClashProxyType.snell:
         // 版本交集：sing-box outbound 仅 v4/v6（schema oneOf），mihomo 支持
-        // v1-v5，唯一忠实交集 v4——v6 需 userkey/mode 流量整形（mihomo 侧无
-        // 来源），v1-v3 老协议无对应分支，强行映射握手必失败，跳过
-        if (int.tryParse(version?.toString() ?? '') != 4) return null;
+        // v1-v5。v5 降级按 v4 映射（mihomo 同款：v5 服务端兼容 v4 客户端，
+        // 降级先于 reuse/udp 判定）；缺省 mihomo 按 v1 老协议跑（
+        // DefaultSnellVersion=Version1）、v1-v3 与 v6（需 userkey/mode，
+        // mihomo 侧无来源）均无对应分支，强行映射握手必失败，跳过
+        final snellVersion = int.tryParse(version?.toString() ?? '');
+        if (snellVersion != 4 && snellVersion != 5) return null;
         outbound = SnellOutbound(tag: name, version: 4)
           ..server = server
           ..serverPort = port

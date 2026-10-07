@@ -18,7 +18,7 @@
 
 **Clash snell proxies**
 * `ClashProxy` now parses `psk` / `version` / `reuse` / `obfs-opts` (snell fields), and the Clash → sing-box conversion emits `SnellOutbound` — mapping `obfs-opts.mode` / `obfs-opts.host` to `obfs_mode` / `obfs_host`, `udp` to `network`, and passing `reuse` through
-* Only snell version 4 maps: the schema's outbound snell accepts v4/v6 while mihomo covers v1-v5, and any other version would produce a node that can never complete its handshake, so those are skipped (same policy as socks5-over-TLS); `version` accepts both int and string YAML spellings; the Clash `ports` hop syntax has no sing-box equivalent (`server_ports` is not in the snell schema branch) and is ignored
+* Snell version 5 downgrades to version 4 (same as mihomo: v5 servers are backward-compatible with v4 clients, the downgrade happens before the reuse/UDP checks); a missing `version` (mihomo defaults to the legacy v1 protocol) and versions 1-3 have no schema counterpart and are skipped (same policy as socks5-over-TLS); `version` accepts both int and string YAML spellings; the Clash `ports` hop syntax has no sing-box equivalent (`server_ports` is not in the snell schema branch) and is ignored
 
 **Default subscription User-Agent**
 * `SubscribeUserAgent` — the default User-Agent builder for subscription requests — is now exported as part of the package's public API
