@@ -9,20 +9,23 @@ class SubscribeUserAgent {
   /// Returns the default User-Agent string for the current platform.
   static Future<String> getDefaultUserAgent() async {
     _cachedVersion ??= await FlutterSingBox().getSingBoxVersion();
-    const String clashVerge = 'clash-verge/2.4.7';
+    final String version = _cachedVersion!;
+    const String mihomo = 'mihomo/1.19.32';
+    const String v2ray = 'v2ray/5.22.0';
 
+    String? client;
     if (io.Platform.isIOS) {
-      return 'SFI/$_cachedVersion sing-box/$_cachedVersion $clashVerge';
+      client = 'SFI/$version (iOS)';
     } else if (io.Platform.isAndroid) {
-      return 'SFA/$_cachedVersion sing-box/$_cachedVersion ClashMetaForAndroid/2.11.27 $clashVerge';
+      client = 'SFA/$version (Android)';
     } else if (io.Platform.isWindows) {
-      return 'SFW/$_cachedVersion sing-box/$_cachedVersion $clashVerge ClashForWindows/0.19.23';
+      client = 'SFW/$version (Windows)';
     } else if (io.Platform.isMacOS) {
-      return 'SFM/$_cachedVersion sing-box/$_cachedVersion $clashVerge';
+      client = 'SFM/$version (Macintosh)';
     } else if (io.Platform.isLinux) {
-      return 'SFL/$_cachedVersion sing-box/$_cachedVersion $clashVerge';
-    } else {
-      return 'sing-box/$_cachedVersion $clashVerge';
+      client = 'SFL/$version (Linux)';
     }
+    final String cores = 'sing-box/$version $mihomo $v2ray';
+    return client == null ? cores : '$client $cores';
   }
 }
