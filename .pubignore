@@ -19,12 +19,6 @@ AGENTS.md
 android/.gradle/
 android/local.properties
 
-# 示例工程整体不入包：消费者无需，且一行覆盖其内部现在与未来的
-# 全部生成物（.dart_tool / gradle 缓存 / iOS 生成物等），无需逐项枚举。
-# 示例仍可从 GitHub 仓库查看；git 仓库与 CI 不受 .pubignore 影响。
-# 代价：pub.dev 页面的 Example 标签页不再展示示例代码。
-example/
-
 # IDE 工程文件与根锁文件。
 *.iml
 pubspec.lock

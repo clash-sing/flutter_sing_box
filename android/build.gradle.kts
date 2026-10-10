@@ -86,7 +86,7 @@ tasks.register("printMmkvVersion") {
 }
 
 dependencies {
-    implementation("com.github.singbox-android:libbox:1.14.2")
+    implementation("com.github.singbox-android:libbox:1.14.3")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation("com.tencent:mmkv:${mmkvVersion()}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
