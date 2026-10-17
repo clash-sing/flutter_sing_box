@@ -1,3 +1,12 @@
+## 3.0.1
+
+### Fixes
+* Clash h2 transport: the `h2-opts.path` field is now parsed as a scalar string (was a list) — mihomo's spec defines `Path` as a plain string and rejects the array form, so unlike `http-opts`' rotating multi-path list, h2 takes a single path; the Clash → sing-box conversion passes it through directly instead of picking the first non-empty entry
+
+### Dependencies
+* Upgrade sing-box core to `1.14.3` (Android `libbox` and the Windows `amd64` / `arm64` binaries updated in sync)
+* The `example/` directory is no longer excluded by `.pubignore`, so the example source ships with the package again and pub.dev's Example tab renders it
+
 ## 3.0.0
 
 ### ⚠️ Breaking change
