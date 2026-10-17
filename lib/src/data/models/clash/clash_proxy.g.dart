@@ -225,7 +225,7 @@ Map<String, dynamic> _$HttpOptsToJson(HttpOpts instance) => <String, dynamic>{
 
 H2Opts _$H2OptsFromJson(Map<String, dynamic> json) => H2Opts(
   host: (json['host'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  path: (json['path'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  path: json['path'] as String?,
 );
 
 Map<String, dynamic> _$H2OptsToJson(H2Opts instance) => <String, dynamic>{

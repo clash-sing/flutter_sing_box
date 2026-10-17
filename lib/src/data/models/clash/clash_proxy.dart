@@ -313,11 +313,13 @@ final class HttpOpts {
   Map<String, dynamic> toJson() => _$HttpOptsToJson(this);
 }
 
-/// h2-opts：network: h2 的传输参数；host 与 path 均为数组。
+/// h2-opts：network: h2 的传输参数；host 为数组，path 为标量字符串
+/// （mihomo 规范：Path string，数组形态会被 mihomo 拒收；与 http-opts
+/// 的多路径列表不同，勿混淆）。
 @JsonSerializable(explicitToJson: true)
 final class H2Opts {
   final List<String>? host;
-  final List<String>? path;
+  final String? path;
 
   H2Opts({this.host, this.path});
 

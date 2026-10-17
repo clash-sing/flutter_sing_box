@@ -338,10 +338,10 @@ void main() {
       expect(o!.transport, isNull);
     });
 
-    test("network: 'h2' → type http + host 数组直传 + path 取首个非空", () {
+    test("network: 'h2' → type http + host 数组直传 + path 标量直传", () {
       final o = ClashProxy.fromJson(vmessNode({
         'network': 'h2',
-        'h2-opts': {'host': ['h1.com', 'h2.com'], 'path': ['/p1', '/p2']},
+        'h2-opts': {'host': ['h1.com', 'h2.com'], 'path': '/p1'},
       })).toOutbound() as VmessOutbound?;
       expect(o!.transport?.type, 'http');
       expect(o.transport?.host, ['h1.com', 'h2.com']);

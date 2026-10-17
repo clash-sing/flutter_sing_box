@@ -554,7 +554,7 @@ extension ClashProxyExt on ClashProxy {
         final h2 = h2Opts;
         return V2RayTransport(type: OutboundTransportType.http)
           ..host = h2?.host?.isNotEmpty == true ? h2!.host : null
-          ..path = _firstNonEmpty(h2?.path);
+          ..path = h2?.path;
       case 'http':
         final http = httpOpts;
         return V2RayTransport(type: OutboundTransportType.http)
