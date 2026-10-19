@@ -1,0 +1,3 @@
+trojan://pw@t1.example.com:443?allowInsecure=0&peer=t1.example.com&sni=t1.example.com#TJ-A
+trojan://pw@t2.example.com:443?allowInsecure=0&peer=t2.example.com&sni=t2.example.com#TJ-B
+hysteria://y1.example.com:443?sni=y1.example.com&insecure=0&protocol=udp&auth=pw&upmbps=30&downmbps=100#HY1

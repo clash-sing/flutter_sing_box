@@ -1,0 +1,6 @@
+proxies:
+  - {name: TJ-A, type: trojan, server: t1.example.com, port: 443, password: pw, sni: t1.example.com, skip-cert-verify: false}
+  - {name: TJ-B, type: trojan, server: t2.example.com, port: 443, password: pw, sni: t2.example.com, skip-cert-verify: false}
+  - {name: VL-H2, type: vless, server: l1.example.com, port: 443, uuid: 1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b, alterId: 0, cipher: auto, udp: true, flow: null, encryption: none, tls: true, skip-cert-verify: false, servername: l1.example.com, network: h2, h2-opts: {path: /h2, host: [l1.example.com]}}
+proxy-groups:
+  - {name: PROXY, type: select, proxies: [TJ-A, TJ-B, VL-H2]}

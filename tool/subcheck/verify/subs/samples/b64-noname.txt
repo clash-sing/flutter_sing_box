@@ -1,0 +1,3 @@
+trojan://pw@t1.example.com:443?allowInsecure=0&peer=t1.example.com&sni=t1.example.com
+trojan://pw@t8.example.com:443?allowInsecure=0&peer=t8.example.com&sni=t8.example.com
+trojan://pw@t2.example.com:443?allowInsecure=0&peer=t2.example.com&sni=t2.example.com#TJ-B
