@@ -1,0 +1,114 @@
+{
+  "dns": {
+    "servers": [
+      {
+        "tag": "remote",
+        "type": "https",
+        "server": "1.1.1.1"
+      },
+      {
+        "tag": "local",
+        "type": "https",
+        "server": "223.5.5.5"
+      }
+    ],
+    "rules": [
+      {
+        "domain_suffix": [
+          "provider-marker.example"
+        ],
+        "action": "route",
+        "server": "local"
+      }
+    ],
+    "final": "remote"
+  },
+  "inbounds": [
+    {
+      "tag": "mixed-in",
+      "type": "mixed",
+      "listen": "127.0.0.1",
+      "listen_port": 2080
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "节点选择",
+      "type": "selector",
+      "outbounds": [
+        "自动选择",
+        "TJ-A",
+        "TJ-B",
+        "HY2-P"
+      ]
+    },
+    {
+      "tag": "自动选择",
+      "type": "urltest",
+      "outbounds": [
+        "TJ-A",
+        "TJ-B",
+        "HY2-P"
+      ]
+    },
+    {
+      "tag": "direct",
+      "type": "direct"
+    },
+    {
+      "tag": "TJ-A",
+      "type": "trojan",
+      "server": "t1.example.com",
+      "server_port": 443,
+      "password": "pw",
+      "tls": {
+        "enabled": true,
+        "insecure": false,
+        "server_name": "t1.example.com"
+      }
+    },
+    {
+      "tag": "TJ-B",
+      "type": "trojan",
+      "server": "t2.example.com",
+      "server_port": 443,
+      "password": "pw",
+      "tls": {
+        "enabled": true,
+        "insecure": false,
+        "server_name": "t2.example.com"
+      }
+    },
+    {
+      "server": "h1.example.com",
+      "server_port": 443,
+      "tag": "HY2-P",
+      "tls": {
+        "enabled": true,
+        "insecure": false,
+        "server_name": "h1.example.com"
+      },
+      "server_ports": [
+        "20000:30000"
+      ],
+      "hop_interval": "60s",
+      "up_mbps": 100,
+      "down_mbps": 500,
+      "type": "hysteria2",
+      "password": "pw"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "domain_suffix": [
+          "provider-marker.example"
+        ],
+        "action": "route",
+        "outbound": "direct"
+      }
+    ],
+    "final": "节点选择",
+    "default_domain_resolver": "local"
+  }
+}

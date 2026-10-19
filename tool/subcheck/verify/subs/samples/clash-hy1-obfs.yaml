@@ -1,0 +1,6 @@
+proxies:
+  - {name: TJ-A, type: trojan, server: t1.example.com, port: 443, password: pw, sni: t1.example.com, skip-cert-verify: false}
+  - {name: TJ-B, type: trojan, server: t2.example.com, port: 443, password: pw, sni: t2.example.com, skip-cert-verify: false}
+  - {name: HY1-O, server: y1.example.com, port: 443, sni: y1.example.com, up: 30, down: 100, skip-cert-verify: false, type: hysteria, auth_str: pw, protocol: udp, obfs: mypass, fast-open: true, disable_mtu_discovery: true}
+proxy-groups:
+  - {name: PROXY, type: select, proxies: [TJ-A, TJ-B, HY1-O]}
