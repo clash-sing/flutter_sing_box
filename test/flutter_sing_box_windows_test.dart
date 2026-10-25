@@ -123,7 +123,7 @@ void main() {
       expect(events[0], ProxyState.stopped); // 初始重放
       expect(events[1], ProxyState.started);
       final stopped = events.last as ProxyStopped;
-      expect(stopped.errMessage, contains('不可达'));
+      expect(stopped.errMessage, contains('Clash Service 服务意外停止运行'));
     });
 
     test('探测返回 stopped（sing-box 退出）→ emit 带 errMessage 的 ProxyStopped', () async {
@@ -136,7 +136,7 @@ void main() {
       await until(() => events.any((e) => e is ProxyStopped && e.errMessage != null));
 
       final stopped = events.last as ProxyStopped;
-      expect(stopped.errMessage, contains('sing-box'));
+      expect(stopped.errMessage, contains('代理内核已停止运行'));
     });
 
     test('stopped 后轮询终止，不再探测', () async {

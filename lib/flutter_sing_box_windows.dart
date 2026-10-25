@@ -321,11 +321,11 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         final status = await helperStatusProbe();
         if (gen != _helperWatchGeneration || _lastProxyState != ProxyState.started) return;
         if (status == 'running') continue;
-        emitProxyState(const ProxyStopped(errMessage: 'sing-box 已停止运行'));
+        emitProxyState(const ProxyStopped(errMessage: '代理内核已停止运行。'));
         return;
       } catch (_) {
         if (gen != _helperWatchGeneration || _lastProxyState != ProxyState.started) return;
-        emitProxyState(const ProxyStopped(errMessage: 'helper 服务不可达'));
+        emitProxyState(const ProxyStopped(errMessage: 'Clash Service 服务意外停止运行。'));
         return;
       }
     }
