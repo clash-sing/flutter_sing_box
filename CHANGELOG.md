@@ -1,3 +1,30 @@
+## 3.0.2
+
+### Features
+
+**Windows: helper / sing-box crash detection**
+* While the proxy is `started`, the Windows implementation now probes the helper's `/status` endpoint every 3 seconds (`WindowsConstants.helperWatchInterval`): a `stopped` reply emits `ProxyStopped(errMessage: "代理内核已停止运行。")`, and an unreachable helper (crashed system service) emits `ProxyStopped(errMessage: "Clash Service 服务意外停止运行。")` — previously a helper crash left the UI showing "connected" forever
+* A generation counter cancels all in-flight probes on every proxy-state change (start / restart / stop / dispose), so user-initiated transitions are never misreported as crashes
+
+**Windows: helper API port re-read on every request**
+* The helper API listens on a random port that changes on every service restart (including the ~1s crash-recovery window) and is written back to `helper.json`; `HelperHttpClient` no longer caches the port across calls — the config is re-read before each request, and on connection refused / timeout the (possibly updated) port is re-read and the request retried once, fixing the state where every helper request failed with connection-refused until the app was restarted
+* `HelperHttpClient.forTest(loadConfig)` allows tests to inject the config reader
+
+### Fixes
+* Windows `stop()` no longer throws on failure — errors are emitted as `ProxyStopped(errMessage: ...)` on `proxyStateStream`, aligned with `start()` / `restart()`
+* Helper HTTP client connect/receive timeouts raised `5s → 15s`: the helper's `/start` includes a readiness probe and `/stop` a graceful-stop + force-kill confirmation (each up to ~10s server-side), so the previous client timeout could fire before the helper reported the real outcome
+* `ProxyStopped.errMessage` from helper calls now prefers the helper's HTTP response body (carrying the core's exit reason / sing-box output) over a raw `DioException.toString()`
+
+### Documentation
+* Dartdoc coverage pass over the whole public API surface (facade, platform interface, constants, Clash models, storage, generated sing-box models) — comments are now written in Simplified Chinese
+* New `tool/doc_coverage.dart`: counts documented public declarations with a pana-like scope (`*.g.dart` / `*.freezed.dart` excluded), `--verbose` lists the missing ones per file; `analyzer` added as an explicit dev dependency for the script
+
+### Dependencies
+* Bundled Windows `clash_sing_helper.exe` (both `amd64` / `arm64`) rebuilt from the current clash_sing_service source, bringing the matching server-side fixes:
+  * sing-box child processes are assigned to a per-helper Job Object with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` — if the helper dies for any reason (crash, `taskkill /F`), the kernel terminates all sing-box children instead of leaving them orphaned in the background holding the TUN device and ports
+  * On startup the helper force-kills leftover sing-box processes matching its own executable path (orphan cleanup covering crashes produced by older helpers or a failed job assignment)
+  * Stop-path hardening across Windows / darwin / linux: a failed stop keeps the reported state "running" and surfaces the error; graceful stop with timeout + force-kill confirmation
+
 ## 3.0.1
 
 ### Fixes
