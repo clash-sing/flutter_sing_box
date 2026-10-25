@@ -36,8 +36,10 @@ class HelperHttpClient {
     final Dio dio = Dio(
       BaseOptions(
         baseUrl: 'http://127.0.0.1:',
-        connectTimeout: Duration(seconds: 5),
-        receiveTimeout: Duration(seconds: 5),
+        // helper 端 /start 含就绪探测（最长约 10 秒）、/stop 含优雅停止+强杀确认（最长约 10 秒），
+        // 客户端超时须覆盖服务端最长耗时，否则会先于 helper 返回真实结果而超时
+        connectTimeout: Duration(seconds: 15),
+        receiveTimeout: Duration(seconds: 15),
       ),
     );
     dio.interceptors.add(LogInterceptor(responseBody: true));
@@ -66,6 +68,18 @@ class HelperHttpClient {
     }
   }
 
+  /// 把异常转成面向用户的错误文本：优先取 helper 的 HTTP 响应体
+  /// （含内核退出原因与 sing-box 真实输出），其余回退 toString
+  String _errorMessage(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is String && data.isNotEmpty) {
+        return data;
+      }
+    }
+    return e.toString();
+  }
+
   Future<void> start() async {
     try {
       _platform.emitProxyState(ProxyState.starting);
@@ -77,7 +91,7 @@ class HelperHttpClient {
       throw Exception(data);
     } catch (e) {
       // 错误唯一出口是状态流：emit 带 errMessage 的 stopped 归位状态机，不再上抛异常
-      _platform.emitProxyState(ProxyStopped(errMessage: e.toString()));
+      _platform.emitProxyState(ProxyStopped(errMessage: _errorMessage(e)));
     }
   }
 
@@ -92,7 +106,7 @@ class HelperHttpClient {
       throw Exception(data);
     } catch (e) {
       // 与 start/restart 一致：错误唯一出口是状态流
-      _platform.emitProxyState(ProxyStopped(errMessage: e.toString()));
+      _platform.emitProxyState(ProxyStopped(errMessage: _errorMessage(e)));
     }
   }
 
@@ -107,7 +121,7 @@ class HelperHttpClient {
       throw Exception(data);
     } catch (e) {
       // 错误唯一出口是状态流：emit 带 errMessage 的 stopped 归位状态机，不再上抛异常
-      _platform.emitProxyState(ProxyStopped(errMessage: e.toString()));
+      _platform.emitProxyState(ProxyStopped(errMessage: _errorMessage(e)));
     }
   }
 

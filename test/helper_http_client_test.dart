@@ -12,11 +12,12 @@ class _FakeHelperServer {
   final HttpServer server;
   final List<String> requests = [];
 
-  static Future<_FakeHelperServer> start(String response) async {
+  static Future<_FakeHelperServer> start(String response, {int status = 200}) async {
     final fake = _FakeHelperServer(await HttpServer.bind('127.0.0.1', 0));
     fake.server.listen((request) async {
       fake.requests.add(request.uri.path);
       // dio 只对 application/json 响应做 JSON 解码（生产 Go 服务端也设了此头）
+      request.response.statusCode = status;
       request.response.headers.contentType = ContentType.json;
       request.response.write('"$response"');
       await request.response.close();
@@ -89,6 +90,22 @@ void main() {
       expect(events[1], ProxyState.stopping);
       expect(events[2], isA<ProxyStopped>());
       expect((events[2] as ProxyStopped).errMessage, isNotNull);
+    });
+
+    test('start 失败（400 带原因）：errMessage 用响应体，不透出 DioException 文本', () async {
+      final events = await setUpPlatform();
+      final fake = await _FakeHelperServer.start(
+        'start failed: sing-box exited: exit status 1; recent output: FATAL: bad config',
+        status: 400,
+      );
+      addTearDown(() => fake.server.close(force: true));
+
+      await HelperHttpClient.forTest(() async => _configOf(fake.port)).start();
+      await Future<void>.delayed(Duration.zero);
+
+      final errMessage = (events.last as ProxyStopped).errMessage!;
+      expect(errMessage, contains('FATAL: bad config'));
+      expect(errMessage, isNot(contains('DioException')));
     });
   });
 
