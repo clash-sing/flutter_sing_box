@@ -1,0 +1,4 @@
+trojan://pw@t1.example.com:443?allowInsecure=0&peer=t1.example.com&sni=t1.example.com#TJ-A
+trojan://pw@t2.example.com:443?allowInsecure=0&peer=t2.example.com&sni=t2.example.com#TJ-B
+trojan://pw@t4.example.com:443?allowInsecure=0&peer=t4.example.com&sni=t4.example.com#%F0%9F%87%AD%F0%9F%87%B0%20%E9%A6%99%E6%B8%AF%2001
+vmess-json {"v":"2","ps":"🇯🇵 日本 02","add":"v1.example.com","port":"443","id":"1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b","aid":"0","net":"ws","type":"ws","host":"v1.example.com","path":"/ws","tls":"tls","sni":"v1.example.com"}

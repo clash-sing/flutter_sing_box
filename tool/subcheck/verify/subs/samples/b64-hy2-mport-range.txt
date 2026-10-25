@@ -1,0 +1,3 @@
+trojan://pw@t1.example.com:443?allowInsecure=0&peer=t1.example.com&sni=t1.example.com#TJ-A
+trojan://pw@t2.example.com:443?allowInsecure=0&peer=t2.example.com&sni=t2.example.com#TJ-B
+hysteria2://pw@h1.example.com:443?sni=h1.example.com&insecure=0&mport=20000-30000#HY2-R

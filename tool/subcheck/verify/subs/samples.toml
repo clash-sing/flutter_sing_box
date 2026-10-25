@@ -1,0 +1,983 @@
+# 订阅样本清单。字段与判定说明见 README.md
+
+[[sample]]
+id = "clash-ctrl"
+file = "samples/clash-ctrl.yaml"
+format = "clash"
+subject = "对照：只有两个 trojan"
+source = "构造：对照组"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B"]
+
+[[sample]]
+id = "clash-no-skipcert"
+file = "samples/clash-no-skipcert.yaml"
+format = "clash"
+subject = "对照变体：TJ-A 不写 skip-cert-verify（Clash 里这个字段可选）"
+source = "构造：clash_sing_app#7 的对照"
+issues = ["clash_sing_app#7"]
+expect_nodes = ["TJ-A", "TJ-B"]
+
+[[sample]]
+id = "clash-ss"
+file = "samples/clash-ss.yaml"
+format = "clash"
+subject = "ss（aes-128-gcm，Xboard 不写 skip-cert-verify）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L257-L328（buildShadowsocks）"
+issues = ["clash_sing_app#8", "clash_sing_app#7"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-1"]
+
+[sample.expect_fields."SS-1"]
+"method" = "aes-128-gcm"
+"password" = "pw"
+
+[[sample]]
+id = "clash-ss-2022"
+file = "samples/clash-ss-2022.yaml"
+format = "clash"
+subject = "ss 2022（2022-blake3-aes-128-gcm）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L257-L328（buildShadowsocks，cipher 取 2022 系列）"
+issues = ["clash_sing_app#8", "clash_sing_app#7"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-2022"]
+
+[sample.expect_fields."SS-2022"]
+"method" = "2022-blake3-aes-128-gcm"
+
+[[sample]]
+id = "clash-ss-obfs"
+file = "samples/clash-ss-obfs.yaml"
+format = "clash"
+subject = "ss + obfs 插件"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L257-L328（buildShadowsocks，plugin=obfs）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-OBFS"]
+
+[sample.expect_fields."SS-OBFS"]
+"plugin" = "obfs-local"
+"plugin_opts" = "obfs=http;obfs-host=www.bing.com"
+
+[[sample]]
+id = "clash-ss-v2ray"
+file = "samples/clash-ss-v2ray.yaml"
+format = "clash"
+subject = "ss + v2ray-plugin"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L257-L328（buildShadowsocks，plugin=v2ray-plugin）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-V2"]
+
+[sample.expect_fields."SS-V2"]
+"plugin" = "v2ray-plugin"
+
+[[sample]]
+id = "clash-vmess-tcp"
+file = "samples/clash-vmess-tcp.yaml"
+format = "clash"
+subject = "vmess + TLS，network: tcp（Xboard 固定写出）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L330-L402（buildVmess，network=tcp）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "VM-1"]
+
+[sample.expect_fields."VM-1"]
+"transport" = "<无>"
+"tls.server_name" = "v1.example.com"
+
+[[sample]]
+id = "clash-vmess-nonet"
+file = "samples/clash-vmess-nonet.yaml"
+format = "clash"
+subject = "vmess + TLS，不写 network"
+source = "构造：clash-vmess-tcp 的对照（去掉 network 一行）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "VM-2"]
+
+[sample.expect_fields."VM-2"]
+"transport" = "<无>"
+
+[[sample]]
+id = "clash-vmess-ws"
+file = "samples/clash-vmess-ws.yaml"
+format = "clash"
+subject = "vmess + ws（ws-opts 带 path 与 Host）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L330-L402（buildVmess，network=ws）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-W"]
+
+[sample.expect_fields."VM-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "v1.example.com"
+
+[[sample]]
+id = "clash-vmess-grpc"
+file = "samples/clash-vmess-grpc.yaml"
+format = "clash"
+subject = "vmess + grpc（grpc-opts）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L330-L402（buildVmess，network=grpc）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-G"]
+
+[sample.expect_fields."VM-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "clash-vmess-h2"
+file = "samples/clash-vmess-h2.yaml"
+format = "clash"
+subject = "vmess + h2"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L330-L402（buildVmess，network=h2）"
+issues = ["clash_sing_app#12"]
+expect_nodes = ["TJ-A", "TJ-B", "VM-H2"]
+
+[sample.expect_fields."VM-H2"]
+"transport.type" = "http"
+"transport.path" = "/h2"
+
+[[sample]]
+id = "clash-vmess-http"
+file = "samples/clash-vmess-http.yaml"
+format = "clash"
+subject = "vmess，tcp + http 伪装（Clash 写成 network: http）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L330-L402（buildVmess，network=tcp 且 header=http）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-HTTP"]
+
+[[sample]]
+id = "clash-vless-tcp"
+file = "samples/clash-vless-tcp.yaml"
+format = "clash"
+subject = "vless + TLS，network: tcp"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，tls=1，network=tcp）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "VL-1"]
+
+[sample.expect_fields."VL-1"]
+"transport" = "<无>"
+"tls.server_name" = "l1.example.com"
+
+[[sample]]
+id = "clash-vless-reality"
+file = "samples/clash-vless-reality.yaml"
+format = "clash"
+subject = "vless + reality + vision"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，tls=2）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-R"]
+
+[sample.expect_fields."VL-R"]
+"flow" = "xtls-rprx-vision"
+"transport" = "<无>"
+"tls.server_name" = "www.microsoft.com"
+"tls.reality.public_key" = "F_bSK4wl5JjCjRHtmeb4q5zM179IGwo7qtmRIwLVUB4"
+"tls.reality.short_id" = "0123abcd"
+"tls.utls.fingerprint" = "chrome"
+
+[[sample]]
+id = "clash-vless-notls"
+file = "samples/clash-vless-notls.yaml"
+format = "clash"
+subject = "vless 无 TLS，network: tcp"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，tls=0）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-P"]
+
+[sample.expect_fields."VL-P"]
+"transport" = "<无>"
+
+[[sample]]
+id = "clash-vless-ws"
+file = "samples/clash-vless-ws.yaml"
+format = "clash"
+subject = "vless + ws"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，network=ws）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-W"]
+
+[sample.expect_fields."VL-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "l1.example.com"
+
+[[sample]]
+id = "clash-vless-grpc"
+file = "samples/clash-vless-grpc.yaml"
+format = "clash"
+subject = "vless + grpc"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，network=grpc）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-G"]
+
+[sample.expect_fields."VL-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "clash-vless-h2"
+file = "samples/clash-vless-h2.yaml"
+format = "clash"
+subject = "vless + h2"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，network=h2）"
+issues = ["clash_sing_app#12"]
+expect_nodes = ["TJ-A", "TJ-B", "VL-H2"]
+
+[sample.expect_fields."VL-H2"]
+"transport.type" = "http"
+"transport.path" = "/h2"
+
+[[sample]]
+id = "clash-vless-xhttp"
+file = "samples/clash-vless-xhttp.yaml"
+format = "clash"
+subject = "vless + xhttp（sing-box 不支持，允许丢弃）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L404-L511（buildVless，network=xhttp）"
+issues = ["clash_sing_app#12"]
+expect_nodes = ["TJ-A", "TJ-B", "VL-X"]
+allow_drop = ["VL-X"]
+
+[[sample]]
+id = "clash-trojan-tcp"
+file = "samples/clash-trojan-tcp.yaml"
+format = "clash"
+subject = "trojan，network: tcp（Xboard 默认写出）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L513-L587（buildTrojan，network=tcp）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TJ-T"]
+
+[sample.expect_fields."TJ-T"]
+"transport" = "<无>"
+
+[[sample]]
+id = "clash-trojan-ws"
+file = "samples/clash-trojan-ws.yaml"
+format = "clash"
+subject = "trojan + ws"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L513-L587（buildTrojan，network=ws）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TJ-W"]
+
+[sample.expect_fields."TJ-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "t3.example.com"
+
+[[sample]]
+id = "clash-trojan-grpc"
+file = "samples/clash-trojan-grpc.yaml"
+format = "clash"
+subject = "trojan + grpc"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L513-L587（buildTrojan，network=grpc）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TJ-G"]
+
+[sample.expect_fields."TJ-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "clash-trojan-h2"
+file = "samples/clash-trojan-h2.yaml"
+format = "clash"
+subject = "trojan + h2（v2.1.0 上就整份失败）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L513-L587（buildTrojan，network=h2）"
+issues = ["clash_sing_app#12"]
+expect_nodes = ["TJ-A", "TJ-B", "TJ-H2"]
+
+[sample.expect_fields."TJ-H2"]
+"transport.type" = "http"
+"transport.path" = "/h2"
+
+[[sample]]
+id = "clash-hy2"
+file = "samples/clash-hy2.yaml"
+format = "clash"
+subject = "hysteria2"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L589-L629（buildHysteria，version=2）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY2-1"]
+
+[sample.expect_fields."HY2-1"]
+"password" = "pw"
+"tls.server_name" = "h1.example.com"
+
+[[sample]]
+id = "clash-hy2-obfs"
+file = "samples/clash-hy2-obfs.yaml"
+format = "clash"
+subject = "hysteria2 + salamander 混淆"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L589-L629（buildHysteria，version=2，obfs 开）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY2-O"]
+
+[sample.expect_fields."HY2-O"]
+"obfs.type" = "salamander"
+"obfs.password" = "ob"
+
+[[sample]]
+id = "clash-hy2-ports"
+file = "samples/clash-hy2-ports.yaml"
+format = "clash"
+subject = "hysteria2 + 端口跳跃"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L589-L629（buildHysteria，ports 与 hop-interval；间隔取 60，避开 sing-box 的默认 30 秒）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY2-P"]
+
+[sample.expect_fields."HY2-P"]
+"server_ports" = ["20000:30000"]
+"hop_interval" = "60s"
+
+[[sample]]
+id = "clash-hy1"
+file = "samples/clash-hy1.yaml"
+format = "clash"
+subject = "hysteria v1"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L589-L629（buildHysteria，version=1）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY1"]
+
+[sample.expect_fields."HY1"]
+"auth_str" = "pw"
+"up_mbps" = 30
+"down_mbps" = 100
+
+[[sample]]
+id = "clash-hy1-obfs"
+file = "samples/clash-hy1-obfs.yaml"
+format = "clash"
+subject = "hysteria v1 + obfs（混淆密码字符串）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L589-L629（buildHysteria，version=1，obfs 开）"
+issues = ["clash_sing_app#13"]
+expect_nodes = ["TJ-A", "TJ-B", "HY1-O"]
+
+[sample.expect_fields."HY1-O"]
+"obfs" = "mypass"
+"auth_str" = "pw"
+
+[[sample]]
+id = "clash-tuic"
+file = "samples/clash-tuic.yaml"
+format = "clash"
+subject = "tuic v5"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L631-L662（buildTuic）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TU-1"]
+
+[sample.expect_fields."TU-1"]
+"uuid" = "1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b"
+"password" = "1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b"
+"congestion_control" = "bbr"
+
+[[sample]]
+id = "clash-anytls"
+file = "samples/clash-anytls.yaml"
+format = "clash"
+subject = "anytls（Xboard 固定写 udp: true、不写 skip-cert-verify）"
+source = "Xboard@4f48e61 app/Protocols/ClashMeta.php#L664-L686（buildAnyTLS）"
+issues = ["clash_sing_app#11", "clash_sing_app#7"]
+expect_nodes = ["TJ-A", "TJ-B", "AT-1"]
+
+[sample.expect_fields."AT-1"]
+"password" = "pw"
+"tls.server_name" = "a1.example.com"
+
+[[sample]]
+id = "b64-ctrl"
+file = "samples/b64-ctrl.txt"
+format = "base64"
+subject = "对照：只有两个 trojan（\\r\\n 换行）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L247-L322（buildTrojan）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B"]
+
+[[sample]]
+id = "b64-ctrl-lf"
+file = "samples/b64-ctrl-lf.txt"
+format = "base64"
+subject = "对照：只有两个 trojan（\\n 换行）"
+source = "构造：b64-ctrl 的对照（换行用 \\n）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B"]
+line_ending = "lf"
+
+[[sample]]
+id = "b64-ss"
+file = "samples/b64-ss.txt"
+format = "base64"
+subject = "ss（SIP002）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L56-L75（buildShadowsocks）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-1"]
+
+[sample.expect_fields."SS-1"]
+"method" = "aes-128-gcm"
+"password" = "pw"
+
+[[sample]]
+id = "b64-ss-obfs"
+file = "samples/b64-ss-obfs.txt"
+format = "base64"
+subject = "ss + obfs-local 插件"
+source = "Xboard@4f48e61 app/Protocols/General.php#L56-L75（buildShadowsocks，带 plugin）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-OBFS"]
+
+[sample.expect_fields."SS-OBFS"]
+"plugin" = "obfs-local"
+"plugin_opts" = "obfs=http;obfs-host=www.bing.com"
+
+[[sample]]
+id = "b64-vmess-tcp"
+file = "samples/b64-vmess-tcp.txt"
+format = "base64"
+subject = "vmess + TLS，tcp（\\r\\n 换行）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L77-L153（buildVmess，network=tcp）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "VM-1"]
+
+[sample.expect_fields."VM-1"]
+"transport" = "<无>"
+"tls.server_name" = "v1.example.com"
+
+[[sample]]
+id = "b64-vmess-tcp-lf"
+file = "samples/b64-vmess-tcp-lf.txt"
+format = "base64"
+subject = "vmess + TLS，tcp（\\n 换行）"
+source = "构造：b64-vmess-tcp 的对照（换行用 \\n）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "VM-1"]
+line_ending = "lf"
+
+[sample.expect_fields."VM-1"]
+"transport" = "<无>"
+
+[[sample]]
+id = "b64-vmess-ws"
+file = "samples/b64-vmess-ws.txt"
+format = "base64"
+subject = "vmess + ws"
+source = "Xboard@4f48e61 app/Protocols/General.php#L77-L153（buildVmess，network=ws）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-W"]
+
+[sample.expect_fields."VM-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "v1.example.com"
+
+[[sample]]
+id = "b64-vmess-grpc"
+file = "samples/b64-vmess-grpc.txt"
+format = "base64"
+subject = "vmess + grpc"
+source = "Xboard@4f48e61 app/Protocols/General.php#L77-L153（buildVmess，network=grpc）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-G"]
+
+[sample.expect_fields."VM-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "b64-vmess-h2"
+file = "samples/b64-vmess-h2.txt"
+format = "base64"
+subject = "vmess + h2"
+source = "Xboard@4f48e61 app/Protocols/General.php#L77-L153（buildVmess，network=h2）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-H2"]
+
+[sample.expect_fields."VM-H2"]
+"transport.type" = "http"
+"transport.path" = "/h2"
+
+[[sample]]
+id = "b64-vmess-kcp"
+file = "samples/b64-vmess-kcp.txt"
+format = "base64"
+subject = "vmess + kcp（sing-box 不支持，允许丢弃）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L77-L153（buildVmess，network 不在 switch 里时原样输出）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-K"]
+allow_drop = ["VM-K"]
+
+[[sample]]
+id = "b64-vless-tcp"
+file = "samples/b64-vless-tcp.txt"
+format = "base64"
+subject = "vless + TLS，tcp"
+source = "Xboard@4f48e61 app/Protocols/General.php#L155-L245（buildVless，tls=1）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "VL-1"]
+
+[sample.expect_fields."VL-1"]
+"transport" = "<无>"
+"tls.server_name" = "l1.example.com"
+
+[[sample]]
+id = "b64-vless-reality"
+file = "samples/b64-vless-reality.txt"
+format = "base64"
+subject = "vless + reality + vision"
+source = "Xboard@4f48e61 app/Protocols/General.php#L155-L245（buildVless，tls=2）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-R"]
+
+[sample.expect_fields."VL-R"]
+"flow" = "xtls-rprx-vision"
+"transport" = "<无>"
+"tls.server_name" = "www.microsoft.com"
+"tls.reality.public_key" = "F_bSK4wl5JjCjRHtmeb4q5zM179IGwo7qtmRIwLVUB4"
+"tls.reality.short_id" = "0123abcd"
+"tls.utls.fingerprint" = "chrome"
+
+[[sample]]
+id = "b64-vless-ws"
+file = "samples/b64-vless-ws.txt"
+format = "base64"
+subject = "vless + ws"
+source = "Xboard@4f48e61 app/Protocols/General.php#L155-L245（buildVless，network=ws）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-W"]
+
+[sample.expect_fields."VL-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "l1.example.com"
+
+[[sample]]
+id = "b64-vless-grpc"
+file = "samples/b64-vless-grpc.txt"
+format = "base64"
+subject = "vless + grpc"
+source = "Xboard@4f48e61 app/Protocols/General.php#L155-L245（buildVless，network=grpc）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-G"]
+
+[sample.expect_fields."VL-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "b64-vless-h2"
+file = "samples/b64-vless-h2.txt"
+format = "base64"
+subject = "vless + h2（Xboard 写成 type=http）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L155-L245（buildVless，network=h2）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-H2"]
+
+[sample.expect_fields."VL-H2"]
+"transport.type" = "http"
+"transport.path" = "/h2"
+
+[[sample]]
+id = "b64-vless-xhttp"
+file = "samples/b64-vless-xhttp.txt"
+format = "base64"
+subject = "vless + xhttp（sing-box 不支持，允许丢弃）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L155-L245（buildVless，network=xhttp）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-X"]
+allow_drop = ["VL-X"]
+
+[[sample]]
+id = "b64-trojan-ws"
+file = "samples/b64-trojan-ws.txt"
+format = "base64"
+subject = "trojan + ws"
+source = "Xboard@4f48e61 app/Protocols/General.php#L247-L322（buildTrojan，network=ws）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TJ-W"]
+
+[sample.expect_fields."TJ-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "t3.example.com"
+
+[[sample]]
+id = "b64-trojan-grpc"
+file = "samples/b64-trojan-grpc.txt"
+format = "base64"
+subject = "trojan + grpc"
+source = "Xboard@4f48e61 app/Protocols/General.php#L247-L322（buildTrojan，network=grpc）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TJ-G"]
+
+[sample.expect_fields."TJ-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "b64-hy2"
+file = "samples/b64-hy2.txt"
+format = "base64"
+subject = "hysteria2，不带 mport"
+source = "Xboard@4f48e61 app/Protocols/General.php#L324-L367（buildHysteria，version=2）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY2-1"]
+
+[sample.expect_fields."HY2-1"]
+"password" = "pw"
+"tls.server_name" = "h1.example.com"
+
+[[sample]]
+id = "b64-hy2-obfs"
+file = "samples/b64-hy2-obfs.txt"
+format = "base64"
+subject = "hysteria2 + salamander 混淆"
+source = "Xboard@4f48e61 app/Protocols/General.php#L324-L367（buildHysteria，version=2，obfs 开）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY2-O"]
+
+[sample.expect_fields."HY2-O"]
+"obfs.type" = "salamander"
+"obfs.password" = "ob"
+
+[[sample]]
+id = "b64-hy2-mport-range"
+file = "samples/b64-hy2-mport-range.txt"
+format = "base64"
+subject = "hysteria2，mport 端口范围"
+source = "Xboard@4f48e61 app/Protocols/General.php#L324-L367（buildHysteria，ports）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY2-R"]
+
+[sample.expect_fields."HY2-R"]
+"server_ports" = ["20000:30000"]
+
+[[sample]]
+id = "b64-hy2-mport-single"
+file = "samples/b64-hy2-mport-single.txt"
+format = "base64"
+subject = "hysteria2，mport 单端口"
+source = "构造：clash_sing_app#8（mport 写成单端口）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY2-S"]
+
+[[sample]]
+id = "b64-hy2-mport-list"
+file = "samples/b64-hy2-mport-list.txt"
+format = "base64"
+subject = "hysteria2，mport 逗号列表"
+source = "构造：clash_sing_app#8（mport 写成逗号列表，按 http_build_query 编码）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY2-L"]
+
+[[sample]]
+id = "b64-hy2-prefix"
+file = "samples/b64-hy2-prefix.txt"
+format = "base64"
+subject = "hy2:// 前缀、insecure=1、salamander、不带 sni"
+source = "构造：clash_sing_app#8（其它面板与客户端常用的写法）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY2-P"]
+
+[sample.expect_fields."HY2-P"]
+"obfs.type" = "salamander"
+"tls.insecure" = true
+"tls.server_name" = "h1.example.com"
+
+[[sample]]
+id = "b64-hy1"
+file = "samples/b64-hy1.txt"
+format = "base64"
+subject = "hysteria v1"
+source = "Xboard@4f48e61 app/Protocols/General.php#L324-L367（buildHysteria，version=1）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY1"]
+
+[sample.expect_fields."HY1"]
+"auth_str" = "pw"
+"up_mbps" = 30
+"down_mbps" = 100
+
+[[sample]]
+id = "b64-hy1-obfs"
+file = "samples/b64-hy1-obfs.txt"
+format = "base64"
+subject = "hysteria v1 + obfs（xplus / obfsParam）"
+source = "Xboard@4f48e61 app/Protocols/General.php#L324-L367（buildHysteria，version=1，obfs 开）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "HY1-O"]
+
+[sample.expect_fields."HY1-O"]
+"obfs" = "mypass"
+
+[[sample]]
+id = "b64-tuic"
+file = "samples/b64-tuic.txt"
+format = "base64"
+subject = "tuic v5"
+source = "Xboard@4f48e61 app/Protocols/General.php#L370-L420（buildTuic）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TU-1"]
+
+[sample.expect_fields."TU-1"]
+"uuid" = "1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b"
+"password" = "1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b"
+"congestion_control" = "bbr"
+
+[[sample]]
+id = "b64-anytls"
+file = "samples/b64-anytls.txt"
+format = "base64"
+subject = "anytls"
+source = "Xboard@4f48e61 app/Protocols/General.php#L426-L439（buildAnyTLS）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "AT-1"]
+
+[sample.expect_fields."AT-1"]
+"password" = "pw"
+"tls.server_name" = "a1.example.com"
+
+[[sample]]
+id = "b64-single"
+file = "samples/b64-single.txt"
+format = "base64"
+subject = "只有一个节点"
+source = "构造：clash_sing_app#8（单节点订阅）"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A"]
+
+[[sample]]
+id = "b64-dup-names"
+file = "samples/b64-dup-names.txt"
+format = "base64"
+subject = "两个节点重名"
+source = "构造：clash_sing_app#8（节点重名）"
+issues = ["clash_sing_app#8"]
+expect_node_count = 3
+
+[[sample]]
+id = "b64-noname"
+file = "samples/b64-noname.txt"
+format = "base64"
+subject = "两个节点没有名字"
+source = "构造：clash_sing_app#8（节点无名）"
+issues = ["clash_sing_app#8"]
+expect_node_count = 3
+
+[[sample]]
+id = "sb-ctrl"
+file = "samples/sb-ctrl.json"
+format = "singbox"
+subject = "对照：两个 trojan，带提供方分流与 DNS"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L637-L679（buildTrojan）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B"]
+expect_provider_route = true
+
+[[sample]]
+id = "sb-ss"
+file = "samples/sb-ss.json"
+format = "singbox"
+subject = "shadowsocks"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L528-L544（buildShadowsocks）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-1"]
+expect_provider_route = true
+
+[sample.expect_fields."SS-1"]
+"method" = "aes-128-gcm"
+
+[[sample]]
+id = "sb-ss-obfs"
+file = "samples/sb-ss-obfs.json"
+format = "singbox"
+subject = "shadowsocks + obfs-local 插件"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L528-L544（buildShadowsocks，带 plugin）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "SS-OBFS"]
+expect_provider_route = true
+
+[sample.expect_fields."SS-OBFS"]
+"plugin" = "obfs-local"
+"plugin_opts" = "obfs=http;obfs-host=www.bing.com"
+
+[[sample]]
+id = "sb-vmess-ws"
+file = "samples/sb-vmess-ws.json"
+format = "singbox"
+subject = "vmess + TLS + ws"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L547-L580（buildVmess）与 #L847-L886（buildTransport）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VM-W"]
+expect_provider_route = true
+
+[sample.expect_fields."VM-W"]
+"transport.type" = "ws"
+"transport.path" = "/ws"
+"transport.headers.Host" = "v1.example.com"
+
+[[sample]]
+id = "sb-vless-reality"
+file = "samples/sb-vless-reality.json"
+format = "singbox"
+subject = "vless + reality + vision"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L582-L635（buildVless，tls=2）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "VL-R"]
+expect_provider_route = true
+
+[sample.expect_fields."VL-R"]
+"flow" = "xtls-rprx-vision"
+"tls.reality.public_key" = "F_bSK4wl5JjCjRHtmeb4q5zM179IGwo7qtmRIwLVUB4"
+"tls.utls.fingerprint" = "chrome"
+
+[[sample]]
+id = "sb-trojan-grpc"
+file = "samples/sb-trojan-grpc.json"
+format = "singbox"
+subject = "trojan + grpc"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L637-L679（buildTrojan）与 #L847-L886（buildTransport）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TJ-G"]
+expect_provider_route = true
+
+[sample.expect_fields."TJ-G"]
+"transport.type" = "grpc"
+"transport.service_name" = "gsvc"
+
+[[sample]]
+id = "sb-hy2-ports"
+file = "samples/sb-hy2-ports.json"
+format = "singbox"
+subject = "hysteria2 + 端口跳跃"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L681-L732（buildHysteria，version=2，ports）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY2-P"]
+expect_provider_route = true
+
+[sample.expect_fields."HY2-P"]
+"server_ports" = ["20000:30000"]
+"hop_interval" = "60s"
+
+[[sample]]
+id = "sb-hy2-obfs"
+file = "samples/sb-hy2-obfs.json"
+format = "singbox"
+subject = "hysteria2 + salamander 混淆"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L681-L732（buildHysteria，version=2，obfs 开）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY2-O"]
+expect_provider_route = true
+
+[sample.expect_fields."HY2-O"]
+"obfs.type" = "salamander"
+"obfs.password" = "ob"
+
+[[sample]]
+id = "sb-hy1"
+file = "samples/sb-hy1.json"
+format = "singbox"
+subject = "hysteria v1，不带混淆"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L681-L732（buildHysteria，version=1）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "HY1"]
+expect_provider_route = true
+
+[sample.expect_fields."HY1"]
+"auth_str" = "pw"
+
+[[sample]]
+id = "sb-hy1-obfs"
+file = "samples/sb-hy1-obfs.json"
+format = "singbox"
+subject = "hysteria v1 + obfs（字符串）"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L681-L732（buildHysteria，version=1，obfs 是密码字符串）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = ["clash_sing_app#13"]
+expect_nodes = ["TJ-A", "TJ-B", "HY1-O"]
+expect_provider_route = true
+
+[sample.expect_fields."HY1-O"]
+"obfs" = "mypass"
+
+[[sample]]
+id = "sb-tuic"
+file = "samples/sb-tuic.json"
+format = "singbox"
+subject = "tuic v5"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L734-L766（buildTuic）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "TU-1"]
+expect_provider_route = true
+
+[sample.expect_fields."TU-1"]
+"uuid" = "1b0c6a5e-9f7d-4b6e-8f1a-2c3d4e5f6a7b"
+"congestion_control" = "bbr"
+
+[[sample]]
+id = "sb-anytls"
+file = "samples/sb-anytls.json"
+format = "singbox"
+subject = "anytls"
+source = "Xboard@4f48e61 app/Protocols/SingBox.php#L768-L790（buildAnyTLS）；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "AT-1"]
+expect_provider_route = true
+
+[sample.expect_fields."AT-1"]
+"password" = "pw"
+
+[[sample]]
+id = "sb-no-inbounds"
+file = "samples/sb-no-inbounds.json"
+format = "singbox"
+subject = "对照变体：没有 inbounds"
+source = "构造：sb-ctrl 去掉 inbounds；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = ["clash_sing_app#15"]
+expect_nodes = ["TJ-A", "TJ-B"]
+expect_provider_route = true
+
+[[sample]]
+id = "sb-no-dns-rules"
+file = "samples/sb-no-dns-rules.json"
+format = "singbox"
+subject = "对照变体：DNS 没有 rules"
+source = "构造：sb-ctrl 去掉 dns.rules；整体结构仿 resources/rules/default.sing-box.json（节点选择 / 自动选择 两个组），改写成 sing-box 1.14 能通过 check 的新格式，提供方自带一条分流规则与 DNS 作标记"
+issues = ["clash_sing_app#14"]
+expect_nodes = ["TJ-A", "TJ-B"]
+expect_provider_route = true
+
+[[sample]]
+id = "b64-ss-lf"
+file = "samples/b64-ss-lf.txt"
+format = "base64"
+subject = "ss（SIP002，\\n 换行）"
+source = "构造：b64-ss 的对照（换行用 \\n），分清 ss 被丢是不是 \\r\\n 造成的"
+issues = ["clash_sing_app#8"]
+expect_nodes = ["TJ-A", "TJ-B", "SS-1"]
+line_ending = "lf"
+
+[sample.expect_fields."SS-1"]
+"method" = "aes-128-gcm"
+"password" = "pw"
+
+[[sample]]
+id = "clash-name-unicode"
+file = "samples/clash-name-unicode.yaml"
+format = "clash"
+subject = "节点名含 emoji、空格、中文"
+source = "构造：真实订阅常见的节点名写法（审查 2026-09-29 指出样本库缺这类名字）"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "🇭🇰 香港 01"]
+
+[[sample]]
+id = "b64-name-unicode"
+file = "samples/b64-name-unicode.txt"
+format = "base64"
+subject = "节点名含 emoji、空格、中文（trojan 链接的 #名字按 rawurlencode 编码；vmess 的 ps 按 json_encode 转义；\\n 换行，避开 N1）"
+source = "构造：真实订阅常见的节点名写法；编码方式照 Xboard@4f48e61 app/Protocols/General.php 的 rawurlencode 与 json_encode"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "🇭🇰 香港 01", "🇯🇵 日本 02"]
+line_ending = "lf"
+
+[[sample]]
+id = "sb-name-unicode"
+file = "samples/sb-name-unicode.json"
+format = "singbox"
+subject = "节点名含 emoji、空格、中文（原生订阅）"
+source = "构造：真实订阅常见的节点名写法；结构同 sb-ctrl"
+issues = []
+expect_nodes = ["TJ-A", "TJ-B", "🇸🇬 新加坡 03"]
+expect_provider_route = true

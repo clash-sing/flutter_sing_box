@@ -1,0 +1,4 @@
+.cache/
+verify/subs/results/
+# --local 用的真实订阅：含服务器与密码，绝不进 git
+verify/subs/local/
