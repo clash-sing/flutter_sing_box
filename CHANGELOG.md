@@ -1,3 +1,16 @@
+## 3.0.3
+
+### CI
+
+**Subscription sample regression gate (`tool/subcheck/`)**
+* New fully synthetic subscription sample library (no real-provider data): Clash YAML / Base64 link-list / native sing-box JSON samples covering ss (incl. 2022 / obfs / v2ray-plugin), trojan, vmess, vless (incl. REALITY), hysteria1 / hysteria2, tuic and anytls across tcp / ws / grpc / h2 transports
+* Each sample is imported through `SingBoxConfigProvider.provide()` — the same conversion path the app uses — and the generated configs are validated with `sing-box check` (matching core version) plus static checks for references to missing outbounds in groups, `route.final`, routing rules and DNS detours
+* Findings are classified into seven categories (import errors, dropped nodes, renamed nodes, field mismatches, kernel rejections, start-up failures, provider routing/DNS replaced); per-sample expected results live in `verify/subs/samples.toml`
+* Release gate: pushing a `v*` tag now runs the library against both the previous release tag and the new commit, and any regression blocks `publish` and `release`; the comparison report lands in the workflow run summary
+* Runs locally too via `tool/subcheck/ci-compare.sh`, which fetches the official sing-box binaries matching each commit's libbox version (no Go toolchain required)
+
+No runtime behavior changes — this release only adds CI verification and tooling.
+
 ## 3.0.2
 
 ### Features
