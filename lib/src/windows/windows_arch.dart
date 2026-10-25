@@ -24,6 +24,7 @@ typedef NativeArchResolver = int Function();
 abstract final class WindowsArch {
   /// 资产子目录名，与 GOARCH 及 clash_sing_service build.sh 的产物布局一致。
   static const String amd64 = 'amd64';
+  /// ARM64 资产子目录名。
   static const String arm64 = 'arm64';
 
   /// 底层真机架构解析器，默认走 win32 的 GetNativeSystemInfo；仅供单测替换。

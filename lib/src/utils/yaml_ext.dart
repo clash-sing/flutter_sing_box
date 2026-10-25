@@ -31,6 +31,7 @@ extension YamlMapExt on YamlMap {
     return list;
   }
 
+  /// 递归转换为普通 `Map<String, dynamic>`（键转字符串、剥掉 Yaml 节点壳）。
   Map<String, dynamic> toMap() {
     return _convertYamlMap(this);
   }

@@ -12,11 +12,13 @@ typedef AssetBytesWriter = Future<void> Function(Uint8List bytes, File dest);
 typedef AssetFileRenamer = Future<File> Function(File source, String newPath);
 
 
+/// 插件打包资产的释放与校验工具。
 abstract final class AssetUtil {
   /// 缓存 Future 而非结果：第一个调用同步地把加载 Future 存下来，
   /// 并发调用直接 await 同一个 Future，底层只加载一次。
   static Future<List<String>>? _assetsListFuture;
 
+  /// 全部打包资产路径清单（并发安全，底层只加载一次）。
   static Future<List<String>> getAssetsList() {
     // 注意：这里不是 async —— ??= 赋值是同步的，没有 await 间隙，
     // 因此并发调用不会重复触发加载。

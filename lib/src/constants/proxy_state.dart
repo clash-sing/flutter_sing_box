@@ -3,6 +3,7 @@
 /// sealed class 形态：四个状态各为一个子类，经模式匹配穷尽处理。
 /// 仅 [ProxyStopped] 携带数据（[ProxyStopped.errMessage]）。
 sealed class ProxyState {
+  /// 常量构造器。
   const ProxyState();
 
   /// 已停止（无错误信息）。供 `state == ProxyState.stopped` 这类存量比较使用。
@@ -34,6 +35,7 @@ sealed class ProxyState {
 ///
 /// [errMessage] 非 null 表示异常停止（启动失败、内核崩溃等），为 null 表示正常停止。
 final class ProxyStopped extends ProxyState {
+  /// 常量构造器，可携带 [errMessage]。
   const ProxyStopped({this.errMessage});
 
   static const _stateName = 'Stopped';
@@ -41,16 +43,20 @@ final class ProxyStopped extends ProxyState {
   /// 异常停止的原因；正常停止时为 null。
   final String? errMessage;
 
+  /// 显示名，固定为 `Stopped`。
   @override
   String get name => _stateName;
 
+  /// 按 [errMessage] 相等比较。
   @override
   bool operator ==(Object other) =>
       identical(this, other) || other is ProxyStopped && other.errMessage == errMessage;
 
+  /// 与 [operator ==] 配套的哈希。
   @override
   int get hashCode => Object.hash(ProxyStopped, errMessage);
 
+  /// 调试字符串；异常停止时附带错误信息。
   @override
   String toString() =>
       errMessage == null ? 'ProxyStopped' : 'ProxyStopped(errMessage: $errMessage)';
@@ -58,39 +64,48 @@ final class ProxyStopped extends ProxyState {
 
 /// 正在启动。
 final class ProxyStarting extends ProxyState {
+  /// 常量构造器。
   const ProxyStarting();
 
   static const _stateName = 'Starting';
 
+  /// 显示名，固定为 `Starting`。
   @override
   String get name => _stateName;
 
+  /// 调试字符串。
   @override
   String toString() => 'ProxyStarting';
 }
 
 /// 已启动。
 final class ProxyStarted extends ProxyState {
+  /// 常量构造器。
   const ProxyStarted();
 
   static const _stateName = 'Started';
 
+  /// 显示名，固定为 `Started`。
   @override
   String get name => _stateName;
 
+  /// 调试字符串。
   @override
   String toString() => 'ProxyStarted';
 }
 
 /// 正在停止。
 final class ProxyStopping extends ProxyState {
+  /// 常量构造器。
   const ProxyStopping();
 
   static const _stateName = 'Stopping';
 
+  /// 显示名，固定为 `Stopping`。
   @override
   String get name => _stateName;
 
+  /// 调试字符串。
   @override
   String toString() => 'ProxyStopping';
 }

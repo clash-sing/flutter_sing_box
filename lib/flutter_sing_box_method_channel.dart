@@ -7,41 +7,48 @@ import 'package:flutter/services.dart';
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
-/// An implementation of [FlutterSingBoxPlatform] that uses method channels.
+/// 基于 MethodChannel / EventChannel 的 [FlutterSingBoxPlatform] 实现（Android/iOS）。
 class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
+  /// 注册本实现为平台默认实例（由 dart_plugin_registrant 调用）。
   static void registerWith() {
     FlutterSingBoxPlatform.instance = MethodChannelFlutterSingBox();
   }
 
-  /// The method channel used to interact with the native platform.
+  /// 与原生平台通信的 method channel。
   @visibleForTesting
   final methodChannel = const MethodChannel('flutter_sing_box_method');
 
+  /// 初始化插件（转发原生 method channel）。
   @override
   Future<void> init() async {
     return await methodChannel.invokeMethod('init');
   }
 
+  /// 启动 VPN 服务（转发原生）。
   @override
   Future<void> startVpn() async {
     return await methodChannel.invokeMethod('startVpn');
   }
 
+  /// 停止 VPN 服务（转发原生）。
   @override
   Future<void> stopVpn() async {
     return await methodChannel.invokeMethod('stopVpn');
   }
 
+  /// 重载服务配置（转发原生）。
   @override
   Future<void> serviceReload() async {
     return await methodChannel.invokeMethod('serviceReload');
   }
 
+  /// 设置 Clash 模式（转发原生）。
   @override
   Future<void> setClashMode(String mode) async {
     return await methodChannel.invokeMethod('setClashMode', mode);
   }
 
+  /// 在分组中选中出站（转发原生）。
   @override
   Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
     return await methodChannel.invokeMethod('selectOutbound', {
@@ -50,6 +57,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     });
   }
 
+  /// 设置分组展开状态（转发原生）。
   @override
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
     return await methodChannel.invokeMethod('setGroupExpand', {
@@ -58,22 +66,26 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     });
   }
 
+  /// 对分组执行 URL 测速（转发原生）。
   @override
   Future<void> urlTest({required String groupTag}) async {
     return await methodChannel.invokeMethod('urlTest', groupTag);
   }
 
+  /// 获取 sing-box 内核版本号（转发原生）。
   @override
   Future<String> getSingBoxVersion() async {
     return await methodChannel.invokeMethod('getSingBoxVersion');
   }
 
+  /// 非 Windows 平台默认实现：无系统服务概念，返回 [WindowsServiceStatus.unsupported]。
   @override
   Future<WindowsServiceStatus> queryServiceStatus() async {
     // Android / iOS 等非 Windows 桌面平台走此默认实现，无该服务概念。
     return WindowsServiceStatus.unsupported;
   }
 
+  /// 非 Windows 平台默认实现：无系统服务概念，恒返回 `true`。
   @override
   Future<bool> installService({
     required String serviceName,
@@ -81,17 +93,21 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
     required String description,
   }) async => true;
 
+  /// 非 Windows 平台默认实现：恒返回 `false`。
   @override
   Future<bool> uninstallService() async => false;
 
+  /// 非 Windows 平台默认实现：恒返回 `false`。
   @override
   Future<bool> startService() async => false;
 
+  /// 非 Windows 平台默认实现：恒返回 `false`。
   @override
   Future<bool> stopService() async => false;
 
   final _eventChannelConnectedStatus = const EventChannel('connected_status_event');
   Stream<ClientStatus>? _connectedStatusStream;
+  /// 客户端连接状态流（EventChannel `connected_status_event`）。
   @override
   Stream<ClientStatus> get connectedStatusStream {
     _connectedStatusStream ??= _eventChannelConnectedStatus.receiveBroadcastStream().map((data) {
@@ -102,6 +118,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
 
   final _eventChannelGroup = const EventChannel('group_event');
   Stream<List<ClientGroup>>? _groupStream;
+  /// 分组列表流（EventChannel `group_event`）。
   @override
   Stream<List<ClientGroup>> get groupStream {
     _groupStream ??= _eventChannelGroup.receiveBroadcastStream().map((data) {
@@ -117,6 +134,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   final _eventChannelClashMode = const EventChannel('clash_mode_event');
   Stream<ClientClashMode>? _clashModeStream;
 
+  /// Clash 模式流（EventChannel `clash_mode_event`）。
   @override
   Stream<ClientClashMode> get clashModeStream {
     _clashModeStream ??= _eventChannelClashMode.receiveBroadcastStream().map(
@@ -127,6 +145,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
 
   final _eventChannelLog = const EventChannel('log_event');
   Stream<List<ClientLog>>? _logStream;
+  /// 内核日志流（EventChannel `log_event`，按批推送）。
   @override
   Stream<List<ClientLog>> get logStream {
     _logStream ??= _eventChannelLog.receiveBroadcastStream().map(
@@ -139,6 +158,7 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
 
   final _eventChannelProxyState = const EventChannel('proxy_state_event');
   Stream<ProxyState>? _proxyStateStream;
+  /// 代理状态流（EventChannel `proxy_state_event`）；原生 error 转为带 errMessage 的 [ProxyStopped]。
   @override
   Stream<ProxyState> get proxyStateStream {
     _proxyStateStream ??= _eventChannelProxyState.receiveBroadcastStream().transform(

@@ -6,16 +6,17 @@ import 'package:flutter/foundation.dart';
 
 /// User-Agent 格式说明：APP名称/APP版本 (编译版本好; 平台 系统版本; 内核名称/内核版本)
 
+/// 全局共享的 Dio HTTP 客户端（单例）。
 class DioClient {
   DioClient._internal();
   static final DioClient _instance = DioClient._internal();
 
-  /// Creates the singleton [DioClient] instance.
+  /// 单例工厂构造器。
   factory DioClient() => _instance;
 
   late final Dio _dio = _initDio();
 
-  /// The configured [Dio] instance.
+  /// 配置好的 [Dio] 实例。
   Dio get dio => _dio;
 
   /// 是否放行证书校验失败的 HTTPS 连接。

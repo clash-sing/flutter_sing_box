@@ -10,12 +10,18 @@ import '../data/models/windows/helper_config.dart';
 
 /// helper.exe 一次调用的完整结果，便于单测断言与失败诊断。
 class HelperCliResult {
+  /// 是否进程正常退出（exitCode == 0 且未超时）。
   final bool ok; // 进程正常退出（exitCode == 0 且未超时）
+  /// 退出码；非提权为 helper.exe 的，提权时为 powershell.exe 的。
   final int exitCode; // 非 elevated：helper.exe 退出码；elevated：powershell.exe 退出码
+  /// 标准输出（已 trim）。
   final String stdout; // 已 trim
+  /// 标准错误输出。
   final String stderr;
+  /// 是否超时。
   final bool timedOut;
 
+  /// 构造调用结果。
   const HelperCliResult({
     required this.ok,
     required this.exitCode,
@@ -33,9 +39,11 @@ typedef HelperRunner = Future<io.ProcessResult> Function(
 ///
 /// 仅 Windows 平台使用；定位 exe、拼参、提权、超时、解析全部收拢于此。
 class HelperCli {
+  /// 构造 CLI 封装；[helperExePath] 为 exe 完整路径，runner 可注入测试。
   HelperCli({required this.helperExePath, HelperRunner? runner})
       : _runner = runner ?? ((exe, args) => io.Process.run(exe, args));
 
+  /// helper.exe 的完整路径。
   final String helperExePath;
   final HelperRunner _runner;
 

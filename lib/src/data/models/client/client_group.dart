@@ -44,6 +44,7 @@ class ClientGroup {
 /// Represents an item within a proxy group.
 @unfreezed
 abstract class ClientGroupItem with _$ClientGroupItem {
+  /// 构造分组条目。
   factory ClientGroupItem({
     required String tag,
     required String type,

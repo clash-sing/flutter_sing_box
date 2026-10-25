@@ -1,9 +1,10 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
-/// Builds the default User-Agent string for subscription requests.
+/// 构造订阅请求的默认 User-Agent。
 class SubscribeUserAgent {
   static String? _cachedVersion;
 
+  /// 内核版本串（sing-box / mihomo / v2ray）；内核版本首次查询后缓存。
   static Future<String> getCoresInUserAgent() async {
     _cachedVersion ??= await FlutterSingBox().getSingBoxVersion();
     const String mihomo = 'mihomo/1.19.32';
@@ -11,7 +12,7 @@ class SubscribeUserAgent {
     return 'sing-box/$_cachedVersion $mihomo $v2ray';
   }
 
-  /// Returns the default User-Agent string for the current platform.
+  /// 返回订阅请求的默认 User-Agent（当前为内核版本串）。
   static Future<String> getDefaultUserAgent() async {
     return await getCoresInUserAgent();
     // TODO：服务端不识别 SFW/${Version}，待服务端修复后，再打开下面的代码。

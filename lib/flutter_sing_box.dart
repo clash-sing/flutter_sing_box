@@ -13,39 +13,34 @@ export 'flutter_sing_box_windows.dart';
 import 'flutter_sing_box.dart';
 import 'flutter_sing_box_platform_interface.dart';
 
-/// The main class for interacting with the flutter_sing_box plugin.
+/// flutter_sing_box 插件的主入口，封装全部跨平台能力。
 class FlutterSingBox {
-  /// Initializes the plugin.
+  /// 初始化插件。
   Future<void> init() async {
     return await FlutterSingBoxPlatform.instance.init();
   }
 
-  /// Starts the VPN service.
+  /// 启动 VPN 服务。
   Future<void> startVpn() async {
     return await FlutterSingBoxPlatform.instance.startVpn();
   }
 
-  /// Stops the VPN service.
+  /// 停止 VPN 服务。
   Future<void> stopVpn() async {
     return await FlutterSingBoxPlatform.instance.stopVpn();
   }
 
-  /// Reloads the service configuration.
+  /// 重载服务配置。
   Future<void> serviceReload() async {
     return await FlutterSingBoxPlatform.instance.serviceReload();
   }
 
-  /// Sets the Clash mode.
-  ///
-  /// [clashMode] The new Clash mode to set (e.g., 'Global', 'Rule', 'Direct').
+  /// 设置 Clash 模式（如 `Global` / `Rule` / `Direct`）。
   Future<void> setClashMode(String clashMode) async {
     return await FlutterSingBoxPlatform.instance.setClashMode(clashMode);
   }
 
-  /// Selects an outbound for a specific group.
-  ///
-  /// [groupTag] The tag of the group.
-  /// [outboundTag] The tag of the outbound to select.
+  /// 在 [groupTag] 分组中选中 [outboundTag] 出站。
   Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
     return await FlutterSingBoxPlatform.instance.selectOutbound(
       groupTag: groupTag,
@@ -53,10 +48,7 @@ class FlutterSingBox {
     );
   }
 
-  /// Sets the expansion state of a group in the UI.
-  ///
-  /// [groupTag] The tag of the group.
-  /// [isExpand] Whether the group should be expanded or collapsed.
+  /// 将 [groupTag] 分组置为 [isExpand] 指定的展开/收起状态。
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
     return await FlutterSingBoxPlatform.instance.setGroupExpand(
       groupTag: groupTag,
@@ -64,14 +56,12 @@ class FlutterSingBox {
     );
   }
 
-  /// Performs a URL test for a specific group.
-  ///
-  /// [groupTag] The tag of the group to test.
+  /// 对 [groupTag] 分组执行 URL 测速。
   Future<void> urlTest({required String groupTag}) async {
     return await FlutterSingBoxPlatform.instance.urlTest(groupTag: groupTag);
   }
 
-  /// Gets the version of the underlying sing-box core.
+  /// 获取底层 sing-box 内核版本号。
   Future<String> getSingBoxVersion() async {
     return await FlutterSingBoxPlatform.instance.getSingBoxVersion();
   }
@@ -81,6 +71,9 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.queryServiceStatus();
   }
 
+  /// 安装 Windows 系统服务（UAC 提权，仅 Windows 平台实际执行）。
+  ///
+  /// [serviceName] 服务名，[displayName] 显示名，[description] 描述文案。
   Future<bool> installService({
     required String serviceName,
     required String displayName,
@@ -108,19 +101,19 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.stopService();
   }
 
-  /// A stream of client connection status updates.
+  /// 客户端连接状态的更新流。
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;
 
-  /// A stream of client group updates.
+  /// 分组列表的更新流。
   Stream<List<ClientGroup>> get groupStream => FlutterSingBoxPlatform.instance.groupStream;
 
-  /// A stream of client Clash mode updates.
+  /// Clash 模式的更新流。
   Stream<ClientClashMode> get clashModeStream => FlutterSingBoxPlatform.instance.clashModeStream;
 
-  /// A stream of log messages from the sing-box core.
+  /// sing-box 内核日志的更新流（按批推送）。
   Stream<List<ClientLog>> get logStream => FlutterSingBoxPlatform.instance.logStream;
 
-  /// A stream of proxy state updates.
+  /// 代理生命周期状态的更新流（启动失败原因也经此流下发）。
   Stream<ProxyState> get proxyStateStream => FlutterSingBoxPlatform.instance.proxyStateStream;
 }

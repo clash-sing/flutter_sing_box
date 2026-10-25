@@ -13,9 +13,11 @@ import 'package:flutter_sing_box/src/data/models/clash/clash_configs.dart';
 /// ws://127.0.0.1:9090/memory?token=
 /// ws://127.0.0.1:9090/traffic?token=
 
+/// Clash API HTTP/WS 客户端（端口与设置存储同源，变更即生效）。
 class ClashHttpClient {
   ClashHttpClient._();
   static final ClashHttpClient _instance = ClashHttpClient._();
+  /// 单例工厂构造器。
   factory ClashHttpClient() => _instance;
 
   /// Clash API WebSocket 基地址，端口与 [dio] 同源（CsSettingsStorage），端口变更即生效。
@@ -24,6 +26,7 @@ class ClashHttpClient {
   Dio? _dio;
   int? _dioPort;
 
+  /// Dio 实例；Clash API 端口变更时整体重建。
   Dio get dio {
     final port = CsSettingsStorage().getClashApiPort();
     if (_dio == null || _dioPort != port) {
@@ -45,6 +48,7 @@ class ClashHttpClient {
     return dio;
   }
 
+  /// 切换代理模式（PATCH /configs）。
   Future<void> setClashMode(String mode) async {
     final response = await dio.patch('/configs', data: {'mode': mode});
     debugPrint('Set clash mode response date: ${response.data}');
@@ -61,11 +65,13 @@ class ClashHttpClient {
     return ClientClashMode(modes: configs.modeList, currentMode: configs.mode);
   }
 
+  /// 在分组中选中出站（`PUT /proxies/<groupTag>`）。
   Future<void> setOutbound({required String groupTag, required String outboundTag}) async {
     final response = await dio.put('/proxies/$groupTag', data: {'name': outboundTag});
     debugPrint('setOutbound response date: ${response.data}');
   }
 
+  /// 拉取分组列表（GET /proxies），映射为 [ClientGroup] 形态。
   Future<List<ClientGroup>> getGroups() async {
     final response = await dio.get('/proxies');
     final Map<String, dynamic> map = response.data is Map
@@ -102,6 +108,7 @@ class ClashHttpClient {
     return groups;
   }
 
+  /// 对分组整体测速（`GET /group/<groupTag>/delay`）。
   Future<void> testGroup(String groupTag) async {
     final params = 'timeout=5000&url=${Uri.encodeQueryComponent(CsSettingsStorage().getTestUrl())}';
     final response = await dio.get('/group/${Uri.encodeQueryComponent(groupTag)}/delay?$params');

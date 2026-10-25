@@ -15,9 +15,12 @@ part 'inbound.g.dart';
 
 /// 入站配置，按 type 判别的密封类层级。
 sealed class Inbound {
+  /// 常量构造器，供子类调用。
   const Inbound();
 
+  /// 标签（JSON 键 `tag`），配置内唯一标识。
   String get tag;
+  /// `type` 判别值，决定反序列化落到哪个子类。
   String get type;
 
   /// 子类输出须带 type 判别键（round-trip 保真的关键）。

@@ -1,73 +1,68 @@
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-/// The interface that implementations of flutter_sing_box must implement.
+/// flutter_sing_box 各平台实现必须实现的平台接口。
 ///
-/// Platform implementations should extend this class rather than implementing it as an `interface`.
-/// Methods in this class that are not overridden by platform implementations will throw
-/// an [UnimplementedError] by default.
+/// 平台实现应继承本类而非以 `interface` 方式实现；
+/// 未被平台实现覆写的方法默认抛出 [UnimplementedError]。
 abstract class FlutterSingBoxPlatform extends PlatformInterface {
-  /// Constructs a FlutterSingBoxPlatform.
+  /// 构造 [FlutterSingBoxPlatform]。
   FlutterSingBoxPlatform() : super(token: _token);
 
   static final Object _token = Object();
 
   static FlutterSingBoxPlatform _instance = MethodChannelFlutterSingBox();
 
-  /// The default instance of [FlutterSingBoxPlatform] to use.
-  ///
-  /// Defaults to [MethodChannelFlutterSingBox].
+  /// 平台默认实例，缺省为 [MethodChannelFlutterSingBox]。
   static FlutterSingBoxPlatform get instance => _instance;
 
-  /// Platform-specific implementations should set this with their own
-  /// platform-specific class that extends [FlutterSingBoxPlatform] when
-  /// they register themselves.
+  /// 平台实现注册自身时调用；token 校验阻止外部误设。
   static set instance(FlutterSingBoxPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }
 
-  /// Initializes the platform interface.
+  /// 初始化平台接口。
   Future<void> init() async {
     throw UnimplementedError('init() has not been implemented.');
   }
 
-  /// Starts the VPN service.
+  /// 启动 VPN 服务。
   Future<void> startVpn() async {
     throw UnimplementedError('startVpn() has not been implemented.');
   }
 
-  /// Stops the VPN service.
+  /// 停止 VPN 服务。
   Future<void> stopVpn() async {
     throw UnimplementedError('stopVpn() has not been implemented.');
   }
 
-  /// Reloads the service configuration.
+  /// 重载服务配置。
   Future<void> serviceReload() async {
     throw UnimplementedError('serviceReload() has not been implemented.');
   }
 
-  /// Sets the Clash mode.
+  /// 设置 Clash 模式。
   Future<void> setClashMode(String mode) async {
     throw UnimplementedError('setClashMode() has not been implemented.');
   }
 
-  /// Selects an outbound for a specific group.
+  /// 在分组中选中指定出站。
   Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
     throw UnimplementedError('selectOutbound() has not been implemented.');
   }
 
-  /// Sets the expansion state of a group.
+  /// 设置分组的展开状态。
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {
     throw UnimplementedError('setGroupExpand() has not been implemented.');
   }
 
-  /// Performs a URL test for a specific group.
+  /// 对指定分组执行 URL 测速。
   Future<void> urlTest({required String groupTag}) async {
     throw UnimplementedError('urlTest() has not been implemented.');
   }
 
-  /// Gets the version of the underlying sing-box core.
+  /// 获取底层 sing-box 内核版本号。
   Future<String> getSingBoxVersion() async {
     throw UnimplementedError('getSingBoxVersion() has not been implemented.');
   }
@@ -80,6 +75,9 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('queryServiceStatus() has not been implemented.');
   }
 
+  /// 安装 Windows 系统服务。
+  ///
+  /// 仅 Windows 平台实现真正执行；其他平台返回 `false`。
   Future<bool> installService({
     required String serviceName,
     required String displayName,
@@ -106,27 +104,27 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopService() has not been implemented.');
   }
 
-  /// A stream of client connection status updates.
+  /// 客户端连接状态的更新流。
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');
   }
 
-  /// A stream of client group updates.
+  /// 分组列表的更新流。
   Stream<List<ClientGroup>> get groupStream {
     throw UnimplementedError('groupStream has not been implemented.');
   }
 
-  /// A stream of client Clash mode updates.
+  /// Clash 模式的更新流。
   Stream<ClientClashMode> get clashModeStream {
     throw UnimplementedError('clashModeStream has not been implemented.');
   }
 
-  /// A stream of log messages from the sing-box core.
+  /// sing-box 内核日志的更新流（按批推送）。
   Stream<List<ClientLog>> get logStream {
     throw UnimplementedError('logStream has not been implemented.');
   }
 
-  /// A stream of proxy state updates.
+  /// 代理生命周期状态的更新流（启动失败原因也经此流下发）。
   Stream<ProxyState> get proxyStateStream {
     throw UnimplementedError('proxyStateStream has not been implemented.');
   }

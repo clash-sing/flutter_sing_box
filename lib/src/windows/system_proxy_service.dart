@@ -8,7 +8,9 @@ import 'package:win32/win32.dart';
 
 /// 系统代理「写注册表 + 通知刷新」的实际执行者（抽象出来便于注入测试）。
 abstract class SystemProxyApplier {
+  /// 将系统代理写为 [proxy]（host:port 形式）。
   Future<void> enable(String proxy);
+  /// 清除系统代理设置。
   Future<void> disable();
 }
 
@@ -18,9 +20,11 @@ abstract class SystemProxyApplier {
 /// 均在调用后置/清 `systemProxyActive` 标志（FFI 失败也置位，保持状态一致
 /// 并交由崩溃自愈兜底）。FFI 异常仅 debugPrint，不抛出、不阻断连接流程。
 class SystemProxyService {
+  /// 构造服务；可注入 [SystemProxyApplier] 替代默认 Windows 注册表实现。
   SystemProxyService({this._applier});
   final SystemProxyApplier? _applier;
 
+  /// 启用系统代理（指向 mixed 入站端口）；无论成败均置位标志。
   Future<void> enable() async {
     final proxy = '127.0.0.1:${CsSettingsStorage().mixedPort}';
     try {
@@ -31,6 +35,7 @@ class SystemProxyService {
     CsSettingsStorage().systemProxyActive = true;
   }
 
+  /// 清除系统代理；无论成败均清标志。
   Future<void> disable() async {
     try {
       await (_applier ?? _WindowsSystemProxyApplier()).disable();

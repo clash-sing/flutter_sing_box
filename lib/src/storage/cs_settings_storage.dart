@@ -2,22 +2,30 @@ import 'dart:convert';
 
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 
+/// App 设置存取（MMKV 持久化，`cs_settings` 实例）。
+///
+/// 键名集中在 `_Keys`；读写走 [storage] 抽象，测试可换 [MemoryStorage]。
 class CsSettingsStorage {
   CsSettingsStorage._internal();
   static final CsSettingsStorage _instance = CsSettingsStorage._internal();
+  /// 单例实例。
   static CsSettingsStorage get instance => _instance;
+  /// 单例工厂构造器。
   factory CsSettingsStorage() => _instance;
 
   /// 仅用于单元测试, 用 [MemoryStorage] 代替默认的 [MmkvStorage]
   static void mockInit() => _storage = MemoryStorage();
 
   static KeyValueStorage? _storage;
+  /// 底层键值存储；缺省惰性初始化为 MMKV。
   static KeyValueStorage get storage => _storage ??= MmkvStorage('cs_settings');
 
+  /// 读取分应用代理模式（0 关闭 / 1 白名单 / 2 黑名单）。
   int getPerAppProxyMode() {
     return storage.getInt(_Keys.perAppProxyMode, defaultValue: _Keys.perAppProxyDisabled);
   }
 
+  /// 写入分应用代理模式；非法值触发断言。
   void setPerAppProxyMode(int mode) {
     assert(
       mode == _Keys.perAppProxyDisabled ||
@@ -28,6 +36,7 @@ class CsSettingsStorage {
     storage.setInt(_Keys.perAppProxyMode, mode);
   }
 
+  /// 读取 [mode] 对应的应用包名列表；关闭模式返回空表。
   List<String> getAppList(int mode) {
     assert(
       mode == _Keys.perAppProxyDisabled ||
@@ -44,6 +53,7 @@ class CsSettingsStorage {
     }
   }
 
+  /// 保存应用包名列表并同步更新代理模式。
   void setAppList(List<String> appList, int mode) {
     assert(
       mode == _Keys.perAppProxyDisabled ||
@@ -60,6 +70,7 @@ class CsSettingsStorage {
     setPerAppProxyMode(mode);
   }
 
+  /// Clash API 监听端口，缺省 [FlutterSingBoxConstants.defaultClashApiPort]。
   int getClashApiPort() {
     return storage.getInt(
       _Keys.clashApiPort,
@@ -67,14 +78,17 @@ class CsSettingsStorage {
     );
   }
 
+  /// 写入 Clash API 监听端口。
   void setClashApiPort(int? port) {
     storage.setInt(_Keys.clashApiPort, port);
   }
 
+  /// 测速 URL，缺省 [FlutterSingBoxConstants.defaultTestUrl]。
   String getTestUrl() {
     return storage.getString(_Keys.testUrl) ?? FlutterSingBoxConstants.defaultTestUrl;
   }
 
+  /// 写入测速 URL。
   void setTestUrl(String? url) {
     storage.setString(_Keys.testUrl, url);
   }
@@ -110,6 +124,7 @@ class CsSettingsStorage {
     storage.setBool(_Keys.systemProxyActive, value);
   }
 
+  /// 清空全部设置。
   void clear() {
     storage.clearAll();
   }

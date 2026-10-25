@@ -10,12 +10,18 @@ import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
 import 'package:flutter_sing_box/src/windows/helper_cli.dart';
 import 'package:flutter_sing_box/src/windows/system_proxy_service.dart';
 
+/// Windows 平台的 [FlutterSingBoxPlatform] 纯 Dart 实现。
+///
+/// 经内置 helper 驱动系统服务托管 sing-box；代理生命周期状态集中在
+/// [proxyStateStream]（启动失败不抛出，经该流下发）。
 class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
-  /// Registers this class as the default instance of [FlutterSingBoxPlatform].
+  /// 注册本实现为平台默认实例（由 Windows C-API 桩调用）。
   static void registerWith() {
     FlutterSingBoxPlatform.instance = FlutterSingBoxWindows();
   }
 
+  /// 初始化：释放 sing-box.exe / libcronet.dll / clash_sing_helper.exe 到应用目录，
+  /// 并清除上次异常退出遗留的系统代理（崩溃自愈）。
   @override
   Future<void> init() async {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
@@ -88,6 +94,9 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
   }
 
+  /// 安装 Windows 系统服务（UAC 提权经 helper CLI）。
+  ///
+  /// 服务可执行文件与 sing-box 配置路径由 [ProfileStorage] 当前使用项决定。
   @override
   Future<bool> installService({
     required String serviceName,
@@ -116,6 +125,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
   }
 
+  /// 卸载 Windows 系统服务；helper.exe 缺失或异常时返回 `false`。
   @override
   Future<bool> uninstallService() async {
     try {
@@ -132,6 +142,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
   }
 
+  /// 启动已安装的 Windows 系统服务；helper.exe 缺失或异常时返回 `false`。
   @override
   Future<bool> startService() async {
     try {
@@ -148,6 +159,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
   }
 
+  /// 停止 Windows 系统服务；helper.exe 缺失或异常时返回 `false`。
   @override
   Future<bool> stopService() async {
     try {
@@ -164,40 +176,48 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
   }
 
+  /// 返回内置 sing-box 内核版本号（随打包内核升级同步更新）。
   @override
   Future<String> getSingBoxVersion() async {
     return '1.14.3';
   }
 
+  /// 经 helper HTTP API 启动代理（失败不抛出，原因经 [proxyStateStream] 下发）。
   @override
   Future<void> startVpn() async {
     await HelperHttpClient().start();
   }
 
+  /// 经 helper HTTP API 停止代理。
   @override
   Future<void> stopVpn() async {
     await HelperHttpClient().stop();
   }
 
+  /// 经 helper HTTP API 重启代理（等价于配置重载）。
   @override
   Future<void> serviceReload() async {
     await HelperHttpClient().restart();
   }
 
+  /// 经 Clash API 设置代理模式，并在后台异步刷新模式流。
   @override
   Future<void> setClashMode(String mode) async {
     await ClashHttpClient().setClashMode(mode);
     unawaited(_refreshClashMode());
   }
 
+  /// 经 Clash API 在 [groupTag] 分组中选中 [outboundTag] 出站。
   @override
   Future<void> selectOutbound({required String groupTag, required String outboundTag}) async {
     await ClashHttpClient().setOutbound(groupTag: groupTag, outboundTag: outboundTag);
   }
 
+  /// Windows 端无持久化展开状态，空实现。
   @override
   Future<void> setGroupExpand({required String groupTag, required bool isExpand}) async {}
 
+  /// 经 Clash API 对 [groupTag] 分组执行 URL 测速。
   @override
   Future<void> urlTest({required String groupTag}) async {
     await ClashHttpClient().testGroup(groupTag);
@@ -352,6 +372,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   /// TODO: async* 的理论竞态，可改为 Stream.multi。但竞态窗口极窄，无需 Stream.multi。
+  /// 代理状态流；新订阅者立即获得当前状态。
   @override
   Stream<ProxyState> get proxyStateStream async* {
     yield _lastProxyState; // 新订阅者立即拿到当前状态
@@ -373,6 +394,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   }
 
   /// TODO: async* 的理论竞态,可改为 Stream.multi。但竞态窗口极窄,与 proxyStateStream 一致。
+  /// Clash 模式流；新订阅者立即获得最近一次模式。
   @override
   Stream<ClientClashMode> get clashModeStream async* {
     if (_lastClashMode != null) yield _lastClashMode!; // 新订阅者立即拿到当前模式
@@ -393,6 +415,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     _clientGroupController.add(groups);
   }
 
+  /// 分组列表流；新订阅者立即获得最近一次分组数据。
   @override
   Stream<List<ClientGroup>> get groupStream async* {
     if (_clientGroups != null) yield _clientGroups!; // 新订阅者立即拿到当前模式
@@ -412,6 +435,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     _logController.add(logs);
   }
 
+  /// 内核日志流（事件型，不做缓存重放）。
   @override
   Stream<List<ClientLog>> get logStream => _logController.stream;
 
@@ -452,6 +476,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     });
   }
 
+  /// 释放全部轮询任务与广播流控制器。
   void dispose() {
     _cancelGroupRefresh();
     _cancelHelperWatch();

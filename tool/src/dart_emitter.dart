@@ -27,6 +27,7 @@ class _FamilySpec {
     required this.unknown,
     required this.registry,
     required this.classDoc,
+    required this.subDocLabel,
     required this.unknownDoc,
     required this.registryDoc,
   });
@@ -36,6 +37,9 @@ class _FamilySpec {
   final String unknown;
   final String registry;
   final String classDoc;
+
+  /// 子类类注释中的类别名（如「出站配置」「DNS 服务器配置」）。
+  final String subDocLabel;
   final String unknownDoc;
   final String registryDoc;
 
@@ -49,6 +53,7 @@ const _outboundFamily = _FamilySpec(
   unknown: 'UnknownOutbound',
   registry: 'kOutboundTypeNames',
   classDoc: '出站配置，按 type 判别的密封类层级。',
+  subDocLabel: '出站配置',
   unknownDoc: '未建模出站类型：持有原始 JSON 原样透传（保真读写）。',
   registryDoc: '白名单内全部出站类型名（对齐测试的数据源）。',
 );
@@ -59,6 +64,7 @@ const _inboundFamily = _FamilySpec(
   unknown: 'UnknownInbound',
   registry: 'kInboundTypeNames',
   classDoc: '入站配置，按 type 判别的密封类层级。',
+  subDocLabel: '入站配置',
   unknownDoc: '未建模入站类型：持有原始 JSON 原样透传（保真读写）。',
   registryDoc: '白名单内全部入站类型名（对齐测试的数据源）。',
 );
@@ -69,6 +75,7 @@ const _dnsServerFamily = _FamilySpec(
   unknown: 'UnknownDnsServer',
   registry: 'kDnsServerTypeNames',
   classDoc: 'DNS 服务器配置，按 type 判别的密封类层级。',
+  subDocLabel: 'DNS服务器配置',
   unknownDoc: '未建模 DNS 服务器类型：持有原始 JSON 原样透传（保真读写）。',
   registryDoc: '全部 DNS 服务器类型名（schema 全量收集，无白名单）。',
 );
@@ -177,6 +184,35 @@ bool _isDnsServerFamily(ClassSpec c) =>
     c.className.endsWith('DNSServer');
 
 // ---------------------------------------------------------------------------
+// dartdoc 注释模板（供各 emit 函数复用，保证公共 API 全量有注释）
+// ---------------------------------------------------------------------------
+
+/// 字段注释：标注 JSON 键与可空性（includeIfNull: false 下 null 不输出）
+void _writeFieldDoc(StringBuffer b, FieldSpec f) {
+  b.writeln(
+    f.required
+        ? '  /// 对应 JSON 键 `${f.jsonName}`，必填。'
+        : '  /// 对应 JSON 键 `${f.jsonName}`，可空（null 不参与序列化）。',
+  );
+}
+
+/// mixin 字段注释：mixin 字段一律可空（规则 9）
+void _writeMixinFieldDoc(StringBuffer b, FieldSpec f) {
+  b.writeln('  /// 对应 JSON 键 `${f.jsonName}`，可空（null 不参与序列化）。');
+}
+
+/// 构造器注释：列出必填参数，说明可空字段缺省为 null
+void _writeConstructorDoc(StringBuffer b, ClassSpec spec) {
+  final requiredFields = spec.ownFields.where((f) => f.required).toList();
+  if (requiredFields.isEmpty) {
+    b.writeln('  /// 构造实例；可空字段省略时为 `null`。');
+  } else {
+    final params = requiredFields.map((f) => '[${f.dartName}]').join('、');
+    b.writeln('  /// 以 $params 构造；可空字段省略时为 `null`。');
+  }
+}
+
+// ---------------------------------------------------------------------------
 // mixin 文件
 // ---------------------------------------------------------------------------
 
@@ -199,6 +235,7 @@ String _emitMixin(
   b.writeln(_mixinDoc(name));
   b.writeln('mixin $name {');
   for (final f in fields) {
+    _writeMixinFieldDoc(b, f);
     if (f.jsonName != f.dartName) {
       b.writeln("  @JsonKey(name: '${f.jsonName}')");
     }
@@ -248,9 +285,12 @@ String _emitFamilyRoot(
   b.writeln();
   b.writeln('/// ${fam.classDoc}');
   b.writeln('sealed class ${fam.base} {');
+  b.writeln('  /// 常量构造器，供子类调用。');
   b.writeln('  const ${fam.base}();');
   b.writeln();
+  b.writeln('  /// 标签（JSON 键 `tag`），配置内唯一标识。');
   b.writeln('  String get tag;');
+  b.writeln('  /// `type` 判别值，决定反序列化落到哪个子类。');
   b.writeln('  String get type;');
   b.writeln();
   b.writeln('  /// 子类输出须带 type 判别键（round-trip 保真的关键）。');
@@ -280,12 +320,15 @@ String _emitSubclassPart(ClassSpec spec, _FamilySpec fam) {
   b.writeln(_header);
   b.writeln("part of '${fileNameFor(fam.base)}';");
   b.writeln();
+  b.writeln('/// `type` 判别值为 `${spec.typeName}` 的${fam.subDocLabel}。');
   b.writeln('@JsonSerializable(explicitToJson: true, includeIfNull: false)');
   final mixins = spec.mixins.isEmpty ? '' : ' with ${spec.mixins.join(', ')}';
   b.writeln('class ${spec.className} extends ${fam.base}$mixins {');
+  b.writeln('  /// 本类的 `type` 判别值。');
   b.writeln("  static const typeName = '${spec.typeName}';");
   b.writeln();
   for (final f in spec.ownFields) {
+    _writeFieldDoc(b, f);
     // 无参 @JsonKey() 与不写等价（公开字段默认序列化），一律不生成；
     // tag 仅需 @override（覆写基类抽象 getter）
     if (f.jsonName == 'tag') {
@@ -297,14 +340,17 @@ String _emitSubclassPart(ClassSpec spec, _FamilySpec fam) {
   }
   _writeConstructor(b, spec);
   b.writeln();
+  b.writeln('  /// `type` 判别值，固定为 [typeName]。');
   b.writeln('  @override');
   b.writeln('  String get type => typeName;');
   b.writeln();
+  b.writeln('  /// 从 JSON 对象反序列化为本类型。');
   b.writeln(
     '  factory ${spec.className}.fromJson(Map<String, dynamic> json) =>',
   );
   b.writeln('      _\$${spec.className}FromJson(json);');
   b.writeln();
+  b.writeln('  /// 序列化为 JSON；输出携带 `type` 判别键。');
   b.writeln('  @override');
   b.writeln('  Map<String, dynamic> toJson() =>');
   b.writeln("      {'type': typeName, ..._\$${spec.className}ToJson(this)};");
@@ -319,17 +365,23 @@ String _emitUnknownPart(_FamilySpec fam) {
   b.writeln();
   b.writeln('/// ${fam.unknownDoc}');
   b.writeln('class ${fam.unknown} extends ${fam.base} {');
+  b.writeln('  /// 原始 JSON 键值表（保真读写）。');
   b.writeln('  final Map<String, dynamic> raw;');
+  b.writeln('  /// 以原始 JSON 构造。');
   b.writeln('  ${fam.unknown}(this.raw);');
   b.writeln();
+  b.writeln('  /// 标签，取 `raw` 的 `tag` 键，缺失时空串兜底。');
   b.writeln('  @override');
   b.writeln("  String get tag => raw['tag'] as String? ?? '';");
+  b.writeln('  /// 原始 `type` 值，缺失时空串兜底。');
   b.writeln('  @override');
   b.writeln("  String get type => raw['type'] as String? ?? '';");
   b.writeln();
+  b.writeln('  /// 从 JSON 对象反序列化（整表透传收存）。');
   b.writeln('  factory ${fam.unknown}.fromJson(Map<String, dynamic> json) =>');
   b.writeln('      ${fam.unknown}(Map<String, dynamic>.from(json));');
   b.writeln();
+  b.writeln('  /// 原样输出 `raw` 全部键值。');
   b.writeln('  @override');
   b.writeln(
     '  Map<String, dynamic> toJson() => Map<String, dynamic>.from(raw);',
@@ -353,20 +405,33 @@ String _emitOpenMapClass(ClassSpec spec) {
   b.writeln('/// 开放映射（schema：object + additionalProperties）：任意键值表，');
   b.writeln('/// 读入全收、输出全出（round-trip 保真）。');
   b.writeln('class ${spec.className} {');
+  b.writeln('  /// 键值表本体。');
   b.writeln('  final Map<String, dynamic> entries;');
   b.writeln();
+  b.writeln('  /// 以初始键值表构造，缺省为空表。');
   b.writeln('  ${spec.className}([this.entries = const {}]);');
   b.writeln();
+  b.writeln('  /// 从 JSON 对象反序列化（任意键全收）。');
   b.writeln(
       '  factory ${spec.className}.fromJson(Map<String, dynamic> json) =>');
   b.writeln(
       '      ${spec.className}(Map<String, dynamic>.from(json));');
+  b.writeln('  /// 序列化为 JSON（任意键全出）。');
   b.writeln();
   b.writeln(
       '  Map<String, dynamic> toJson() => Map<String, dynamic>.from(entries);');
   b.writeln('}');
   return b.toString();
 }
+
+/// 普通类类注释：顶层四段特判，其余给 schema def 指引
+String _plainClassDoc(String className) => switch (className) {
+  'DNS' => '/// 顶层 `dns` 配置段模型。',
+  'LogOptions' => '/// 顶层 `log` 配置段模型。',
+  'RouteOptions' => '/// 顶层 `route` 配置段模型。',
+  'ExperimentalOptions' => '/// 顶层 `experimental` 配置段模型。',
+  _ => '/// 由官方 JSON schema `\$defs/$className` 定义的配置模型。',
+};
 
 String _emitPlainClass(ClassSpec spec, Map<String, String> pathOf) {
   final selfPath = fileNameFor(spec.className);
@@ -382,9 +447,11 @@ String _emitPlainClass(ClassSpec spec, Map<String, String> pathOf) {
   _writeImports(b, imports);
   b.writeln("part '${_stripExt(selfPath)}.g.dart';");
   b.writeln();
+  b.writeln(_plainClassDoc(spec.className));
   b.writeln('@JsonSerializable(explicitToJson: true, includeIfNull: false)');
   b.writeln('class ${spec.className} {');
   for (final f in spec.ownFields) {
+    _writeFieldDoc(b, f);
     if (f.jsonName != f.dartName) {
       b.writeln("  @JsonKey(name: '${f.jsonName}')");
     }
@@ -392,11 +459,13 @@ String _emitPlainClass(ClassSpec spec, Map<String, String> pathOf) {
   }
   _writeConstructor(b, spec);
   b.writeln();
+  b.writeln('  /// 从 JSON 对象反序列化为本类型。');
   b.writeln(
     '  factory ${spec.className}.fromJson(Map<String, dynamic> json) =>',
   );
   b.writeln('      _\$${spec.className}FromJson(json);');
   b.writeln();
+  b.writeln('  /// 序列化为 JSON 对象。');
   b.writeln(
     '  Map<String, dynamic> toJson() => _\$${spec.className}ToJson(this);',
   );
@@ -410,6 +479,7 @@ void _writeConstructor(StringBuffer b, ClassSpec spec) {
   final hasOmitted =
       spec.ownFields.any((f) => !f.required) || spec.mixins.isNotEmpty;
   b.writeln();
+  _writeConstructorDoc(b, spec);
   if (requiredFields.isEmpty) {
     b.writeln('  ${spec.className}();');
     return;
@@ -459,6 +529,7 @@ String _emitSingBox(Map<String, String> pathOf) {
   _writeImports(b, imports);
   b.writeln("part 'sing_box.g.dart';");
   b.writeln();
+  b.writeln('/// sing-box 配置顶层模型，对应整份配置 JSON。');
   b.writeln('@JsonSerializable(explicitToJson: true, includeIfNull: false)');
   b.writeln('class SingBox {');
   b.writeln(
@@ -466,6 +537,9 @@ String _emitSingBox(Map<String, String> pathOf) {
   );
   b.writeln();
   for (final s in sections) {
+    final isList = s.key == 'inbounds' || s.key == 'outbounds';
+    b.writeln('  /// 顶层 `${s.key}` '
+        '${isList ? '列表' : '配置段'}${s.nullable ? '（可空）' : '（必填）'}。');
     b.writeln('  ${s.nullable ? '${s.type}?' : s.type} ${s.key};');
   }
   b.writeln();
@@ -473,6 +547,7 @@ String _emitSingBox(Map<String, String> pathOf) {
   b.writeln('  @JsonKey(includeFromJson: false, includeToJson: false)');
   b.writeln('  final Map<String, dynamic> unknownSections = {};');
   b.writeln();
+  b.writeln('  /// 构造顶层配置；可空段省略时为 `null`。');
   b.writeln('  SingBox({');
   for (final s in sections) {
     b.writeln(
@@ -481,6 +556,7 @@ String _emitSingBox(Map<String, String> pathOf) {
   }
   b.writeln('  });');
   b.writeln();
+  b.writeln('  /// 从整份配置 JSON 反序列化；未建模顶层段收入 [unknownSections]。');
   b.writeln('  factory SingBox.fromJson(Map<String, dynamic> json) {');
   b.writeln('    final result = _\$SingBoxFromJson(json);');
   b.writeln('    json.forEach((key, value) {');
@@ -491,6 +567,7 @@ String _emitSingBox(Map<String, String> pathOf) {
   b.writeln('    return result;');
   b.writeln('  }');
   b.writeln();
+  b.writeln('  /// 序列化为 JSON；[unknownSections] 原样合并输出。');
   b.writeln('  Map<String, dynamic> toJson() {');
   b.writeln('    final result = _\$SingBoxToJson(this);');
   b.writeln('    result.addAll(unknownSections);');

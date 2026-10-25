@@ -6,19 +6,19 @@ import 'package:flutter_sing_box/src/core/services/subscribe_user_agent.dart';
 import '../../data/network/api_result.dart';
 import '../../data/network/dio_client.dart';
 
-/// Fetches subscription content over the network.
+/// 订阅内容的网络下载服务。
 class NetworkService {
   NetworkService._internal();
 
-  /// The singleton instance of [NetworkService].
+  /// 单例实例。
   static final NetworkService instance = NetworkService._internal();
 
-  /// Creates the singleton [NetworkService] instance.
+  /// 单例工厂构造器。
   factory NetworkService() => instance;
 
-  /// Downloads the subscription at [uri] and returns it as an [ApiResult].
+  /// 下载 [uri] 的订阅内容，结果包装为 [ApiResult]。
   ///
-  /// Uses [userAgent] when provided, otherwise the default subscribe user agent.
+  /// [userAgent] 缺省用 [SubscribeUserAgent.getDefaultUserAgent] 的默认 UA。
   Future<ApiResult<dynamic>> fetchSubscription(Uri uri, {String? userAgent}) async {
     try {
       final response = await DioClient().dio.getUri(

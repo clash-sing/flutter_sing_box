@@ -8,7 +8,9 @@ import 'package:flutter_sing_box/flutter_sing_box_platform_interface.dart';
 import 'package:flutter_sing_box/src/constants/windows_constants.dart';
 import 'package:path/path.dart' as p;
 
+/// helper 服务本地 HTTP API 客户端（/start /stop /restart /status）。
 class HelperHttpClient {
+  /// helper API 成功返回值字符串。
   static const String successValue = 'success';
   FlutterSingBoxWindows get _platform => FlutterSingBoxPlatform.instance as FlutterSingBoxWindows;
 
@@ -23,6 +25,7 @@ class HelperHttpClient {
 
   static final HelperHttpClient _instance = HelperHttpClient._(_readHelperConfig);
 
+  /// 单例工厂构造器。
   factory HelperHttpClient() => _instance;
 
   /// 仅供测试：注入配置读取器构造独立实例（如返回固定端口/动态换端口）。
@@ -30,6 +33,7 @@ class HelperHttpClient {
   HelperHttpClient.forTest(Future<HelperConfig?> Function() loadConfig)
       : this._(loadConfig);
 
+  /// Dio 实例（baseUrl 不含端口，每次请求现拼）。
   late final Dio dio = _initDio();
 
   Dio _initDio() {
@@ -80,6 +84,7 @@ class HelperHttpClient {
     return e.toString();
   }
 
+  /// 启动 sing-box（GET /start）；状态经 [FlutterSingBoxWindows.emitProxyState] 下发，失败不抛出。
   Future<void> start() async {
     try {
       _platform.emitProxyState(ProxyState.starting);
@@ -95,6 +100,7 @@ class HelperHttpClient {
     }
   }
 
+  /// 停止 sing-box（GET /stop）；失败同样只走状态流。
   Future<void> stop() async {
     try {
       _platform.emitProxyState(ProxyState.stopping);
@@ -110,6 +116,7 @@ class HelperHttpClient {
     }
   }
 
+  /// 重启 sing-box（GET /restart）；失败同样只走状态流。
   Future<void> restart() async {
     try {
       _platform.emitProxyState(ProxyState.starting);
@@ -134,6 +141,7 @@ class HelperHttpClient {
     return data as String;
   }
 
+  /// 查询状态（GET /status）并推送到代理状态流。
   Future<void> status() async {
     try {
       final data = await _get('/status');

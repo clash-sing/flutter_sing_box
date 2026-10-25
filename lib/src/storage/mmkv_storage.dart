@@ -6,6 +6,7 @@ import 'key_value_storage.dart';
 class MmkvStorage implements KeyValueStorage {
   final MMKV _mmkv;
 
+  /// 以 MMKV 实例 ID 构造；缺省多进程模式（供 `:remote` VPN 进程共享读取）。
   MmkvStorage(String id, {MMKVMode mode = MMKVMode.MULTI_PROCESS_MODE})
     : _mmkv = MMKV(id, mode: mode);
 
