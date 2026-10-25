@@ -73,4 +73,92 @@ void main() {
       platform.dispose();
     });
   });
+
+  group('FlutterSingBoxWindows.helper 存活轮询', () {
+    setUp(CsSettingsStorage.mockInit);
+
+    /// 起一个 404 服务器吸收 started 触发的 Clash API 副作用流（clash mode/group/log）。
+    Future<void> setUpClashStub() async {
+      final server = await HttpServer.bind('127.0.0.1', 0);
+      server.listen((request) async {
+        request.response.statusCode = 404;
+        await request.response.close();
+      });
+      CsSettingsStorage().setClashApiPort(server.port);
+      addTearDown(() => server.close(force: true));
+    }
+
+    /// 平台实例 + 探测注入 + 状态流收集，返回收集列表。
+    List<ProxyState> setUpPlatform(
+      FlutterSingBoxWindows platform, {
+      Future<String> Function()? probe,
+      Duration interval = const Duration(milliseconds: 30),
+    }) {
+      platform.helperWatchInterval = interval;
+      platform.helperStatusProbe =
+          probe ?? (() async => 'running');
+      final events = <ProxyState>[];
+      final sub = platform.proxyStateStream.listen(events.add);
+      addTearDown(() async {
+        await sub.cancel();
+        platform.dispose();
+      });
+      return events;
+    }
+
+    test('探测失败（helper 服务崩溃）→ emit 带 errMessage 的 ProxyStopped', () async {
+      await setUpClashStub();
+      final platform = FlutterSingBoxWindows();
+      var probeCount = 0;
+      final events = setUpPlatform(platform, probe: () async {
+        probeCount++;
+        if (probeCount <= 2) return 'running';
+        throw Exception('connection refused');
+      });
+
+      await Future<void>.delayed(Duration.zero); // 收初始 stopped 重放
+      platform.emitProxyState(ProxyState.started);
+      await until(() => events.any((e) => e is ProxyStopped && e.errMessage != null));
+
+      expect(events[0], ProxyState.stopped); // 初始重放
+      expect(events[1], ProxyState.started);
+      final stopped = events.last as ProxyStopped;
+      expect(stopped.errMessage, contains('不可达'));
+    });
+
+    test('探测返回 stopped（sing-box 退出）→ emit 带 errMessage 的 ProxyStopped', () async {
+      await setUpClashStub();
+      final platform = FlutterSingBoxWindows();
+      final events = setUpPlatform(platform, probe: () async => 'stopped');
+
+      await Future<void>.delayed(Duration.zero);
+      platform.emitProxyState(ProxyState.started);
+      await until(() => events.any((e) => e is ProxyStopped && e.errMessage != null));
+
+      final stopped = events.last as ProxyStopped;
+      expect(stopped.errMessage, contains('sing-box'));
+    });
+
+    test('stopped 后轮询终止，不再探测', () async {
+      await setUpClashStub();
+      final platform = FlutterSingBoxWindows();
+      var probeCount = 0;
+      final events = setUpPlatform(platform, probe: () async {
+        probeCount++;
+        return 'running';
+      });
+
+      await Future<void>.delayed(Duration.zero);
+      platform.emitProxyState(ProxyState.started);
+      await until(() => probeCount >= 2);
+      platform.emitProxyState(ProxyState.stopped);
+
+      final probesAtStop = probeCount;
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(probeCount, probesAtStop);
+      // 状态流只有初始重放与正常 stopped 两次，均无 errMessage（无异常停止）
+      expect(events.whereType<ProxyStopped>().length, 2);
+      expect(events.any((e) => e is ProxyStopped && e.errMessage != null), isFalse);
+    });
+  });
 }

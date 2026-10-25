@@ -222,16 +222,23 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       unawaited(_refreshClashMode());
       _startGroupRefresh();
       _startLogSubscribe();
+      _startHelperWatch();
       // 系统代理模式：sing-box 已起，设系统代理
       if (CsSettingsStorage().proxyMode == ProxyMode.systemProxy) {
         unawaited(SystemProxyService().enable());
       }
-    } else if (state == ProxyState.stopped) {
-      _cancelGroupRefresh();
-      _cancelLogSubscribe();
-      // 只要标志位说系统代理还开着就清(覆盖断开/切换重启/崩溃后停止)
-      if (CsSettingsStorage().systemProxyActive) {
-        unawaited(SystemProxyService().disable());
+    } else {
+      // 任何离开 started 的状态（启动中/停止中/已停止）都终止存活轮询
+      _cancelHelperWatch();
+      // is ProxyStopped 覆盖带 errMessage 的异常停止（启动失败、内核崩溃、
+      // 存活轮询发现的 helper 崩溃）——这些场景同样需要停副作用流、清系统代理
+      if (state is ProxyStopped) {
+        _cancelGroupRefresh();
+        _cancelLogSubscribe();
+        // 只要标志位说系统代理还开着就清(覆盖断开/切换重启/崩溃后停止)
+        if (CsSettingsStorage().systemProxyActive) {
+          unawaited(SystemProxyService().disable());
+        }
       }
     }
   }
@@ -272,6 +279,56 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 取消所有在飞的 group 轮询(stopped / dispose 调用)。
   void _cancelGroupRefresh() {
     _groupRefreshGeneration++;
+  }
+
+  /// helper 存活轮询的「代」：每次启动新一轮自增使上一轮自动退出;
+  /// 离开 started（停止中/已停止/重启过渡）与 dispose 也自增以取消所有在飞轮询。
+  int _helperWatchGeneration = 0;
+
+  /// 存活轮询间隔；默认 [WindowsConstants.helperWatchInterval]，测试可缩短。
+  @visibleForTesting
+  Duration helperWatchInterval = WindowsConstants.helperWatchInterval;
+
+  /// 存活轮询的探测点：默认查 helper /status；测试可覆写。
+  @visibleForTesting
+  Future<String> Function() helperStatusProbe = () => HelperHttpClient().probeStatus();
+
+  /// 启动一轮新的 helper 存活轮询;自增 generation 使上一轮自动退出,
+  /// 天然处理 start/restart/status 多处重复触发 started 的并发防护。
+  void _startHelperWatch() {
+    final gen = ++_helperWatchGeneration;
+    unawaited(_watchHelperAlive(gen));
+  }
+
+  /// 取消所有在飞的存活轮询(离开 started / dispose 调用)。
+  void _cancelHelperWatch() {
+    _helperWatchGeneration++;
+  }
+
+  /// 连接期间周期探测 helper /status,感知 helper 服务/sing-box 异常退出——
+  /// 此前 helper 崩溃后 App 无从得知,UI 一直显示已连接(issue #19 验收反馈)。
+  ///
+  /// 探测返回 running 无动作;返回 stopped(sing-box 已退出)或连接失败
+  /// (helper 服务崩溃,[_get] 重读配置重试后仍失败)时 emit 带 errMessage 的
+  /// ProxyStopped 归位 UI,本轮监视结束。fire-and-forget,不影响连接流程。
+  /// 用 [gen] 配合 [_helperWatchGeneration] 做取消与重复 started 的并发防护,
+  /// emit 前复查 gen 与当前状态,避免用户主动 stop/restart 途中误报。
+  Future<void> _watchHelperAlive(int gen) async {
+    while (gen == _helperWatchGeneration && _lastProxyState == ProxyState.started) {
+      await Future.delayed(helperWatchInterval);
+      if (gen != _helperWatchGeneration || _lastProxyState != ProxyState.started) return;
+      try {
+        final status = await helperStatusProbe();
+        if (gen != _helperWatchGeneration || _lastProxyState != ProxyState.started) return;
+        if (status == 'running') continue;
+        emitProxyState(const ProxyStopped(errMessage: 'sing-box 已停止运行'));
+        return;
+      } catch (_) {
+        if (gen != _helperWatchGeneration || _lastProxyState != ProxyState.started) return;
+        emitProxyState(const ProxyStopped(errMessage: 'helper 服务不可达'));
+        return;
+      }
+    }
   }
 
   /// 连接成功后每秒持续拉取 proxies 回推 groupStream,直到 stopped / dispose 取消。
@@ -397,6 +454,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
 
   void dispose() {
     _cancelGroupRefresh();
+    _cancelHelperWatch();
     _cancelLogSubscribe();
     _proxyStateStreamController?.close();
     _proxyStateStreamController = null;
