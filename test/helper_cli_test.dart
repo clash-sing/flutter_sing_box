@@ -444,4 +444,90 @@ void main() {
       expect(ok, isFalse);
     });
   });
+
+  group('HelperCli.restart', () {
+    /// 前进式假时钟：从基准时间起每次调用推进 500ms，模拟真实时钟持续
+    /// 前进。注意不能用「若干次后冻结」的 fake——restart 串联两段轮询，
+    /// 第二段 deadline 以冻结点重算后永远无法越过，会死循环
+    /// （真实 DateTime.now() 不存在此问题）。
+    DateTime Function() makeAdvancingClock() {
+      var elapsedMs = 0;
+      return () {
+        final t = DateTime(2026, 11, 1).add(Duration(milliseconds: elapsedMs));
+        elapsedMs += 500;
+        return t;
+      };
+    }
+
+    test('run 失败（UAC 拒绝）返回 false 且不进入轮询', () async {
+      var statusCalls = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 1, '', 'UAC 拒绝'),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async {
+          statusCalls += 1;
+          return WindowsServiceStatus.running;
+        },
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+      expect(statusCalls, 0);
+    });
+
+    test('观测到离开 running 并回到 running 返回 true', () async {
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running, // 一段第 1 次：仍在 running（不得视为完成）
+        WindowsServiceStatus.stopped, // 一段第 2 次：离开 running
+        WindowsServiceStatus.stopped, // 二段第 1 次：新服务未起
+        WindowsServiceStatus.running, // 二段第 2 次：回到 running
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => seq[i++],
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isTrue);
+      expect(i, 4);
+    });
+
+    test('恒 running（restart 未推进）超时返回 false（假成功防护）', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => WindowsServiceStatus.running,
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+
+    test('离开 running 后恒 stopped（start 失败）超时返回 false', () async {
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running,
+        WindowsServiceStatus.stopped,
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async =>
+            i < seq.length ? seq[i++] : WindowsServiceStatus.stopped,
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+  });
 }

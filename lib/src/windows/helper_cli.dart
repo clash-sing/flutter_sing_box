@@ -35,7 +35,7 @@ class HelperCliResult {
 typedef HelperRunner = Future<io.ProcessResult> Function(
     String exe, List<String> args);
 
-/// 封装 `clash_sing_helper.exe` 的 5 个子命令调用。
+/// 封装 `clash_sing_helper.exe` 的 6 个子命令调用。
 ///
 /// 仅 Windows 平台使用；定位 exe、拼参、提权、超时、解析全部收拢于此。
 class HelperCli {
@@ -51,7 +51,7 @@ class HelperCli {
   /// [subCommand] 的命令行参数。抽成独立方法便于单测参数形状。
   ///
   /// 安全前提：[helperExePath] 来自受控 asset 释放路径、假定不含单引号；
-  /// [subCommand] 为封闭枚举（install/uninstall/start/stop/status），
+  /// [subCommand] 为封闭枚举（install/uninstall/start/restart/stop/status），
   /// 故直接单引号插值无需转义。
   @visibleForTesting
   static List<String> buildRunasArgs(String helperExePath, String subCommand) {
@@ -237,6 +237,60 @@ class HelperCli {
       target: (s) => s == WindowsServiceStatus.running,
       delay: delay ?? ((Duration d) => Future<void>.delayed(d)),
       now: now ?? DateTime.now,
+    );
+  }
+
+  /// 提权重启服务：`helper.exe restart`（UAC 提权，Go 侧 SCM 同步 stop→start）
+  /// 后做**两段式状态迁移轮询**——第一段等「离开 running」（deadline 20s，含
+  /// UAC 已确认但 SCM 停止在途的稳定窗口余量），第二段等「回到 running」
+  /// （deadline 15s）。服务本就在 running，若照抄 [start] 的单段「轮询到
+  /// running」会首轮即假成功（此时服务尚未被停、App 会去连即将被停的旧服务），
+  /// 故完成判定必须观测到状态迁移。
+  ///
+  /// [run] 失败（UAC 拒绝、30s 超时——注意 runas 无 -Wait，该超时只覆盖
+  /// 「UAC 等待用户点击 + 提权进程启动」）直接返回 false；任一段超时同样返回
+  /// false——调用方降级用旧版服务继续业务，不打断用户。
+  ///
+  /// [queryStatus]/[delay]/[now] 仅供测试注入；默认用自身 [status] 与真实时间。
+  Future<bool> restart({
+    Future<WindowsServiceStatus> Function()? queryStatus,
+    Future<void> Function(Duration)? delay,
+    DateTime Function()? now,
+  }) async {
+    final HelperCliResult r = await run(
+      'restart',
+      elevated: true,
+      timeout: const Duration(seconds: 30),
+    );
+    if (!r.ok) {
+      debugPrint(
+          'helper restart runas 失败, exitCode=${r.exitCode}, stderr=${r.stderr}');
+      return false;
+    }
+    final Future<WindowsServiceStatus> Function() query =
+        queryStatus ?? status;
+    final Future<void> Function(Duration) wait =
+        delay ?? ((Duration d) => Future<void>.delayed(d));
+    final DateTime Function() clock = now ?? DateTime.now;
+    // 第一段：等离开 running，证明 restart 确实在推进（服务正被 SCM 停止）
+    final bool left = await waitUntilStatus(
+      queryStatus: query,
+      target: (s) => s != WindowsServiceStatus.running,
+      delay: wait,
+      now: clock,
+      deadline: const Duration(seconds: 20),
+    );
+    if (!left) {
+      debugPrint('helper restart 第一段超时：服务始终未离开 running，按失败降级');
+      return false;
+    }
+    // 第二段：等回到 running（新服务进程已被 SCM 拉起）
+    return waitUntilStatus(
+      queryStatus: query,
+      target: (s) => s == WindowsServiceStatus.running,
+      delay: wait,
+      now: clock,
+      deadline: const Duration(seconds: 15),
     );
   }
 }
