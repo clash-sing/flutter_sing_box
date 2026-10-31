@@ -38,6 +38,11 @@ migrate_working_dir/
 /.vscode
 
 /assets/.local/
-.gitnexus
-/.claude/settings.local.json
 /doc/
+# Claude Code / GitNexus 个人本地配置(仅部分成员使用,不入库)
+.gitnexus
+/.claude/skills/gitnexus/
+/.claude/settings.local.json
+/.gitnexusrc
+/CLAUDE.local.md
+
