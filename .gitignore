@@ -32,7 +32,6 @@ migrate_working_dir/
 /build/
 /coverage/
 /NUL
-/AGENTS.md
 /.qoder
 /.trae
 /.vscode
