@@ -491,11 +491,31 @@ void main() {
       );
       final ok = await cli.restart(
         queryStatus: () async => seq[i++],
+        oldFileExists: () async => true, // .old 恒在，纯走状态迁移路径
         delay: (_) async {},
         now: makeAdvancingClock(),
       );
       expect(ok, isTrue);
       expect(i, 4);
+    });
+
+    test('恒 running 但 .old 中途消失（快速重启窄于采样间隔）返回 true', () async {
+      // 连接时刻 sing-box 未跑，stop→start 全程可压缩到一次采样间隔内，
+      // 状态采样可能全程落在 running（kardianos 把 StartPending 也映射为
+      // running）——此时 .old 的消失（新服务 Program.Start 必删）是唯一
+      // 可靠的成功信号
+      var polls = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => WindowsServiceStatus.running,
+        oldFileExists: () async => polls++ >= 2, // 前两轮 .old 仍在，第三轮起消失
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isTrue);
     });
 
     test('恒 running（restart 未推进）超时返回 false（假成功防护）', () async {
@@ -505,6 +525,7 @@ void main() {
       );
       final ok = await cli.restart(
         queryStatus: () async => WindowsServiceStatus.running,
+        oldFileExists: () async => true, // .old 恒在（restart 未推进）
         delay: (_) async {},
         now: makeAdvancingClock(),
       );
@@ -524,6 +545,7 @@ void main() {
       final ok = await cli.restart(
         queryStatus: () async =>
             i < seq.length ? seq[i++] : WindowsServiceStatus.stopped,
+        oldFileExists: () async => true, // .old 恒在（服务未能重启）
         delay: (_) async {},
         now: makeAdvancingClock(),
       );
