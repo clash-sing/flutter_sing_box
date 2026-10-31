@@ -179,7 +179,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 返回内置 sing-box 内核版本号（随打包内核升级同步更新）。
   @override
   Future<String> getSingBoxVersion() async {
-    return '1.14.3';
+    return '1.14.4';
   }
 
   /// 经 helper HTTP API 启动代理（失败不抛出，原因经 [proxyStateStream] 下发）。
