@@ -49,6 +49,17 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
+    // 清理上次更新遗留的 .old（服务正挂在上面时删除失败是预期，忽略；
+    // 服务重启路径另有 Go 侧 Program.Start 兜底清理）
+    final io.File staleOld = io.File(
+      p.join(dir.path,
+          WindowsConstants.helperFileName + WindowsConstants.helperOldSuffix),
+    );
+    try {
+      if (await staleOld.exists()) await staleOld.delete();
+    } catch (_) {
+      // 服务运行中锁定 .old，留给服务重启时清理
+    }
     final serviceStatus = await queryServiceStatus();
     if (serviceStatus == WindowsServiceStatus.running ||
         serviceStatus == WindowsServiceStatus.stopped) {
@@ -91,6 +102,64 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       return await cli.status();
     } catch (_) {
       return WindowsServiceStatus.error;
+    }
+  }
+
+  /// 待生效 helper 更新的判定逻辑：`<helper>.old` 存在（App 更新时重命名降级
+  /// 的产物，运行中服务仍挂在旧文件上）且服务当前 running。
+  ///
+  /// 组合逻辑拆为静态纯函数（[oldFileExists] / [queryStatus] 为注入的异步输入），
+  /// 公共入口 [hasPendingHelperUpdate] 组装真实依赖——ProfileStorage 目录与
+  /// status CLI 子进程在单测环境均不可用。
+  @visibleForTesting
+  static Future<bool> evaluatePendingUpdate({
+    required Future<bool> Function() oldFileExists,
+    required Future<WindowsServiceStatus> Function() queryStatus,
+  }) async {
+    // 短路：绝大多数场景无待生效更新，不启动 status CLI 子进程
+    if (!await oldFileExists()) return false;
+    return await queryStatus() == WindowsServiceStatus.running;
+  }
+
+  /// 检测 Windows 端是否存在待生效的 helper 更新（`.old` 存在且服务 running）。
+  ///
+  /// 命中意味着运行中的服务仍挂在旧版二进制上，需重启服务（[restartService]）
+  /// 才能应用新版；`.old` 在服务重启后由 Go 侧清理，信号自洽。异常一律返回
+  /// `false`（按无更新处理，不打扰用户）。
+  @override
+  Future<bool> hasPendingHelperUpdate() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File oldFile = io.File(p.join(dir.path,
+          WindowsConstants.helperFileName + WindowsConstants.helperOldSuffix));
+      // await 使 evaluatePendingUpdate 内的异常落入本地 catch（否则随 Future 逃逸）
+      return await evaluatePendingUpdate(
+        oldFileExists: () => oldFile.exists(),
+        queryStatus: () => queryServiceStatus(),
+      );
+    } catch (e) {
+      debugPrint('检测待生效 helper 更新失败: $e');
+      return false;
+    }
+  }
+
+  /// 重启 Windows 系统服务（UAC 提权 + 两段式状态迁移轮询确认完成），
+  /// 供 helper 更新落盘后使新版服务无感生效。
+  ///
+  /// helper.exe 缺失或任何异常返回 `false`；调用方应降级用旧版继续业务。
+  @override
+  Future<bool> restartService() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
+      if (!await helperExe.exists()) {
+        return false;
+      }
+      final cli = _buildCli(dir);
+      return await cli.restart();
+    } catch (e) {
+      debugPrint('flutter_sing_box 插件重启服务失败, $e');
+      return false;
     }
   }
 

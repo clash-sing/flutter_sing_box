@@ -11,6 +11,9 @@ abstract class WindowsConstants {
   static const String helperFileName = 'clash_sing_helper.exe';
   /// helper 服务配置文件名。
   static const String helperConfigFileName = 'helper.json';
+  /// helper 更新时重命名降级的旧文件后缀（clash_sing_helper.exe.old）：
+  /// 运行中的服务仍挂在旧文件上，其存在即「有更新未生效」的信号。
+  static const String helperOldSuffix = '.old';
 
   /// helper 存活轮询间隔：连接期间探测 helper /status 以感知 helper/sing-box 异常退出。
   static const Duration helperWatchInterval = Duration(seconds: 3);

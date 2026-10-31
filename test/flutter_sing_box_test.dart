@@ -45,6 +45,16 @@ class MockFlutterSingBoxPlatform with MockPlatformInterfaceMixin implements Flut
   }
 
   @override
+  Future<bool> hasPendingHelperUpdate() {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> restartService() {
+    throw UnimplementedError();
+  }
+
+  @override
   Stream<ClientClashMode> get clashModeStream => throw UnimplementedError();
 
   @override

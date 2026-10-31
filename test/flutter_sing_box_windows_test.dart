@@ -161,4 +161,43 @@ void main() {
       expect(events.any((e) => e is ProxyStopped && e.errMessage != null), isFalse);
     });
   });
+
+  group('FlutterSingBoxWindows.evaluatePendingUpdate', () {
+    test('.old 不存在时短路返回 false 且不查询服务状态', () async {
+      var statusCalls = 0;
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => false,
+        queryStatus: () async {
+          statusCalls += 1;
+          return WindowsServiceStatus.running;
+        },
+      );
+      expect(result, isFalse);
+      expect(statusCalls, 0);
+    });
+
+    test('.old 存在且服务 running 返回 true', () async {
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => true,
+        queryStatus: () async => WindowsServiceStatus.running,
+      );
+      expect(result, isTrue);
+    });
+
+    test('.old 存在且服务 stopped 返回 false', () async {
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => true,
+        queryStatus: () async => WindowsServiceStatus.stopped,
+      );
+      expect(result, isFalse);
+    });
+
+    test('.old 存在且服务 error 返回 false', () async {
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => true,
+        queryStatus: () async => WindowsServiceStatus.error,
+      );
+      expect(result, isFalse);
+    });
+  });
 }
