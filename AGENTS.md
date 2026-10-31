@@ -93,7 +93,7 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 
 ### Native Side (Android)
 
-- Kotlin, min SDK 26, sing-box libbox **1.14.0** (jitpack `com.github.singbox-android:libbox`) — keep this version in sync when upgrading sing-box
+- Kotlin, min SDK 26, sing-box libbox **1.14.4** (jitpack `com.github.singbox-android:libbox`) — keep this version in sync when upgrading sing-box（1.14.4 起 `PlatformInterface` 移除了 `useProcFS()`，legacy Android 的连接属主查找改为 `findConnectionOwner` 内按 `SDK_INT >= Q` 分支、`< Q` 走 `Libbox.findConnectionOwner` procfs 搜索）
 - **Read `android/AGENTS.md` before touching `android/`** — it documents the two-package layout (plugin layer + vendored sing-box-for-android service layer), the `:remote` process model, AIDL vs libbox CommandClient channels, and known gotchas.
 
 ### Windows Side
