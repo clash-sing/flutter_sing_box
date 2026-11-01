@@ -151,7 +151,7 @@ class HelperHttpClient {
         _platform.emitProxyState(ProxyState.stopped);
       }
     } catch (e) {
-      throw Exception('Error starting helper: $e');
+      throw Exception('Error querying helper status: $e');
     }
   }
 

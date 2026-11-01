@@ -64,11 +64,13 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
         // 进程仍锁定该 .old（如服务正挂旧 helper / sing-box 未退出），留给清理
       }
     }
-    final serviceStatus = await queryServiceStatus();
-    if (serviceStatus == WindowsServiceStatus.running ||
-        serviceStatus == WindowsServiceStatus.stopped) {
-      HelperHttpClient().status();
-    }
+    // 启动期代理状态恢复：仅服务 running 时经 helper HTTP 恢复 UI 状态；
+    // stopped 等其余状态跳过（stopped 时端口必无人监听，探测只会得到
+    // 连接拒绝的 Unhandled Exception，而代理状态初始即 stopped 已正确）
+    await restoreStartupProxyState(
+      queryStatus: queryServiceStatus,
+      restoreViaHttp: () => HelperHttpClient().status(),
+    );
     // 崩溃自愈: 若上次异常退出遗留了系统代理,且 sing-box 当前未运行,则清除
     if (CsSettingsStorage().systemProxyActive) {
       final status = await queryServiceStatus();
@@ -150,6 +152,34 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     } catch (e) {
       debugPrint('检测待生效 helper 更新失败: $e');
       return false;
+    }
+  }
+
+  /// 启动期代理状态恢复的决策与执行（[init] 用）。
+  ///
+  /// 仅当服务 SCM 状态为 running 才经 helper HTTP `/status` 恢复 UI 代理状态
+  /// （覆盖「上次退出时代理还在跑」的场景）；stopped 时 helper 进程不存在、
+  /// HTTP 必然连接拒绝，且代理状态初始即 [ProxyState.stopped]，无需探测。
+  /// notInstalled/unknown/error 同样跳过——恢复是 best-effort，探测不可信时
+  /// 交由后续真实操作反馈。
+  ///
+  /// HTTP 恢复失败（如 SCM running 但端口瞬态不可达）只记日志不上抛：
+  /// 连接拒绝为立即失败（不占超时窗口），不值得以 Unhandled Exception
+  /// 打扰启动链。
+  ///
+  /// 拆为静态注入式函数（[queryStatus]/[restoreViaHttp] 为注入的异步输入），
+  /// 公共调用点 [init] 组装真实依赖——ProfileStorage 目录与 HTTP 客户端在
+  /// 单测环境均不可用。
+  @visibleForTesting
+  static Future<void> restoreStartupProxyState({
+    required Future<WindowsServiceStatus> Function() queryStatus,
+    required Future<void> Function() restoreViaHttp,
+  }) async {
+    if (await queryStatus() != WindowsServiceStatus.running) return;
+    try {
+      await restoreViaHttp();
+    } catch (e) {
+      debugPrint('启动期代理状态恢复失败(忽略): $e');
     }
   }
 
