@@ -35,25 +35,27 @@ class Base64Provider {
       } else {
         // parse uri
         Outbound? outbound;
+        // 无名节点的兜底名要先于构造算好（tag 是 final，构造后改不了）
+        final fallbackTag = _nextFallbackTag(outbounds);
         switch (uri.scheme) {
           case ClashProxyType.hysteria2:
           case 'hy2':
-            outbound = _parseHysteria2(uri);
+            outbound = _parseHysteria2(uri, fallbackTag);
             break;
           case ClashProxyType.hysteria:
-            outbound = _parseHysteria(uri);
+            outbound = _parseHysteria(uri, fallbackTag);
             break;
           case ClashProxyType.anytls:
-            outbound = _parseAnytls(uri);
+            outbound = _parseAnytls(uri, fallbackTag);
             break;
           case ClashProxyType.trojan:
-            outbound = _parseTrojan(uri);
+            outbound = _parseTrojan(uri, fallbackTag);
             break;
           case ClashProxyType.shadowsocks:
-            outbound = _parseShadowsocks(uri);
+            outbound = _parseShadowsocks(uri, fallbackTag);
             break;
           case ClashProxyType.vless:
-            outbound = _parseVless(uri);
+            outbound = _parseVless(uri, fallbackTag);
             break;
           case ClashProxyType.vmess:
             // vmess://base64(JSON) 不是标准 URI（无 @host:port 结构），传原始行整行解码
@@ -70,12 +72,31 @@ class Base64Provider {
     return outbounds;
   }
 
-  static Outbound? _parseHysteria2(Uri uri) {
+  /// 无名节点的兜底命名：分享链接缺 #fragment 时 tag 为空字符串，而
+  /// sing-box 1.14.4 起内核在 initialize 阶段查重出站 tag，重复的空 tag
+  /// 会被 check 直接拒收，分组引用空 tag 也无法启动（clash_sing_app#8）。
+  /// 按「节点 N」顺延取名，N 取跳过已有 tag 的最小值。
+  static String _nextFallbackTag(List<Outbound> existing) {
+    final taken = existing.map((e) => e.tag).toSet();
+    var n = 1;
+    while (taken.contains('节点 $n')) {
+      n++;
+    }
+    return '节点 $n';
+  }
+
+  /// 取出站 tag：fragment 解码非空用解码名，空则用兜底名。
+  static String _tagOr(Uri uri, String fallback) {
+    final name = Uri.decodeComponent(uri.fragment);
+    return name.isEmpty ? fallback : name;
+  }
+
+  static Outbound? _parseHysteria2(Uri uri, String fallbackTag) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
       final sni = queryParams['sni'] ?? uri.host;
       // 生成子类构造仅收 tag，其余字段语义对应旧拍平构造参数，构造后级联赋值
-      return Hysteria2Outbound(tag: Uri.decodeComponent(uri.fragment))
+      return Hysteria2Outbound(tag: _tagOr(uri, fallbackTag))
         ..server = uri.host
         ..serverPort = uri.port
         ..serverPorts = toSingBoxServerPorts(queryParams['mport'])
@@ -97,12 +118,12 @@ class Base64Provider {
     }
   }
 
-  static Outbound? _parseHysteria(Uri uri) {
+  static Outbound? _parseHysteria(Uri uri, String fallbackTag) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
       // peer 为 hysteria v1 官方参数名，兼容 sni 写法，缺省回退 host
       final sni = queryParams['peer'] ?? queryParams['sni'] ?? uri.host;
-      return HysteriaOutbound(tag: Uri.decodeComponent(uri.fragment))
+      return HysteriaOutbound(tag: _tagOr(uri, fallbackTag))
         ..network = queryParams['protocol'] == 'udp' ? ['tcp', 'udp'] : 'tcp'
         ..server = uri.host
         ..serverPort = uri.port
@@ -129,12 +150,12 @@ class Base64Provider {
     return (list == null || list.isEmpty) ? null : list;
   }
 
-  static Outbound? _parseAnytls(Uri uri) {
+  static Outbound? _parseAnytls(Uri uri, String fallbackTag) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
       // 官方 URI Scheme 参数为 sni（anytls-go docs/uri_scheme.md），缺省回退 host
       final sni = queryParams['sni'] ?? uri.host;
-      return AnytlsOutbound(tag: Uri.decodeComponent(uri.fragment))
+      return AnytlsOutbound(tag: _tagOr(uri, fallbackTag))
         ..server = uri.host
         ..serverPort = uri.port
         ..password = uri.userInfo
@@ -148,12 +169,12 @@ class Base64Provider {
     }
   }
 
-  static Outbound? _parseTrojan(Uri uri) {
+  static Outbound? _parseTrojan(Uri uri, String fallbackTag) {
     try {
       Map<String, String> queryParams = uri.queryParameters;
       // 主认 sni（v2rayN/官方标准），兼容 peer（trojan-go / Shadowrocket 旧写法），缺省回退 host
       final sni = queryParams['sni'] ?? queryParams['peer'] ?? uri.host;
-      return TrojanOutbound(tag: Uri.decodeComponent(uri.fragment))
+      return TrojanOutbound(tag: _tagOr(uri, fallbackTag))
         ..server = uri.host
         ..serverPort = uri.port
         ..password = uri.userInfo
@@ -170,7 +191,7 @@ class Base64Provider {
     }
   }
 
-  static Outbound? _parseShadowsocks(Uri uri) {
+  static Outbound? _parseShadowsocks(Uri uri, String fallbackTag) {
     try {
       final pair = _decodeSsUserinfo(uri.userInfo);
       if (pair == null) return null;
@@ -183,7 +204,7 @@ class Base64Provider {
           ? plugin.substring(plugin.indexOf(';') + 1)
           : null;
 
-      return ShadowsocksOutbound(tag: Uri.decodeComponent(uri.fragment))
+      return ShadowsocksOutbound(tag: _tagOr(uri, fallbackTag))
         ..server = uri.host
         ..serverPort = uri.port
         ..method = method
@@ -227,7 +248,7 @@ class Base64Provider {
   }
 
   /// 解析 vless:// 分享链接（格式定义见 Xray-core Discussion #716）。
-  static Outbound? _parseVless(Uri uri) {
+  static Outbound? _parseVless(Uri uri, String fallbackTag) {
     try {
       final q = uri.queryParameters;
       // 缺省回退 host：域名为 host 时作为 SNI；host 为 IP 时内核不发送 SNI
@@ -263,7 +284,7 @@ class Base64Provider {
           break;
       }
 
-      return VlessOutbound(tag: Uri.decodeComponent(uri.fragment))
+      return VlessOutbound(tag: _tagOr(uri, fallbackTag))
         ..server = uri.host
         ..serverPort = uri.port
         ..uuid = uri.userInfo
