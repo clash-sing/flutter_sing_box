@@ -49,13 +49,20 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
-    // 清理上次更新遗留的 .old（服务正挂在上面时删除失败是预期，忽略；
-    // 服务重启路径另有 Go 侧 Program.Start 兜底清理）
-    final io.File staleOld = _helperOldFileIn(dir);
-    try {
-      if (await staleOld.exists()) await staleOld.delete();
-    } catch (_) {
-      // 服务运行中锁定 .old，留给服务重启时清理
+    // 清理上次更新遗留的 .old（三个二进制走同一重命名降级路径，都会产生）。
+    // 被运行中进程锁定时删除失败是预期，忽略；服务重启路径另有 Go 侧
+    // Program.Start 兜底清理（服务启动时 sing-box 必已退出，删除必成功）
+    for (final String baseName in <String>[
+      WindowsConstants.helperFileName,
+      WindowsConstants.singBoxFileName,
+      WindowsConstants.libcronetFileName,
+    ]) {
+      try {
+        final io.File stale = _oldFileIn(dir, baseName);
+        if (await stale.exists()) await stale.delete();
+      } catch (_) {
+        // 进程仍锁定该 .old（如服务正挂旧 helper / sing-box 未退出），留给清理
+      }
     }
     final serviceStatus = await queryServiceStatus();
     if (serviceStatus == WindowsServiceStatus.running ||
@@ -77,11 +84,11 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     return HelperCli(helperExePath: p.join(dir.path, WindowsConstants.helperFileName));
   }
 
-  /// 目录 [dir] 下 helper 的 `.old` 副本（App 更新时重命名降级的产物）。
-  /// init 清理与待生效更新检测共用同一拼装，避免两处漂移。
-  static io.File _helperOldFileIn(io.Directory dir) {
+  /// 目录 [dir] 下 [baseName] 的 `.old` 副本（App 更新时重命名降级的产物）。
+  /// init 清理与待生效更新检测共用同一拼装，避免多处漂移。
+  static io.File _oldFileIn(io.Directory dir, String baseName) {
     return io.File(
-        p.join(dir.path, WindowsConstants.helperFileName + WindowsConstants.helperOldSuffix));
+        p.join(dir.path, baseName + WindowsConstants.helperOldSuffix));
   }
 
   /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
@@ -134,7 +141,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<bool> hasPendingHelperUpdate() async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final io.File oldFile = _helperOldFileIn(dir);
+      final io.File oldFile = _oldFileIn(dir, WindowsConstants.helperFileName);
       // await 使 evaluatePendingUpdate 内的异常落入本地 catch（否则随 Future 逃逸）
       return await evaluatePendingUpdate(
         oldFileExists: () => oldFile.exists(),
