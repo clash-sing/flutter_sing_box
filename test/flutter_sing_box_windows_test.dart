@@ -161,4 +161,91 @@ void main() {
       expect(events.any((e) => e is ProxyStopped && e.errMessage != null), isFalse);
     });
   });
+
+  group('FlutterSingBoxWindows.evaluatePendingUpdate', () {
+    test('.old 不存在时短路返回 false 且不查询服务状态', () async {
+      var statusCalls = 0;
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => false,
+        queryStatus: () async {
+          statusCalls += 1;
+          return WindowsServiceStatus.running;
+        },
+      );
+      expect(result, isFalse);
+      expect(statusCalls, 0);
+    });
+
+    test('.old 存在且服务 running 返回 true', () async {
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => true,
+        queryStatus: () async => WindowsServiceStatus.running,
+      );
+      expect(result, isTrue);
+    });
+
+    test('.old 存在且服务 stopped 返回 false', () async {
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => true,
+        queryStatus: () async => WindowsServiceStatus.stopped,
+      );
+      expect(result, isFalse);
+    });
+
+    test('.old 存在且服务 error 返回 false', () async {
+      final result = await FlutterSingBoxWindows.evaluatePendingUpdate(
+        oldFileExists: () async => true,
+        queryStatus: () async => WindowsServiceStatus.error,
+      );
+      expect(result, isFalse);
+    });
+  });
+
+  group('FlutterSingBoxWindows.restoreStartupProxyState', () {
+    test('服务 running：经 helper HTTP 恢复一次代理状态', () async {
+      var httpCalls = 0;
+      await FlutterSingBoxWindows.restoreStartupProxyState(
+        queryStatus: () async => WindowsServiceStatus.running,
+        restoreViaHttp: () async => httpCalls += 1,
+      );
+      expect(httpCalls, 1);
+    });
+
+    test('服务 stopped：跳过 HTTP 恢复（stopped 时端口必无人监听，代理状态初始即 stopped）', () async {
+      var httpCalls = 0;
+      await FlutterSingBoxWindows.restoreStartupProxyState(
+        queryStatus: () async => WindowsServiceStatus.stopped,
+        restoreViaHttp: () async => httpCalls += 1,
+      );
+      expect(httpCalls, 0);
+    });
+
+    test('notInstalled/unknown/error 一律跳过 HTTP 恢复', () async {
+      const skipped = [
+        WindowsServiceStatus.notInstalled,
+        WindowsServiceStatus.unknown,
+        WindowsServiceStatus.error,
+      ];
+      for (final status in skipped) {
+        var httpCalls = 0;
+        await FlutterSingBoxWindows.restoreStartupProxyState(
+          queryStatus: () async => status,
+          restoreViaHttp: () async => httpCalls += 1,
+        );
+        expect(httpCalls, 0, reason: '状态 $status 不应触发 HTTP 状态恢复');
+      }
+    });
+
+    test('HTTP 恢复失败（瞬态不可达）：不上抛（best-effort，不以 Unhandled Exception 打扰启动链）', () async {
+      var httpCalls = 0;
+      await FlutterSingBoxWindows.restoreStartupProxyState(
+        queryStatus: () async => WindowsServiceStatus.running,
+        restoreViaHttp: () async {
+          httpCalls += 1;
+          throw Exception('connection refused');
+        },
+      );
+      expect(httpCalls, 1);
+    });
+  });
 }

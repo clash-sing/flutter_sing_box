@@ -6,11 +6,9 @@ part 'user.g.dart';
 /// 由官方 JSON schema `$defs/User` 定义的配置模型。
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class User {
-  /// 对应 JSON 键 `Username`，可空（null 不参与序列化）。
-  @JsonKey(name: 'Username')
+  /// 对应 JSON 键 `username`，可空（null 不参与序列化）。
   String? username;
-  /// 对应 JSON 键 `Password`，可空（null 不参与序列化）。
-  @JsonKey(name: 'Password')
+  /// 对应 JSON 键 `password`，可空（null 不参与序列化）。
   String? password;
 
   /// 构造实例；可空字段省略时为 `null`。

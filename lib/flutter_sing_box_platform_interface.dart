@@ -104,6 +104,20 @@ abstract class FlutterSingBoxPlatform extends PlatformInterface {
     throw UnimplementedError('stopService() has not been implemented.');
   }
 
+  /// 检测是否存在待生效的 helper 更新（`.old` 存在且服务 running）。
+  ///
+  /// 仅 Windows 平台实现；其他平台未覆写本方法，调用抛 [UnimplementedError]。
+  Future<bool> hasPendingHelperUpdate() async {
+    throw UnimplementedError('hasPendingHelperUpdate() has not been implemented.');
+  }
+
+  /// 重启 Windows 系统服务（UAC 提权 + 轮询确认），使已落盘的新版 helper 生效。
+  ///
+  /// 仅 Windows 平台实现；其他平台未覆写本方法，调用抛 [UnimplementedError]。
+  Future<bool> restartService() async {
+    throw UnimplementedError('restartService() has not been implemented.');
+  }
+
   /// 客户端连接状态的更新流。
   Stream<ClientStatus> get connectedStatusStream {
     throw UnimplementedError('connectedStatusStream has not been implemented.');

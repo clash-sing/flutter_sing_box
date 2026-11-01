@@ -35,7 +35,7 @@ class HelperCliResult {
 typedef HelperRunner = Future<io.ProcessResult> Function(
     String exe, List<String> args);
 
-/// 封装 `clash_sing_helper.exe` 的 5 个子命令调用。
+/// 封装 `clash_sing_helper.exe` 的 6 个子命令调用。
 ///
 /// 仅 Windows 平台使用；定位 exe、拼参、提权、超时、解析全部收拢于此。
 class HelperCli {
@@ -51,7 +51,7 @@ class HelperCli {
   /// [subCommand] 的命令行参数。抽成独立方法便于单测参数形状。
   ///
   /// 安全前提：[helperExePath] 来自受控 asset 释放路径、假定不含单引号；
-  /// [subCommand] 为封闭枚举（install/uninstall/start/stop/status），
+  /// [subCommand] 为封闭枚举（install/uninstall/start/restart/stop/status），
   /// 故直接单引号插值无需转义。
   @visibleForTesting
   static List<String> buildRunasArgs(String helperExePath, String subCommand) {
@@ -237,6 +237,79 @@ class HelperCli {
       target: (s) => s == WindowsServiceStatus.running,
       delay: delay ?? ((Duration d) => Future<void>.delayed(d)),
       now: now ?? DateTime.now,
+    );
+  }
+
+  /// 提权重启服务：`helper.exe restart`（UAC 提权，Go 侧 SCM 同步 stop→start）
+  /// 后做**两段式状态迁移轮询**，完成判定必须观测到重启确实发生——服务本就
+  /// running，若照抄 [start] 的单段「轮询到 running」会首轮即假成功（此时
+  /// 服务尚未被停、App 会去连即将被停的旧服务）。
+  ///
+  /// 第一段（deadline 20s，含 UAC 已确认但 SCM 停止在途的稳定窗口余量）等
+  /// 「离开 running」**或「.old 消失」」：连接时刻 sing-box 未运行，快速重启
+  /// 的非 running 窗口可窄于 500ms 采样间隔、状态采样全程落在 running
+  /// （kardianos 把 StartPending 也映射为 running），此时 [oldFileExists] 的
+  /// 消失是唯一可靠信号——新服务的 Program.Start 在进入 running 前必删
+  /// `<helper>.old`。第二段（deadline 15s）等「回到 running」。
+  ///
+  /// [run] 失败（UAC 拒绝、30s 超时——注意 runas 无 -Wait，该超时只覆盖
+  /// 「UAC 等待用户点击 + 提权进程启动」）直接返回 false；任一段超时同样返回
+  /// false——调用方降级用旧版服务继续业务，不打断用户。
+  ///
+  /// [queryStatus]/[oldFileExists]/[delay]/[now] 仅供测试注入；默认用自身
+  /// [status]、helper 同目录 `.old` 文件与真实时间。
+  Future<bool> restart({
+    Future<WindowsServiceStatus> Function()? queryStatus,
+    Future<bool> Function()? oldFileExists,
+    Future<void> Function(Duration)? delay,
+    DateTime Function()? now,
+  }) async {
+    final HelperCliResult r = await run(
+      'restart',
+      elevated: true,
+      timeout: const Duration(seconds: 30),
+    );
+    if (!r.ok) {
+      debugPrint(
+          'helper restart runas 失败, exitCode=${r.exitCode}, stderr=${r.stderr}');
+      return false;
+    }
+    final Future<WindowsServiceStatus> Function() query =
+        queryStatus ?? status;
+    final Future<bool> Function() oldExists = oldFileExists ??
+        () => io.File('$helperExePath${WindowsConstants.helperOldSuffix}')
+            .exists();
+    final Future<void> Function(Duration) wait =
+        delay ?? ((Duration d) => Future<void>.delayed(d));
+    final DateTime Function() clock = now ?? DateTime.now;
+
+    // 第一段：等「真实离开 running」（stopped / notInstalled）或「.old 消失」，
+    // 证明 restart 确实在推进。error/unknown（status CLI 瞬态失败）不算迁移——
+    // 否则服务从未被停时第二段首轮命中 running 即误报成功。
+    // .old 检查是 async 文件 IO，装不进 waitUntilStatus 的同步 target，手写循环。
+    final DateTime firstEnd = clock().add(const Duration(seconds: 20));
+    bool transitioned = false;
+    while (clock().isBefore(firstEnd)) {
+      final WindowsServiceStatus s = await query();
+      final bool leftRunning = s == WindowsServiceStatus.stopped ||
+          s == WindowsServiceStatus.notInstalled;
+      if (leftRunning || !await oldExists()) {
+        transitioned = true;
+        break;
+      }
+      await wait(const Duration(milliseconds: 500));
+    }
+    if (!transitioned) {
+      debugPrint('helper restart 第一段超时：服务未离开 running 且 .old 未清理，按失败降级');
+      return false;
+    }
+    // 第二段：等回到 running（新服务进程已被 SCM 拉起）
+    return waitUntilStatus(
+      queryStatus: query,
+      target: (s) => s == WindowsServiceStatus.running,
+      delay: wait,
+      now: clock,
+      deadline: const Duration(seconds: 15),
     );
   }
 }

@@ -447,4 +447,31 @@ void main() {
       expect(rt.transport?.headers, isNull);
     });
   });
+
+  group('Base64Provider.provide - 无名节点兜底命名', () {
+    // 背景：sing-box 1.14.4 起内核在 initialize 阶段查重出站 tag，
+    // 空 tag 的重复出站会被 check 直接拒收（clash_sing_app#8 场景）。
+    test('缺 #fragment 的节点生成非空且互不重复的兜底 tag', () {
+      const l1 = 'trojan://pw@t1.example.com:443?sni=t1.example.com';
+      const l2 = 'trojan://pw@t8.example.com:443?sni=t8.example.com';
+      const l3 = 'trojan://pw@t2.example.com:443?sni=t2.example.com#TJ-B';
+      final outbounds = Base64Provider.provide(encodeSub([l1, l2, l3]));
+      expect(outbounds, hasLength(3));
+      final tags = outbounds.map((e) => e.tag).toList();
+      expect(tags, everyElement(isNotEmpty), reason: '空 tag 会被内核拒收');
+      expect(tags.toSet().length, 3, reason: '兜底 tag 之间不能重复');
+      expect(tags[2], 'TJ-B', reason: '带名字的节点不受影响');
+    });
+
+    test('兜底 tag 避让订阅里已有的显式节点名', () {
+      // 显式名「节点 1」已被占用，两个空名节点应顺延为「节点 2」「节点 3」
+      const named = 'trojan://pw@t3.example.com:443?sni=t3.example.com#%E8%8A%82%E7%82%B9%201';
+      const l1 = 'trojan://pw@t1.example.com:443?sni=t1.example.com';
+      const l2 = 'trojan://pw@t8.example.com:443?sni=t8.example.com';
+      final outbounds = Base64Provider.provide(encodeSub([named, l1, l2]));
+      final tags = outbounds.map((e) => e.tag).toList();
+      expect(tags[0], '节点 1');
+      expect(tags.toSet().length, 3, reason: '兜底 tag 不得与显式名冲突');
+    });
+  });
 }

@@ -49,11 +49,28 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
-    final serviceStatus = await queryServiceStatus();
-    if (serviceStatus == WindowsServiceStatus.running ||
-        serviceStatus == WindowsServiceStatus.stopped) {
-      HelperHttpClient().status();
+    // 清理上次更新遗留的 .old（三个二进制走同一重命名降级路径，都会产生）。
+    // 被运行中进程锁定时删除失败是预期，忽略；服务重启路径另有 Go 侧
+    // Program.Start 兜底清理（服务启动时 sing-box 必已退出，删除必成功）
+    for (final String baseName in <String>[
+      WindowsConstants.helperFileName,
+      WindowsConstants.singBoxFileName,
+      WindowsConstants.libcronetFileName,
+    ]) {
+      try {
+        final io.File stale = _oldFileIn(dir, baseName);
+        if (await stale.exists()) await stale.delete();
+      } catch (_) {
+        // 进程仍锁定该 .old（如服务正挂旧 helper / sing-box 未退出），留给清理
+      }
     }
+    // 启动期代理状态恢复：仅服务 running 时经 helper HTTP 恢复 UI 状态；
+    // stopped 等其余状态跳过（stopped 时端口必无人监听，探测只会得到
+    // 连接拒绝的 Unhandled Exception，而代理状态初始即 stopped 已正确）
+    await restoreStartupProxyState(
+      queryStatus: queryServiceStatus,
+      restoreViaHttp: () => HelperHttpClient().status(),
+    );
     // 崩溃自愈: 若上次异常退出遗留了系统代理,且 sing-box 当前未运行,则清除
     if (CsSettingsStorage().systemProxyActive) {
       final status = await queryServiceStatus();
@@ -67,6 +84,13 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 基于 exe 同目录构造 HelperCli（每次调用重建，无状态，轻量）。
   HelperCli _buildCli(io.Directory dir) {
     return HelperCli(helperExePath: p.join(dir.path, WindowsConstants.helperFileName));
+  }
+
+  /// 目录 [dir] 下 [baseName] 的 `.old` 副本（App 更新时重命名降级的产物）。
+  /// init 清理与待生效更新检测共用同一拼装，避免多处漂移。
+  static io.File _oldFileIn(io.Directory dir, String baseName) {
+    return io.File(
+        p.join(dir.path, baseName + WindowsConstants.helperOldSuffix));
   }
 
   /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
@@ -91,6 +115,91 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
       return await cli.status();
     } catch (_) {
       return WindowsServiceStatus.error;
+    }
+  }
+
+  /// 待生效 helper 更新的判定逻辑：`<helper>.old` 存在（App 更新时重命名降级
+  /// 的产物，运行中服务仍挂在旧文件上）且服务当前 running。
+  ///
+  /// 组合逻辑拆为静态纯函数（[oldFileExists] / [queryStatus] 为注入的异步输入），
+  /// 公共入口 [hasPendingHelperUpdate] 组装真实依赖——ProfileStorage 目录与
+  /// status CLI 子进程在单测环境均不可用。
+  @visibleForTesting
+  static Future<bool> evaluatePendingUpdate({
+    required Future<bool> Function() oldFileExists,
+    required Future<WindowsServiceStatus> Function() queryStatus,
+  }) async {
+    // 短路：绝大多数场景无待生效更新，不启动 status CLI 子进程
+    if (!await oldFileExists()) return false;
+    return await queryStatus() == WindowsServiceStatus.running;
+  }
+
+  /// 检测 Windows 端是否存在待生效的 helper 更新（`.old` 存在且服务 running）。
+  ///
+  /// 命中意味着运行中的服务仍挂在旧版二进制上，需重启服务（[restartService]）
+  /// 才能应用新版；`.old` 在服务重启后由 Go 侧清理，信号自洽。异常一律返回
+  /// `false`（按无更新处理，不打扰用户）。
+  @override
+  Future<bool> hasPendingHelperUpdate() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File oldFile = _oldFileIn(dir, WindowsConstants.helperFileName);
+      // await 使 evaluatePendingUpdate 内的异常落入本地 catch（否则随 Future 逃逸）
+      return await evaluatePendingUpdate(
+        oldFileExists: () => oldFile.exists(),
+        queryStatus: () => queryServiceStatus(),
+      );
+    } catch (e) {
+      debugPrint('检测待生效 helper 更新失败: $e');
+      return false;
+    }
+  }
+
+  /// 启动期代理状态恢复的决策与执行（[init] 用）。
+  ///
+  /// 仅当服务 SCM 状态为 running 才经 helper HTTP `/status` 恢复 UI 代理状态
+  /// （覆盖「上次退出时代理还在跑」的场景）；stopped 时 helper 进程不存在、
+  /// HTTP 必然连接拒绝，且代理状态初始即 [ProxyState.stopped]，无需探测。
+  /// notInstalled/unknown/error 同样跳过——恢复是 best-effort，探测不可信时
+  /// 交由后续真实操作反馈。
+  ///
+  /// HTTP 恢复失败（如 SCM running 但端口瞬态不可达）只记日志不上抛：
+  /// 连接拒绝为立即失败（不占超时窗口），不值得以 Unhandled Exception
+  /// 打扰启动链。
+  ///
+  /// 拆为静态注入式函数（[queryStatus]/[restoreViaHttp] 为注入的异步输入），
+  /// 公共调用点 [init] 组装真实依赖——ProfileStorage 目录与 HTTP 客户端在
+  /// 单测环境均不可用。
+  @visibleForTesting
+  static Future<void> restoreStartupProxyState({
+    required Future<WindowsServiceStatus> Function() queryStatus,
+    required Future<void> Function() restoreViaHttp,
+  }) async {
+    if (await queryStatus() != WindowsServiceStatus.running) return;
+    try {
+      await restoreViaHttp();
+    } catch (e) {
+      debugPrint('启动期代理状态恢复失败(忽略): $e');
+    }
+  }
+
+  /// 重启 Windows 系统服务（UAC 提权 + 两段式状态迁移轮询确认完成），
+  /// 供 helper 更新落盘后使新版服务无感生效。
+  ///
+  /// helper.exe 缺失或任何异常返回 `false`；调用方应降级用旧版继续业务。
+  @override
+  Future<bool> restartService() async {
+    try {
+      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
+      if (!await helperExe.exists()) {
+        return false;
+      }
+      final cli = _buildCli(dir);
+      return await cli.restart();
+    } catch (e) {
+      debugPrint('flutter_sing_box 插件重启服务失败, $e');
+      return false;
     }
   }
 
@@ -179,7 +288,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 返回内置 sing-box 内核版本号（随打包内核升级同步更新）。
   @override
   Future<String> getSingBoxVersion() async {
-    return '1.14.3';
+    return '1.14.4';
   }
 
   /// 经 helper HTTP API 启动代理（失败不抛出，原因经 [proxyStateStream] 下发）。

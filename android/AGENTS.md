@@ -1,8 +1,8 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI coding agents (e.g. Claude Code) when working with code in this repository.
 
-Android native (Kotlin) implementation of the `flutter_sing_box` plugin. The Dart-side layout, build commands, and code-generation conventions live in [`../CLAUDE.md`](../CLAUDE.md); this file covers only the Kotlin layer under `android/`.
+Android native (Kotlin) implementation of the `flutter_sing_box` plugin. The Dart-side layout, build commands, and code-generation conventions live in [`../AGENTS.md`](../AGENTS.md); this file covers only the Kotlin layer under `android/`.
 
 ## Build & Test
 
@@ -15,7 +15,7 @@ Android native (Kotlin) implementation of the `flutter_sing_box` plugin. The Dar
   `flutter analyze` / `flutter test` (repo root, CI) only cover the Dart side.
 - Gradle is Kotlin DSL (`build.gradle.kts`). AGP library plugin, compileSdk 37, minSdk 26, Java 17, core-library desugaring enabled.
 - Sources live in `src/main/kotlin` and `src/test/kotlin` (wired explicitly via `sourceSets`), not `src/main/java`.
-- Key dependencies: `com.github.singbox-android:libbox` (jitpack — version must stay in sync with the sing-box version mentioned in `../CLAUDE.md` and `../pubspec.yaml`), MMKV 2.4.2, kotlinx-serialization-json. Unit tests use kotlin-test + Mockito on JUnit Platform.
+- Key dependencies: `com.github.singbox-android:libbox` (jitpack — version must stay in sync with the sing-box version mentioned in `../AGENTS.md` and `../pubspec.yaml`), MMKV 2.4.2, kotlinx-serialization-json. Unit tests use kotlin-test + Mockito on JUnit Platform.
 - AIDL is required (`buildFeatures { aidl = true }`) — `IService`/`IServiceCallback` under `src/main/aidl` drive cross-process communication (see below).
 
 ## The Two-Package Layout

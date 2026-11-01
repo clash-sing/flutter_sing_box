@@ -444,4 +444,173 @@ void main() {
       expect(ok, isFalse);
     });
   });
+
+  group('HelperCli.restart', () {
+    /// 前进式假时钟：从基准时间起每次调用推进 500ms，模拟真实时钟持续
+    /// 前进。注意不能用「若干次后冻结」的 fake——restart 串联两段轮询，
+    /// 第二段 deadline 以冻结点重算后永远无法越过，会死循环
+    /// （真实 DateTime.now() 不存在此问题）。
+    DateTime Function() makeAdvancingClock() {
+      var elapsedMs = 0;
+      return () {
+        final t = DateTime(2026, 11, 1).add(Duration(milliseconds: elapsedMs));
+        elapsedMs += 500;
+        return t;
+      };
+    }
+
+    test('run 失败（UAC 拒绝）返回 false 且不进入轮询', () async {
+      var statusCalls = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 1, '', 'UAC 拒绝'),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async {
+          statusCalls += 1;
+          return WindowsServiceStatus.running;
+        },
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+      expect(statusCalls, 0);
+    });
+
+    test('观测到离开 running 并回到 running 返回 true', () async {
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running, // 一段第 1 次：仍在 running（不得视为完成）
+        WindowsServiceStatus.stopped, // 一段第 2 次：离开 running
+        WindowsServiceStatus.stopped, // 二段第 1 次：新服务未起
+        WindowsServiceStatus.running, // 二段第 2 次：回到 running
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => seq[i++],
+        oldFileExists: () async => true, // .old 恒在，纯走状态迁移路径
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isTrue);
+      expect(i, 4);
+    });
+
+    test('恒 running 但 .old 中途消失（快速重启窄于采样间隔）返回 true', () async {
+      // 连接时刻 sing-box 未跑，stop→start 全程可压缩到一次采样间隔内，
+      // 状态采样可能全程落在 running（kardianos 把 StartPending 也映射为
+      // running）——此时 .old 的消失（新服务 Program.Start 必删）是唯一
+      // 可靠的成功信号
+      var polls = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => WindowsServiceStatus.running,
+        oldFileExists: () async => polls++ >= 2, // 前两轮 .old 仍在，第三轮起消失
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isTrue);
+    });
+
+    test('恒 running（restart 未推进）超时返回 false（假成功防护）', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => WindowsServiceStatus.running,
+        oldFileExists: () async => true, // .old 恒在（restart 未推进）
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+
+    test('离开 running 后恒 stopped（start 失败）超时返回 false', () async {
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running,
+        WindowsServiceStatus.stopped,
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async =>
+            i < seq.length ? seq[i++] : WindowsServiceStatus.stopped,
+        oldFileExists: () async => true, // .old 恒在（服务未能重启）
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+
+    test('error 瞬态不算状态迁移，等真实 stopped 后继续完成', () async {
+      // status CLI 在服务停止过程中可能瞬态失败（error）——不得据此判定
+      // 「已离开 running」；继续轮询到真实 stopped 才算迁移
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running, // 一段第 1 次：未推进
+        WindowsServiceStatus.error, // 瞬态失败：不算迁移
+        WindowsServiceStatus.stopped, // 真实迁移
+        WindowsServiceStatus.stopped, // 二段：未起
+        WindowsServiceStatus.running, // 二段：回到 running
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => seq[i++],
+        oldFileExists: () async => true,
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isTrue);
+      expect(i, 5); // error 那次未提前转段，全序列被消费
+    });
+
+    test('error 瞬态后回到 running（服务从未被停）不得假阳性成功', () async {
+      // 假阳性场景：error 一次后服务其实一直在 running（restart 未推进）——
+      // 若把 error 当「已离开 running」，第二段首轮命中 running 即误报成功
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running,
+        WindowsServiceStatus.error,
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async =>
+            i < seq.length ? seq[i++] : WindowsServiceStatus.running,
+        oldFileExists: () async => true, // .old 恒在：restart 确实未推进
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+
+    test('恒 error 且 .old 恒在（status 持续失败）超时返回 false', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => WindowsServiceStatus.error,
+        oldFileExists: () async => true,
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+  });
 }

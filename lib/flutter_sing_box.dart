@@ -101,6 +101,20 @@ class FlutterSingBox {
     return FlutterSingBoxPlatform.instance.stopService();
   }
 
+  /// 检测是否存在待生效的 helper 更新（`.old` 存在且服务 running，
+  /// 仅 Windows 平台实现；其他平台未实现，调用抛 [UnimplementedError]，
+  /// 调用方应先判断平台）。
+  Future<bool> hasPendingHelperUpdate() {
+    return FlutterSingBoxPlatform.instance.hasPendingHelperUpdate();
+  }
+
+  /// 重启 Windows 系统服务使已落盘的新版 helper 生效（UAC 提权，
+  /// 仅 Windows 平台实现；其他平台未实现，调用抛 [UnimplementedError]，
+  /// 调用方应先判断平台）。
+  Future<bool> restartService() {
+    return FlutterSingBoxPlatform.instance.restartService();
+  }
+
   /// 客户端连接状态的更新流。
   Stream<ClientStatus> get connectedStatusStream =>
       FlutterSingBoxPlatform.instance.connectedStatusStream;

@@ -7,7 +7,6 @@ import android.os.Process
 import android.provider.Settings
 import android.system.OsConstants
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.clashsing.flutter_sing_box.cs.PluginManager
 import io.nekohasekai.libbox.BridgeOptions
 import io.nekohasekai.libbox.BridgeSession
@@ -39,9 +38,9 @@ interface PlatformInterfaceWrapper : PlatformInterface {
         error("invalid argument")
     }
 
-    override fun useProcFS(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+    // libbox 1.14.4 起接口已移除 useProcFS()：legacy Android（API < Q）的 procfs
+    // 连接属主查找改由下方 findConnectionOwner 内按 SDK 版本分支处理。
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun findConnectionOwner(
         ipProtocol: Int,
         sourceAddress: String,
@@ -50,12 +49,24 @@ interface PlatformInterfaceWrapper : PlatformInterface {
         destinationPort: Int,
     ): ConnectionOwner {
         try {
+            // API >= Q 用系统 ConnectionOwner API；更早版本回退到 libbox 内置的
+            // /proc/net 搜索（Libbox.findConnectionOwner，1.14.4 新增的静态绑定）。
             val uid =
-                PluginManager.connectivity.getConnectionOwnerUid(
-                    ipProtocol,
-                    InetSocketAddress(sourceAddress, sourcePort),
-                    InetSocketAddress(destinationAddress, destinationPort),
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    PluginManager.connectivity.getConnectionOwnerUid(
+                        ipProtocol,
+                        InetSocketAddress(sourceAddress, sourcePort),
+                        InetSocketAddress(destinationAddress, destinationPort),
+                    )
+                } else {
+                    Libbox.findConnectionOwner(
+                        ipProtocol,
+                        sourceAddress,
+                        sourcePort,
+                        destinationAddress,
+                        destinationPort,
+                    ).userId
+                }
 //            if (uid == Process.INVALID_UID) error("android: connection owner not found")
             if (uid == Process.INVALID_UID) {
                 Log.w("PlatformInterface", "Connection owner not found for $sourceAddress:$sourcePort -> $destinationAddress:$destinationPort")
