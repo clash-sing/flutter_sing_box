@@ -51,10 +51,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     }
     // 清理上次更新遗留的 .old（服务正挂在上面时删除失败是预期，忽略；
     // 服务重启路径另有 Go 侧 Program.Start 兜底清理）
-    final io.File staleOld = io.File(
-      p.join(dir.path,
-          WindowsConstants.helperFileName + WindowsConstants.helperOldSuffix),
-    );
+    final io.File staleOld = _helperOldFileIn(dir);
     try {
       if (await staleOld.exists()) await staleOld.delete();
     } catch (_) {
@@ -78,6 +75,13 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 基于 exe 同目录构造 HelperCli（每次调用重建，无状态，轻量）。
   HelperCli _buildCli(io.Directory dir) {
     return HelperCli(helperExePath: p.join(dir.path, WindowsConstants.helperFileName));
+  }
+
+  /// 目录 [dir] 下 helper 的 `.old` 副本（App 更新时重命名降级的产物）。
+  /// init 清理与待生效更新检测共用同一拼装，避免两处漂移。
+  static io.File _helperOldFileIn(io.Directory dir) {
+    return io.File(
+        p.join(dir.path, WindowsConstants.helperFileName + WindowsConstants.helperOldSuffix));
   }
 
   /// 查询 Windows 端 `clash_sing_service` 的安装/运行状态。
@@ -130,8 +134,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   Future<bool> hasPendingHelperUpdate() async {
     try {
       final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final io.File oldFile = io.File(p.join(dir.path,
-          WindowsConstants.helperFileName + WindowsConstants.helperOldSuffix));
+      final io.File oldFile = _helperOldFileIn(dir);
       // await 使 evaluatePendingUpdate 内的异常落入本地 catch（否则随 Future 逃逸）
       return await evaluatePendingUpdate(
         oldFileExists: () => oldFile.exists(),

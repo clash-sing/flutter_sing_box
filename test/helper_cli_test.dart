@@ -551,5 +551,66 @@ void main() {
       );
       expect(ok, isFalse);
     });
+
+    test('error 瞬态不算状态迁移，等真实 stopped 后继续完成', () async {
+      // status CLI 在服务停止过程中可能瞬态失败（error）——不得据此判定
+      // 「已离开 running」；继续轮询到真实 stopped 才算迁移
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running, // 一段第 1 次：未推进
+        WindowsServiceStatus.error, // 瞬态失败：不算迁移
+        WindowsServiceStatus.stopped, // 真实迁移
+        WindowsServiceStatus.stopped, // 二段：未起
+        WindowsServiceStatus.running, // 二段：回到 running
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => seq[i++],
+        oldFileExists: () async => true,
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isTrue);
+      expect(i, 5); // error 那次未提前转段，全序列被消费
+    });
+
+    test('error 瞬态后回到 running（服务从未被停）不得假阳性成功', () async {
+      // 假阳性场景：error 一次后服务其实一直在 running（restart 未推进）——
+      // 若把 error 当「已离开 running」，第二段首轮命中 running 即误报成功
+      final seq = <WindowsServiceStatus>[
+        WindowsServiceStatus.running,
+        WindowsServiceStatus.error,
+      ];
+      var i = 0;
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async =>
+            i < seq.length ? seq[i++] : WindowsServiceStatus.running,
+        oldFileExists: () async => true, // .old 恒在：restart 确实未推进
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
+
+    test('恒 error 且 .old 恒在（status 持续失败）超时返回 false', () async {
+      final cli = HelperCli(
+        helperExePath: 'x',
+        runner: (exe, args) async => io.ProcessResult(0, 0, '', ''),
+      );
+      final ok = await cli.restart(
+        queryStatus: () async => WindowsServiceStatus.error,
+        oldFileExists: () async => true,
+        delay: (_) async {},
+        now: makeAdvancingClock(),
+      );
+      expect(ok, isFalse);
+    });
   });
 }

@@ -283,13 +283,17 @@ class HelperCli {
         delay ?? ((Duration d) => Future<void>.delayed(d));
     final DateTime Function() clock = now ?? DateTime.now;
 
-    // 第一段：等「离开 running」或「.old 消失」，证明 restart 确实在推进。
+    // 第一段：等「真实离开 running」（stopped / notInstalled）或「.old 消失」，
+    // 证明 restart 确实在推进。error/unknown（status CLI 瞬态失败）不算迁移——
+    // 否则服务从未被停时第二段首轮命中 running 即误报成功。
     // .old 检查是 async 文件 IO，装不进 waitUntilStatus 的同步 target，手写循环。
     final DateTime firstEnd = clock().add(const Duration(seconds: 20));
     bool transitioned = false;
     while (clock().isBefore(firstEnd)) {
       final WindowsServiceStatus s = await query();
-      if (s != WindowsServiceStatus.running || !await oldExists()) {
+      final bool leftRunning = s == WindowsServiceStatus.stopped ||
+          s == WindowsServiceStatus.notInstalled;
+      if (leftRunning || !await oldExists()) {
         transitioned = true;
         break;
       }
