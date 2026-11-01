@@ -9,6 +9,13 @@
 * `init()` now best-effort deletes leftover `.old` copies of helper / sing-box / libcronet; locked files are ignored — the service-start path on the Go side is the reliable cleanup point
 * Bundled `clash_sing_helper.exe` upgraded to **v0.2.0**: adds the `restart` subcommand (synchronous SCM stop→start), service-start cleanup of helper / sing-box / libcronet `.old` copies, an unknown-subcommand guard (only a bare invocation may run as the service body), and a stop-timeout wrapper working around an upstream kardianos/service hang
 
+**Windows: startup proxy-state restoration**
+
+* `init()` now restores the UI proxy state on startup when the service is already `running` from a previous session — the helper `/status` probe re-emits the correct `ProxyState`, so the UI no longer comes up as stopped while the proxy is actually active
+* The probe is skipped for every other service state: probing a `stopped` service always hit a connection-refused exception (nobody listens on the helper port) while the initial `stopped` state was already correct; `notInstalled` / `unknown` / `error` are likewise skipped — restoration is best-effort and defers to real-operation feedback when the status read is untrustworthy
+* A failed probe during restoration (SCM running but the port transiently unreachable) is logged and ignored instead of surfacing an unhandled exception in the startup chain
+* Corrected the exception message thrown by `HelperHttpClient.status()` (`Error starting helper` → `Error querying helper status`)
+
 ### Tooling
 
 * `tool/check_helper_asset.sh` — pre-tag release gate for the bundled helper: asserts the restart marker string exists in both architecture binaries and that the native-architecture binary reports a version number above the `0.0.0` local-build sentinel
