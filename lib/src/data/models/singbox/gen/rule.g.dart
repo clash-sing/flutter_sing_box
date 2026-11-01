@@ -64,23 +64,6 @@ Rule _$RuleFromJson(Map<String, dynamic> json) => Rule()
   ..tlsRecordFragment = json['tls_record_fragment'] as bool?
   ..tlsSpoof = json['tls_spoof'] as String?
   ..tlsSpoofMethod = json['tls_spoof_method'] as String?
-  ..bindInterface = json['bind_interface'] as String?
-  ..inet4BindAddress = json['inet4_bind_address']
-  ..inet6BindAddress = json['inet6_bind_address']
-  ..bindAddressNoPort = json['bind_address_no_port'] as bool?
-  ..protectPath = json['protect_path'] as String?
-  ..routingMark = json['routing_mark']
-  ..reuseAddr = json['reuse_addr'] as bool?
-  ..netns = json['netns'] as String?
-  ..connectTimeout = json['connect_timeout'] as String?
-  ..tcpFastOpen = json['tcp_fast_open'] as bool?
-  ..tcpMultiPath = json['tcp_multi_path'] as bool?
-  ..disableTcpKeepAlive = json['disable_tcp_keep_alive'] as bool?
-  ..tcpKeepAlive = json['tcp_keep_alive'] as String?
-  ..tcpKeepAliveInterval = json['tcp_keep_alive_interval'] as String?
-  ..udpFragment = json['udp_fragment'] as bool?
-  ..domainResolver = json['domain_resolver']
-  ..fallbackNetworkType = json['fallback_network_type']
   ..method = json['method'] as String?
   ..noDrop = json['no_drop'] as bool?
   ..sniffer = json['sniffer']
@@ -154,23 +137,6 @@ Map<String, dynamic> _$RuleToJson(Rule instance) => <String, dynamic>{
   'tls_record_fragment': ?instance.tlsRecordFragment,
   'tls_spoof': ?instance.tlsSpoof,
   'tls_spoof_method': ?instance.tlsSpoofMethod,
-  'bind_interface': ?instance.bindInterface,
-  'inet4_bind_address': ?instance.inet4BindAddress,
-  'inet6_bind_address': ?instance.inet6BindAddress,
-  'bind_address_no_port': ?instance.bindAddressNoPort,
-  'protect_path': ?instance.protectPath,
-  'routing_mark': ?instance.routingMark,
-  'reuse_addr': ?instance.reuseAddr,
-  'netns': ?instance.netns,
-  'connect_timeout': ?instance.connectTimeout,
-  'tcp_fast_open': ?instance.tcpFastOpen,
-  'tcp_multi_path': ?instance.tcpMultiPath,
-  'disable_tcp_keep_alive': ?instance.disableTcpKeepAlive,
-  'tcp_keep_alive': ?instance.tcpKeepAlive,
-  'tcp_keep_alive_interval': ?instance.tcpKeepAliveInterval,
-  'udp_fragment': ?instance.udpFragment,
-  'domain_resolver': ?instance.domainResolver,
-  'fallback_network_type': ?instance.fallbackNetworkType,
   'method': ?instance.method,
   'no_drop': ?instance.noDrop,
   'sniffer': ?instance.sniffer,
