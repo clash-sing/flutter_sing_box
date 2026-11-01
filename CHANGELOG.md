@@ -1,3 +1,18 @@
+## 3.1.0
+
+### Features
+
+**Windows: helper updates take effect without a manual service restart**
+
+* New `hasPendingHelperUpdate()` API — detects a pending helper update: the renamed-away `clash_sing_helper.exe.old` (produced when the running service locks the binary during an app update) exists **and** the service is running. Short-circuits on the file check alone, so no CLI subprocess is spawned when nothing is pending
+* New `restartService()` API — elevates via UAC (`helper.exe restart`) and confirms completion with a two-phase state-transition poll: it must observe the service *leave* running (or the `.old` file disappear — fast restarts can slip entirely between the 500 ms samples, and the new service deletes `.old` before entering running) and then *return* to running. Transient `error`/`unknown` status reads do not count as a transition. Any failure (UAC declined, timeout, restart error) returns `false` so callers can fall back to the old service instead of blocking the user
+* `init()` now best-effort deletes leftover `.old` copies of helper / sing-box / libcronet; locked files are ignored — the service-start path on the Go side is the reliable cleanup point
+* Bundled `clash_sing_helper.exe` upgraded to **v0.2.0**: adds the `restart` subcommand (synchronous SCM stop→start), service-start cleanup of helper / sing-box / libcronet `.old` copies, an unknown-subcommand guard (only a bare invocation may run as the service body), and a stop-timeout wrapper working around an upstream kardianos/service hang
+
+### Tooling
+
+* `tool/check_helper_asset.sh` — pre-tag release gate for the bundled helper: asserts the restart marker string exists in both architecture binaries and that the native-architecture binary reports a version number above the `0.0.0` local-build sentinel
+
 ## 3.0.3
 
 ### CI
