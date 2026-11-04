@@ -39,9 +39,8 @@ migrate_working_dir/
 /assets/.local/
 /doc/
 # Claude Code / GitNexus 个人本地配置(仅部分成员使用,不入库)
-.gitnexus
 /.claude/skills/gitnexus/
 /.claude/settings.local.json
-/.gitnexusrc
+/.gitnexus/
 /CLAUDE.local.md
 
