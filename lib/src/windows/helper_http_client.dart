@@ -157,7 +157,7 @@ class HelperHttpClient {
 
   /// 默认配置读取器：从 App 存储目录读 helper.json。
   static Future<HelperConfig?> _readHelperConfig() async {
-    final io.Directory dir = await ProfileStorage().getStorageDirectory();
+    final io.Directory dir = await CoreStorage().getStorageDirectory();
     final io.File configFile = io.File(p.join(dir.path, WindowsConstants.helperConfigFileName));
     if (!await configFile.exists()) {
       return null;

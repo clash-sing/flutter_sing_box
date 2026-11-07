@@ -25,7 +25,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<void> init() async {
     debugPrint('flutter_sing_box 插件初始化 Windows 平台 startTime = ${DateTime.now()}');
-    final io.Directory dir = await ProfileStorage().getStorageDirectory();
+    final io.Directory dir = await CoreStorage().getStorageDirectory();
     final singBoxResult = await AssetUtil.copyAssetToDirectory(
       WindowsConstants.singBoxAsset,
       dir.path,
@@ -102,7 +102,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<WindowsServiceStatus> queryServiceStatus() async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
       final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return WindowsServiceStatus.notInstalled;
@@ -122,7 +122,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 的产物，运行中服务仍挂在旧文件上）且服务当前 running。
   ///
   /// 组合逻辑拆为静态纯函数（[oldFileExists] / [queryStatus] 为注入的异步输入），
-  /// 公共入口 [hasPendingHelperUpdate] 组装真实依赖——ProfileStorage 目录与
+  /// 公共入口 [hasPendingHelperUpdate] 组装真实依赖——CoreStorage 目录与
   /// status CLI 子进程在单测环境均不可用。
   @visibleForTesting
   static Future<bool> evaluatePendingUpdate({
@@ -142,7 +142,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<bool> hasPendingHelperUpdate() async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
       final io.File oldFile = _oldFileIn(dir, WindowsConstants.helperFileName);
       // await 使 evaluatePendingUpdate 内的异常落入本地 catch（否则随 Future 逃逸）
       return await evaluatePendingUpdate(
@@ -168,7 +168,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   /// 打扰启动链。
   ///
   /// 拆为静态注入式函数（[queryStatus]/[restoreViaHttp] 为注入的异步输入），
-  /// 公共调用点 [init] 组装真实依赖——ProfileStorage 目录与 HTTP 客户端在
+  /// 公共调用点 [init] 组装真实依赖——CoreStorage 目录与 HTTP 客户端在
   /// 单测环境均不可用。
   @visibleForTesting
   static Future<void> restoreStartupProxyState({
@@ -190,7 +190,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<bool> restartService() async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
       final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
@@ -205,7 +205,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
 
   /// 安装 Windows 系统服务（UAC 提权经 helper CLI）。
   ///
-  /// 服务可执行文件与 sing-box 配置路径由 [ProfileStorage] 当前使用项决定。
+  /// 服务可执行文件与 sing-box 配置路径由 [CoreStorage] 当前使用项决定。
   @override
   Future<bool> installService({
     required String serviceName,
@@ -213,8 +213,8 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     required String description,
   }) async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
-      final String usingConfig = (await ProfileStorage().getUsingConfig()).path;
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
+      final String usingConfig = (await CoreStorage().getUsingConfig()).path;
       HelperConfig config = HelperConfig(
         helperServiceName: serviceName,
         helperServiceDisplayName: displayName,
@@ -238,7 +238,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<bool> uninstallService() async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
       final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
@@ -255,7 +255,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<bool> startService() async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
       final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;
@@ -272,7 +272,7 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
   @override
   Future<bool> stopService() async {
     try {
-      final io.Directory dir = await ProfileStorage().getStorageDirectory();
+      final io.Directory dir = await CoreStorage().getStorageDirectory();
       final io.File helperExe = io.File(p.join(dir.path, WindowsConstants.helperFileName));
       if (!await helperExe.exists()) {
         return false;

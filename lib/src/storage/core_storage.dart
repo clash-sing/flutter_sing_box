@@ -6,17 +6,25 @@ import 'package:path/path.dart' as p;
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// 订阅配置档案的持久化存取（MMKV 元数据 + 文件系统配置体）。
+/// 内核存储的路径契约与 Dart↔原生交接通道，非事实源。
 ///
-/// 元数据（[Profile]）存 MMKV（`cs_profile` 实例），sing-box 配置 JSON
-/// 写 `profiles/` 目录下的文件；两者以 [Profile.id] 关联。
-class ProfileStorage {
-  ProfileStorage._internal();
-  static final ProfileStorage _instance = ProfileStorage._internal();
+/// 订阅数据的事实源在 app 侧，本类只保留两类职责：
+/// - **路径契约**：存储根目录（[getStorageDirectory]）与配置文件路径派生
+///   （[getProfilePath]，`profiles/profile_<id>.json`）——存储根的选择同时被
+///   Dart 侧与 Kotlin 原生侧依赖，插件是这份契约的唯一持有者；
+/// - **交接通道**：`using_config`（[setUsingConfig]）与 `selected_profile_name`
+///   （[setSelectedProfileName]）两键，供原生侧定位当前生效配置。
+///
+/// 过渡期保留的档案读写方法（[getSelectedProfile] / [setSelectedProfile] /
+/// [getProfile] / [addProfile] / [generateProfileId]）仅供 ProfileService
+/// 存量逻辑使用，随 Profile 模型删除一并移除。
+class CoreStorage {
+  CoreStorage._internal();
+  static final CoreStorage _instance = CoreStorage._internal();
   /// 单例实例。
-  static ProfileStorage get instance => _instance;
+  static CoreStorage get instance => _instance;
   /// 单例工厂构造器。
-  factory ProfileStorage() => _instance;
+  factory CoreStorage() => _instance;
 
   /// 仅用于单元测试, 用 [MemoryStorage] 代替默认的 [MmkvStorage]
   static void mockInit() => _storage = MemoryStorage();
@@ -44,6 +52,11 @@ class ProfileStorage {
   /// 设为当前选中的档案。
   bool setSelectedProfile(int profileId) {
     return storage.setInt(_Keys.selectedProfileId, profileId);
+  }
+
+  /// 写交接键：当前选中的档案名（原生侧按名定位配置文件）。
+  void setSelectedProfileName(String name) {
+    storage.setString(_Keys.selectedProfileName, name);
   }
 
   int get _maxId {
@@ -94,69 +107,6 @@ class ProfileStorage {
     }
   }
 
-  /// 更新档案元数据。
-  void updateProfile(Profile profile) {
-    final String key = _getProfileKey(profile.id);
-    final String jsonString = jsonEncode(profile.toJson());
-    storage.setString(key, jsonString);
-  }
-
-  /// 删除档案（元数据与配置文件一并删除），选中项自动顺延。
-  void deleteProfile(int id) {
-    final profile = getProfile(id);
-    if (profile == null) {
-      return;
-    }
-    final String key = _getProfileKey(profile.id);
-    storage.removeValue(key);
-    final file = io.File(profile.typed.path);
-    file.deleteSync();
-    final firstProfile = getProfiles().firstOrNull;
-    if (firstProfile != null) {
-      setSelectedProfile(firstProfile.id);
-    } else {
-      storage.removeValue(_Keys.selectedProfileId);
-    }
-  }
-
-  /// 全部档案，按用户排序值（order）升序。
-  List<Profile> getProfiles() {
-    List<String> keys = storage.allKeys
-        .where((key) => key.startsWith(_Keys.profilePrefix))
-        .toList();
-    List<Profile> profiles = [];
-    for (String key in keys) {
-      final String? jsonString = storage.getString(key);
-      if (jsonString?.isNotEmpty == true) {
-        final Map<String, dynamic> jsonMap = jsonDecode(jsonString!);
-        profiles.add(Profile.fromJson(jsonMap));
-      }
-    }
-    profiles.sort((a, b) => a.order.compareTo(b.order));
-    return profiles;
-  }
-
-  /// 全部档案 ID。
-  List<int> getProfileIds() {
-    List<String> keys = storage.allKeys
-        .where((key) => key.startsWith(_Keys.profilePrefix))
-        .toList();
-    return keys
-        .map((key) => int.tryParse(key.substring(_Keys.profilePrefix.length)))
-        .whereType<int>()
-        .toList();
-  }
-
-  /// 按传入顺序重写各档案的 order。
-  void sort(List<Profile> profiles) {
-    for (int i = 0; i < profiles.length; i++) {
-      final Profile profile = profiles[i];
-      profile.order = i;
-      final String jsonString = jsonEncode(profile.toJson());
-      storage.setString(_getProfileKey(profile.id), jsonString);
-    }
-  }
-
   /// 当前生效配置文件的路径（未设置时用存储根目录下的缺省文件名）。
   Future<io.File> getUsingConfig() async {
     final String usingConfig =
@@ -168,17 +118,13 @@ class ProfileStorage {
   void setUsingConfig(String path) {
     storage.setString(_Keys.usingConfig, path);
   }
-
-  /// 清空全部档案元数据（不动配置文件）。
-  void clear() {
-    storage.clearAll();
-  }
 }
 
 class _Keys {
   static const String maxId = "max_id";
   static const String profilePrefix = "profile_";
   static const String selectedProfileId = "selected_profile_id";
+  static const String selectedProfileName = "selected_profile_name";
   static const String usingConfig = "using_config";
   static const String usingConfigFilename = "using_config.json";
 }

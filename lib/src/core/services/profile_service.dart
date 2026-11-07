@@ -31,7 +31,7 @@ class ProfileService {
     if (subscribeLink != null) {
       link = subscribeLink;
     } else {
-      link = Uri.parse(ProfileStorage().getProfile(id!)!.typed.subscribeUrl!);
+      link = Uri.parse(CoreStorage().getProfile(id!)!.typed.subscribeUrl!);
     }
 
     late final ApiResult apiResult;
@@ -47,8 +47,8 @@ class ProfileService {
       apiResult = await NetworkService().fetchSubscription(link, userAgent: userAgent);
     }
 
-    final profileId = id ?? ProfileStorage().generateProfileId;
-    final profilePath = await ProfileStorage().getProfilePath(profileId);
+    final profileId = id ?? CoreStorage().generateProfileId;
+    final profilePath = await CoreStorage().getProfilePath(profileId);
     final userInfo = _getUserInfo(apiResult.headers);
     final typedProfile = _getTypedProfile(link, apiResult.headers, autoUpdateInterval, profilePath);
     final profileName = _getProfileName(link, name, apiResult.headers);
@@ -74,7 +74,7 @@ class ProfileService {
       typed: typedProfile,
       userInfo: userInfo,
     );
-    await ProfileStorage().addProfile(profile, singBox);
+    await CoreStorage().addProfile(profile, singBox);
     return profile;
   }
 
