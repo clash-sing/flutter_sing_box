@@ -7,8 +7,11 @@ import 'package:flutter_sing_box_example/utils/client_providers.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/snackbar_util.dart';
-import 'config_profiles.dart';
 
+/// 首页：VPN 启停演示。
+///
+/// 订阅管理（列表/切换/新增）已随插件移除 Profile CRUD 一并删除——
+/// 订阅数据的事实源在宿主 App 侧，example 只演示插件的真实公开 API。
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -17,44 +20,6 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  final List<Profile> _profiles = [];
-  Profile? _selectedProfile;
-
-  @override
-  void initState() {
-    super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    _loadProfiles();
-  }
-
-  Future<void> _loadProfiles() async {
-    _selectedProfile = ProfileStorage().getSelectedProfile();
-    _profiles.clear();
-    _profiles.addAll(ProfileStorage().getProfiles());
-    if (!mounted) return;
-    setState(() {});
-  }
-
-  Future<void> _switchProfile(int profileId) async {
-    ProfileStorage().setSelectedProfile(profileId);
-    _loadProfiles();
-    if (ref.read(proxyStateStreamProvider).value == ProxyState.started) {
-      try {
-        await Future.delayed(const Duration(milliseconds: 3000));
-        await ref.read(flutterSingBoxProvider).stopVpn();
-        debugPrint('stopVpn');
-        await Future.delayed(const Duration(milliseconds: 1500));
-        await ref.read(flutterSingBoxProvider).startVpn();
-        debugPrint('startVpn');
-      } catch (e) {
-        debugPrint(e.toString());
-      }
-    }
-  }
-
   Future<void> _startVpn() async {
     try {
       await requestPostNotificationPermission();
@@ -98,18 +63,6 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Plugin example app'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ConfigProfiles()),
-              );
-              _loadProfiles();
-            },
-          ),
-        ],
       ),
       floatingActionButton: _buildFloatingActionButton(),
       body: _buildBody(),
@@ -147,40 +100,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildBody() {
     return Stack(
       children: [
-        Column(
-          children: [
-            Expanded(
-              flex: 1,
-              child: _profiles.isEmpty
-                  ? const Center(child: Text('No subscription'))
-                  : ListView.builder(
-                      itemCount: _profiles.length,
-                      itemBuilder: (context, index) {
-                        return _buildProfileItem(_profiles[index]);
-                      },
-                    ),
-            ),
-          ],
-        ),
+        const Center(child: Text('订阅管理由宿主 App 负责，此处演示 VPN 启停与连接概览')),
         Positioned(bottom: 16, left: 16, child: _buildOverviewButton()),
       ],
-    );
-  }
-
-  Widget _buildProfileItem(Profile profile) {
-    return ListTile(
-      title: Text(profile.name),
-      subtitle: Text(DateTime.fromMillisecondsSinceEpoch(profile.typed.lastUpdated).toString()),
-      trailing: IconButton(
-        icon: _selectedProfile?.id == profile.id
-            ? const Icon(Icons.radio_button_checked)
-            : const Icon(Icons.radio_button_unchecked),
-        onPressed: () {
-          if (_selectedProfile?.id != profile.id) {
-            _switchProfile(profile.id);
-          }
-        },
-      ),
     );
   }
 
@@ -205,10 +127,5 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
       loading: () => const SizedBox.shrink(),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

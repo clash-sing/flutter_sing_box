@@ -14,7 +14,6 @@ class ConnectedOverview extends ConsumerStatefulWidget {
 }
 
 class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
-  Profile? _profile;
   SingBox? _singBox;
   final List<GroupItem> _groupItems = [];
 
@@ -31,14 +30,13 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   @override
   initState() {
     super.initState();
-    _profile = ProfileStorage().getSelectedProfile();
     _initData();
   }
 
   Future<void> _initData() async {
-    final path = _profile?.typed.path;
-    if (path?.isNotEmpty != true) return;
-    final file = File(path!);
+    // 当前生效配置经 CoreStorage 交接键定位（订阅元数据已不在插件侧）
+    final path = (await CoreStorage().getUsingConfig()).path;
+    final file = File(path);
     if (!await file.exists()) return;
     try {
       final map = jsonDecode(await file.readAsString());
@@ -72,7 +70,7 @@ class _ConnectedOverviewState extends ConsumerState<ConnectedOverview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_profile?.name ?? '服务未启动')),
+      appBar: AppBar(title: const Text('连接概览')),
       body: SingleChildScrollView(
         child: Column(children: [_buildConnectedStatus(), _buildClashMode(), _buildGroups()]),
       ),

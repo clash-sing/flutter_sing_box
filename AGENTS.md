@@ -65,12 +65,14 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 |-----------|---------|
 | `constants/` | Enums: `ProfileType`, `OutboundType`, `ProxyMode` (tun/systemProxy), `WindowsServiceStatus`, etc.; non-enum constants: `ClashMode` (string-constants class) and `ProxyState` (sealed class, see Key Design Patterns); plus `FlutterSingBoxConstants` (default mixed port 8890 / Clash API port 9090, template asset path) |
 | `core/provider/` | Config format converters: `SingBoxConfigProvider` (native JSON), `ClashProvider` (YAML→sing-box), `Base64Provider` (Base64 subscription→sing-box) |
-| `core/services/` | `ProfileService` (profile CRUD), `NetworkService` (HTTP for remote profiles) |
-| `storage/` | `KeyValueStorage` abstraction with two impls — `MmkvStorage` (production) and `MemoryStorage` (unit tests, no native dependency); `ProfileStorage` / `CsSettingsStorage` sit on top |
+| `core/services/` | `ProfileService`（订阅下载+解析 `fetchAndParse`，不落盘不落库）, `NetworkService` (HTTP for remote subscriptions) |
+| `storage/` | `KeyValueStorage` abstraction with two impls — `MmkvStorage` (production) and `MemoryStorage` (unit tests, no native dependency); `CoreStorage`（路径契约+交接通道，见下）/ `CsSettingsStorage` sit on top |
+
+**profile CRUD 已移除**：订阅数据（档案列表、选中项、用量元数据）的事实源在 app 侧；插件侧 `CoreStorage` 只保留路径契约（存储根目录 + `profiles/profile_<id>.json` 派生，Dart 与原生两侧共用）与交接通道（`using_config` / `selected_profile_name` 两键）。`ProfileService.importProfile` 已由纯「下载+解析」的 `fetchAndParse` 取代（返回 `SubscriptionFetchResult` 快照，持久化由调用方负责）。
 | `data/models/singbox/` | sing-box config models: `gen/` — schema-generated sealed models (see below) + `schema_validator.dart` (`SingBoxSchemaValidator`, offline validation against the official JSON schema) |
 | `data/models/clash/` | Clash-compatible models (`Clash`, `ClashGroup`, `ClashProxy`) |
 | `data/models/client/` | UI-facing models (`ClientStatus`, `ClientGroup`, `ClientClashMode`) — streamed to the app side |
-| `data/models/database/` | Persistence models (`Profile`, `TypedProfile`, `UserInfo`) |
+| `data/models/database/` | `UserInfo`（订阅用量，`Profile` / `TypedProfile` 已随 profile CRUD 移除） |
 | `data/models/windows/` | `HelperConfig` — parameters handed to `clash_sing_helper.exe install` |
 | `data/network/` | `DioClient` (HTTP), `ApiResult` (response wrapper) |
 | `windows/` | Windows-only service layer: `HelperCli` (spawns `clash_sing_helper.exe` CLI subcommands), `HelperHttpClient` (service HTTP API), `ClashHttpClient` (Clash API), `SystemProxyService` (registry-based system proxy) |

@@ -7,9 +7,6 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
-    # 过渡措施：Part A 存储收缩期间 example 尚未适配新 API（订阅 CRUD 已从插件移除），
-    # 其 Dart 侧清理完成后移除本行（与 build.yaml 排除 example/** 同理）
-    - example/**
 include: package:flutter_lints/flutter.yaml
 
 # Additional information about this file can be found
