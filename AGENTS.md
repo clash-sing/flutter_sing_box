@@ -67,8 +67,6 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 | `core/provider/` | Config format converters: `SingBoxConfigProvider` (native JSON), `ClashProvider` (YAML→sing-box), `Base64Provider` (Base64 subscription→sing-box) |
 | `core/services/` | `ProfileService`（订阅下载+解析 `fetchAndParse`，不落盘不落库）, `NetworkService` (HTTP for remote subscriptions) |
 | `storage/` | `KeyValueStorage` abstraction with two impls — `MmkvStorage` (production) and `MemoryStorage` (unit tests, no native dependency); `CoreStorage`（路径契约+交接通道，见下）/ `CsSettingsStorage` sit on top |
-
-**profile CRUD 已移除**：订阅数据（档案列表、选中项、用量元数据）的事实源在 app 侧；插件侧 `CoreStorage` 只保留路径契约（存储根目录 + `profiles/profile_<id>.json` 派生，Dart 与原生两侧共用）与交接通道（`using_config` / `selected_profile_name` 两键）。`ProfileService.importProfile` 已由纯「下载+解析」的 `fetchAndParse` 取代（返回 `SubscriptionFetchResult` 快照，持久化由调用方负责）。
 | `data/models/singbox/` | sing-box config models: `gen/` — schema-generated sealed models (see below) + `schema_validator.dart` (`SingBoxSchemaValidator`, offline validation against the official JSON schema) |
 | `data/models/clash/` | Clash-compatible models (`Clash`, `ClashGroup`, `ClashProxy`) |
 | `data/models/client/` | UI-facing models (`ClientStatus`, `ClientGroup`, `ClientClashMode`) — streamed to the app side |
@@ -76,7 +74,9 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
 | `data/models/windows/` | `HelperConfig` — parameters handed to `clash_sing_helper.exe install` |
 | `data/network/` | `DioClient` (HTTP), `ApiResult` (response wrapper) |
 | `windows/` | Windows-only service layer: `HelperCli` (spawns `clash_sing_helper.exe` CLI subcommands), `HelperHttpClient` (service HTTP API), `ClashHttpClient` (Clash API), `SystemProxyService` (registry-based system proxy) |
-| `utils/` | Extensions for YAML, profiles, and config merging (`UsingConfig`) |
+| `utils/` | `yaml_ext.dart`（`YamlMap`/`YamlList` → 普通 Dart Map/List 递归转换扩展）、`asset_util.dart`（打包资产释放与校验，SHA256 比对 + 独占锁兜底改名 `.old`） |
+
+**profile CRUD 已移除**：订阅数据（档案列表、选中项、用量元数据）的事实源在 app 侧；插件侧 `CoreStorage` 只保留路径契约（存储根目录 + `profiles/profile_<id>.json` 派生，Dart 与原生两侧共用）与交接通道（`using_config` / `selected_profile_name` 两键）。`ProfileService.importProfile` 已由纯「下载+解析」的 `fetchAndParse` 取代（返回 `SubscriptionFetchResult` 快照，持久化由调用方负责）。
 
 **sing-box 生成模型**（`data/models/singbox/gen/`）：由 `tool/gen_models.dart` 从 `assets/schemas/singbox_schema.json` 生成——Outbound / Inbound / DnsServer 三个 sealed 判别族（按 `type` 判别，未知类型落到 `Unknown*` 透传变体）、`gen/shared/` 的 mixin 共享字段块（`DialerFields` / `ListenFields` 等）、`SingBox` 把未建模顶层段收进 `unknownSections` 原样保真（读入收存、输出合并）。生成物勿手改。schema 升级流程：替换 `assets/schemas/singbox_schema.json` → `dart run tool/gen_models.dart` → `dart run build_runner build` → 跑测试。`tool/` 其余工具：`src/`（gen_models 的 emitter / IR 支撑代码）、`diagnose_schema.dart`（schema 差异诊断）、`doc_coverage.dart`（doc 注释覆盖率统计）、`subcheck/`（CI 订阅样本回归门，见上）。
 

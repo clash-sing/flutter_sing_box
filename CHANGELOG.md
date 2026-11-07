@@ -1,3 +1,25 @@
+## 4.0.0
+
+### ⚠️ Breaking change
+
+**存储层精简：`ProfileStorage` 移除，由 `CoreStorage` 取代**
+
+* `ProfileStorage` 已移除，由 `CoreStorage` 取代：后者只保留**路径契约**（存储根目录与 `profiles/profile_<id>.json` 派生路径，Dart 与原生两侧共用）与 **Dart↔原生交接通道**（`using_config` / `selected_profile_name` 两键）
+* profile 元数据 CRUD（档案列表、选中项、用量元数据的读写）整体移除——订阅数据的事实源移入宿主 App，由其自行持久化，插件不再代管
+
+**订阅导入拆分：`ProfileService.importProfile` 移除，由 `fetchAndParse` 取代**
+
+* `ProfileService.importProfile` 已移除，由 `fetchAndParse` 取代：纯「下载 + 解析」，**不落盘不落库**，返回 `SubscriptionFetchResult` 快照，持久化由调用方负责
+
+**模型删除**
+
+* `Profile` / `TypedProfile` 模型删除（订阅用量模型 `UserInfo` 保留）
+
+**Android 原生交接收缩**
+
+* Android 原生 `ProfileManager` 改读 `selected_profile_name` 交接键，Kotlin 侧 `Profile` 模型删除
+* example 示例 App 移除订阅管理演示页
+
 ## 3.1.0
 
 ### Features
