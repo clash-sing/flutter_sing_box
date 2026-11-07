@@ -1,8 +1,6 @@
 package com.clashsing.flutter_sing_box.utils
 
-import com.clashsing.flutter_sing_box.cs.models.Profile
 import com.tencent.mmkv.MMKV
-import kotlinx.serialization.json.Json
 import java.io.File
 
 object ProfileManager {
@@ -10,18 +8,10 @@ object ProfileManager {
     private val mmkv by lazy {
         MMKV.mmkvWithID(MMKV_ID, MMKV.MULTI_PROCESS_MODE)
     }
-    fun getAllKeys() : List<String>? {
-        return  mmkv.allKeys()?.toList()
-    }
-    fun getSelectedProfile(): Profile? {
-        val id = mmkv.decodeInt(Keys.SELECTED_PROFILE_ID, -1)
-        val profileKey = getProfileKey(id)
-        val content = mmkv.decodeString(profileKey)
-        return if (content == null) null
-        else Json.decodeFromString<Profile>(content)
-    }
-    private fun getProfileKey(id: Int): String {
-        return "${Keys.PROFILE_PREFIX}$id"
+
+    // Dart 侧经 CoreStorage.setSelectedProfileName 写入的交接键,仅用于通知栏展示名称
+    fun getSelectedProfileName(): String? {
+        return mmkv.decodeString(Keys.SELECTED_PROFILE_NAME)
     }
 
     fun getUsingConfig(): File {
@@ -32,8 +22,7 @@ object ProfileManager {
     }
 
     private object Keys {
-        const val PROFILE_PREFIX: String = "profile_"
-        const val SELECTED_PROFILE_ID: String = "selected_profile_id"
+        const val SELECTED_PROFILE_NAME: String = "selected_profile_name"
         const val USING_CONFIG: String = "using_config"
         const val USING_CONFIG_FILE_NAME: String = "using_config.json"
     }

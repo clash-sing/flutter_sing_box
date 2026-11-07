@@ -131,8 +131,8 @@ class BoxService(private val service: Service, private val platformInterface: Pl
 //
 //            val content = File(profile.typed.path).readText()
             val configFile = ProfileManager.getUsingConfig()
-            val profile = ProfileManager.getSelectedProfile()
-            if (profile == null || !configFile.exists()) {
+            val profileName = ProfileManager.getSelectedProfileName()
+            if (profileName == null || !configFile.exists()) {
                 stopAndAlert(Alert.EmptyConfiguration)
                 return
             }
@@ -142,7 +142,7 @@ class BoxService(private val service: Service, private val platformInterface: Pl
                 return
             }
 
-            lastProfileName = profile.name
+            lastProfileName = profileName!!
             withContext(Dispatchers.Main) {
                 notification.show(lastProfileName, R.string.status_starting)
             }
@@ -230,8 +230,8 @@ class BoxService(private val service: Service, private val platformInterface: Pl
 //        val content = File(profile.typed.path).readText()
 
         val configFile = ProfileManager.getUsingConfig()
-        val profile = ProfileManager.getSelectedProfile()
-        if (profile == null || !configFile.exists()) {
+        val profileName = ProfileManager.getSelectedProfileName()
+        if (profileName == null || !configFile.exists()) {
             stopAndAlert(Alert.EmptyConfiguration)
             return
         }
@@ -240,7 +240,7 @@ class BoxService(private val service: Service, private val platformInterface: Pl
             stopAndAlert(Alert.EmptyConfiguration)
             return
         }
-        lastProfileName = profile.name
+        lastProfileName = profileName!!
         // Bug fix：切换配置文件时，通知栏显示的配置文件名可能不是最新的
         withContext(Dispatchers.Main) {
             notification.show(lastProfileName, R.string.status_starting)
