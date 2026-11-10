@@ -448,6 +448,47 @@ void main() {
     });
   });
 
+  group('Base64Provider.provide - 换行兼容', () {
+    // 背景（clash_sing_app#29）：Xboard / V2Board 的通用订阅每条链接以 \r\n
+    // 结尾。只按 \n 拆行会把行尾 \r 留在链接里：vmess 的 base64 解码抛
+    // FormatException 后整行被吞掉，其它协议的节点名尾部混入 \r。
+    String encodeSubWithSep(List<String> lines, String sep) =>
+        base64.encode(utf8.encode(lines.join(sep) + sep));
+
+    String vmessLink(Map<String, dynamic> json) =>
+        'vmess://${base64.encode(utf8.encode(jsonEncode(json)))}';
+
+    final vmessJson = {
+      'v': '2',
+      'ps': 'VM-1',
+      'add': 'vm.example.com',
+      'port': 443,
+      'id': 'b831381d-6324-4d53-ad4f-8cda48b30811',
+      'net': 'tcp',
+    };
+    const ss = 'ss://YWVzLTEyOC1nY206cHc@ss.example.com:8388#SS-A';
+    const trojan = 'trojan://pwd@t.example.com:443?sni=t.example.com#TJ-A';
+
+    test(r'\r\n 换行：vmess 不丢、节点名尾部无 \r', () {
+      final lines = [ss, vmessLink(vmessJson), trojan];
+      final outbounds = Base64Provider.provide(encodeSubWithSep(lines, '\r\n'));
+      expect(outbounds, hasLength(3));
+      expect(outbounds.map((o) => o.tag), ['SS-A', 'VM-1', 'TJ-A']);
+      expect(outbounds[1], isA<VmessOutbound>());
+      expect(
+        outbounds.map((o) => o.tag).any((t) => t.contains('\r')),
+        isFalse,
+        reason: '节点名尾部残留 \\r（按名字匹配会失败）',
+      );
+    });
+
+    test(r'单独 \r 换行（老式 Mac 写法）也兼容', () {
+      final lines = [trojan, vmessLink(vmessJson)];
+      final outbounds = Base64Provider.provide(encodeSubWithSep(lines, '\r'));
+      expect(outbounds.map((o) => o.tag), ['TJ-A', 'VM-1']);
+    });
+  });
+
   group('Base64Provider.provide - 无名节点兜底命名', () {
     // 背景：sing-box 1.14.4 起内核在 initialize 阶段查重出站 tag，
     // 空 tag 的重复出站会被 check 直接拒收（clash_sing_app#8 场景）。

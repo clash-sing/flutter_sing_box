@@ -22,7 +22,14 @@ class Base64Provider {
     }
     String decodedString = utf8.decode(base64.decode(base64String));
     final List<Outbound> outbounds = [];
-    final List<String> lines = decodedString.split('\n');
+    // 订阅换行可能是 \r\n（Xboard / V2Board 通用订阅）、\n 或老式 \r。
+    // LineSplitter 三种都处理；逐行 trim 再滤掉空行，避免行尾 \r 混进
+    // vmess 的 base64 解码（会抛异常导致整行被丢）与其它协议的节点名
+    // （clash_sing_app#29）。
+    final Iterable<String> lines = const LineSplitter()
+        .convert(decodedString)
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty);
     for (var line in lines) {
       final uri = Uri.tryParse(line);
       if (uri == null) {
