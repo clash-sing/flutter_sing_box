@@ -21,6 +21,8 @@ class MethodChannelFlutterSingBox extends FlutterSingBoxPlatform {
   /// 初始化插件（转发原生 method channel）。
   @override
   Future<void> init() async {
+    // 释放内置规则集，供配置里的 initial_path 使用；失败不阻断初始化
+    await RuleSetAssets.ensureExtracted();
     return await methodChannel.invokeMethod('init');
   }
 

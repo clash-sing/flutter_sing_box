@@ -49,6 +49,9 @@ class FlutterSingBoxWindows extends FlutterSingBoxPlatform {
     if (!helperResult) {
       throw Exception('复制 clash_sing_helper.exe 资源失败');
     }
+    // 释放内置分流规则集（clash_sing_app#27）：best-effort，失败只记日志；
+    // 配置侧会按文件是否存在决定是否注入 initial_path
+    await RuleSetAssets.ensureExtracted();
     // 清理上次更新遗留的 .old（三个二进制走同一重命名降级路径，都会产生）。
     // 被运行中进程锁定时删除失败是预期，忽略；服务重启路径另有 Go 侧
     // Program.Start 兜底清理（服务启动时 sing-box 必已退出，删除必成功）

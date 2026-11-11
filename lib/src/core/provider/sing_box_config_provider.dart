@@ -126,6 +126,10 @@ class SingBoxConfigProvider {
     final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
     final jsonConfig = jsonDecode(defaultConfig);
     final defaultSingBox = SingBox.fromJson(jsonConfig);
+    // 内置远程规则集本地兜底（clash_sing_app#27）：模板里的 geoip-cn /
+    // geosite-cn 无缓存时会被内核同步下载，失败则整份配置起不来。
+    // 这里给可识别的官方规则集写上本地 initial_path；失败静默跳过。
+    await RuleSetAssets.applyInitialPaths(defaultSingBox);
     if (data.containsKey("dns")) {
       (defaultSingBox.dns.servers ??= []).addAll(
         (data['dns']['servers'] as List<dynamic>)

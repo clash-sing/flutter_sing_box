@@ -20,6 +20,13 @@
 * Android 原生 `ProfileManager` 改读 `selected_profile_name` 交接键，Kotlin 侧 `Profile` 模型删除
 * example 示例 App 移除订阅管理演示页
 
+### Fixes
+
+**首次连接不再同步下载内置规则集（clash_sing_app#27）**
+
+* 打包官方 `geoip-cn.srs` / `geosite-cn.srs`（`assets/rulesets/`，合计约 89 KB）。`init()` 时释放到存储根下的 `rule-sets/`；`SingBoxConfigProvider` 给模板里可识别的官方 remote 规则集写入 `initial_path`，无缓存首启优先读本地文件，成功下载后仍按 `update_interval` 后台更新
+* 新增 `RuleSetAssets.applyInitialPaths()`，宿主 App 可在合并配置时调用，覆盖升级前生成、缺少 `initial_path` 的存量档案；不同文件名或非 SagerNet 官方来源的规则集不会被替换
+
 ## 3.1.0
 
 ### Features

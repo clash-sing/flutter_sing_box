@@ -70,6 +70,9 @@ flutter:
   assets:
     - assets/configs/
     - assets/schemas/
+    # 内置远程规则集（geoip-cn / geosite-cn），用于首连无缓存时经 initial_path 本地兜底。
+    # 全平台打包，不能像 Windows 二进制那样加 platforms 过滤。
+    - assets/rulesets/
     # Windows 二进制按 CPU 架构分目录打包（目录资产非递归，三个目录都要显式声明；
     # 父目录只含 LICENSE）。运行时按真机架构选择其一释放，见 WindowsArch。
     - path: assets/windows/

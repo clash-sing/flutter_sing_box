@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/services.dart';
 // 旧拍平模型（SingBox 等重名导出）已不再使用，hide 后从 gen 导入
 import 'package:flutter_sing_box/flutter_sing_box.dart'
     hide Inbound, Outbound, RuleSet, SingBox;
 import 'package:flutter_sing_box/src/data/models/singbox/gen/index.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   late final Map<String, dynamic> templateMap;
@@ -174,6 +175,44 @@ void main() {
       expect(tags, containsAll(['g', 'vm1', 'vm2']));
       expect(tags, isNot(contains('wg')), reason: '未建模类型不得透传进配置');
       expect(tags, isNot(contains('bk')), reason: '已废弃的 block 不得进新配置');
+    });
+  });
+
+  group('规则集本地兜底', () {
+    late Directory tmp;
+    late Directory ruleSetDir;
+    const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
+
+    setUp(() async {
+      tmp = await Directory.systemTemp.createTemp('sing_box_provider_rule_set_');
+      ruleSetDir = Directory(p.join(tmp.path, 'rule-sets'));
+      await ruleSetDir.create(recursive: true);
+      for (final name in RuleSetAssets.fileNames) {
+        await File(p.join(ruleSetDir.path, name)).writeAsBytes([1]);
+      }
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(pathProviderChannel, (call) async => tmp.path);
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(pathProviderChannel, null);
+      if (await tmp.exists()) await tmp.delete(recursive: true);
+    });
+
+    test('Base64 订阅导入生成的配置带 initial_path', () async {
+      final sub = _encodeSub([
+        'ss://aes-128-gcm:pass1@1.2.3.4:8388#ss1',
+        'ss://aes-128-gcm:pass2@5.6.7.8:8388#ss2',
+      ]);
+
+      final singBox = await SingBoxConfigProvider.provide(sub);
+
+      final ruleSets = singBox.route.ruleSet!;
+      for (final tag in ['geoip-cn', 'geosite-cn']) {
+        final ruleSet = ruleSets.firstWhere((e) => e.tag == tag);
+        expect(ruleSet.initialPath, p.join(ruleSetDir.path, '$tag.srs'));
+      }
     });
   });
 }
