@@ -65,6 +65,8 @@ flutter:
       ios:
         pluginClass: FlutterSingBoxPlugin
         dartPluginClass: MethodChannelFlutterSingBox
+      macos:
+        dartPluginClass: FlutterSingBoxMacos
 
   # To add assets to your plugin package, add an assets section, like this:
   assets:
