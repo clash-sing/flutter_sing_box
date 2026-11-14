@@ -31,3 +31,5 @@ example/ios/Flutter/ephemeral/
 example/ios/Pods/
 example/ios/.symlinks/
 example/ios/Podfile.lock
+example/ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+example/ios/Runner.xcworkspace/xcshareddata/swiftpm/
