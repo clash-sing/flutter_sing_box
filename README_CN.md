@@ -66,7 +66,7 @@ try {
 }
 ```
 
-> 自 2.0.0 起，Windows 上的启动失败不再从该 Future 抛出——改为通过 `proxyStateStream` 报告（见下文[监听代理状态](#监听代理状态)）。
+> 自 2.0.0 起，Windows 上的启动失败不再从该 Future 抛出——改为通过 `proxyStateStream` 报告（见下文[监听代理状态](#监听代理状态)）。macOS 遵循同一约定：`startVpn()` 将「不支持」的原因经 `proxyStateStream` 下发（见 [macOS 平台说明](#macos-平台说明)）。
 
 #### 停止 VPN
 
@@ -103,7 +103,7 @@ FlutterSingBox().proxyStateStream.listen((state) {
 });
 ```
 
-`ProxyStopped.errMessage` 非 null 表示服务异常停止（启动失败、内核崩溃等）——在 Android 与 Windows 上，它都是启动失败的唯一事实来源。
+`ProxyStopped.errMessage` 非 null 表示服务异常停止（启动失败、内核崩溃等）——在 Android、Windows 与 macOS 上，它都是启动失败的唯一事实来源。
 
 ### Windows 平台说明
 
@@ -114,6 +114,15 @@ FlutterSingBox().proxyStateStream.listen((state) {
 - 自 2.0.0 起，`startVpn()` / `serviceReload()` 失败不再抛出异常；失败原因以 `ProxyStopped(errMessage: ...)` 形式经 `proxyStateStream` 发出。
 - 通过 `ProxyMode` 提供两种代理模式：`tun`（默认，虚拟网卡整机透明代理）与 `systemProxy`（基于注册表的系统代理，默认混合端口 `8890`）。
 - **双架构二进制（amd64 / arm64）**：插件同时打包两种架构的 `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe`；`init()` 启动时探测机器的**原生**架构（基于 `GetNativeSystemInfo`）并只释放匹配的一套。应用侧保持 amd64 构建、零改动即可——在 arm64 设备（如骁龙笔记本）上，应用 UI 由 Windows 内置的 x64 模拟层运行，而内核与系统服务以原生 arm64 运行。注意双架构打包会相应增大发布体积。
+
+### macOS 平台说明
+
+macOS 当前提供的是 **Dart-only 兼容层**：所有插件 API 都可安全调用，但**尚无代理与内核能力**（无 TUN、无系统代理、无 NetworkExtension）。
+
+- `startVpn()` 不会启动内核。它会依次经 `proxyStateStream` 下发 `ProxyStarting` 与带 `errMessage` 的 `ProxyStopped`——不要 `await` 它并期待抛异常；UI 必须监听 `proxyStateStream` 才能展示原因。
+- `getSingBoxVersion()` 返回 `'unsupported'`；`queryServiceStatus()` 返回 `WindowsServiceStatus.unsupported`；服务安装类 API 返回非 Windows 默认值。
+- `connectedStatusStream` / `groupStream` / `clashModeStream` / `logStream` 为空广播流；`proxyStateStream` 为广播流，每个新订阅者都会收到当前状态重放。
+- `init()` 可安全调用，会释放内置规则集，与 Android/Windows 的初始化语义一致。
 
 ### Android 32 位（armeabi-v7a）构建
 

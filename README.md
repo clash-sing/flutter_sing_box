@@ -66,7 +66,7 @@ try {
 }
 ```
 
-> Since 2.0.0, startup failures on Windows are no longer thrown from this future — they are reported via `proxyStateStream` instead (see [Listen to Proxy State](#listen-to-proxy-state) below).
+> Since 2.0.0, startup failures on Windows are no longer thrown from this future — they are reported via `proxyStateStream` instead (see [Listen to Proxy State](#listen-to-proxy-state) below). macOS follows the same contract: `startVpn()` reports the "not supported" reason on `proxyStateStream` (see [macOS Notes](#macos-notes)).
 
 #### Stop VPN
 
@@ -103,7 +103,7 @@ FlutterSingBox().proxyStateStream.listen((state) {
 });
 ```
 
-`ProxyStopped.errMessage` is non-null when the service stopped abnormally (start failure, core crash) — on both Android and Windows, this is the single source of truth for startup failures.
+`ProxyStopped.errMessage` is non-null when the service stopped abnormally (start failure, core crash) — on Android, Windows and macOS, this is the single source of truth for startup failures.
 
 ### Windows Notes
 
@@ -114,6 +114,15 @@ On Windows, sing-box runs as a system service (`clash_sing_service`) instead of 
 - Since 2.0.0, `startVpn()` / `serviceReload()` failures no longer throw; the reason is emitted as `ProxyStopped(errMessage: ...)` on `proxyStateStream`.
 - Two proxy modes are available via `ProxyMode`: `tun` (default, system-wide transparent proxying) and `systemProxy` (registry-based system proxy, default mixed port `8890`).
 - **Dual-architecture binaries (amd64 / arm64)**: the plugin bundles `sing-box.exe` / `libcronet.dll` / `clash_sing_helper.exe` for both architectures; at startup `init()` detects the machine's **native** architecture (via `GetNativeSystemInfo`) and extracts only the matching set. Your app keeps building as amd64 with zero changes — on arm64 devices (e.g. Snapdragon laptops) the app UI runs under Windows' built-in x64 emulation while the core and the system service run natively as arm64. Note that bundling both architectures increases the packaged size accordingly.
+
+### macOS Notes
+
+macOS currently ships a **Dart-only compatibility layer**: every plugin API answers safely, but there is **no proxy or kernel yet** (no TUN, no system proxy, no NetworkExtension).
+
+- `startVpn()` does not start a core. It emits `ProxyStarting` followed by `ProxyStopped(errMessage: ...)` on `proxyStateStream` — do not `await` it expecting a thrown exception. A UI must listen to `proxyStateStream` to show the reason.
+- `getSingBoxVersion()` returns `'unsupported'`; `queryServiceStatus()` returns `WindowsServiceStatus.unsupported`; the service-installation APIs return non-Windows defaults.
+- `connectedStatusStream` / `groupStream` / `clashModeStream` / `logStream` are empty broadcast streams. `proxyStateStream` is a broadcast stream that replays the current state to every new subscriber.
+- `init()` is safe to call and extracts the bundled rule sets, matching the Android/Windows initialization semantics.
 
 ### Android 32-bit (armeabi-v7a) Builds
 
