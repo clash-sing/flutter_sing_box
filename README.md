@@ -31,7 +31,7 @@ A powerful Flutter plugin for [sing-box](https://github.com/SagerNet/sing-box), 
 | Android |    ✅    | Production Ready (arm64-v8a / armeabi-v7a / x86_64) |
 | Windows |    ✅    | Production Ready (amd64 / arm64) |
 | iOS |    ☐    | Planned |
-| macOS |   ☐️    | Planned |
+| macOS |   ⚠️    | Compatibility layer (plugin APIs work; no proxy yet) |
 | Linux |    ☐    | Planned |
 
 ## Requirements

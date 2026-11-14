@@ -1,3 +1,15 @@
+## 4.1.0
+
+### Features
+
+**macOS 兼容层（暂不代理）**
+
+* `pubspec.yaml` 声明 `macos` 平台（Dart-only），新增 `FlutterSingBoxMacos` 实现，消除 App 在 macOS 上启动时 4 条 EventChannel `MissingPluginException`
+* macOS 上全部平台 API 可安全调用：`startVpn()` 经 `proxyStateStream` 下发带原因的 `ProxyStopped`（不抛异常、不假装已连接），`getSingBoxVersion()` 返回 `unsupported`，服务查询返回 `WindowsServiceStatus.unsupported`
+* 5 条流在 macOS 上稳定可用：4 条事件流为空广播流，`proxyStateStream` 为新订阅者重放当前状态
+* `init()` 在 macOS 上仍释放内置规则集，与 Android/Windows 的初始化语义保持一致
+* 本轮**不提供代理能力**：不含 sing-box 内核、系统代理与 TUN；完整 macOS 能力留待后续方案
+
 ## 4.0.0
 
 ### ⚠️ Breaking change

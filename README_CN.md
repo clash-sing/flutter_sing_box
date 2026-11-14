@@ -31,7 +31,7 @@
 | Android |    ✅    | 生产就绪（arm64-v8a / armeabi-v7a / x86_64） |
 | Windows |    ✅    | 生产就绪（amd64 / arm64） |
 | iOS |    ☐    | 计划中 |
-| macOS |   ☐️    | 计划中 |
+| macOS |   ⚠️    | 兼容层（插件 API 可用，暂不代理） |
 | Linux |    ☐    | 计划中 |
 
 ## 环境要求

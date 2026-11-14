@@ -4,12 +4,12 @@ This file provides guidance to AI coding agents (e.g. Claude Code) when working 
 
 ## Project Overview
 
-Flutter plugin wrapping [sing-box](https://github.com/SagerNet/sing-box) for VPN proxy functionality. Android and Windows are production-ready; iOS is planned — `pubspec.yaml` already declares the `ios` platform (sharing the MethodChannel `dartPluginClass`), but the native side (`ios/Classes/FlutterSingBoxPlugin.swift`) is only the Flutter plugin scaffold stub (macOS/Linux not started).
+Flutter plugin wrapping [sing-box](https://github.com/SagerNet/sing-box) for VPN proxy functionality. Android and Windows are production-ready. macOS has a **Dart-only compatibility layer** (all plugin APIs answer safely; no proxy, no kernel yet). iOS is planned — `pubspec.yaml` already declares the `ios` platform (sharing the MethodChannel `dartPluginClass`), but the native side (`ios/Classes/FlutterSingBoxPlugin.swift`) is only the Flutter plugin scaffold stub (Linux not started).
 
 - **Plugin package**: `com.clashsing.flutter_sing_box`
 - **Dart SDK**: ^3.12.0, **Flutter**: >=3.44.0
 - **License**: GPL-3.0
-- Android/iOS use the native method-channel implementation; Windows is implemented **entirely in Dart** on top of bundled external binaries (see Windows Side below)
+- Android/iOS use the native method-channel implementation; Windows is implemented **entirely in Dart** on top of bundled external binaries (see Windows Side below); macOS is a Dart-only compatibility layer (no native code, no proxy yet).
 
 ## Build & Development Commands
 
@@ -54,6 +54,8 @@ FlutterSingBox (lib/flutter_sing_box.dart)    ← public API facade
       → MethodChannelFlutterSingBox            ← Android/iOS: MethodChannel → Kotlin/Swift
       → FlutterSingBoxWindows                  ← Windows: pure-Dart implementation,
          (lib/flutter_sing_box_windows.dart)     registered via registerWith()
+      → FlutterSingBoxMacos                    ← macOS: pure-Dart compatibility layer,
+         (lib/flutter_sing_box_macos.dart)       no proxy/kernel yet
 ```
 
 - `FlutterSingBox` delegates everything to the platform interface; on Windows it additionally exposes service management: `installService` / `uninstallService` / `queryServiceStatus` / `startService` / `stopService`.
