@@ -39,6 +39,15 @@ flutter test --plain-name "用例名称"
 - Android native (Kotlin) unit tests run through the example app: `cd example/android && ./gradlew testDebugUnitTest` (see `android/AGENTS.md`, including the known-failing template test documented there).
 - CI（`.github/workflows/ci.yml`，仅 `v*` tag 触发）四个 job 依次把关：`build`（`flutter analyze --fatal-infos` + `flutter test`）→ `subcheck`（订阅样本回归门，见下节）→ `publish`（pub.dev，走官方 dart-lang workflow）→ `release`（从 `CHANGELOG.md` 提取本版本 `## x.y.z` 段落创建 GitHub Release，缺段落则回退自动生成）。发版动作即：更新 `pubspec.yaml` 版本号 + `CHANGELOG.md` 新段落 → 本机跑 subcheck 对比 → 推 `v*` tag。
 
+### macOS 本地测试环境（Swiftly + Xcode 27）
+
+- 现象：本机 `flutter test` 的 `test/tool/gen_models_e2e_test.dart` 报 `KernelKit requires -fdefine_target_os_macros`。
+- 原因：该测试子进程执行 `dart run tool/gen_models.dart`，Dart 的 native build hook 会编译 `path_provider_foundation → objective_c` 的 Objective-C 源码；hook 不读 `CC`，回退到 PATH 上的 `clang`。若 Swiftly 全局默认是 Swift 5.7.3，其自带的 clang 13 太旧，无法编译 Xcode 27 SDK。
+- 修复：`swiftly use xcode --global-default`（一次性；Xcode 版本以 `xcode-select -p` 为准）。只想影响单条命令时用 `swiftly run <cmd> +xcode`。
+- 需要固定 Swift 5.7.3 的仓库（如 `sing-box-for-apple`）用仓库内 `.swift-version` 隔离，不受全局默认影响。
+- 回退：`swiftly use 5.7.3 --global-default`。切换后已打开的终端可能需要 `hash -r` 或重开。
+- 注意：在插件仓库根放 `.swift-version = xcode` **不能**替代上述修复——build hook 在 pub-cache 的包目录下执行，读不到仓库根的 `.swift-version`。
+
 ### 订阅样本回归门（`tool/subcheck/`）
 
 - 一组**全构造**的订阅样本（Clash YAML / Base64 链接表 / 原生 sing-box JSON，覆盖 ss（含 2022/obfs/v2ray-plugin）/trojan/vmess/vless（含 REALITY）/hysteria1/hysteria2/tuic/anytls 与 tcp/ws/grpc/h2 传输），每个样本走 `SingBoxConfigProvider.provide()`——App 导入订阅的真实转换路径——产物用对应内核版本的 `sing-box check` 校验，并静态检查分组、`route.final`、路由规则与 DNS detour 有没有引用不存在的出站。
