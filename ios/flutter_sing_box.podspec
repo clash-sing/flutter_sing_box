@@ -13,7 +13,7 @@ A Flutter plugin project for sing-box.
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'flutter_sing_box/Sources/flutter_sing_box/**/*.swift'
   s.dependency 'Flutter'
   s.platform = :ios, '13.0'
 
@@ -21,9 +21,10 @@ A Flutter plugin project for sing-box.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
   s.swift_version = '5.0'
 
-  # If your plugin requires a privacy manifest, for example if it uses any
-  # required reason APIs, update the PrivacyInfo.xcprivacy file to describe your
-  # plugin's privacy impact, and then uncomment this line. For more information,
-  # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
-  # s.resource_bundles = {'flutter_sing_box_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+  # 隐私清单同时供 CocoaPods 与 SwiftPM 使用
+  s.resource_bundles = {
+    'flutter_sing_box_privacy' => [
+      'flutter_sing_box/Sources/flutter_sing_box/PrivacyInfo.xcprivacy'
+    ]
+  }
 end

@@ -22,3 +22,12 @@ android/local.properties
 # IDE 工程文件与根锁文件。
 *.iml
 pubspec.lock
+
+# Swift Package Manager / Flutter 构建产物
+ios/flutter_sing_box/.build/
+ios/flutter_sing_box/.swiftpm/
+ios/flutter_sing_box/Package.resolved
+example/ios/Flutter/ephemeral/
+example/ios/Pods/
+example/ios/.symlinks/
+example/ios/Podfile.lock

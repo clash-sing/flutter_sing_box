@@ -36,6 +36,9 @@ migrate_working_dir/
 /.trae
 /.vscode
 
+# Swift Package Manager 本地解析结果（库包不固定依赖）
+/ios/flutter_sing_box/Package.resolved
+
 /assets/.local/
 /doc/
 # Claude Code / GitNexus 个人本地配置(仅部分成员使用,不入库)
