@@ -35,6 +35,8 @@ class FlutterSingBoxMacos extends FlutterSingBoxPlatform {
     _proxyStateControllerOrCreate.add(state);
   }
 
+  Stream<ProxyState>? _proxyStateStream;
+
   /// 初始化：释放内置规则集（best-effort，失败不阻断启动）。
   @override
   Future<void> init() async {
@@ -121,11 +123,22 @@ class FlutterSingBoxMacos extends FlutterSingBoxPlatform {
   @override
   Future<bool> restartService() async => false;
 
-  /// 代理状态流；新订阅者立即获得当前状态。
+  /// 代理状态流（广播流：同一 stream 对象可多次订阅）。
+  ///
+  /// 用 [Stream.multi] 而非 `async*`：`async*` 返回单订阅流，缓存后二次
+  /// listen 会抛 Bad state；且其 onListen 延迟到微任务，同一轮次内
+  /// listen 后立刻调用 [startVpn] 会丢掉 `ProxyStarting` 事件。
+  /// 每个新订阅者先收到当前状态，之后接收状态变化。
   @override
-  Stream<ProxyState> get proxyStateStream async* {
-    yield _lastProxyState;
-    yield* _proxyStateControllerOrCreate.stream;
+  Stream<ProxyState> get proxyStateStream {
+    return _proxyStateStream ??= Stream<ProxyState>.multi((controller) {
+      controller.add(_lastProxyState);
+      final sub = _proxyStateControllerOrCreate.stream.listen(
+        controller.add,
+        onError: controller.addError,
+      );
+      controller.onCancel = sub.cancel;
+    }, isBroadcast: true);
   }
 
   /// 兼容层无连接状态数据，返回空广播流。

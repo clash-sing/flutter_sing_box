@@ -39,6 +39,41 @@ void main() {
       );
     });
 
+    test('同一 stream 对象可被二次订阅（广播流）', () async {
+      final platform = buildPlatform();
+      final stream = platform.proxyStateStream;
+
+      final first = <ProxyState>[];
+      final second = <ProxyState>[];
+      final sub1 = stream.listen(first.add);
+      final sub2 = stream.listen(second.add);
+      addTearDown(sub1.cancel);
+      addTearDown(sub2.cancel);
+      await pumpEventQueue();
+
+      expect(first, [ProxyState.stopped]);
+      expect(second, [ProxyState.stopped]); // 第二订阅者也收到初始重放
+    });
+
+    test('同一轮次 listen + startVpn 不丢 starting', () async {
+      final platform = buildPlatform();
+      final events = <ProxyState>[];
+      final sub = platform.proxyStateStream.listen(events.add);
+      addTearDown(sub.cancel);
+
+      // 不等待事件队列，立即触发启动：初始重放与后续状态都不得丢失
+      await platform.startVpn();
+      await pumpEventQueue();
+
+      expect(events.length, 3);
+      expect(events[0], ProxyState.stopped);
+      expect(events[1], ProxyState.starting);
+      expect(
+        (events[2] as ProxyStopped).errMessage,
+        FlutterSingBoxMacos.unsupportedMessage,
+      );
+    });
+
     test('stopVpn 下发正常 stopped', () async {
       final platform = buildPlatform();
       final events = <ProxyState>[];
