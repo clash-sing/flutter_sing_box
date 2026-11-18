@@ -178,6 +178,36 @@ void main() {
     });
   });
 
+  group('回退合并的 DNS 服务器标签', () {
+    // 缺 inbounds → SingBox.fromJson 失败 → 走 _fixSingBoxConfig 回退路径
+    Map<String, dynamic> fallbackSubscription(List<Map<String, dynamic>> servers) => {
+      'dns': {'servers': servers, 'rules': []},
+      'outbounds': [
+        {'tag': 'g', 'type': 'selector', 'outbounds': ['vm1', 'vm2']},
+        {'tag': 'vm1', 'type': 'vmess', 'server': 'a.com', 'server_port': 1, 'uuid': 'u1'},
+        {'tag': 'vm2', 'type': 'vmess', 'server': 'b.com', 'server_port': 2, 'uuid': 'u2'},
+      ],
+    };
+
+    test('订阅与模板同名时保留订阅的服务器，其余模板服务器不动', () async {
+      // 订阅复用模板的 remote 标签 + 自己的 local 标签（clash_sing_app#16 样本）
+      final singBox = await SingBoxConfigProvider.provide(
+        fallbackSubscription([
+          {'tag': 'remote', 'type': 'https', 'server': '1.1.1.1'},
+          {'tag': 'local', 'type': 'udp', 'server': '8.8.8.8'},
+        ]),
+      );
+
+      final servers = singBox.dns.servers!;
+      final tags = servers.map((server) => server.tag).toList();
+      // sing-box 1.14.3 起同名 DNS 服务器直接拒绝整份配置
+      expect(tags.toSet().length, tags.length, reason: 'DNS 服务器标签必须唯一: $tags');
+      // 同名时订阅优先（与 sing-box 1.14.2 的“后加顶替”行为一致）
+      expect(servers.firstWhere((server) => server.tag == 'remote').type, 'https');
+      expect(tags, containsAll(['local', 'system', 'alidoh', 'udp-bytedance']));
+    });
+  });
+
   group('规则集本地兜底', () {
     late Directory tmp;
     late Directory ruleSetDir;
