@@ -131,11 +131,16 @@ class SingBoxConfigProvider {
     // 这里给可识别的官方规则集写上本地 initial_path；失败静默跳过。
     await RuleSetAssets.applyInitialPaths(defaultSingBox);
     if (data.containsKey("dns")) {
-      (defaultSingBox.dns.servers ??= []).addAll(
-        (data['dns']['servers'] as List<dynamic>)
-            .map((e) => DNSServer.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+      final List<DNSServer> subscriptionServers = (data['dns']['servers'] as List<dynamic>)
+          .map((e) => DNSServer.fromJson(e as Map<String, dynamic>))
+          .toList();
+      // 与模板按 tag 合并去重，订阅同名时顶替模板项（即 sing-box 1.14.2
+      // “后加覆盖前一个”的历史行为）：1.14.3 起内核对重名 tag 直接报
+      // duplicate DNS server tag，不去重会让整份配置起不来。
+      defaultSingBox.dns.servers = <String, DNSServer>{
+        for (final server in [...?defaultSingBox.dns.servers, ...subscriptionServers])
+          server.tag: server,
+      }.values.toList();
       (defaultSingBox.dns.rules ??= []).insertAll(
         0,
         (data['dns']['rules'] as List<dynamic>)

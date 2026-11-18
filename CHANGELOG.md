@@ -39,6 +39,10 @@
 * 打包官方 `geoip-cn.srs` / `geosite-cn.srs`（`assets/rulesets/`，合计约 89 KB）。`init()` 时释放到存储根下的 `rule-sets/`；`SingBoxConfigProvider` 给模板里可识别的官方 remote 规则集写入 `initial_path`，无缓存首启优先读本地文件，成功下载后仍按 `update_interval` 后台更新
 * 新增 `RuleSetAssets.applyInitialPaths()`，宿主 App 可在合并配置时调用，覆盖升级前生成、缺少 `initial_path` 的存量档案；不同文件名或非 SagerNet 官方来源的规则集不会被替换
 
+**回退合并时处理 DNS 服务器标签重名（clash_sing_app#16）**
+
+* `_fixSingBoxConfig` 把订阅的 DNS 服务器合并进模板时按 `tag` 去重，订阅同名项顶替模板项（与 sing-box 1.14.2 的“后加覆盖”行为一致）。此前直接追加：订阅复用模板的 `system` / `alidoh` / `udp-bytedance` / `remote` 任一标签时生成重复服务器标签，1.14.3 起内核以 `duplicate DNS server tag` 拒绝整份配置（宿主观感为连接时内核无法启动）
+
 ## 3.1.0
 
 ### Features
