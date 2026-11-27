@@ -43,6 +43,11 @@
 
 * `_fixSingBoxConfig` 把订阅的 DNS 服务器合并进模板时按 `tag` 去重，订阅同名项顶替模板项（与 sing-box 1.14.2 的“后加覆盖”行为一致）。此前直接追加：订阅复用模板的 `system` / `alidoh` / `udp-bytedance` / `remote` 任一标签时生成重复服务器标签，1.14.3 起内核以 `duplicate DNS server tag` 拒绝整份配置（宿主观感为连接时内核无法启动）
 
+**Android：被取消的 DNS 查询不再卡住线程（clash_sing_app#44）**
+
+* `LocalResolver` 对齐上游 SFA `124a7c1`：查询被内核取消时，除取消系统查询外同时恢复等待中的协程。此前只调 `signal.cancel()`，而 `DnsResolver` 取消后不保证回调，`runBlocking` 会永久占住线程。国内域名会并发走 `system` 与 `udp-bytedance` 竞速，输掉的 `system` 查询每次泄漏一个线程，VPN 进程的线程和内存只增不减，断开重连也不释放（真机常开 VPN 约 20 小时实测累积 93 个）
+* 回调里的 `resume` 改为 `tryResume`：取消后系统查询的应答仍可能晚到，二次 resume 会抛 `Already resumed` 导致进程崩溃
+
 ## 3.1.0
 
 ### Features
