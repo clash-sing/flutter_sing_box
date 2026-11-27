@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_sing_box/flutter_sing_box.dart';
 import 'package:yaml/yaml.dart';
 
+import 'sing_box_legacy_upgrader.dart';
+
 /// Builds a normalized [SingBox] config from raw subscription content.
 class SingBoxConfigProvider {
 
@@ -18,17 +20,19 @@ class SingBoxConfigProvider {
     Exception? exception;
     try {
       if (data is Map<String, dynamic>) {
+        // 先把旧版写法升级成当前内核认的写法，主路径与回退路径都用升级后的配置
+        final config = SingBoxLegacyUpgrader.upgrade(data);
         try {
-          singBox = SingBox.fromJson(data);
+          singBox = SingBox.fromJson(config);
         } catch (e) {
           exception = e is Error ? Exception('Error: $e') : e as Exception;
-          singBox = await _fixSingBoxConfig(data);
+          singBox = await _fixSingBoxConfig(config);
         }
       } else if (data is String) {
         final String content = data.trim();
         if (content.startsWith("{") && content.endsWith("}")) {
           // 可能是 json (sing-box) 格式
-          final Map<String, dynamic> singBoxMap = jsonDecode(data);
+          final Map<String, dynamic> singBoxMap = SingBoxLegacyUpgrader.upgrade(jsonDecode(data));
           try {
             singBox = SingBox.fromJson(singBoxMap);
           } catch (e) {
@@ -122,6 +126,20 @@ class SingBoxConfigProvider {
     }
   }
 
+  /// DNS 规则（含逻辑规则的子规则）引用到的规则集标签。
+  static Iterable<String> _referencedRuleSets(dynamic rule) sync* {
+    if (rule is! Map) return;
+    final ruleSet = rule['rule_set'];
+    if (ruleSet is String) yield ruleSet;
+    if (ruleSet is List) yield* ruleSet.whereType<String>();
+    final subRules = rule['rules'];
+    if (subRules is List) {
+      for (final subRule in subRules) {
+        yield* _referencedRuleSets(subRule);
+      }
+    }
+  }
+
   static Future<SingBox?> _fixSingBoxConfig(Map<String, dynamic> data) async {
     final defaultConfig = await rootBundle.loadString(FlutterSingBoxConstants.templateConfig);
     final jsonConfig = jsonDecode(defaultConfig);
@@ -141,12 +159,26 @@ class SingBoxConfigProvider {
         for (final server in [...?defaultSingBox.dns.servers, ...subscriptionServers])
           server.tag: server,
       }.values.toList();
+      // 回退路径用模板的 route，订阅自己定义的规则集不会带过来：引用了模板里
+      // 没有的规则集的 DNS 规则不并入，否则内核报 rule-set not found 拒收整份配置
+      final ruleSetTags = {...?defaultSingBox.route.ruleSet?.map((ruleSet) => ruleSet.tag)};
       (defaultSingBox.dns.rules ??= []).insertAll(
         0,
         (data['dns']['rules'] as List<dynamic>)
+            .where((e) => _referencedRuleSets(e).every(ruleSetTags.contains))
             .map((e) => DNSRule.fromJson(e as Map<String, dynamic>))
             .toList(),
       );
+    }
+    // 回退路径用模板的 route；订阅的 route 里指定了默认域名解析器（例如旧写法
+    // outbound: any 的 DNS 规则迁移得到的），且它指向的服务器在合并后存在时，
+    // 用它顶替模板的值。指向不存在的服务器时保留模板的值，避免内核报找不到服务器
+    final route = data['route'];
+    final resolver = route is Map ? route['default_domain_resolver'] : null;
+    final resolverServer = resolver is Map ? resolver['server'] : resolver;
+    if (resolverServer is String &&
+        (defaultSingBox.dns.servers ?? []).any((server) => server.tag == resolverServer)) {
+      defaultSingBox.route.defaultDomainResolver = resolver;
     }
 
     final List<String> errorTags = [];
@@ -200,6 +232,7 @@ class SingBoxConfigProvider {
       defaultSingBox.outbounds.insert(index + 1, directOutbound);
     }
     _fixOutboundInRoute(defaultSingBox);
+    _fixDnsServerDetour(defaultSingBox);
     return defaultSingBox;
   }
 
@@ -245,6 +278,35 @@ class SingBoxConfigProvider {
         }
       }
     }
+  }
+
+  /// 修正 DNS 服务器的 detour：删组后订阅原文写的、或升级器补写的 detour 可能
+  /// 指向已不存在的出站，内核启动时报 outbound detour not found。与路由规则的
+  /// 处理一致，改为修正后的 route.final；route.final 是空 direct 时去掉 detour
+  /// （内核对指向空 direct 的 detour 报错，不写 detour 就是直连）。detour 指向的
+  /// 出站存在、但是空 direct（例如订阅没有 direct，回退时补进来的那个）时同样去掉。
+  static void _fixDnsServerDetour(SingBox singBox) {
+    final byTag = {for (final outbound in singBox.outbounds) outbound.tag: outbound};
+    bool isEmptyDirect(Outbound? outbound) =>
+        outbound != null && SingBoxLegacyUpgrader.isEmptyDirect(outbound.toJson());
+    final finalTag = singBox.route.final_;
+    final dropDetour = isEmptyDirect(byTag[finalTag]);
+    singBox.dns.servers = singBox.dns.servers?.map((server) {
+      final json = server.toJson();
+      final detour = json['detour'];
+      if (detour is! String || detour.isEmpty) return server;
+      if (byTag.containsKey(detour)) {
+        if (!isEmptyDirect(byTag[detour])) return server;
+        json.remove('detour');
+        return DNSServer.fromJson(json);
+      }
+      if (dropDetour) {
+        json.remove('detour');
+      } else {
+        json['detour'] = finalTag;
+      }
+      return DNSServer.fromJson(json);
+    }).toList();
   }
 
   /// 组出站（selector/urltest）的成员列表；判别基类未收敛 outbounds 字段，

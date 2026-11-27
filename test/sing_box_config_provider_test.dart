@@ -206,6 +206,209 @@ void main() {
       expect(servers.firstWhere((server) => server.tag == 'remote').type, 'https');
       expect(tags, containsAll(['local', 'system', 'alidoh', 'udp-bytedance']));
     });
+
+    test('订阅的 DNS 规则引用了模板里没有的规则集时不并入，其余规则照常并入', () async {
+      // 回退路径用模板的 route，订阅自己定义的规则集不会带过来；规则还引用它，
+      // 内核报 rule-set not found 拒收整份配置
+      final subscription = fallbackSubscription([
+        {'tag': 'local', 'type': 'udp', 'server': '203.0.113.8'},
+      ]);
+      (subscription['dns'] as Map<String, dynamic>)['rules'] = [
+        {'rule_set': ['category-ads-all'], 'action': 'predefined', 'rcode': 'NOERROR'},
+        {
+          'type': 'logical',
+          'mode': 'or',
+          'rules': [
+            {'rule_set': 'category-ads-all'},
+          ],
+          'server': 'local',
+        },
+        {'rule_set': ['geosite-cn'], 'server': 'local'},
+        {'domain_suffix': ['example.org'], 'server': 'local'},
+      ];
+      subscription['route'] = {
+        'rule_set': [
+          {'tag': 'category-ads-all', 'type': 'remote', 'format': 'binary', 'url': 'https://example.com/ads.srs'},
+        ],
+      };
+
+      final singBox = await SingBoxConfigProvider.provide(subscription);
+
+      final ruleSetTags = singBox.route.ruleSet!.map((ruleSet) => ruleSet.tag).toSet();
+      expect(ruleSetTags, contains('geosite-cn'), reason: '模板自带 geosite-cn');
+      final rules = singBox.dns.rules!.map((rule) => jsonEncode(rule.toJson())).toList();
+      expect(rules.where((rule) => rule.contains('category-ads-all')), isEmpty);
+      expect(rules.take(2), [
+        jsonEncode({'rule_set': ['geosite-cn'], 'server': 'local'}),
+        jsonEncode({'domain_suffix': ['example.org'], 'server': 'local'}),
+      ]);
+    });
+  });
+
+  group('旧写法的 DNS（sing-box 1.12 之前的格式）', () {
+    // 面板默认模板常见的写法：DNS 服务器用 address，规则里有 outbound 条件，
+    // 还有 rcode:// 服务器
+    Map<String, dynamic> legacyDns() => {
+      'servers': [
+        {'tag': 'remote', 'address': 'https://203.0.113.1/dns-query', 'detour': 'g'},
+        {'tag': 'local', 'address': 'https://198.51.100.5/dns-query', 'detour': 'direct'},
+        {'tag': 'block', 'address': 'rcode://success'},
+      ],
+      'rules': [
+        {'outbound': ['any'], 'server': 'local'},
+        {'clash_mode': 'global', 'server': 'remote'},
+      ],
+    };
+    List<Map<String, dynamic>> outbounds() => [
+      {'tag': 'g', 'type': 'selector', 'outbounds': ['vm1', 'vm2']},
+      {'tag': 'vm1', 'type': 'vmess', 'server': 'a.example.com', 'server_port': 1, 'uuid': 'u1'},
+      {'tag': 'vm2', 'type': 'vmess', 'server': 'b.example.com', 'server_port': 2, 'uuid': 'u2'},
+      {'tag': 'direct', 'type': 'direct'},
+    ];
+
+    void expectNoLegacyServers(SingBox singBox) {
+      final servers = singBox.dns.servers!;
+      // 旧写法没有 type，会落进 UnknownDnsServer 原样透传，内核 1.14 整份拒收
+      expect(servers.whereType<UnknownDnsServer>(), isEmpty,
+          reason: '仍有旧写法的服务器: ${servers.map((s) => s.toJson()).toList()}');
+      expect(servers.map((s) => s.tag), isNot(contains('block')));
+    }
+
+    test('回退路径（tun 入站没有 tag）：订阅的 DNS 服务器升级成新写法再合并', () async {
+      final singBox = await SingBoxConfigProvider.provide({
+        'dns': legacyDns(),
+        'inbounds': [
+          {'type': 'tun', 'address': ['172.19.0.1/30'], 'auto_route': true},
+        ],
+        'outbounds': outbounds(),
+        'route': {'rules': []},
+      });
+
+      expectNoLegacyServers(singBox);
+      final remote = singBox.dns.servers!.firstWhere((s) => s.tag == 'remote');
+      expect(remote.toJson(), {'type': 'https', 'tag': 'remote', 'server': '203.0.113.1', 'detour': 'g'});
+    });
+
+    test('回退路径：outbound 条件的规则不会变成匹配一切的规则', () async {
+      final singBox = await SingBoxConfigProvider.provide({
+        'dns': legacyDns(),
+        'outbounds': outbounds(),
+      });
+
+      // 生成的 DNSRule 没有 outbound 字段，不升级的话这条规则读进来只剩
+      // {"server": "local"}，排在最前面，所有查询都走 local
+      final rules = singBox.dns.rules!.map((rule) => rule.toJson()).toList();
+      expect(rules, isNot(contains(equals({'server': 'local'}))));
+      expect(rules.first, {'clash_mode': 'global', 'server': 'remote'});
+    });
+
+    test('主路径（整份配置能直接解析）：DNS 服务器同样升级', () async {
+      final config = _deepCopy(templateMap)
+        ..['dns'] = legacyDns()
+        ..['outbounds'] = outbounds();
+      // 去掉模板自带的默认解析器，让迁移项写入的值可见
+      (config['route'] as Map<String, dynamic>).remove('default_domain_resolver');
+      final singBox = await SingBoxConfigProvider.provide(config);
+
+      expectNoLegacyServers(singBox);
+      expect(singBox.route.defaultDomainResolver, 'local');
+    });
+
+    test('面板样本：local 服务器的 detour 不再指向空 direct 出站', () async {
+      for (final name in ['sb-xboard-default', 'sb-wyx-old']) {
+        final sample = jsonDecode(
+          File('tool/subcheck/verify/subs/samples/$name.json').readAsStringSync(),
+        ) as Map<String, dynamic>;
+        final singBox = await SingBoxConfigProvider.provide(sample);
+
+        final local = singBox.dns.servers!.firstWhere((s) => s.tag == 'local').toJson();
+        expect(local.containsKey('detour'), isFalse, reason: '$name: $local');
+        final remote = singBox.dns.servers!.firstWhere((s) => s.tag == 'remote').toJson();
+        expect(remote['detour'], '节点选择', reason: name);
+      }
+    });
+
+    test('没有 tag 的旧写法服务器：导入不抛异常，补上的 tag 唯一', () async {
+      final singBox = await SingBoxConfigProvider.provide({
+        'dns': {
+          'servers': [
+            {'address': '192.0.2.53'},
+            {'address': 'local'},
+          ],
+          'rules': [],
+        },
+        'outbounds': outbounds(),
+      });
+
+      final servers = singBox.dns.servers!.map((s) => s.toJson()).toList();
+      expect(servers.where((s) => s['type'] == 'udp' && s['server'] == '192.0.2.53'), hasLength(1));
+      expect(servers.where((s) => s['type'] == 'local'), isNotEmpty);
+      final tags = servers.map((s) => s['tag']).toList();
+      expect(tags.toSet().length, tags.length, reason: '$tags');
+    });
+
+    test('outbound 规则的 rewrite_ttl 等字段以对象形式保留到产物', () async {
+      final config = _deepCopy(templateMap)
+        ..['dns'] = {
+          'servers': legacyDns()['servers'],
+          'rules': [
+            {'outbound': ['vm1'], 'server': 'remote', 'disable_cache': true},
+            {'outbound': ['any'], 'server': 'local', 'rewrite_ttl': 60, 'client_subnet': '192.0.2.0/24'},
+          ],
+        }
+        ..['outbounds'] = outbounds();
+      (config['route'] as Map<String, dynamic>).remove('default_domain_resolver');
+      final singBox = await SingBoxConfigProvider.provide(config);
+
+      expect(
+        singBox.route.toJson()['default_domain_resolver'],
+        {'server': 'local', 'rewrite_ttl': 60, 'client_subnet': '192.0.2.0/24'},
+      );
+      final vm1 = singBox.outbounds.firstWhere((o) => o.tag == 'vm1').toJson();
+      expect(vm1['domain_resolver'], {'server': 'remote', 'disable_cache': true});
+    });
+  });
+
+  group('回退路径的默认域名解析器', () {
+    // tun 入站缺 tag → SingBox.fromJson 失败 → 走 _fixSingBoxConfig 回退路径
+    Map<String, dynamic> fallbackConfig(String resolverServer, {bool withRoute = true}) => {
+      'dns': {
+        'servers': [
+          {'tag': 'remote', 'address': 'https://203.0.113.1/dns-query', 'detour': 'g'},
+          {'tag': 'local', 'address': 'https://198.51.100.5/dns-query', 'detour': 'direct'},
+        ],
+        'rules': [
+          {'outbound': ['any'], 'server': resolverServer},
+        ],
+      },
+      'inbounds': [
+        {'type': 'tun', 'address': ['172.19.0.1/30'], 'auto_route': true},
+      ],
+      'outbounds': [
+        {'tag': 'g', 'type': 'selector', 'outbounds': ['vm1', 'vm2']},
+        {'tag': 'vm1', 'type': 'vmess', 'server': 'a.example.com', 'server_port': 1, 'uuid': 'u1'},
+        {'tag': 'vm2', 'type': 'vmess', 'server': 'b.example.com', 'server_port': 2, 'uuid': 'u2'},
+        {'tag': 'direct', 'type': 'direct'},
+      ],
+      if (withRoute) 'route': {'rules': []},
+    };
+    Object? templateResolver() => (templateMap['route'] as Map)['default_domain_resolver'];
+
+    test('订阅迁移出的解析器指向存在的服务器：覆盖模板的值', () async {
+      final singBox = await SingBoxConfigProvider.provide(fallbackConfig('local'));
+      expect(singBox.route.defaultDomainResolver, 'local');
+      expect(templateResolver(), isNot('local'));
+    });
+
+    test('指向不存在的服务器：保留模板的值', () async {
+      final singBox = await SingBoxConfigProvider.provide(fallbackConfig('missing'));
+      expect(singBox.route.defaultDomainResolver, templateResolver());
+    });
+
+    test('订阅没有 route：迁移项不写解析器，回退用模板的值', () async {
+      final singBox = await SingBoxConfigProvider.provide(fallbackConfig('local', withRoute: false));
+      expect(singBox.route.defaultDomainResolver, templateResolver());
+    });
   });
 
   group('规则集本地兜底', () {
