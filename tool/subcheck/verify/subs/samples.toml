@@ -981,3 +981,21 @@ source = "构造：真实订阅常见的节点名写法；结构同 sb-ctrl"
 issues = []
 expect_nodes = ["TJ-A", "TJ-B", "🇸🇬 新加坡 03"]
 expect_provider_route = true
+
+[[sample]]
+id = "sb-xboard-default"
+file = "samples/sb-xboard-default.json"
+format = "singbox"
+subject = "Xboard 默认 sing-box 模板，按 App 默认 UA 生成（旧 DNS 写法）"
+source = "Xboard@d826a3b resources/rules/default.sing-box.json，按 app/Protocols/SingBox.php buildOutbounds（L135-L215）与 adaptConfigForVersion（L317-L345）生成；节点用 buildShadowsocks（L528-L544）"
+issues = ["clash_sing_app#30"]
+expect_nodes = ["SS-A", "SS-B"]
+
+[[sample]]
+id = "sb-wyx-old"
+file = "samples/sb-wyx-old.json"
+format = "singbox"
+subject = "wyx2685/v2board 旧版 sing-box 模板（App 默认 UA 匹配不到版本号时下发，旧 DNS 写法）"
+source = "wyx2685/v2board@8d2d669 resources/rules/default.sing-box.old.json，按 app/Protocols/Singbox/SingboxOld.php addProxies（L86-L96）填节点；节点按 buildShadowsocks（L98 起）；选哪个模板见 app/Http/Controllers/V1/Client/ClientController.php L28-L50"
+issues = ["clash_sing_app#30"]
+expect_nodes = ["SS-A", "SS-B"]
